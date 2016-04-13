@@ -4,6 +4,8 @@ import re
 from collections import deque
 import time
 import json
+from operator import itemgetter
+import glob
 
 ALL_PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh', 
 'Gr', 'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu', 'Na', 'Op', 'Og', 'Sp', 
@@ -16,8 +18,12 @@ ALL_PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon
 'Okawaru', 'Pakellas', 'Qazlal', 'Ru', 'Sif Muna', 'the Shining One', 'Trog', 
 'Vehumet', 'Xom', 'Yredelemnul', 'Zin'}
 
+
 def main():
     start_time = time.time()
+    
+    # Logfiles to parse
+    logfiles = [f for f in glob.glob("*logfiles*.txt")]
     
     # All logs
     logs = []
@@ -34,32 +40,37 @@ def main():
     output = {'players': players, 'global_stats': {'race_highscores': race_highscores,
     'role_highscores': role_highscores, 'combo_highscores': combo_highscores}}
     
-    parse_logfile('dcss-logfiles-trunk.txt', logs)
+    logs = parse_logfiles(logfiles)
     calc_stats(logs, players, race_highscores, role_highscores, combo_highscores)
     write_output(output, 'scoring_data.json')
-    
     print('Completed in', time.time() - start_time, 'seconds')
+    
     
 def deque_default(obj):
     if isinstance(obj, deque):
         return list(obj)
     raise TypeError
 
-def parse_logfile(logfile, output):
-    pat = '(?<!:):(?!:)' # logfile format escapes : as ::, so we need to split with re.split instead of naive line.split(':')
-    for line in open(logfile).readlines():
-        if not line:  # skip blank lines
-            continue
-        log = {}
-        for field in re.split(pat, line):
-            if not field:  # skip blank fields
-                continue
-            #print(field)
-            k, v = field.split('=', 1)
-            log[k] = v
-        #print(log)
-        output.append(log)
 
+def parse_logfiles(logfiles):
+    unsorted = []
+    pat = '(?<!:):(?!:)' # logfile format escapes : as ::, so we need to split with re.split instead of naive line.split(':')
+    for logfile in logfiles:
+        for line in open(logfile).readlines():
+            if not line:  # skip blank lines
+                continue
+            log = {}
+            for field in re.split(pat, line):
+                if not field:  # skip blank fields
+                    continue
+                k, v = field.split('=', 1)
+                log[k] = v
+            unsorted.append(log)
+            
+    # Sort logs by 'end' field
+    return sorted(unsorted, key=itemgetter('end'))
+     
+     
 def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores):
     for log in logs:
 
@@ -208,11 +219,13 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
         # Adjust boring_rate
         player['boring_rate'] = player['boring_games'] / player['games']
 
+
 def write_output(output, filename):
     f = open(filename, 'w')
     json.dump(output, f, default=deque_default)
     print('Output written to', filename)
     f.close()
+
 
 if __name__ == '__main__':
     main()
