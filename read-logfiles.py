@@ -102,7 +102,13 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
                 player['fastest_turncount'] = log['turn']
                 
             # Increment active_streak
-            player['active_streak'] += 1
+            if player['active_streak'] > 0:
+                
+                # Increment only if win started after previous game
+                if int(log['start'][:-1]) > player['last_game_end']:
+                    player['active_streak'] += 1
+            else:
+                player['active_streak'] += 1
             
             # Adjust longest_streak
             if player['active_streak'] > player['longest_streak']:
@@ -203,7 +209,7 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
         player['boring_rate'] = player['boring_games'] / player['games'] 
         
         # Adjust last_game_end
-        player['last_game_end'] = log['end']
+        player['last_game_end'] = int(log['end'][:-1])
 
 def write_output(output, filename):
     f = open(filename, 'w')
