@@ -1,19 +1,41 @@
-<html>
-<head>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
     <title>DCSS Scoreboard - {% block title %}{% endblock %}</title>
-</head>
-<body>
-    {# header #}
-    <div>
-      <h1>DCSS Scoreboard</h1>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="container">
+      {# header #}
+      <div class="row">
+        <div class="col-sm-12">
+          <nav class="navbar navbar-light bg-faded">
+            <a class="navbar-brand" href="#">DCSS Scoreboard</a>
+            <div class="nav navbar-nav">
+              <a class="nav-item nav-link active" href="#">Home</span></a>
+              <a class="nav-item nav-link" href="#">High Scores</a>
+              <a class="nav-item nav-link" href="#">Players</a>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      {# content #}
+      <div class="row">
+        {% block content %}{% endblock %}
+      </div>
+
+      {# footer #}
+      <div class="row">
+        <hr>
+      </div>
     </div>
-    {# content #}
-    <div>
-      {% block content %}{% endblock %}
-    </div>
-    {# footer #}
-    <div>
-        Footer goes here.
-    </div>
-</body>
+  </body>
 </html>
