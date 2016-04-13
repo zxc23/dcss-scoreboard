@@ -17,7 +17,6 @@
     <p><strong>Races Won:</strong> {{ stats['race_wins']|prettycounter }}</p>
     <p><strong>Backgrounds Won:</strong> {{ stats['role_wins']|prettycounter }}</p>
     <p><strong>Gods Won:</strong> {{ stats['god_wins']|prettycounter }}</p>
-    {{ stats.keys() }}
   </div>
   <div class="col-sm-4">
     <h3>Achievements</h3>
@@ -27,8 +26,29 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-sm-4">
-    <h3>Detailed Statistics</h3>
+  <div class="col-sm-12">
+    <h3>Recent Games</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Score</th>
+          <th>Character</th>
+          <th>Place</th>
+          <th>End</th>
+          <th>XL</th>
+          <th>Turns</th>
+          <th>Duration</th>
+          <th>Runes</th>
+          <th>Date</th>
+          <th>Version</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for game in stats['last_5_games'] %}
+        {{ game|gametotablerow }}
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}

@@ -3,6 +3,7 @@
 import os
 import json
 import datetime
+import time
 
 import jinja2
 
@@ -31,11 +32,46 @@ def prettycounter(counter, reverse=True):
     """
     return ", ".join("{k} ({v})".format(k=k, v=v) for k, v in sorted(counter.items(), key=lambda i: i[1], reverse=reverse))
 
+def prettycrawldate(d):
+    """Jinja filter to convert crawl logfile date to pretty text."""
+    try:
+        return time.strftime("%c", time.strptime(d, "%Y%m%d%H%M%SS"))
+    except ValueError:
+        return d
+
+def gametotablerow(game):
+    """Jinja filter to convert a game dict to a table row."""
+    return """<tr {win}>
+      <td>{score}</td>
+      <td>{character}</td>
+      <td>{place}</td>
+      <td>{end}</td>
+      <td>{xl}</td>
+      <td>{turns}</td>
+      <td>{duration}</td>
+      <td>{runes}</td>
+      <td>{date}</td>
+      <td>{version}</td>
+    </tr>""".format(win='class="table-success"' if game['ktyp'] == 'winning' else '',
+                    score=game['sc'],
+                    character=game['char'],
+                    place=game['place'],
+                    end=game['tmsg'],
+                    xl=game['xl'],
+                    turns=game['turn'],
+                    duration=game['dur'],
+                    runes='?',
+                    date=prettycrawldate(game['end']),
+                    version=game['v'])
+
+
 if __name__ == '__main__':
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('html_templates'))
     env.filters['prettyint'] = prettyint
     env.filters['prettydur'] = prettydur
     env.filters['prettycounter'] = prettycounter
+    env.filters['prettycrawldate'] = prettycrawldate
+    env.filters['gametotablerow'] = gametotablerow
 
     data = json.loads(open('scoring_data.json').read())
 
