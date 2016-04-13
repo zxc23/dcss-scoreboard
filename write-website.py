@@ -13,7 +13,8 @@ if __name__ == '__main__':
     data = json.loads(open('scoring_data.json').read())
 
     print("Writing HTML to %s" % OUTDIR)
-    os.makedirs(OUTDIR)
+    if not os.path.isdir(OUTDIR):
+        os.mkdir(OUTDIR)
 
     with open(os.path.join(OUTDIR, 'index.html'), 'w') as f:
         template = env.get_template('index.html')
@@ -24,7 +25,8 @@ if __name__ == '__main__':
         f.write(template.render(highscores=data['global_stats']))
 
     player_html_path = os.path.join(OUTDIR, 'players')
-    os.makedirs(player_html_path)
+    if not os.path.isdir(player_html_path):
+        os.mkdir(player_html_path)
     with open(os.path.join(OUTDIR, 'players.html'), 'w') as f:
         template = env.get_template('players.html')
         f.write(template.render(players=data['players'].keys()))
