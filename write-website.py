@@ -8,7 +8,7 @@ import pprint
 OUTDIR = 'dcss-scoreboard-html'
 
 if __name__ == '__main__':
-    data = json.loads(open('scoring_data.txt').read())
+    data = json.loads(open('scoring_data.json').read())
 
     print("Writing HTML to %s" % OUTDIR)
     os.makedirs(OUTDIR)
