@@ -35,13 +35,16 @@ def main():
     race_highscores = {}
     role_highscores = {}
     combo_highscores = {}
+    streaks = []
+    active_streaks = []
     
     # Output data
     output = {'players': players, 'global_stats': {'race_highscores': race_highscores,
-    'role_highscores': role_highscores, 'combo_highscores': combo_highscores}}
+    'role_highscores': role_highscores, 'combo_highscores': combo_highscores, 
+    'streaks': streaks, 'active_streaks': active_streaks}}
     
     logs = parse_logfiles(logfiles)
-    calc_stats(logs, players, race_highscores, role_highscores, combo_highscores)
+    calc_stats(logs, players, race_highscores, role_highscores, combo_highscores, streaks, active_streaks)
     write_output(output, 'scoring_data.json')
     print('Completed in', time.time() - start_time, 'seconds')
     
@@ -71,7 +74,7 @@ def parse_logfiles(logfiles):
     return sorted(unsorted, key=itemgetter('end'))
      
      
-def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores):
+def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores, streaks, active_streaks):
     for log in logs:
 
         # Log vars
@@ -88,9 +91,9 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
         # Make player dictionary
         if name not in players:
             players[name] = {'wins': [], 'games': 0, 'winrate': 0, 'total_score': 0, 
-            'avg_score': 0, 'active_streak': [], 'longest_streak': 0, 
-            'last_5_games': deque([], 5), 'boring_games': 0, 'boring_rate': 0, 
-            'god_wins': {}, 'race_wins': {}, 'role_wins': {}, 'achievements': {}}
+            'avg_score': 0, 'last_5_games': deque([], 5), 'boring_games': 0, 
+            'boring_rate': 0, 'god_wins': {}, 'race_wins': {}, 'role_wins': {}, 
+            'achievements': {}}
         player = players[name]
         
         # Player vars
@@ -111,19 +114,6 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
             # Adjust fastest_turncount win
             if 'fastest_turncount' not in player or log['turn'] < player['fastest_turncount']['turn']:
                 player['fastest_turncount'] = log
-                
-            # Increment active_streak
-            if len(player['active_streak']) > 0:
-                
-                # Increment only if win started after previous game
-                if int(log['start'][:-1]) > int(player['active_streak'][-1]['end'][:-1]):
-                    player['active_streak'].append(log)
-            else:
-                player['active_streak'].append(log)
-            
-            # Adjust longest_streak
-            if len(player['active_streak']) > player['longest_streak']:
-                player['longest_streak'] = len(player['active_streak'])
                 
             # Increment god_wins            
             if god not in player['god_wins']:
@@ -183,10 +173,8 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
                 else:
                     achievements['cleared_zig'] += 1
         
-        # Reset active_streak on non-win
         else:
-            player['active_streak'][:] = []
-            
+        
             # Increment boring_games
             if log['ktyp'] in ('leaving', 'quitting'):
                 player['boring_games'] += 1
@@ -218,6 +206,75 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
         
         # Adjust boring_rate
         player['boring_rate'] = player['boring_games'] / player['games']
+        
+    calc_streaks(logs, players, streaks, active_streaks)
+
+
+def calc_streaks(logs, players, streaks, active_streaks):
+    active_streak_players = {}
+    
+    # Iterate through logs to find all streaks
+    for log in logs:
+        player = log['name']
+    
+        # If game win
+        if log['ktyp'] == 'winning':
+        
+            # Make active streak list
+            if player not in active_streak_players:
+                active_streak_players[player] = []
+            
+            # Start active streak if no active streak
+            if len(active_streak_players[player]) == 0:
+                active_streak_players[player].append(log)
+                continue
+            
+            # Extend active streak only if win started after previous game end
+            if log['start'][:-1] > active_streak_players[player][-1]['end']:
+                active_streak_players[player].append(log)
+            
+        # If game loss
+        else:
+        
+            # Skip players with no active streak
+            if player not in active_streak_players:
+                continue
+                
+            # Finalise streaks of 2 or more wins
+            if len(active_streak_players[player]) >= 2:
+            
+                # TODO: Insert anti-griefing code here
+                
+                # Place streak in streaks
+                streaks.append({'player': player, 
+                'wins': active_streak_players[player], 
+                'streak_breaker': log, 
+                'start': active_streak_players[player][0]['start'], 
+                'end': active_streak_players[player][-1]['end']})
+               
+            # Reset active streak    
+            active_streak_players[player] = []
+            
+    # Add streaks to unsorted lists
+    for name, streak in active_streak_players.items():
+    
+        # Keep only streaks of 2 or more wins
+        if len(streak) < 2:
+            continue
+            
+        active_streaks.append(streak)
+        streaks.append({'player': name, 
+            'wins': streak, 
+            'start': streak[0]['start'], 
+            'end': streak[-1]['end']})
+    
+    # Sort streaks
+    active_streaks.sort(key=lambda x: (-len(x), x[-1]['end']))
+    streaks.sort(key=lambda x: (-len(x['wins']), x['end']))
+    
+    # Print streak summary
+    #for streak in streaks:
+        #print(streak['player'], len(streak['wins']), streak['end']) 
 
 
 def write_output(output, filename):
