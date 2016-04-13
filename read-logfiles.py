@@ -3,6 +3,7 @@
 import re
 from collections import deque
 import time
+import json
 
 start = time.time()
 all_logs = []
@@ -10,6 +11,11 @@ players = {}
 race_highscores = {}
 role_highscores = {}
 combo_highscores = {}
+
+output_file = 'scoring_data.txt'
+output = {'players': players, 'global_stats': {'race_highscores': race_highscores,
+'role_highscores': role_highscores, 'combo_highscores': combo_highscores}}
+
 all_playable_races = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh', 
 'Gr', 'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu', 'Na', 'Op', 'Og', 'Sp', 
 'Te', 'Tr', 'VS', 'Vp'}
@@ -20,6 +26,11 @@ all_playable_gods = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon
 'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha', 'Lugonu', 'Makhleb', 'Nemelex Xobeh',
 'Okawaru', 'Pakellas', 'Qazlal', 'Ru', 'Sif Muna', 'the Shining One', 'Trog', 
 'Vehumet', 'Xom', 'Yredelemnul', 'Zin'}
+
+def deque_default(obj):
+    if isinstance(obj, deque):
+        return list(obj)
+    raise TypeError
 
 # Clean up logfiles
 pat = '(?<!:):(?!:)' # logfile format escapes : as ::, so we need to split with re.split instead of naive line.split(':')
@@ -56,7 +67,7 @@ for log in all_logs:
         'fastest_turncount': 'N/A', 'total_score': 0, 'avg_score': 0, 'active_streak': 0, 'longest_streak': 0,
         'last_5_games_scores': deque([], 5), 'boring_games': 0, 'boring_rate': 0, 'god_wins': {}, 
         'race_wins': {}, 'role_wins': {}, 'avg_win_ac': 'N/A', 'avg_win_ev': 'N/A', 'avg_win_sh': 'N/A', 
-        'achievements': set(), 'last_game_end': 0}
+        'achievements': {}, 'last_game_end': 0}
         
     # Increment games
     players[name]['games'] += 1
@@ -84,7 +95,7 @@ for log in all_logs:
         if god not in players[name]['god_wins']:
             players[name]['god_wins'][god] = 1
             if len(all_playable_gods.difference(players[name]['god_wins'].keys())) == 0:
-                players[name]['achievements'].add('polytheist')
+                players[name]['achievements']['polytheist'] = True
         else:
             players[name]['god_wins'][god] += 1
             
@@ -92,7 +103,7 @@ for log in all_logs:
         if race not in players[name]['race_wins']:
             players[name]['race_wins'][race] = 1
             if len(all_playable_races.difference(players[name]['race_wins'].keys())) == 0:
-                players[name]['achievements'].add('greatplayer')
+                players[name]['achievements']['greatplayer'] = True
         else:
             players[name]['race_wins'][race] += 1
             
@@ -101,7 +112,7 @@ for log in all_logs:
             players[name]['role_wins'][role] = 1
             if len(all_playable_roles.difference(players[name]['role_wins'].keys())) == 0 \
             and 'greatplayer' in players[name]['achievements']:
-                players[name]['achievements'].add('greaterplayer')
+                players[name]['achievements']['greaterplayer'] = True
         else:
             players[name]['role_wins'][role] += 1
             
@@ -121,16 +132,22 @@ for log in all_logs:
             
         # Adjust win-based achievements
         if players[name]['wins'] == 10:
-            players[name]['achievements'].add('goodplayer')
+            players[name]['achievements']['goodplayer'] = True
             
         if players[name]['wins'] == 100:
-            players[name]['achievements'].add('centuryplayer')
+            players[name]['achievements']['centuryplayer'] = True
             
         if log['potionsused'] == 0 and log['scrollsused'] == 0:
-            players[name]['achievements'].add('no_potion_or_scroll_win')
+            if 'no_potion_or_scroll_win' not in players[name]['achievements']:
+                 players[name]['achievements']['no_potion_or_scroll_win'] = 1
+            else:
+                players[name]['achievements']['no_potion_or_scroll_win'] += 1
             
         if 'zigdeepest' in log and log['zigdeepest'] == '27':
-            players[name]['achievements'].add('cleared_zig')
+            if 'cleared_zig' not in players[name]['achievements']:
+                 players[name]['achievements']['cleared_zig'] = 1
+            else:
+                players[name]['achievements']['cleared_zig'] += 1
        
     # Reset active_streak on non-win
     else:
@@ -170,7 +187,13 @@ for log in all_logs:
     
     # Adjust last_game_end
     players[name]['last_game_end'] = log['end']
-        
+   
+# Write to data file
+f = open(output_file, 'w')
+json.dump(output, f, default=deque_default)
+f.close()
+    
+# Test run     
 testplayer = 'chequers'
 print(testplayer + "'s stats:")
 print(players[testplayer])
