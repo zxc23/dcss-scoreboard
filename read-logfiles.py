@@ -63,7 +63,7 @@ def parse_logfile(logfile, output):
 def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores):
     for log in logs:
 
-        # Local vars
+        # Log vars
         name = log['name']
         if 'god' in log:
             god = log['god']
@@ -76,43 +76,43 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
         
         # Make player dictionary
         if name not in players:
-            players[name] = {'wins': 0, 'games': 0, 'winrate': 0, 'highscore': 0, 'fastest_realtime': 'N/A', 
-            'fastest_turncount': 'N/A', 'total_score': 0, 'avg_score': 0, 'active_streak': 0, 'longest_streak': 0,
-            'last_5_games_scores': deque([], 5), 'boring_games': 0, 'boring_rate': 0, 'god_wins': {}, 
-            'race_wins': {}, 'role_wins': {}, 'avg_win_ac': 'N/A', 'avg_win_ev': 'N/A', 'avg_win_sh': 'N/A', 
-            'achievements': {}, 'last_game_end': 0}
+            players[name] = {'wins': [], 'games': 0, 'winrate': 0, 'total_score': 0, 
+            'avg_score': 0, 'active_streak': [], 'longest_streak': 0, 
+            'last_5_games': deque([], 5), 'boring_games': 0, 'boring_rate': 0, 
+            'god_wins': {}, 'race_wins': {}, 'role_wins': {}, 'achievements': {}}
         player = players[name]
+        
+        # Player vars
+        achievements = player['achievements']
+        wins = len(player['wins'])
             
         # Increment games
         player['games'] += 1
         
         # Increment wins
         if log['ktyp'] == 'winning':
-            player['wins'] += 1
+            player['wins'].append(log)
             
-            # Short vars
-            achievements = player['achievements']
+            # Adjust fastest_realtime win
+            if 'fastest_realtime' not in player or log['dur'] < player['fastest_realtime']['dur']:
+                player['fastest_realtime'] = log
             
-            # Adjust fastest_realtime
-            if player['fastest_realtime'] == 'N/A' or log['dur'] < player['fastest_realtime']:
-                player['fastest_realtime'] = log['dur']
-            
-            # Adjust fastest_turncount
-            if player['fastest_turncount'] == 'N/A' or log['turn'] < player['fastest_turncount']:
-                player['fastest_turncount'] = log['turn']
+            # Adjust fastest_turncount win
+            if 'fastest_turncount' not in player or log['turn'] < player['fastest_turncount']['turn']:
+                player['fastest_turncount'] = log
                 
             # Increment active_streak
-            if player['active_streak'] > 0:
+            if len(player['active_streak']) > 0:
                 
                 # Increment only if win started after previous game
-                if int(log['start'][:-1]) > player['last_game_end']:
-                    player['active_streak'] += 1
+                if int(log['start'][:-1]) > int(player['active_streak'][-1]['end'][:-1]):
+                    player['active_streak'].append(log)
             else:
-                player['active_streak'] += 1
+                player['active_streak'].append(log)
             
             # Adjust longest_streak
-            if player['active_streak'] > player['longest_streak']:
-                player['longest_streak'] = player['active_streak']
+            if len(player['active_streak']) > player['longest_streak']:
+                player['longest_streak'] = len(player['active_streak'])
                 
             # Increment god_wins            
             if god not in player['god_wins']:
@@ -140,24 +140,24 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
                 player['role_wins'][role] += 1
                 
             # Adjust avg_win stats
-            if player['avg_win_ac'] == 'N/A':
+            if 'avg_win_ac' not in player:
                 player['avg_win_ac'] = int(log['ac'])
             else:
-                player['avg_win_ac'] += (int(log['ac']) - player['avg_win_ac']) / player['wins']
-            if player['avg_win_ev'] == 'N/A':
+                player['avg_win_ac'] += (int(log['ac']) - player['avg_win_ac']) / wins
+            if 'avg_win_ev' not in player:
                 player['avg_win_ev'] = int(log['ev'])
             else:
-                player['avg_win_ev'] += (int(log['ev']) - player['avg_win_ev']) / player['wins']
-            if player['avg_win_sh'] == 'N/A':
+                player['avg_win_ev'] += (int(log['ev']) - player['avg_win_ev']) / wins
+            if 'avg_win_sh' not in player:
                 player['avg_win_sh'] = int(log['sh'])
             else:
-                player['avg_win_sh'] += (int(log['sh']) - player['avg_win_sh']) / player['wins']
+                player['avg_win_sh'] += (int(log['sh']) - player['avg_win_sh']) / wins
                 
             # Adjust win-based achievements
-            if player['wins'] == 10:
+            if wins == 10:
                 achievements['goodplayer'] = True
                 
-            if player['wins'] == 100:
+            if wins == 100:
                 achievements['centuryplayer'] = True
                 
             if log['potionsused'] == 0 and log['scrollsused'] == 0:
@@ -174,27 +174,27 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
         
         # Reset active_streak on non-win
         else:
-            player['active_streak'] = 0
+            player['active_streak'][:] = []
             
             # Increment boring_games
             if log['ktyp'] in ('leaving', 'quitting'):
                 player['boring_games'] += 1
             
         # Adjust winrate
-        player['winrate'] = player['wins'] / player['games'] 
+        player['winrate'] = wins / player['games'] 
         
         # Adjust highscores
-        if score > player['highscore']:
-            player['highscore'] = score
+        if 'highscore' not in player or score > int(player['highscore']['sc']):
+            player['highscore'] = log
             
-        if race not in race_highscores or score > race_highscores[race]:
-            race_highscores[race] = score
+        if race not in race_highscores or score > int(race_highscores[race]['sc']):
+            race_highscores[race] = log
 
-        if role not in role_highscores or score > role_highscores[role]:
-            role_highscores[role] = score
+        if role not in role_highscores or score > int(role_highscores[role]['sc']):
+            role_highscores[role] = log
             
-        if char not in combo_highscores or score > combo_highscores[char]:
-            combo_highscores[char] = score
+        if char not in combo_highscores or score > int(combo_highscores[char]['sc']):
+            combo_highscores[char] = log
             
         # Increment total_score
         player['total_score'] += score
@@ -202,14 +202,11 @@ def calc_stats(logs, players, race_highscores, role_highscores, combo_highscores
         # Adjust avg_score
         player['avg_score'] = player['total_score'] / player['games']
         
-        # Adjust last_5_games_scores
-        player['last_5_games_scores'].appendleft(score)
+        # Adjust last_5_games
+        player['last_5_games'].append(log)
         
         # Adjust boring_rate
-        player['boring_rate'] = player['boring_games'] / player['games'] 
-        
-        # Adjust last_game_end
-        player['last_game_end'] = int(log['end'][:-1])
+        player['boring_rate'] = player['boring_games'] / player['games']
 
 def write_output(output, filename):
     f = open(filename, 'w')
