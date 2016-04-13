@@ -27,9 +27,10 @@ if __name__ == '__main__':
     player_html_path = os.path.join(OUTDIR, 'players')
     if not os.path.isdir(player_html_path):
         os.mkdir(player_html_path)
+    players = sorted(data['players'].keys(), key=lambda s: s.lower())
     with open(os.path.join(OUTDIR, 'players.html'), 'w') as f:
         template = env.get_template('players.html')
-        f.write(template.render(players=data['players'].keys()))
+        f.write(template.render(players=players))
 
     for player, stats in data['players'].items():
         outfile = os.path.join(player_html_path, player + '.html')
