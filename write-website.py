@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import json
-import pprint
 
 import jinja2
 
