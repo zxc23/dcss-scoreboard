@@ -12,7 +12,7 @@ OUTDIR = 'dcss-scoreboard-html'
 def prettyint(value):
     """Jinja filter to prettify ints.
 
-    eg, 1234567 to '1 234 567'.
+    eg, 1234567 to '1,234,567'.
     """
     return "{0:,}".format(value)
 
