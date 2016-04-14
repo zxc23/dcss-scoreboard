@@ -3,7 +3,6 @@
 import os
 import json
 import datetime
-import time
 
 import jinja2
 
@@ -31,17 +30,26 @@ def prettycounter(counter, reverse=True):
     eg, {'a':1, 'b': 3, 'c': 2} to 'a (3), c (2), b (1)'.
     """
     return ", ".join("{k} ({v})".format(k=k, v=v) for k, v in sorted(counter.items(), key=lambda i: i[1], reverse=reverse))
+    # return ", ".join("%s (%s)" % (i[0], i[1]) for i in collections.Counter(counter).most_common()) # slower
 
 def prettycrawldate(d):
-    """Jinja filter to convert crawl logfile date to pretty text."""
+    """Jinja filter to convert crawl logfile date to pretty text.
+
+    Note: crawl dates use a 0-indexed month... I think you can blame struct_tm
+    for this.
+    """
+    # Increment the month by one
+    d = d[:4] + '%02d' % (int(d[4:6]) + 1) + d[6:]
     try:
-        return time.strftime("%c", time.strptime(d, "%Y%m%d%H%M%SS"))
+        # return time.strftime("%c", time.strptime(d, "%Y%m%d%H%M%SS")) # slower
+        return datetime.datetime(year=int(d[:4]), month=int(d[4:6]), day=int(d[6:8]), hour=int(d[8:10]), minute=int(d[10:12]), second=int(d[12:14])).strftime("%c")
+
     except ValueError:
         return d
 
 def gametotablerow(game):
     """Jinja filter to convert a game dict to a table row."""
-    return """<tr {win}>
+    return """<tr class="{win}">
       <td>{score}</td>
       <td>{character}</td>
       <td>{place}</td>
@@ -52,7 +60,7 @@ def gametotablerow(game):
       <td>{runes}</td>
       <td>{date}</td>
       <td>{version}</td>
-    </tr>""".format(win='class="table-success"' if game['ktyp'] == 'winning' else 'class="table-danger"' if game['ktyp'] == 'quitting' else '',
+    </tr>""".format(win='table-success' if game['ktyp'] == 'winning' else 'table-danger' if game['ktyp'] == 'quitting' else '',
                     score=game['sc'],
                     character=game['char'],
                     place=game['place'],
@@ -98,9 +106,9 @@ if __name__ == '__main__':
         template = env.get_template('players.html')
         f.write(template.render(players=players))
 
+    print("Writing player pages")
+    template = env.get_template('player.html')
     for player, stats in data['players'].items():
-        print("Writing player %s" % player)
         outfile = os.path.join(player_html_path, player + '.html')
         with open(outfile, 'w') as f:
-            template = env.get_template('player.html')
             f.write(template.render(player=player, stats=stats))
