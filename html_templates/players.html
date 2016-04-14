@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Players{% endblock %}
+{% block content %}
+<ul>
+  {% for player in players %}
+  <li><a href="players/{{player}}.html">{{ player }}</a></li>
+  {% endfor %}
+</ul>
+{% endblock %}
