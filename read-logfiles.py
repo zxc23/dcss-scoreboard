@@ -46,6 +46,8 @@ def parse_logfiles(logfiles):
                 if not field:  # skip blank fields
                     continue
                 k, v = field.split('=', 1)
+                if v.isdigit():
+                    v = int(v)
                 log[k] = v
             unsorted.append(log)
         print("done (%s lines)" % lines)
@@ -66,7 +68,7 @@ def calc_stats(logs, players, race_highscores, role_highscores,
             god = log['god']
         else:
             god = 'no_god'
-        score = int(log['sc'])
+        score = log['sc']
         race = log['char'][:2]
         role = log['char'][2:]
         char = log['char']
@@ -100,13 +102,11 @@ def calc_stats(logs, players, race_highscores, role_highscores,
             player['wins'].append(log)
 
             # Adjust fastest_realtime win
-            if 'fastest_realtime' not in player or log['dur'] < player[
-                    'fastest_realtime']['dur']:
+            if 'fastest_realtime' not in player or log['dur'] < player['fastest_realtime']['dur']:
                 player['fastest_realtime'] = log
 
             # Adjust fastest_turncount win
-            if 'fastest_turncount' not in player or log['turn'] < player[
-                    'fastest_turncount']['turn']:
+            if 'fastest_turncount' not in player or log['turn'] < player['fastest_turncount']['turn']:
                 player['fastest_turncount'] = log
 
             # Increment god_wins
@@ -138,20 +138,20 @@ def calc_stats(logs, players, race_highscores, role_highscores,
 
             # Adjust avg_win stats
             if 'avg_win_ac' not in player:
-                player['avg_win_ac'] = int(log['ac'])
+                player['avg_win_ac'] = log['ac']
             else:
                 player['avg_win_ac'] += (
-                    int(log['ac']) - player['avg_win_ac']) / wins
+                    log['ac'] - player['avg_win_ac']) / wins
             if 'avg_win_ev' not in player:
-                player['avg_win_ev'] = int(log['ev'])
+                player['avg_win_ev'] = log['ev']
             else:
                 player['avg_win_ev'] += (
-                    int(log['ev']) - player['avg_win_ev']) / wins
+                    log['ev'] - player['avg_win_ev']) / wins
             if 'avg_win_sh' not in player:
-                player['avg_win_sh'] = int(log['sh'])
+                player['avg_win_sh'] = log['sh']
             else:
                 player['avg_win_sh'] += (
-                    int(log['sh']) - player['avg_win_sh']) / wins
+                    log['sh'] - player['avg_win_sh']) / wins
 
             # Adjust win-based achievements
             if wins == 10:
@@ -182,19 +182,17 @@ def calc_stats(logs, players, race_highscores, role_highscores,
         player['winrate'] = wins / player['games']
 
         # Adjust highscores
-        if 'highscore' not in player or score > int(player['highscore']['sc']):
+        if 'highscore' not in player or score > player['highscore']['sc']:
             player['highscore'] = log
 
-        if race not in race_highscores or score > int(race_highscores[race][
-                'sc']):
+        if race not in race_highscores or score > race_highscores[race]['sc']:
             race_highscores[race] = log
 
-        if role not in role_highscores or score > int(role_highscores[role][
-                'sc']):
+        if role not in role_highscores or score > role_highscores[role]['sc']:
             role_highscores[role] = log
 
-        if char not in combo_highscores or score > int(combo_highscores[char][
-                'sc']):
+        if char not in combo_highscores or score > combo_highscores[char][
+                'sc']:
             combo_highscores[char] = log
 
         # Increment total_score
@@ -324,6 +322,7 @@ def main():
                combo_highscores, streaks, active_streaks)
     write_output(output, 'scoring_data.json')
     print('Completed in', round(time.time() - start_time, 1), 'seconds')
+
 
 if __name__ == '__main__':
     main()
