@@ -8,12 +8,14 @@ import jinja2
 
 OUTDIR = 'dcss-scoreboard-html'
 
+
 def prettyint(value):
     """Jinja filter to prettify ints.
 
     eg, 1234567 to '1 234 567'.
     """
     return "{0:,}".format(value)
+
 
 def prettydur(duration):
     """Jinja filter to convert seconds to a pretty duration.
@@ -22,6 +24,7 @@ def prettydur(duration):
     """
     return str(datetime.timedelta(seconds=duration))
 
+
 def prettycounter(counter, reverse=True):
     """Jinja filter to convert a counter dict to pretty text.
 
@@ -29,8 +32,12 @@ def prettycounter(counter, reverse=True):
 
     eg, {'a':1, 'b': 3, 'c': 2} to 'a (3), c (2), b (1)'.
     """
-    return ", ".join("{k} ({v})".format(k=k, v=v) for k, v in sorted(counter.items(), key=lambda i: i[1], reverse=reverse))
-    # return ", ".join("%s (%s)" % (i[0], i[1]) for i in collections.Counter(counter).most_common()) # slower
+    return ", ".join("{k} ({v})".format(k=k,
+                                        v=v)
+                     for k, v in sorted(counter.items(),
+                                        key=lambda i: i[1],
+                                        reverse=reverse))
+
 
 def prettycrawldate(d):
     """Jinja filter to convert crawl logfile date to pretty text.
@@ -41,11 +48,16 @@ def prettycrawldate(d):
     # Increment the month by one
     d = d[:4] + '%02d' % (int(d[4:6]) + 1) + d[6:]
     try:
-        # return time.strftime("%c", time.strptime(d, "%Y%m%d%H%M%SS")) # slower
-        return datetime.datetime(year=int(d[:4]), month=int(d[4:6]), day=int(d[6:8]), hour=int(d[8:10]), minute=int(d[10:12]), second=int(d[12:14])).strftime("%c")
+        return datetime.datetime(year=int(d[:4]),
+                                 month=int(d[4:6]),
+                                 day=int(d[6:8]),
+                                 hour=int(d[8:10]),
+                                 minute=int(d[10:12]),
+                                 second=int(d[12:14])).strftime("%c")
 
     except ValueError:
         return d
+
 
 def gametotablerow(game):
     """Jinja filter to convert a game dict to a table row."""
@@ -60,7 +72,8 @@ def gametotablerow(game):
       <td>{runes}</td>
       <td>{date}</td>
       <td>{version}</td>
-    </tr>""".format(win='table-success' if game['ktyp'] == 'winning' else 'table-danger' if game['ktyp'] == 'quitting' else '',
+    </tr>""".format(win='table-success' if game['ktyp'] == 'winning' else
+                    'table-danger' if game['ktyp'] == 'quitting' else '',
                     score=game['sc'],
                     character=game['char'],
                     place=game['place'],
