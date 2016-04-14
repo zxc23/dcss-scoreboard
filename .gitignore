@@ -1,3 +1,4 @@
 *.json
 dcss-scoreboard-html/
 *-logfiles-*.txt
+venv/
