@@ -7,6 +7,7 @@ import json
 from operator import itemgetter
 import glob
 import sys
+import os
 
 ALL_PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh',
                       'Gr', 'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu',
@@ -31,6 +32,8 @@ def parse_logfiles(logfiles):
     unsorted = []
     pat = '(?<!:):(?!:)'  # logfile format escapes : as ::, so we need to split with re.split instead of naive line.split(':')
     for logfile in logfiles:
+        if os.stat(logfile).st_size == 0:
+            continue
         print("Reading %s... " % logfile, end='')
         sys.stdout.flush()
         lines = 0
@@ -293,7 +296,7 @@ def main():
     start_time = time.time()
 
     # Logfiles to parse
-    logfiles = [f for f in glob.glob("*logfile*.txt")]
+    logfiles = [f for f in glob.glob("logfiles/*")]
 
     # All logs
     logs = []

@@ -1,4 +1,5 @@
 *.json
 dcss-scoreboard-html/
-*-logfiles-*.txt
+logfiles/*
+!logfiles/EMPTY_DIR
 venv/
