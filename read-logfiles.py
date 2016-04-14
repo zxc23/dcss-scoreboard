@@ -48,6 +48,8 @@ def parse_logfiles(logfiles):
                 k, v = field.split('=', 1)
                 if v.isdigit():
                     v = int(v)
+                else:
+                    v = v.replace("::", ":") # Logfile escaping as per above
                 log[k] = v
             unsorted.append(log)
         print("done (%s lines)" % lines)
