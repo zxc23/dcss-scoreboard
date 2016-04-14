@@ -6,6 +6,7 @@ import time
 import json
 from operator import itemgetter
 import glob
+import sys
 
 ALL_PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh',
                       'Gr', 'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu',
@@ -30,7 +31,11 @@ def parse_logfiles(logfiles):
     unsorted = []
     pat = '(?<!:):(?!:)'  # logfile format escapes : as ::, so we need to split with re.split instead of naive line.split(':')
     for logfile in logfiles:
+        print("Reading %s... " % logfile, end='')
+        sys.stdout.flush()
+        lines = 0
         for line in open(logfile).readlines():
+            lines += 1
             if not line:  # skip blank lines
                 continue
             log = {}
@@ -40,15 +45,18 @@ def parse_logfiles(logfiles):
                 k, v = field.split('=', 1)
                 log[k] = v
             unsorted.append(log)
+        print("done (%s lines)" % lines)
 
     # Sort logs by 'end' field
+    print("Loaded", len(unsorted), "games")
     return sorted(unsorted, key=itemgetter('end'))
 
 
 def calc_stats(logs, players, race_highscores, role_highscores,
                combo_highscores, streaks, active_streaks):
+    print("Calculating statistics for %s games... " % len(logs), end='')
+    sys.stdout.flush()
     for log in logs:
-
         # Log vars
         name = log['name']
         if 'god' in log:
@@ -198,10 +206,14 @@ def calc_stats(logs, players, race_highscores, role_highscores,
         # Adjust boring_rate
         player['boring_rate'] = player['boring_games'] / player['games']
 
+    print("done")
+
     calc_streaks(logs, players, streaks, active_streaks)
 
 
 def calc_streaks(logs, players, streaks, active_streaks):
+    print("Finding streaks... ", end='')
+    sys.stdout.flush()
     active_streak_players = {}
 
     # Iterate through logs to find all streaks
@@ -267,6 +279,7 @@ def calc_streaks(logs, players, streaks, active_streaks):
     # Print streak summary
     #for streak in streaks:
     #print(streak['player'], len(streak['wins']), streak['end'])
+    print("done")
 
 
 def write_output(output, filename):
@@ -280,7 +293,7 @@ def main():
     start_time = time.time()
 
     # Logfiles to parse
-    logfiles = [f for f in glob.glob("*logfiles*.txt")]
+    logfiles = [f for f in glob.glob("*logfile*.txt")]
 
     # All logs
     logs = []
@@ -307,8 +320,7 @@ def main():
     calc_stats(logs, players, race_highscores, role_highscores,
                combo_highscores, streaks, active_streaks)
     write_output(output, 'scoring_data.json')
-    print('Completed in', time.time() - start_time, 'seconds')
-
+    print('Completed in', round(time.time() - start_time, 1), 'seconds')
 
 if __name__ == '__main__':
     main()
