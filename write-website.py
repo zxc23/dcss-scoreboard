@@ -52,7 +52,7 @@ def gametotablerow(game):
       <td>{runes}</td>
       <td>{date}</td>
       <td>{version}</td>
-    </tr>""".format(win='class="table-success"' if game['ktyp'] == 'winning' else '',
+    </tr>""".format(win='class="table-success"' if game['ktyp'] == 'winning' else 'class="table-danger"' if game['ktyp'] == 'quitting' else '',
                     score=game['sc'],
                     character=game['char'],
                     place=game['place'],
