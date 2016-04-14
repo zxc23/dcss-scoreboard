@@ -14,14 +14,14 @@ def prettyint(value):
 
     eg, 1234567 to '1 234 567'.
     """
-    return "{0:,}".format(int(value))
+    return "{0:,}".format(value)
 
 def prettydur(duration):
     """Jinja filter to convert seconds to a pretty duration.
 
     eg, 170 to '2 minutes, 50 seconds'.
     """
-    return str(datetime.timedelta(seconds=int(duration)))
+    return str(datetime.timedelta(seconds=duration))
 
 def prettycounter(counter, reverse=True):
     """Jinja filter to convert a counter dict to pretty text.
