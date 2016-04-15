@@ -28,15 +28,24 @@
       </div>
     </div>
 
-      {# content #}
-      <div class="container">
-        {% block content %}{% endblock %}
+    {# heading #}
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h2>{% block heading %}{% endblock %}</h2>
+          <hr>
+        </div>
       </div>
+    </div>
 
-      {# footer #}
-      <div class="container">
-        <hr>
-      </div>
+    {# content #}
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+
+    {# footer #}
+    <div class="container">
+      <hr>
     </div>
   </body>
 </html>
