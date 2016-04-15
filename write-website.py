@@ -83,6 +83,18 @@ def gametotablerow(game):
                     date=prettycrawldate(game['end']),
                     version=game['v'])
 
+def streaktotablerow(streak):
+    """Jinja filter to convert a streak to a table row."""
+    return """<tr>
+      <td>{wins}</td>
+      <td>{player}</td>
+      <td>{games}</td>
+      <td>{versions}</td>
+    </tr>""".format(wins=len(streak),
+                    player=streak[0]['name'],
+                    games=', '.join(g['char'] for g in streak),
+                    versions=', '.join(sorted(set(g['v'] for g in streak))))
+
 
 if __name__ == '__main__':
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('html_templates'))
@@ -91,6 +103,7 @@ if __name__ == '__main__':
     env.filters['prettycounter'] = prettycounter
     env.filters['prettycrawldate'] = prettycrawldate
     env.filters['gametotablerow'] = gametotablerow
+    env.filters['streaktotablerow'] = streaktotablerow
 
     data = json.loads(open('scoring_data.json').read())
 
@@ -106,7 +119,7 @@ if __name__ == '__main__':
     print("Writing highscores")
     with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
         template = env.get_template('highscores.html')
-        f.write(template.render(highscores=data['global_stats']))
+        f.write(template.render(stats=data['global_stats']))
 
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')

@@ -1,7 +1,25 @@
 {% extends "base.html" %}
 {% block title %}High Scores{% endblock %}
+{% block heading %}Global High Scores{% endblock %}
 {% block content %}
-<pre>
-  {{ highscores }}
-</pre>
+<div class="row">
+  <div class="col-sm-12">
+    <h3>Active Streaks</h3>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Wins</th>
+          <th>Player</th>
+          <th>Games</th>
+          <th>Versions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for streak in stats['active_streaks'] %}
+        {{ streak|streaktotablerow }}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
