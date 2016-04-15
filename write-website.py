@@ -25,18 +25,16 @@ def prettydur(duration):
     return str(datetime.timedelta(seconds=duration))
 
 
-def prettycounter(counter, reverse=True):
+def prettycounter(counter):
     """Jinja filter to convert a counter dict to pretty text.
 
-    Set reverse=False to sort ascending instead of descending.
+    Sorts by lexical order of keys.
 
-    eg, {'a':1, 'b': 3, 'c': 2} to 'a (3), c (2), b (1)'.
+    eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
     return ", ".join("{k} ({v})".format(k=k,
                                         v=v)
-                     for k, v in sorted(counter.items(),
-                                        key=lambda i: i[1],
-                                        reverse=reverse))
+                     for k, v in sorted(counter.items(), key=lambda i: i[0]))
 
 
 def prettycrawldate(d):
