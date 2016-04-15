@@ -57,9 +57,10 @@ def prettycrawldate(d):
         return d
 
 
-def gametotablerow(game):
+def gametotablerow(game, prefix_row=None):
     """Jinja filter to convert a game dict to a table row."""
-    return """<tr class="{win}">
+    t = """<tr class="{win}">
+      {prefix_row}
       <td>{score}</td>
       <td>{character}</td>
       <td>{place}</td>
@@ -70,8 +71,10 @@ def gametotablerow(game):
       <td>{runes}</td>
       <td>{date}</td>
       <td>{version}</td>
-    </tr>""".format(win='table-success' if game['ktyp'] == 'winning' else
-                    'table-danger' if game['ktyp'] == 'quitting' else '',
+    </tr>"""
+    return t.format(win='table-success' if game['ktyp'] == 'winning' else
+                        'table-danger' if game['ktyp'] == 'quitting' else '',
+                    prefix_row='' if prefix_row is None else "<td>%s</td>" % game[prefix_row],
                     score=game['sc'],
                     character=game['char'],
                     place=game['place'],

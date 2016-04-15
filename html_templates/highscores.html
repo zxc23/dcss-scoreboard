@@ -4,6 +4,104 @@
 {% block content %}
 <div class="row">
   <div class="col-sm-12">
+    <h3>Highscores</h3>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#race" role="tab">Race</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#background" role="tab">Background</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#char" role="tab">Combo</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#god" role="tab">God</a>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="race" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Race</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for race, game in stats['race_highscores'].items() %}
+            {{ game|gametotablerow(prefix_row='race') }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="background" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Background</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for race, game in stats['role_highscores'].items() %}
+            {{ game|gametotablerow(prefix_row='cls') }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="char" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for race, game in stats['combo_highscores'].items() %}
+            {{ game|gametotablerow() }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="god" role="tabpanel">
+        <br>Coming soon!<br><br><br><br><br>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
     <h3>Active Streaks</h3>
     <table class="table table-hover">
       <thead>
