@@ -75,13 +75,13 @@ def gametotablerow(game, prefix_row=None):
     return t.format(win='table-success' if game['ktyp'] == 'winning' else
                         'table-danger' if game['ktyp'] == 'quitting' else '',
                     prefix_row='' if prefix_row is None else "<td>%s</td>" % game[prefix_row],
-                    score=game['sc'],
+                    score=prettyint(game['sc']),
                     character=game['char'],
                     place=game['place'],
                     end=game['tmsg'],
                     xl=game['xl'],
-                    turns=game['turn'],
-                    duration=game['dur'],
+                    turns=prettyint(game['turn']),
+                    duration=prettydur(game['dur']),
                     runes='?',
                     date=prettycrawldate(game['end']),
                     version=game['v'])
