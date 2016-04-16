@@ -35,6 +35,7 @@ def parse_logfiles(logfiles):
         if os.stat(logfile).st_size == 0:
             continue
         print("Reading %s... " % logfile, end='')
+        server = logfile.split('-', 1)[0]
         sys.stdout.flush()
         lines = 0
         for line in open(logfile).readlines():
@@ -42,6 +43,7 @@ def parse_logfiles(logfiles):
             if not line:  # skip blank lines
                 continue
             log = {}
+            log['src'] = server
             for field in re.split(pat, line):
                 if not field:  # skip blank fields
                     continue
@@ -49,7 +51,7 @@ def parse_logfiles(logfiles):
                 if v.isdigit():
                     v = int(v)
                 else:
-                    v = v.replace("::", ":") # Logfile escaping as per above
+                    v = v.replace("::", ":")  # Logfile escaping as per above
                 log[k] = v
             unsorted.append(log)
         print("done (%s lines)" % lines)

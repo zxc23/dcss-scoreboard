@@ -25,9 +25,16 @@ metadata = MetaData()
 
 game = Table('games', metadata,
              Column('gid', String, primary_key=True),
-             Column('logfile', JsonEncodedDict),
+             Column('logfile', JsonEncodedDict, nullable=False),
 )
 
 log_progress = Table('log_progress', metadata,
                      Column('logfile', String, primary_key=True),
                      Column('lines_parsed', Integer, nullable=False))
+
+player_scores = Table('player_scores', metadata,
+                      Column('name', String, primary_key=True),
+                      Column('scoringinfo', JsonEncodedDict, nullable=False))
+
+global_scores = Table('global_scores', metadata,
+                      Column('global_scores', JsonEncodedDict, nullable=False))

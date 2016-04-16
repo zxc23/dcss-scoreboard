@@ -6,8 +6,7 @@ import sys
 import re
 
 import sqlalchemy
-from sqlalchemy import create_engine
-engine = create_engine('sqlite:///scoredata.db', echo=False)
+engine = sqlalchemy.create_engine('sqlite:///scoredata.db', echo=False)
 
 
 def sqlite_performance_over_safety(dbapi_con, con_record):
@@ -61,7 +60,7 @@ def calculate_game_gid(log):
 
     XXX: should include server source.
     """
-    return "%s:%s" % (log['name'], log['start'])
+    return "%s:%s:%s" % (log['name'], log['src'], log['start'])
 
 
 def load_logfiles():
@@ -74,6 +73,7 @@ def load_logfiles():
     # instead of naive line.split(':')
     pat = '(?<!:):(?!:)'
     for logfile in glob.glob("logfiles/*"):
+        src = os.path.basename(logfile.split('-', 1)[0])
         if os.stat(logfile).st_size == 0:
             continue
         sys.stdout.flush()
@@ -90,6 +90,7 @@ def load_logfiles():
             if not line:  # skip blank lines
                 continue
             log = {}
+            log['src'] = src
             for field in re.split(pat, line):
                 if not field:  # skip blank fields
                     continue
