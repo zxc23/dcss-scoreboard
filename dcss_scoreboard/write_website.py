@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+"""Take generated score data and write out all website files."""
 
 import os
 import json
 import datetime
 
 import jinja2
+import sqlalchemy
+
+import dcss_scoreboard.model as model
 
 OUTDIR = 'dcss-scoreboard-html'
 
@@ -34,7 +38,8 @@ def prettycounter(counter):
     """
     return ", ".join("{k} ({v})".format(k=k,
                                         v=v)
-                     for k, v in sorted(counter.items(), key=lambda i: i[0]))
+                     for k, v in sorted(counter.items(),
+                                        key=lambda i: i[0]))
 
 
 def prettycrawldate(d):
@@ -72,19 +77,23 @@ def gametotablerow(game, prefix_row=None):
       <td>{date}</td>
       <td>{version}</td>
     </tr>"""
-    return t.format(win='table-success' if game['ktyp'] == 'winning' else
-                        'table-danger' if game['ktyp'] == 'quitting' else '',
-                    prefix_row='' if prefix_row is None else "<td>%s</td>" % game[prefix_row],
-                    score=prettyint(game['sc']),
-                    character=game['char'],
-                    place=game['place'],
-                    end=game['tmsg'],
-                    xl=game['xl'],
-                    turns=prettyint(game['turn']),
-                    duration=prettydur(game['dur']),
-                    runes='?',
-                    date=prettycrawldate(game['end']),
-                    version=game['v'])
+
+    return t.format(
+        win='table-success' if game['ktyp'] == 'winning' else 'table-danger'
+        if game['ktyp'] == 'quitting' else '',
+        prefix_row='' if prefix_row is None else "<td>%s</td>" % game[
+            prefix_row],
+        score=prettyint(game['sc']),
+        character=game['char'],
+        place=game['place'],
+        end=game['tmsg'],
+        xl=game['xl'],
+        turns=prettyint(game['turn']),
+        duration=prettydur(game['dur']),
+        runes='?',
+        date=prettycrawldate(game['end']),
+        version=game['v'])
+
 
 def streaktotablerow(streak):
     """Jinja filter to convert a streak to a table row."""
@@ -99,7 +108,8 @@ def streaktotablerow(streak):
                     versions=', '.join(sorted(set(g['v'] for g in streak))))
 
 
-def main():
+def write_website():
+    """Write all website files."""
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('html_templates'))
     env.filters['prettyint'] = prettyint
     env.filters['prettydur'] = prettydur
@@ -108,7 +118,8 @@ def main():
     env.filters['gametotablerow'] = gametotablerow
     env.filters['streaktotablerow'] = streaktotablerow
 
-    data = json.loads(open('scoring_data.json').read())
+    engine = sqlalchemy.create_engine('sqlite:///scoredata.db', echo=False)
+    conn = engine.connect()
 
     print("Writing HTML to %s" % OUTDIR)
     if not os.path.isdir(OUTDIR):
@@ -119,27 +130,24 @@ def main():
         template = env.get_template('index.html')
         f.write(template.render())
 
-    print("Writing highscores")
-    with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
-        template = env.get_template('highscores.html')
-        f.write(template.render(stats=data['global_stats']))
+    # print("Writing highscores")
+    # with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
+    # template = env.get_template('highscores.html')
+    # f.write(template.render(stats=data['global_stats']))
 
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')
     if not os.path.isdir(player_html_path):
         os.mkdir(player_html_path)
-    players = sorted(data['players'].keys(), key=lambda s: s.lower())
+    players = sorted(
+        r.name for r in conn.execute(model.player_scores.select()).fetchall())
     with open(os.path.join(OUTDIR, 'players.html'), 'w') as f:
         template = env.get_template('players.html')
         f.write(template.render(players=players))
 
     print("Writing player pages")
     template = env.get_template('player.html')
-    for player, stats in data['players'].items():
-        outfile = os.path.join(player_html_path, player + '.html')
+    for row in conn.execute(model.player_scores.select()).fetchall():
+        outfile = os.path.join(player_html_path, row.name + '.html')
         with open(outfile, 'w') as f:
-            f.write(template.render(player=player, stats=stats))
-
-
-if __name__ == '__main__':
-    main()
+            f.write(template.render(player=row.name, stats=row.scoringinfo))
