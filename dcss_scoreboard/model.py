@@ -3,6 +3,7 @@
 from sqlalchemy import TypeDecorator, MetaData, Table, Column
 from sqlalchemy import String, Integer
 import json
+import collections
 import sqlalchemy.ext.mutable
 
 
@@ -18,6 +19,16 @@ def sqlite_performance_over_safety(dbapi_con, con_record):
     dbapi_con.execute('PRAGMA synchronous = OFF')
 
 
+def deque_default(obj):
+    """Convert deques to lists.
+
+    Used to persist deque data into JSON.
+    """
+    if isinstance(obj, collections.deque):
+        return list(obj)
+    raise TypeError
+
+
 class _JsonEncodedDict(TypeDecorator):
     """Enables JSON storage by encoding and decoding on the fly."""
 
@@ -25,12 +36,11 @@ class _JsonEncodedDict(TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """Dict -> JSON String."""
-        return json.dumps(value)
+        return json.dumps(value, default=deque_default)
 
     def process_result_value(self, value, dialect):
         """JSON String -> Dict."""
         return json.loads(value)
-
 
 sqlalchemy.ext.mutable.MutableDict.associate_with(_JsonEncodedDict)
 
@@ -141,8 +151,7 @@ def get_player_score_data(name):
                 'winrate': 0,
                 'total_score': 0,
                 'avg_score': 0,
-                # 'last_5_games': deque(
-                #    [], 5),
+                'last_5_games': collections.deque([], 5),
                 'boring_games': 0,
                 'boring_rate': 0,
                 'god_wins': {},

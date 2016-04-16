@@ -151,9 +151,8 @@ def score_games():
         # Adjust avg_score
         scoring['avg_score'] = scoring['total_score'] / scoring['games']
 
-        # XXX re-add the deque conversion to re-enable this
         # Adjust last_5_games
-        # scoring['last_5_games'].append(log)
+        scoring['last_5_games'].append(log)
 
         # Adjust boring_rate
         scoring['boring_rate'] = scoring['boring_games'] / scoring['games']
