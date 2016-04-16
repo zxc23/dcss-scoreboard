@@ -3,3 +3,5 @@ dcss-scoreboard-html/
 logfiles/*
 !logfiles/EMPTY_DIR
 venv/
+__pycache__
+*.db
