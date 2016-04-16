@@ -8,10 +8,7 @@ from . import model
 
 
 def calculate_game_gid(log):
-    """Calculate GID for a game. Sequell compatible.
-
-    XXX: should include server source.
-    """
+    """Calculate GID for a game. Sequell compatible."""
     return "%s:%s:%s" % (log['name'], log['src'], log['start'])
 
 
