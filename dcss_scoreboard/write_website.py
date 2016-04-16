@@ -99,7 +99,7 @@ def streaktotablerow(streak):
                     versions=', '.join(sorted(set(g['v'] for g in streak))))
 
 
-if __name__ == '__main__':
+def main():
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('html_templates'))
     env.filters['prettyint'] = prettyint
     env.filters['prettydur'] = prettydur
@@ -139,3 +139,7 @@ if __name__ == '__main__':
         outfile = os.path.join(player_html_path, player + '.html')
         with open(outfile, 'w') as f:
             f.write(template.render(player=player, stats=stats))
+
+
+if __name__ == '__main__':
+    main()
