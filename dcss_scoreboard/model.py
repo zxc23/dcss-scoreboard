@@ -5,6 +5,13 @@ from sqlalchemy import String, Integer
 import json
 import collections
 import sqlalchemy.ext.mutable
+import pylru
+
+def _store_game(key, value):
+    set_player_score_data(key, value)
+
+PLAYER_SCORE_CACHE = pylru.lrucache(1000, _store_game)
+
 
 
 class DatabaseError(Exception):
@@ -41,6 +48,7 @@ class _JsonEncodedDict(TypeDecorator):
     def process_result_value(self, value, dialect):
         """JSON String -> Dict."""
         return json.loads(value)
+
 
 sqlalchemy.ext.mutable.MutableDict.associate_with(_JsonEncodedDict)
 
@@ -141,36 +149,37 @@ def player_scores():
 
 
 def get_player_score_data(name):
-    """Return a dict of the player's current scoring data."""
+    """Return a dict of the player's current scoring data.
+
+    If the player doesn't exist, None is returned.
+    """
+    # serve result from the cache if it's there
+    if name in PLAYER_SCORE_CACHE:
+        return PLAYER_SCORE_CACHE[name]
+
     s = _player_scores.select().where(_player_scores.c.name == name)
     result = _conn.execute(s).fetchone()
-    if not result:
-        # print("Creating empty scoreboard for", name)
-        return {'wins': [],
-                'games': 0,
-                'winrate': 0,
-                'total_score': 0,
-                'avg_score': 0,
-                'last_5_games': collections.deque([], 5),
-                'boring_games': 0,
-                'boring_rate': 0,
-                'god_wins': {},
-                'race_wins': {},
-                'role_wins': {},
-                'achievements': {}}
+    if result:
+        score = result[1]
+        # Update the cache
+        PLAYER_SCORE_CACHE[name] = score
     else:
-        # print("Loaded existing scoreboard for", name)
-        return result.scoringinfo
+        score = None
+    return score
 
 
-def set_player_score_data(player, data):
-    """Write player's scoring data to the database."""
+def set_player_score_data(name, data):
+    """Write player's scoring data to the database.
+
+    XXX this function is the slowest part of scoring.py.
+    """
     # print("Saving scoring data for", player)
+    PLAYER_SCORE_CACHE[name] = data
     try:
-        _conn.execute(_player_scores.insert(), name=player, scoringinfo=data)
+        _conn.execute(_player_scores.insert(), name=name, scoringinfo=data)
     except sqlalchemy.exc.IntegrityError:
         _conn.execute(_player_scores.update().where(
-            _player_scores.c.name == player).values(scoringinfo=data))
+            _player_scores.c.name == name).values(scoringinfo=data))
 
 
 def games():
