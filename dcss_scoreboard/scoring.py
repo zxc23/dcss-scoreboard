@@ -1,5 +1,8 @@
 """Take game data and figure out scoring."""
 
+import collections
+import time
+
 from . import model
 
 # XXX these should be in the database
@@ -16,17 +19,47 @@ PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
                  'Yredelemnul', 'Zin'}
 
 
+def load_player_scores(name):
+    """Load the score dictionary of a player.
+
+    This requires applying some transformations to the raw stored data.
+    """
+    data = model.get_player_score_data(name)
+
+    if data:
+        data['last_5_games'] = collections.deque(data['last_5_games'], 5)
+    else:
+        data = {'wins': [],
+                'games': 0,
+                'winrate': 0,
+                'total_score': 0,
+                'avg_score': 0,
+                'last_5_games': collections.deque([], 5),
+                'boring_games': 0,
+                'boring_rate': 0,
+                'god_wins': {},
+                'race_wins': {},
+                'role_wins': {},
+                'achievements': {}}
+
+    return data
+
+
 def score_games():
     """Update scores with all game's data."""
     print("Scoring all games...")
+    start = time.time()
     scored = 0
     for gid, log in model.games():
+        # Periodically print our progress
         scored += 1
         if scored % 10000 == 0:
             print(scored)
-        # print("Scoring", gid)
-        # Log vars
+
         name = log['name']
+        scores = load_player_scores(name)
+
+        # Log vars
         if 'god' in log:
             god = log['god']
         else:
@@ -35,73 +68,70 @@ def score_games():
         race = log['char'][:2]
         role = log['char'][2:]
 
-        # Make player dictionary
-        scoring = model.get_player_score_data(name)
-
         # Player vars
-        achievements = scoring['achievements']
-        wins = len(scoring['wins'])
+        achievements = scores['achievements']
+        wins = len(scores['wins'])
 
         # Increment games
-        scoring['games'] += 1
+        scores['games'] += 1
 
         # Increment wins
         if log['ktyp'] == 'winning':
-            scoring['wins'].append(log)
+            scores['wins'].append(log)
 
             # Adjust fastest_realtime win
-            if 'fastest_realtime' not in scoring or log['dur'] < scoring[
+            if 'fastest_realtime' not in scores or log['dur'] < scores[
                     'fastest_realtime']['dur']:
-                scoring['fastest_realtime'] = log
+                scores['fastest_realtime'] = log
 
             # Adjust fastest_turncount win
-            if 'fastest_turncount' not in scoring or log['turn'] < scoring[
+            if 'fastest_turncount' not in scores or log['turn'] < scores[
                     'fastest_turncount']['turn']:
-                scoring['fastest_turncount'] = log
+                scores['fastest_turncount'] = log
 
             # Increment god_wins
-            if god not in scoring['god_wins']:
-                scoring['god_wins'][god] = 1
-                if len(PLAYABLE_GODS.difference(scoring['god_wins'].keys(
+            if god not in scores['god_wins']:
+                scores['god_wins'][god] = 1
+                if len(PLAYABLE_GODS.difference(scores['god_wins'].keys(
                 ))) == 0:
                     achievements['polytheist'] = True
             else:
-                scoring['god_wins'][god] += 1
+                scores['god_wins'][god] += 1
 
             # Increment race_wins
-            if race not in scoring['race_wins']:
-                scoring['race_wins'][race] = 1
-                if len(PLAYABLE_RACES.difference(scoring['race_wins'].keys(
+            if race not in scores['race_wins']:
+                scores['race_wins'][race] = 1
+                if len(PLAYABLE_RACES.difference(scores['race_wins'].keys(
                 ))) == 0:
                     achievements['greatplayer'] = True
             else:
-                scoring['race_wins'][race] += 1
+                scores['race_wins'][race] += 1
 
             # Increment role_wins
-            if role not in scoring['role_wins']:
-                scoring['role_wins'][role] = 1
-                if len(PLAYABLE_ROLES.difference(scoring['role_wins'].keys(
+            if role not in scores['role_wins']:
+                scores['role_wins'][role] = 1
+                if len(PLAYABLE_ROLES.difference(scores['role_wins'].keys(
                 ))) == 0 and 'greatplayer' in achievements:
                     achievements['greaterplayer'] = True
             else:
-                scoring['role_wins'][role] += 1
+                scores['role_wins'][role] += 1
 
             # Adjust avg_win stats
-            if 'avg_win_ac' not in scoring:
-                scoring['avg_win_ac'] = log['ac']
+            if 'avg_win_ac' not in scores:
+                scores['avg_win_ac'] = log['ac']
             else:
-                scoring['avg_win_ac'] += (
-                    log['ac'] - scoring['avg_win_ac']) / wins
-            if 'avg_win_ev' not in scoring:
-                scoring['avg_win_ev'] = log['ev']
+                scores['avg_win_ac'] += (
+                    log['ac'] - scores['avg_win_ac']) / wins
+            if 'avg_win_ev' not in scores:
+                scores['avg_win_ev'] = log['ev']
             else:
-                scoring['avg_win_ev'] += (
-                    log['ev'] - scoring['avg_win_ev']) / wins
-            if 'avg_win_sh' not in scoring:
-                scoring['avg_win_sh'] = log['sh']
+                scores['avg_win_ev'] += (
+                    log['ev'] - scores['avg_win_ev']) / wins
+            if 'avg_win_sh' not in scores:
+                scores['avg_win_sh'] = log['sh']
             else:
-                scoring['avg_win_sh'] += (
-                    log['sh'] - scoring['avg_win_sh']) / wins
+                scores['avg_win_sh'] += (
+                    log['sh'] - scores['avg_win_sh']) / wins
 
             # Adjust win-based achievements
             if wins == 10:
@@ -126,14 +156,14 @@ def score_games():
 
             # Increment boring_games
             if log['ktyp'] in ('leaving', 'quitting'):
-                scoring['boring_games'] += 1
+                scores['boring_games'] += 1
 
         # Adjust winrate
-        scoring['winrate'] = wins / scoring['games']
+        scores['winrate'] = wins / scores['games']
 
         # Adjust highscores
-        if 'highscore' not in scoring or score > scoring['highscore']['sc']:
-            scoring['highscore'] = log
+        if 'highscore' not in scores or score > scores['highscore']['sc']:
+            scores['highscore'] = log
 
         # if race not in race_highscores or score > race_highscores[race]['sc']:
         # race_highscores[race] = log
@@ -146,15 +176,18 @@ def score_games():
         # combo_highscores[char] = log
 
         # Increment total_score
-        scoring['total_score'] += score
+        scores['total_score'] += score
 
         # Adjust avg_score
-        scoring['avg_score'] = scoring['total_score'] / scoring['games']
+        scores['avg_score'] = scores['total_score'] / scores['games']
 
         # Adjust last_5_games
-        scoring['last_5_games'].append(log)
+        scores['last_5_games'].append(log)
 
         # Adjust boring_rate
-        scoring['boring_rate'] = scoring['boring_games'] / scoring['games']
+        scores['boring_rate'] = scores['boring_games'] / scores['games']
 
-        model.set_player_score_data(name, scoring)
+        model.set_player_score_data(name, scores)
+
+    end = time.time()
+    print("Scoring took", end - start, "seconds")
