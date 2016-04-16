@@ -1,8 +1,6 @@
 """Take game data and figure out scoring."""
 
-# from collections import deque
-
-import dcss_scoreboard.model as model
+from . import model
 
 # XXX these should be in the database
 PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh', 'Gr',

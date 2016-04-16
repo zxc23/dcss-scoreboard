@@ -6,7 +6,7 @@ import datetime
 
 import jinja2
 
-import dcss_scoreboard.model as model
+from . import model
 
 OUTDIR = 'dcss-scoreboard-html'
 

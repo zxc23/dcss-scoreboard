@@ -1,9 +1,10 @@
 """Handle reading logfiles and parsing them."""
 
-import dcss_scoreboard.model as model
 import os
 import sys
 import re
+
+from . import model
 
 
 def calculate_game_gid(log):
