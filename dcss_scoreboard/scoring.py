@@ -1,22 +1,22 @@
 """Take game data and figure out scoring."""
 
 import sqlalchemy
-from collections import deque
+# from collections import deque
 
 import dcss_scoreboard.model as model
 
 # XXX these should be in the database
-ALL_PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh',
-                      'Gr', 'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu',
-                      'Na', 'Op', 'Og', 'Sp', 'Te', 'Tr', 'VS', 'Vp'}
-ALL_PLAYABLE_ROLES = {'AE', 'AK', 'AM', 'Ar', 'As', 'Be', 'CK', 'Cj', 'EE',
-                      'En', 'FE', 'Fi', 'Gl', 'Hu', 'IE', 'Mo', 'Ne', 'Sk',
-                      'Su', 'Tm', 'VM', 'Wn', 'Wr', 'Wz'}
-ALL_PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos',
-                     'Elyvilon', 'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha',
-                     'Lugonu', 'Makhleb', 'Nemelex Xobeh', 'Okawaru',
-                     'Pakellas', 'Qazlal', 'Ru', 'Sif Muna', 'the Shining One',
-                     'Trog', 'Vehumet', 'Xom', 'Yredelemnul', 'Zin'}
+PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh', 'Gr',
+                  'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu', 'Na', 'Op',
+                  'Og', 'Sp', 'Te', 'Tr', 'VS', 'Vp'}
+PLAYABLE_ROLES = {'AE', 'AK', 'AM', 'Ar', 'As', 'Be', 'CK', 'Cj', 'EE', 'En',
+                  'FE', 'Fi', 'Gl', 'Hu', 'IE', 'Mo', 'Ne', 'Sk', 'Su', 'Tm',
+                  'VM', 'Wn', 'Wr', 'Wz'}
+PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
+                 'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha', 'Lugonu',
+                 'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas', 'Qazlal',
+                 'Ru', 'Sif Muna', 'the Shining One', 'Trog', 'Vehumet', 'Xom',
+                 'Yredelemnul', 'Zin'}
 
 engine = sqlalchemy.create_engine('sqlite:///scoredata.db', echo=False)
 
@@ -53,7 +53,7 @@ def get_player_score_data(name):
                 'winrate': 0,
                 'total_score': 0,
                 'avg_score': 0,
-                #'last_5_games': deque(
+                # 'last_5_games': deque(
                 #    [], 5),
                 'boring_games': 0,
                 'boring_rate': 0,
@@ -76,7 +76,6 @@ def set_player_score_data(player, data):
     except sqlalchemy.exc.IntegrityError:
         conn.execute(model.player_scores.update().where(
             model.player_scores.c.name == player).values(scoringinfo=data))
-
 
 
 def score_games():
@@ -126,7 +125,7 @@ def score_games():
             # Increment god_wins
             if god not in scoring['god_wins']:
                 scoring['god_wins'][god] = 1
-                if len(ALL_PLAYABLE_GODS.difference(scoring['god_wins'].keys(
+                if len(PLAYABLE_GODS.difference(scoring['god_wins'].keys(
                 ))) == 0:
                     achievements['polytheist'] = True
             else:
@@ -135,7 +134,7 @@ def score_games():
             # Increment race_wins
             if race not in scoring['race_wins']:
                 scoring['race_wins'][race] = 1
-                if len(ALL_PLAYABLE_RACES.difference(scoring['race_wins'].keys(
+                if len(PLAYABLE_RACES.difference(scoring['race_wins'].keys(
                 ))) == 0:
                     achievements['greatplayer'] = True
             else:
@@ -144,8 +143,8 @@ def score_games():
             # Increment role_wins
             if role not in scoring['role_wins']:
                 scoring['role_wins'][role] = 1
-                if len(ALL_PLAYABLE_ROLES.difference(scoring['role_wins'].keys())) == 0 \
-                and 'greatplayer' in achievements:
+                if len(PLAYABLE_ROLES.difference(scoring['role_wins'].keys(
+                ))) == 0 and 'greatplayer' in achievements:
                     achievements['greaterplayer'] = True
             else:
                 scoring['role_wins'][role] += 1
@@ -200,14 +199,14 @@ def score_games():
             scoring['highscore'] = log
 
         # if race not in race_highscores or score > race_highscores[race]['sc']:
-            # race_highscores[race] = log
+        # race_highscores[race] = log
 
         # if role not in role_highscores or score > role_highscores[role]['sc']:
-            # role_highscores[role] = log
+        # role_highscores[role] = log
 
         # if char not in combo_highscores or score > combo_highscores[char][
         #         'sc']:
-            # combo_highscores[char] = log
+        # combo_highscores[char] = log
 
         # Increment total_score
         scoring['total_score'] += score
