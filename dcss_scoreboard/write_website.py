@@ -2,11 +2,9 @@
 """Take generated score data and write out all website files."""
 
 import os
-import json
 import datetime
 
 import jinja2
-import sqlalchemy
 
 import dcss_scoreboard.model as model
 
@@ -118,9 +116,6 @@ def write_website():
     env.filters['gametotablerow'] = gametotablerow
     env.filters['streaktotablerow'] = streaktotablerow
 
-    engine = sqlalchemy.create_engine('sqlite:///scoredata.db', echo=False)
-    conn = engine.connect()
-
     print("Writing HTML to %s" % OUTDIR)
     if not os.path.isdir(OUTDIR):
         os.mkdir(OUTDIR)
@@ -139,15 +134,14 @@ def write_website():
     player_html_path = os.path.join(OUTDIR, 'players')
     if not os.path.isdir(player_html_path):
         os.mkdir(player_html_path)
-    players = sorted(
-        r.name for r in conn.execute(model.player_scores.select()).fetchall())
+    players = sorted(model.players())
     with open(os.path.join(OUTDIR, 'players.html'), 'w') as f:
         template = env.get_template('players.html')
         f.write(template.render(players=players))
 
     print("Writing player pages")
     template = env.get_template('player.html')
-    for row in conn.execute(model.player_scores.select()).fetchall():
+    for row in model.player_scores():
         outfile = os.path.join(player_html_path, row.name + '.html')
         with open(outfile, 'w') as f:
             f.write(template.render(player=row.name, stats=row.scoringinfo))

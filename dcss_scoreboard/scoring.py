@@ -1,6 +1,5 @@
 """Take game data and figure out scoring."""
 
-import sqlalchemy
 # from collections import deque
 
 import dcss_scoreboard.model as model
@@ -18,72 +17,12 @@ PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
                  'Ru', 'Sif Muna', 'the Shining One', 'Trog', 'Vehumet', 'Xom',
                  'Yredelemnul', 'Zin'}
 
-engine = sqlalchemy.create_engine('sqlite:///scoredata.db', echo=False)
-
-
-def sqlite_performance_over_safety(dbapi_con, con_record):
-    """Significantly speeds up inserts but will break on crash."""
-    dbapi_con.execute('PRAGMA journal_mode = MEMORY')
-    dbapi_con.execute('PRAGMA synchronous = OFF')
-
-
-sqlalchemy.event.listen(engine, 'connect', sqlite_performance_over_safety)
-
-conn = engine.connect()
-
-
-def players():
-    """Return list of all players.
-
-    XXX should be at least memoised if not outright replaced with something
-    saner.
-    """
-    s = model.player_scores.select()
-    return [i.name for i in conn.execute(s).fetchall()]
-
-
-def get_player_score_data(name):
-    """Return a dict of the player's current scoring data."""
-    s = model.player_scores.select().where(model.player_scores.c.name == name)
-    result = conn.execute(s).fetchone()
-    if not result:
-        # print("Creating empty scoreboard for", name)
-        return {'wins': [],
-                'games': 0,
-                'winrate': 0,
-                'total_score': 0,
-                'avg_score': 0,
-                # 'last_5_games': deque(
-                #    [], 5),
-                'boring_games': 0,
-                'boring_rate': 0,
-                'god_wins': {},
-                'race_wins': {},
-                'role_wins': {},
-                'achievements': {}}
-    else:
-        # print("Loaded existing scoreboard for", name)
-        return result.scoringinfo
-
-
-def set_player_score_data(player, data):
-    """Write player's scoring data to the database."""
-    # print("Saving scoring data for", player)
-    try:
-        conn.execute(model.player_scores.insert(),
-                     name=player,
-                     scoringinfo=data)
-    except sqlalchemy.exc.IntegrityError:
-        conn.execute(model.player_scores.update().where(
-            model.player_scores.c.name == player).values(scoringinfo=data))
-
 
 def score_games():
     """Update scores with all game's data."""
     print("Scoring all games...")
-    s = model.game.select()
     scored = 0
-    for gid, log in conn.execute(s).fetchall():
+    for gid, log in model.games():
         scored += 1
         if scored % 10000 == 0:
             print(scored)
@@ -99,7 +38,7 @@ def score_games():
         role = log['char'][2:]
 
         # Make player dictionary
-        scoring = get_player_score_data(name)
+        scoring = model.get_player_score_data(name)
 
         # Player vars
         achievements = scoring['achievements']
@@ -221,4 +160,4 @@ def score_games():
         # Adjust boring_rate
         scoring['boring_rate'] = scoring['boring_games'] / scoring['games']
 
-        set_player_score_data(name, scoring)
+        model.set_player_score_data(name, scoring)
