@@ -210,5 +210,8 @@ def score_games():
 
         set_player_scores(name, scores)
 
+    # Now we have to write out everything remaining in the cache
+    for name, scores in PLAYER_SCORE_CACHE.items():
+        _store_game(name, scores)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
