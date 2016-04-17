@@ -1,0 +1,83 @@
+String_ID,Name,Description
+polytheist,Polytheist,Won a game with every currently playable god.
+greatplayer,Great Player,Won a game with every currently playable species.
+greaterplayer,Greater Player,Won a game with every currently playable species and background.
+goodplayer,Good Player,Won 10 games.
+centuryplayer,Century Player,Won 100 games.
+no_potion_or_scroll_win,Potion-less and Scroll-less Win,Won a game without using a single potion or scroll.
+cleared_zig,Zig Clearer,Exited a ziggurat from the 27th floor.
+greatcentaur,Great Centaur,Won a game with every Centaur combo.
+greatdeepdwarf,Great Deep Dwarf,Won a game with every Deep Dwarf combo.
+greatdeepelf,Great Deep Elf,Won a game with every Deep Elf combo.
+greatdemigod,Great Demigod,Won a game with every Demigod combo.
+greatdemonspawn,Great Demonspawn,Won a game with every Demonspawn combo.
+greatdraconian,Great Draconian,Won a game with every Draconian combo.
+greatfelid,Great Felid,Won a game with every Felid combo.
+greatformicid,Great Formicid,Won a game with every Formicid combo.
+greatghoul,Great Ghoul,Won a game with every Ghoul combo.
+greatgargoyle,Great Gargoyle,Won a game with every Gargoyle combo.
+greathighelf,Great High Elf,Won a game with every High Elf combo.
+greathillorc,Great Hill Orc,Won a game with every Hill Orc combo.
+greathalfling,Great Halfling,Won a game with every Halfling combo.
+greathuman,Great Human,Won a game with every Human combo.
+greatkobold,Great Kobold,Won a game with every Kobold combo.
+greatmerfolk,Great Merfolk,Won a game with every Merfolk combo.
+greatminotaur,Great Minotaur,Won a game with every Minotaur combo.
+greatmummy,Great Mummy,Won a game with every Mummy combo.
+greatnaga,Great Naga,Won a game with every Naga combo.
+greatoctopode,Great Octopode,Won a game with every Octopode combo.
+greatogre,Great Ogre,Won a game with every Ogre combo.
+greatspriggan,Great Spriggan,Won a game with every Spriggan combo.
+greattengu,Great Tengu,Won a game with every Tengu combo.
+greattroll,Great Troll,Won a game with every Troll combo.
+greatvinestalker,Great Vinestalker,Won a game with every Vinestalker combo.
+greatvampire,Great Vampire,Won a game with every Vampire combo.
+greatairelementalist,Great Air Elementalist,Won a game with every Air Elementalist combo.
+greatabyssalknight,Great Abyssal Knight,Won a game with every Abyssal Knight combo.
+greatarcanemarksman,Great Arcane Marksman,Won a game with every Arcane Marksman combo.
+greatartificer,Great Artificer,Won a game with every Artificer combo.
+greatassassin,Great Assassin,Won a game with every Assassin combo.
+greatberserker,Great Berserker,Won a game with every Berserker combo.
+greatchaosknight,Great Chaos Knight,Won a game with every Chaos Knight combo.
+greatconjurer,Great Conjurer,Won a game with every Conjurer combo.
+greatearthelementalist,Great Earth Elementalist,Won a game with every Earth Elementalist combo.
+greatenchanter,Great Enchanter,Won a game with every Enchanter combo.
+greatfireelementalist,Great Fire Elementalist,Won a game with every Fire Elementalist combo.
+greatfighter,Great Fighter,Won a game with every Fighter combo.
+greatgladiator,Great Gladiator,Won a game with every Gladiator combo.
+greathealer,Great Healer,Won a game with every Healer combo.
+greathunter,Great Hunter,Won a game with every Hunter combo.
+greaticeelementalist,Great Ice Elementalist,Won a game with every Ice Elementalist combo.
+greatmonk,Great Monk,Won a game with every Monk combo.
+greatnecromancer,Great Necromancer,Won a game with every Necromancer combo.
+greatskald,Great Skald,Won a game with every Skald combo.
+greatsummoner,Great Summoner,Won a game with every Summoner combo.
+greattransmuter,Great Transmuter,Won a game with every Transmuter combo.
+greatvenommage,Great Venom Mage,Won a game with every Venom Mage combo.
+greatwanderer,Great Wanderer,Won a game with every Wanderer combo.
+greatwarper,Great Warper,Won a game with every Warper combo.
+greatwizard,Great Wizard,Won a game with every Wizard combo.
+0.4_winner,0.4 Tournament Winner,Won the 0.4 tournament.
+0.5_winner,0.5 Tournament Winner,Won the 0.5 tournament.
+0.7_winner,0.7 Tournament Winner,Won the 0.7 tournament.
+0.8_winner,0.8 Tournament Winner,Won the 0.8 tournament.
+0.9_winner,0.9 Tournament Winner,Won the 0.9 tournament.
+0.10_winner,0.10 Tournament Winner,Won the 0.10 tournament.
+0.11_winner,0.11 Tournament Winner,Won the 0.11 tournament.
+0.12_winner,0.12 Tournament Winner,Won the 0.12 tournament.
+0.13_winner,0.13 Tournament Winner,Won the 0.13 tournament.
+0.14_winner,0.14 Tournament Winner,Won the 0.14 tournament.
+0.15_winner,0.15 Tournament Winner,Won the 0.15 tournament.
+0.16_winner,0.16 Tournament Winner,Won the 0.16 tournament.
+0.17_winner,0.17 Tournament Winner,Won the 0.17 tournament.
+0.18_winner,0.18 Tournament Winner,Won the 0.18 tournament.
+iron_rune_first,Iron Rune First,Found the iron rune before entering Pandemonium or any branch of the dungeon containing any other rune.
+dupz_winner,DUPZ Winner,"Won a game by going through Dungeon, Depths, Pan, Zot and nowhere else except portals and temple."
+duhz_winner,DUHZ Winner,"Won a game by going through Dungeon, Depths, Hell, Zot and nowhere else except portals and temple."
+low_skill_win,Low Skill Win,Won a game without increasing any skill past 12.0.
+killed_all_uniques,Unique Slayer,Killed all current uniques at least once.
+low_xl_win,Low XL Win,Won a game before reaching experience level 19.
+orb_run_tomb,Orb Run Tomb,Won a game with the golden rune by entering tomb for the first time after retrieving the orb.
+greater_orb_run,Greater Orb Run,Won a game with 15 runes after picking up the orb with only 3.
+fast_win,Fast Win,Won a game in under two hours.
+short_win,Short Win,Won a game in under 40000 turns.
