@@ -4,23 +4,8 @@ import collections
 import time
 import traceback
 import json
-
 import pylru
-
-from . import model
-
-# XXX these should be in the database
-PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Ds', 'Dr', 'Fe', 'Fo', 'Gh', 'Gr',
-                  'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu', 'Na', 'Op',
-                  'Og', 'Sp', 'Te', 'Tr', 'VS', 'Vp'}
-PLAYABLE_ROLES = {'AE', 'AK', 'AM', 'Ar', 'As', 'Be', 'CK', 'Cj', 'EE', 'En',
-                  'FE', 'Fi', 'Gl', 'Hu', 'IE', 'Mo', 'Ne', 'Sk', 'Su', 'Tm',
-                  'VM', 'Wn', 'Wr', 'Wz'}
-PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
-                 'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha', 'Lugonu',
-                 'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas', 'Qazlal',
-                 'Ru', 'Sif Muna', 'the Shining One', 'Trog', 'Vehumet', 'Xom',
-                 'Yredelemnul', 'Zin'}
+from . import model, constants
 
 PLAYER_SCORE_CACHE = pylru.lrucache(1000, callback=model.set_player_score_data)
 
@@ -153,7 +138,7 @@ def score_game(game):
         # Increment god_wins
         if god not in scores['god_wins']:
             scores['god_wins'][god] = 1
-            if len(PLAYABLE_GODS.difference(scores['god_wins'].keys())) == 0:
+            if len(constants.PLAYABLE_GODS.difference(scores['god_wins'].keys())) == 0:
                 achievements['polytheist'] = True
         else:
             scores['god_wins'][god] += 1
@@ -161,7 +146,7 @@ def score_game(game):
         # Increment race_wins
         if race not in scores['race_wins']:
             scores['race_wins'][race] = 1
-            if len(PLAYABLE_RACES.difference(scores['race_wins'].keys())) == 0:
+            if len(constants.PLAYABLE_RACES.difference(scores['race_wins'].keys())) == 0:
                 achievements['greatplayer'] = True
         else:
             scores['race_wins'][race] += 1
@@ -169,7 +154,7 @@ def score_game(game):
         # Increment role_wins
         if role not in scores['role_wins']:
             scores['role_wins'][role] = 1
-            if len(PLAYABLE_ROLES.difference(scores['role_wins'].keys(
+            if len(constants.PLAYABLE_ROLES.difference(scores['role_wins'].keys(
             ))) == 0 and 'greatplayer' in achievements:
                 achievements['greaterplayer'] = True
         else:
@@ -200,6 +185,34 @@ def score_game(game):
 
         if wins == 100:
             achievements['centuryplayer'] = True
+
+        # Check for great race completion
+        if race in constants.RACE_TO_GREAT_RACE:
+            great_race = constants.RACE_TO_GREAT_RACE[race]
+            if (great_race not in achievements
+                    and scores['race_wins'][race] >= len(constants.PLAYABLE_ROLES)-1):
+
+                # Get roles won with this race
+                roles_won = set([win['char'][2:] for win in scores['wins'] if race == win['char'][:2]])
+                roles_won.add(role)
+
+                # Check for completion
+                if len(constants.PLAYABLE_ROLES.difference(roles_won)) == 0:
+                    achievements[great_race] = True
+
+        # Check for great role completion
+        if role in constants.ROLE_TO_GREAT_ROLE:
+            great_role = constants.ROLE_TO_GREAT_ROLE[role]
+            if (great_role not in achievements
+                    and scores['role_wins'][role] >= len(constants.PLAYABLE_RACES)-1):
+
+                # Get races won with this role
+                races_won = set([win['char'][:2] for win in scores['wins'] if role == win['char'][2:]])
+                races_won.add(race)
+
+                # Check for completion
+                if len(constants.PLAYABLE_RACES.difference(races_won)) == 0:
+                    achievements[great_role] = True
 
         # Older logfiles don't have these fields, so skip those games
         if 'potionsused' in log and log['potionsused'] == 0 and log[
