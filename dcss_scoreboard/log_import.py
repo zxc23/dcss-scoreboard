@@ -44,9 +44,10 @@ def load_logfiles():
                 if not field:  # skip blank fields
                     continue
                 k, v = field.split('=', 1)
-                if v.isdigit():
+                # Store integer fields natively
+                try:
                     v = int(v)
-                else:
+                except ValueError:
                     v = v.replace("::", ":")  # Logfile escaping as per above
                 log[k] = v
             gid = calculate_game_gid(log)
