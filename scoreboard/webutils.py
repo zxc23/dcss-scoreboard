@@ -96,3 +96,20 @@ def streaktotablerow(streak):
                     player=streak[0]['name'],
                     games=', '.join(g['char'] for g in streak),
                     versions=', '.join(sorted(set(g['v'] for g in streak))))
+
+
+def completedstreaktotablerow(streak):
+    """Jinja filter to convert a streak to a table row."""
+    return """<tr>
+      <td>{wins}</td>
+      <td>{player}</td>
+      <td>{games}</td>
+      <td>{ended}</td>
+      <td>{lost_game}</td>
+      <td>{versions}</td>
+    </tr>""".format(wins=len(streak['wins']),
+                    player=streak['wins'][0]['name'],
+                    games=', '.join(g['char'] for g in streak['wins']),
+                    ended=prettycrawldate(streak['end']),
+                    lost_game=streak['streak_breaker']['char'],
+                    versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))
