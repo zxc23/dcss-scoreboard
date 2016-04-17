@@ -73,3 +73,8 @@ def write_website():
             f.write(template.render(player=row.name,
                                     stats=row.scoringinfo,
                                     achievement_data=achievements))
+
+
+if __name__ == "__main__":
+    write_website()
+

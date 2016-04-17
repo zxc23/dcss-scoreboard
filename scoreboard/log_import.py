@@ -64,3 +64,7 @@ def load_logfiles():
         print("done (%s new lines)" % (lines - processed_lines))
         # Save the new number of lines processed in the database
         model.save_log_pos(logfile, lines)
+        
+        
+if __name__ == "__main__":
+    load_logfiles()

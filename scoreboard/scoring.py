@@ -319,3 +319,7 @@ def score_games():
         model.set_global_score(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
+
+
+if __name__ == "__main__":
+    score_games()
