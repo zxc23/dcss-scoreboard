@@ -79,7 +79,10 @@ _player_scores = Table('player_scores',
 
 _global_scores = Table('global_scores',
                        _metadata,
-                       Column('global_scores',
+                       Column('key',
+                              String,
+                              primary_key=True),
+                       Column('data',
                               _JsonEncodedDict,
                               nullable=False))
 
@@ -187,5 +190,30 @@ def games(scored=None):
 
 def mark_game_scored(gid):
     """Mark a game as being scored."""
-    _conn.execute(_games.update().where(_games.c.gid == gid).values(scored=
-                                                                    True))
+    s = _games.update().where(_games.c.gid == gid).values(scored=True)
+    _conn.execute(s)
+
+
+def set_global_score(key, data):
+    """Set global score data."""
+    try:
+        _conn.execute(_global_scores.insert(), key=key, data=data)
+    except sqlalchemy.exc.IntegrityError:
+        _conn.execute(_global_scores.update().where(
+            _global_scores.c.key == key).values(data=data))
+
+
+def get_global_score(key):
+    """Get global score data."""
+    s = _global_scores.select().where(_global_scores.c.key == key)
+    val = _conn.execute(s).fetchone()
+    return val
+
+
+def get_all_global_scores():
+    """Get all global score data."""
+    scores = {}
+    s = _global_scores.select()
+    for row in _conn.execute(s).fetchall():
+        scores[row[0]] = row[1]
+    return scores
