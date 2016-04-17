@@ -22,7 +22,10 @@
   <div class="col-sm-4">
     <h3>Achievements</h3>
     {% for achievement in stats['achievements'] %}
-    {{ achievement }}
+    <p>
+        <h5 class="card-title">{{ achievement_data[achievement]['name'] }}</h5>
+        <p class="card-text">{{ achievement_data[achievement]['description'] }}</p>
+    </p>
     {% endfor %}
   </div>
 </div>

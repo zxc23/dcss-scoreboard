@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}High Scores{% endblock %}
+{% block heading %}Global High Scores{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-sm-12">
+    <h3>Highscores</h3>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#active_streaks" role="tab">Active Streaks</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#completed_streaks" role="tab">Completed Streaks</a>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="active_streaks" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Wins</th>
+              <th>Player</th>
+              <th>Games</th>
+              <th>Versions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for player, streak in stats['active_streaks'].items() %}
+            {{ streak|streaktotablerow }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="completed_streaks" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Wins</th>
+              <th>Player</th>
+              <th>Games</th>
+              <th>Date Ended</th>
+              <th>Lost Game</th>
+              <th>Versions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for streak in stats['completed_streaks'] %}
+            {{ streak|completedstreaktotablerow }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -95,29 +95,30 @@
         </table>
       </div>
       <div class="tab-pane" id="god" role="tabpanel">
-        <br>Coming soon!<br><br><br><br><br>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>God</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for race, game in stats['role_highscores'].items() %}
+            {{ game|gametotablerow(prefix_row='god') }}
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
-  </div>
-</div>
-<div class="row">
-  <div class="col-sm-12">
-    <h3>Active Streaks</h3>
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Wins</th>
-          <th>Player</th>
-          <th>Games</th>
-          <th>Versions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for streak in stats['active_streaks'] %}
-        {{ streak|streaktotablerow }}
-        {% endfor %}
-      </tbody>
-    </table>
   </div>
 </div>
 {% endblock %}
