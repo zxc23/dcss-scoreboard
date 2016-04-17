@@ -20,15 +20,10 @@ PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
                  'Ru', 'Sif Muna', 'the Shining One', 'Trog', 'Vehumet', 'Xom',
                  'Yredelemnul', 'Zin'}
 
-
-def _store_game(key, value):
-    # print("score cache overflow, persisting %s" % key)
-    model.set_player_score_data(key, value)
-
-PLAYER_SCORE_CACHE = pylru.lrucache(1000, _store_game)
+PLAYER_SCORE_CACHE = pylru.lrucache(1000, callback=model.set_player_score_data)
 
 
-def load_player_scores(name):
+def _load_player_scores(name):
     """Load the score dictionary of a player.
 
     This requires applying some transformations to the raw stored data.
@@ -60,6 +55,7 @@ def load_player_scores(name):
 
 
 def set_player_scores(name, data):
+    """Save player scores to the LRU cache."""
     # print("storing %s in the cache" % name)
     PLAYER_SCORE_CACHE[name] = data
 
@@ -76,7 +72,7 @@ def score_games():
             print(scored)
 
         name = log['name']
-        scores = load_player_scores(name)
+        scores = _load_player_scores(name)
 
         # Log vars
         if 'god' in log:
@@ -212,6 +208,6 @@ def score_games():
 
     # Now we have to write out everything remaining in the cache
     for name, scores in PLAYER_SCORE_CACHE.items():
-        _store_game(name, scores)
+        model.set_player_score_data(name, scores)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
