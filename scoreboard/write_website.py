@@ -125,10 +125,15 @@ def write_website():
         template = env.get_template('index.html')
         f.write(template.render())
 
-    # print("Writing highscores")
-    # with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
-    # template = env.get_template('highscores.html')
-    # f.write(template.render(stats=data['global_stats']))
+    print("Writing highscores")
+    with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
+        template = env.get_template('highscores.html')
+        f.write(template.render(stats=model.get_all_global_scores()))
+
+    print("Writing streaks")
+    with open(os.path.join(OUTDIR, 'streaks.html'), 'w') as f:
+        template = env.get_template('streaks.html')
+        f.write(template.render(stats=model.get_all_global_scores()))
 
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')
@@ -140,8 +145,11 @@ def write_website():
         f.write(template.render(players=players))
 
     print("Writing player pages")
+    achievements = achievement_data()
     template = env.get_template('player.html')
     for row in model.player_scores():
         outfile = os.path.join(player_html_path, row.name + '.html')
         with open(outfile, 'w') as f:
-            f.write(template.render(player=row.name, stats=row.scoringinfo))
+            f.write(template.render(player=row.name,
+                                    stats=row.scoringinfo,
+                                    achievement_data=achievements))
