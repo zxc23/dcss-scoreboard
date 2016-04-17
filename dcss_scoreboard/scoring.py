@@ -65,7 +65,10 @@ def score_games():
     print("Scoring all games...")
     start = time.time()
     scored = 0
-    for gid, log in model.games():
+    for game in model.games(scored=False):
+        gid = game[0]
+        log = game[1]
+
         # Periodically print our progress
         scored += 1
         if scored % 10000 == 0:
@@ -205,6 +208,8 @@ def score_games():
         scores['boring_rate'] = scores['boring_games'] / scores['games']
 
         set_player_scores(name, scores)
+
+        model.mark_game_scored(gid)
 
     # Now we have to write out everything remaining in the cache
     for name, scores in PLAYER_SCORE_CACHE.items():

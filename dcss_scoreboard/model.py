@@ -1,7 +1,7 @@
 """Defines the database models for this module."""
 
 from sqlalchemy import TypeDecorator, MetaData, Table, Column
-from sqlalchemy import String, Integer
+from sqlalchemy import String, Integer, Boolean
 import json
 import collections
 import sqlalchemy.ext.mutable
@@ -54,7 +54,10 @@ _games = Table('games',
                       primary_key=True),
                Column('logfile',
                       _JsonEncodedDict,
-                      nullable=False), )
+                      nullable=False),
+               Column('scored',
+                      Boolean,
+                      default=False))
 
 _log_progress = Table('log_progress',
                       _metadata,
@@ -168,11 +171,21 @@ def set_player_score_data(name, data):
             _player_scores.c.name == name).values(scoringinfo=data))
 
 
-def games():
+def games(scored=None):
     """Return all games.
+
+    If scored is not none, only return games who match bool(scored).
 
     Uses a lot of RAM if there are a lot of games.
     XXX fix this.
     """
     s = _games.select()
+    if scored is not None:
+        s = s.where(_games.c.scored == bool(scored))
     return _conn.execute(s).fetchall()
+
+
+def mark_game_scored(gid):
+    """Mark a game as being scored."""
+    _conn.execute(_games.update().where(_games.c.gid == gid).values(scored=
+                                                                    True))
