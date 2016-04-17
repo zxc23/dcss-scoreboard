@@ -207,7 +207,10 @@ def get_global_score(key):
     """Get global score data."""
     s = _global_scores.select().where(_global_scores.c.key == key)
     val = _conn.execute(s).fetchone()
-    return val
+    if val is not None:
+        return val[1]
+    else:
+        return None
 
 
 def get_all_global_scores():
