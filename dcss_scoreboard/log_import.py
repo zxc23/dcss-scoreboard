@@ -50,6 +50,9 @@ def load_logfiles():
                     v = v.replace("::", ":")  # Logfile escaping as per above
                 log[k] = v
             gid = calculate_game_gid(log)
-            model.add_game(gid, log)
+            try:
+                model.add_game(gid, log)
+            except model.DatabaseError as e:
+                print(e)
         print("done (%s new lines)" % (lines - processed_lines))
         model.save_log_pos(logfile, lines)

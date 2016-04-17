@@ -5,13 +5,6 @@ from sqlalchemy import String, Integer
 import json
 import collections
 import sqlalchemy.ext.mutable
-import pylru
-
-def _store_game(key, value):
-    set_player_score_data(key, value)
-
-PLAYER_SCORE_CACHE = pylru.lrucache(1000, _store_game)
-
 
 
 class DatabaseError(Exception):
@@ -98,7 +91,7 @@ def add_game(gid, data):
     try:
         _conn.execute(_games.insert(), gid=gid, logfile=data)
     except sqlalchemy.exc.IntegrityError:
-        raise DatabaseError("Duplicate game, ignoring.")
+        raise DatabaseError("Duplicate game %s, ignoring." % gid)
 
 
 def get_log_pos(logfile):
@@ -153,16 +146,10 @@ def get_player_score_data(name):
 
     If the player doesn't exist, None is returned.
     """
-    # serve result from the cache if it's there
-    if name in PLAYER_SCORE_CACHE:
-        return PLAYER_SCORE_CACHE[name]
-
     s = _player_scores.select().where(_player_scores.c.name == name)
     result = _conn.execute(s).fetchone()
     if result:
         score = result[1]
-        # Update the cache
-        PLAYER_SCORE_CACHE[name] = score
     else:
         score = None
     return score
@@ -174,7 +161,6 @@ def set_player_score_data(name, data):
     XXX this function is the slowest part of scoring.py.
     """
     # print("Saving scoring data for", player)
-    PLAYER_SCORE_CACHE[name] = data
     try:
         _conn.execute(_player_scores.insert(), name=name, scoringinfo=data)
     except sqlalchemy.exc.IntegrityError:

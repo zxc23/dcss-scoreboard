@@ -3,6 +3,8 @@
 import collections
 import time
 
+import pylru
+
 from . import model
 
 # XXX these should be in the database
@@ -19,12 +21,24 @@ PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
                  'Yredelemnul', 'Zin'}
 
 
+def _store_game(key, value):
+    # print("score cache overflow, persisting %s" % key)
+    model.set_player_score_data(key, value)
+
+PLAYER_SCORE_CACHE = pylru.lrucache(1000, _store_game)
+
+
 def load_player_scores(name):
     """Load the score dictionary of a player.
 
     This requires applying some transformations to the raw stored data.
     """
-    data = model.get_player_score_data(name)
+    if name in PLAYER_SCORE_CACHE:
+        # print("loading %s from cache" % name)
+        data = PLAYER_SCORE_CACHE[name]
+    else:
+        # print("loading %s from database" % name)
+        data = model.get_player_score_data(name)
 
     if data:
         data['last_5_games'] = collections.deque(data['last_5_games'], 5)
@@ -43,6 +57,11 @@ def load_player_scores(name):
                 'achievements': {}}
 
     return data
+
+
+def set_player_scores(name, data):
+    # print("storing %s in the cache" % name)
+    PLAYER_SCORE_CACHE[name] = data
 
 
 def score_games():
@@ -165,10 +184,12 @@ def score_games():
         if 'highscore' not in scores or score > scores['highscore']['sc']:
             scores['highscore'] = log
 
-        # if race not in race_highscores or score > race_highscores[race]['sc']:
+        # if race not in race_highscores or
+        #   score > race_highscores[race]['sc']:
         # race_highscores[race] = log
 
-        # if role not in role_highscores or score > role_highscores[role]['sc']:
+        # if role not in role_highscores or
+        #   score > role_highscores[role]['sc']:
         # role_highscores[role] = log
 
         # if char not in combo_highscores or score > combo_highscores[char][
@@ -187,7 +208,7 @@ def score_games():
         # Adjust boring_rate
         scores['boring_rate'] = scores['boring_games'] / scores['games']
 
-        model.set_player_score_data(name, scores)
+        set_player_scores(name, scores)
 
     end = time.time()
-    print("Scoring took", end - start, "seconds")
+    print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
