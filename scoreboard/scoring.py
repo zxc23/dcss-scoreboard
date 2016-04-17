@@ -3,6 +3,7 @@
 import collections
 import time
 import traceback
+import json
 
 import pylru
 
@@ -23,8 +24,23 @@ PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
 
 PLAYER_SCORE_CACHE = pylru.lrucache(1000, callback=model.set_player_score_data)
 
+GLOBAL_SCORE_CACHE = pylru.lrucache(1000, callback=model.set_global_score)
 
-def _load_player_scores(name):
+
+def clean_up_active_streaks(streaks):
+    """Remove single game "streaks"."""
+    return {k: v for k, v in streaks.items() if len(v) > 1}
+
+
+def is_valid_streak_addition(game, streak):
+    """Check if the game is a valid addition to the streak."""
+    # Extend active streak only if win started after previous game end
+    if len(streak) == 0:
+        return True
+    return game['start'][:-1] > streak[-1]['end']
+
+
+def load_player_scores(name):
     """Load the score dictionary of a player.
 
     This requires applying some transformations to the raw stored data.
@@ -62,22 +78,46 @@ def set_player_scores(name, data):
     PLAYER_SCORE_CACHE[name] = data
 
 
+def load_global_scores(key, default=None):
+    """Load a global score key from db/cache.
+
+    If the key doesn't exist, return default.
+    """
+    if key in GLOBAL_SCORE_CACHE:
+        val = GLOBAL_SCORE_CACHE[key]
+    else:
+        val = model.get_global_score(key)
+    if default is not None and val is None:
+        return default
+    else:
+        return val
+
+
+def set_global_scores(key, data):
+    """Save a global score key to cache.
+
+    The cache is cleared out at the end of score_games.
+    """
+    GLOBAL_SCORE_CACHE[key] = data
+
+
 def score_game(game):
     """Score a single game."""
     gid = game[0]
     log = game[1]
 
     name = log['name']
-    scores = _load_player_scores(name)
+    scores = load_player_scores(name)
 
     # Log vars
     if 'god' in log:
         god = log['god']
     else:
-        god = 'no_god'
+        god = 'Atheist'
     score = log['sc']
     race = log['char'][:2]
     role = log['char'][2:]
+    char = log['char']
 
     # Player vars
     achievements = scores['achievements']
@@ -86,9 +126,19 @@ def score_game(game):
     # Increment games
     scores['games'] += 1
 
+    active_streaks = load_global_scores('active_streaks', {})
+    completed_streaks = load_global_scores('completed_streaks', [])
+
     # Increment wins
     if log['ktyp'] == 'winning':
         scores['wins'].append(log)
+
+        # Extend or start a streak
+        if name in active_streaks:
+            if is_valid_streak_addition(log, active_streaks[name]):
+                active_streaks[name].append(log)
+        else:
+            active_streaks[name] = [log]
 
         # Adjust fastest_realtime win
         if 'fastest_realtime' not in scores or log['dur'] < scores[
@@ -165,7 +215,18 @@ def score_game(game):
             else:
                 achievements['cleared_zig'] += 1
 
-    else:
+    else:  # ktyp != 'winning'
+        # If the player was on a 2+ game streak, record it
+        if len(active_streaks.get(name, [])) > 1:
+            completed_streaks.append(
+                {'player': name,
+                 'wins': active_streaks[name],
+                 'streak_breaker': log,
+                 'start': active_streaks[name][0]['start'],
+                 'end': active_streaks[name][-1]['end']})
+        # It has been ZERO games since the last streak
+        if name in active_streaks:
+            del active_streaks[name]
 
         # Increment boring_games
         if log['ktyp'] in ('leaving', 'quitting'):
@@ -178,17 +239,25 @@ def score_game(game):
     if 'highscore' not in scores or score > scores['highscore']['sc']:
         scores['highscore'] = log
 
-    # if race not in race_highscores or
-    #   score > race_highscores[race]['sc']:
-    # race_highscores[race] = log
+    race_highscores = load_global_scores('race_highscores', {})
+    if race not in race_highscores or score > race_highscores[race]['sc']:
+        race_highscores[race] = log
+    set_global_scores('race_highscores', race_highscores)
 
-    # if role not in role_highscores or
-    #   score > role_highscores[role]['sc']:
-    # role_highscores[role] = log
+    role_highscores = load_global_scores('role_highscores', {})
+    if role not in role_highscores or score > role_highscores[role]['sc']:
+        role_highscores[role] = log
+    set_global_scores('role_highscores', role_highscores)
 
-    # if char not in combo_highscores or score > combo_highscores[char][
-    #         'sc']:
-    # combo_highscores[char] = log
+    god_highscores = load_global_scores('god_highscores', {})
+    if god not in god_highscores or score > god_highscores[god]['sc']:
+        god_highscores[god] = log
+    set_global_scores('god_highscores', god_highscores)
+
+    combo_highscores = load_global_scores('combo_highscores', {})
+    if char not in combo_highscores or score > combo_highscores[char]['sc']:
+        combo_highscores[char] = log
+    set_global_scores('combo_highscores', combo_highscores)
 
     # Increment total_score
     scores['total_score'] += score
@@ -201,6 +270,9 @@ def score_game(game):
 
     # Adjust boring_rate
     scores['boring_rate'] = scores['boring_games'] / scores['games']
+
+    set_global_scores('active_streaks', active_streaks)
+    set_global_scores('completed_streaks', completed_streaks)
 
     set_player_scores(name, scores)
 
@@ -224,8 +296,13 @@ def score_games():
         if scored % 10000 == 0:
             print(scored)
 
+    # clean up single-game "streaks"
+    set_global_scores('active_streaks', clean_up_active_streaks(load_global_scores('active_streaks')))
+
     # Now we have to write out everything remaining in the cache
     for name, scores in PLAYER_SCORE_CACHE.items():
         model.set_player_score_data(name, scores)
+    for key, data in GLOBAL_SCORE_CACHE.items():
+        model.set_global_score(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
