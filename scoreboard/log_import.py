@@ -2,6 +2,7 @@
 
 import os
 import re
+import time
 
 from . import model
 
@@ -21,6 +22,7 @@ def load_logfiles():
     # instead of naive line.split(':')
     pat = '(?<!:):(?!:)'
     for logfile in glob.glob("logfiles/*"):
+        start = time.time()
         # should be server source, eg cao, cpo, etc
         src = os.path.basename(logfile.split('-', 1)[0])
         if os.stat(logfile).st_size == 0:
@@ -60,9 +62,11 @@ def load_logfiles():
                 model.add_game(gid, log)
             except model.DatabaseError as e:
                 print(e)
-        print("done (%s new lines)" % (lines - processed_lines))
         # Save the new number of lines processed in the database
         model.save_log_pos(logfile, lines)
+        end = time.time()
+        print("done (%s new lines) in %s secs" % (lines - processed_lines,
+                                                  round(end - start, 2)))
 
 
 if __name__ == "__main__":
