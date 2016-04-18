@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Take generated score data and write out all website files."""
 
 import os

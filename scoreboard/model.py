@@ -10,7 +10,6 @@ from sqlalchemy import String, Integer, Boolean
 
 class DatabaseError(Exception):
     """Generic error for issues with the model."""
-
     pass
 
 
@@ -103,7 +102,6 @@ def add_game(gid, data):
 
 def get_log_pos(logfile):
     """Get the number of lines we've already processed."""
-    pass
     # print(dir(model.log_progress.c))
     s = _log_progress.select().where(_log_progress.c.logfile == logfile)
     row = _conn.execute(s).fetchone()
