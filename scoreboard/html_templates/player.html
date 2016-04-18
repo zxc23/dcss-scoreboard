@@ -90,7 +90,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['wins'][:5]|sort(attribute='end', reverse=True) %}
+            {% for game in stats['wins'][-5:]|sort(attribute='end', reverse=True) %}
             {{ game|gametotablerow }}
             {% endfor %}
           </tbody>
