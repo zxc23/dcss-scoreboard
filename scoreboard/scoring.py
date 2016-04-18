@@ -136,8 +136,7 @@ def great_role(role, scores, achievements):
 
 
 def score_game_vs_global_highscores(log, fields):
-    """Compares a game log with global highscores by field and updates
-    the records if necessary.
+    """Update global highscores with log's data.
 
     Returns True if a global record was updated.
     """
@@ -154,24 +153,34 @@ def score_game_vs_global_highscores(log, fields):
 
 
 def score_game_vs_misc_stats(log):
-    """Compares a game log with various misc global stats.
+    """Compare a game log with various misc global stats.
 
     Note: Currently assumes the game was won.
     """
     dur = log['dur']
     turns = log['turn']
 
-    min_dur = load_global_scores('min_dur')
-    if min_dur and dur < min_dur['dur']:
-        set_global_scores('min_dur', log)
+    min_dur = load_global_scores('min_dur', [])
+    if not min_dur or len(min_dur) < 5:
+        min_dur.append(log)
+    else:
+        if dur < min(i['dur'] for i in min_dur):
+            min_dur.append(log)
+            min_dur = sorted(min_dur, key=lambda i: i['dur'])[:5]
+    set_global_scores('min_dur', min_dur)
 
-    min_turns = load_global_scores('min_turns')
-    if min_turns and turns < min_turns['turn']:
-        set_global_scores('min_turns', log)
+    min_turns = load_global_scores('min_turns', [])
+    if not min_turns or len(min_turns) < 5:
+        min_turns.append(log)
+    else:
+        if turns < min(i['turn'] for i in min_turns):
+            min_turns.append(log)
+            min_turns = sorted(min_turns, key=lambda i: i['turn'])[:5]
+    set_global_scores('min_turns', min_turns)
 
 
 def score_game_vs_streaks(log, won):
-    """Extends active streaks if a game was won and finalises streak stats."""
+    """Extend active streaks if a game was won and finalises streak stats."""
     active_streaks = load_global_scores('active_streaks', {})
     name = log['name']
     if won:
