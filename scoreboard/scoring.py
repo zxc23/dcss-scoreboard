@@ -203,7 +203,7 @@ def score_game(game):
         # Increment role_wins and check greaterplayer
         if role not in scores['role_wins']:
             scores['role_wins'][role] = 1
-            if not constants.PLAYABLE_ROLES - scores['role_wins'] \
+            if not constants.PLAYABLE_ROLES - scores['role_wins'].keys() \
                     and 'greatplayer' in achievements:
                 achievements['greaterplayer'] = True
         else:
