@@ -6,7 +6,7 @@ PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Dr', 'Ds', 'Fe', 'Fo', 'Gh', 'Gr',
 PLAYABLE_ROLES = {'AE', 'AK', 'AM', 'Ar', 'As', 'Be', 'CK', 'Cj', 'EE', 'En',
                   'FE', 'Fi', 'Gl', 'Hu', 'IE', 'Mo', 'Ne', 'Sk', 'Su', 'Tm',
                   'VM', 'Wn', 'Wr', 'Wz'}
-PLAYABLE_GODS = {'Ashenzari', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
+PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos', 'Elyvilon',
                  'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha', 'Lugonu',
                  'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas', 'Qazlal',
                  'Ru', 'Sif Muna', 'the Shining One', 'Trog', 'Vehumet', 'Xom',

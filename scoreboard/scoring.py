@@ -48,10 +48,11 @@ def load_player_scores(name):
                     [], 5),
                 'boring_games': 0,
                 'boring_rate': 0,
-                'god_wins': {},
-                'race_wins': {},
-                'role_wins': {},
+                'god_wins': {k: 0 for k in constants.PLAYABLE_GODS},
+                'race_wins': {k: 0 for k in constants.PLAYABLE_RACES},
+                'role_wins': {k: 0 for k in constants.PLAYABLE_ROLES},
                 'achievements': {}}
+        # print("Created data for %s with %s elements in god_wins" % (name, len(data['god_wins'])))
 
     return data
 
@@ -245,9 +246,10 @@ def score_game(game):
             scores['fastest_turncount'] = log
 
         # Increment god_wins and check polytheist
-        if god not in scores['god_wins']:
-            scores['god_wins'][god] = 1
-            if not constants.PLAYABLE_GODS - scores['god_wins'].keys():
+        if god in scores['god_wins']:
+            scores['god_wins'][god] += 1
+            if scores['god_wins'][god] == 1 and \
+                    not constants.PLAYABLE_GODS - {g for g, w in scores['god_wins'].items() if w > 0}:
                 achievements['polytheist'] = True
         else:
             scores['god_wins'][god] += 1

@@ -26,8 +26,10 @@ def prettycounter(counter):
 
     eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
-    return ", ".join("{k} ({v})".format(k=k,
-                                        v=v)
+    return ", ".join("{open}{k} ({v}){close}".format(k=k,
+                                                     v=v,
+                                                     open="" if v > 0 else '<span class="text-muted">',
+                                                     close="" if v > 0 else '</span>')
                      for k, v in sorted(counter.items(),
                                         key=lambda i: i[0]))
 
