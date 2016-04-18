@@ -58,6 +58,8 @@ def load_logfiles():
                 log[k] = v
             log['rc'] = log['char'][:2]
             log['bg'] = log['char'][2:]
+            if 'god' not in log:
+                log['god'] = 'Atheist'
             gid = calculate_game_gid(log)
             # Store the game in the database
             try:

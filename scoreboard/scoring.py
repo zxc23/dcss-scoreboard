@@ -96,9 +96,9 @@ def great_race(race, scores, achievements):
     # Check the race has a greatrace achievement
     if race not in constants.RACE_TO_GREAT_RACE:
         return False
-    great_race = constants.RACE_TO_GREAT_RACE[race]
+    achievement = constants.RACE_TO_GREAT_RACE[race]
     # Might have already achieved it
-    if great_race in achievements:
+    if achievement in achievements:
         return True
     # Speed optimisation - check we actually have enough potential wins
     if scores['race_wins'][race] < len(constants.PLAYABLE_ROLES):
@@ -107,7 +107,7 @@ def great_race(race, scores, achievements):
     roles_won = set(win['char'][2:]
                     for win in scores['wins'] if race == win['char'][:2])
     if not constants.PLAYABLE_ROLES - roles_won:
-        achievements[great_race] = True
+        achievements[achievement] = True
 
 
 def great_role(role, scores, achievements):
@@ -121,9 +121,9 @@ def great_role(role, scores, achievements):
     # Check the role has a greatrole achievement
     if role not in constants.ROLE_TO_GREAT_ROLE:
         return False
-    great_role = constants.ROLE_TO_GREAT_ROLE[role]
+    achievement = constants.ROLE_TO_GREAT_ROLE[role]
     # Might have already achieved it
-    if great_role in achievements:
+    if achievement in achievements:
         return True
     # Speed optimisation - check we actually have enough potential wins
     if scores['role_wins'][role] < len(constants.PLAYABLE_RACES):
@@ -132,7 +132,25 @@ def great_role(role, scores, achievements):
     races_won = set(win['char'][:2]
                     for win in scores['wins'] if role == win['char'][2:])
     if not constants.PLAYABLE_RACES - races_won:
-        achievements[great_role] = True
+        achievements[achievement] = True
+
+
+def score_game_vs_global_records(log, fields):
+    """Compares a game log with global records by field and updates
+    the records if necessary.
+
+    Returns True if a global record was updated.
+    """
+    result = False
+    for field in fields:
+        fieldval = log[field]
+        highscores = load_global_scores(field + '_highscores', {})
+        if fieldval not in highscores or log[
+                'sc'] > highscores[fieldval]['sc']:
+            highscores[fieldval] = log
+            set_global_scores(field + '_highscores', highscores)
+            result = True
+    return result
 
 
 def score_game(game):
@@ -140,20 +158,15 @@ def score_game(game):
     gid = game[0]
     log = game[1]
 
-    name = log['name']
-    scores = load_player_scores(name)
-
     # Log vars
-    if 'god' in log:
-        god = log['god']
-    else:
-        god = 'Atheist'
+    name = log['name']
+    god = log['god']
     score = log['sc']
-    race = log['char'][:2]
-    role = log['char'][2:]
-    char = log['char']
+    race = log['rc']
+    role = log['bg']
 
     # Player vars
+    scores = load_player_scores(name)
     achievements = scores['achievements']
     wins = len(scores['wins'])
 
@@ -273,44 +286,20 @@ def score_game(game):
         if log['ktyp'] in ('leaving', 'quitting'):
             scores['boring_games'] += 1
 
-    # Adjust winrate
-    scores['winrate'] = wins / scores['games']
-
-    # Adjust highscores
+    # Update other player stats
     if 'highscore' not in scores or score > scores['highscore']['sc']:
         scores['highscore'] = log
-
-    race_highscores = load_global_scores('race_highscores', {})
-    if race not in race_highscores or score > race_highscores[race]['sc']:
-        race_highscores[race] = log
-    set_global_scores('race_highscores', race_highscores)
-
-    role_highscores = load_global_scores('role_highscores', {})
-    if role not in role_highscores or score > role_highscores[role]['sc']:
-        role_highscores[role] = log
-    set_global_scores('role_highscores', role_highscores)
-
-    god_highscores = load_global_scores('god_highscores', {})
-    if god not in god_highscores or score > god_highscores[god]['sc']:
-        god_highscores[god] = log
-    set_global_scores('god_highscores', god_highscores)
-
-    combo_highscores = load_global_scores('combo_highscores', {})
-    if char not in combo_highscores or score > combo_highscores[char]['sc']:
-        combo_highscores[char] = log
-    set_global_scores('combo_highscores', combo_highscores)
-
-    # Increment total_score
+    scores['winrate'] = wins / scores['games']
     scores['total_score'] += score
-
-    # Adjust avg_score
     scores['avg_score'] = scores['total_score'] / scores['games']
-
-    # Adjust last_5_games
     scores['last_5_games'].append(log)
-
-    # Adjust boring_rate
     scores['boring_rate'] = scores['boring_games'] / scores['games']
+
+    # Check global highscore records
+    if score_game_vs_global_records(log, ['char']):
+        # Only check rc and bg records if char record was broken
+        score_game_vs_global_records(log, ['rc', 'bg'])
+    score_game_vs_global_records(log, ['god'])
 
     set_global_scores('active_streaks', active_streaks)
     set_global_scores('completed_streaks', completed_streaks)

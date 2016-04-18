@@ -42,7 +42,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['race_highscores'].items() %}
+            {% for race, game in stats['rc_highscores'].items() %}
             {{ game|gametotablerow(prefix_row='race', show_player=True) }}
             {% endfor %}
           </tbody>
@@ -67,7 +67,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['role_highscores'].items() %}
+            {% for race, game in stats['bg_highscores'].items() %}
             {{ game|gametotablerow(prefix_row='cls', show_player=True) }}
             {% endfor %}
           </tbody>
@@ -91,7 +91,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['combo_highscores'].items() %}
+            {% for race, game in stats['char_highscores'].items() %}
             {{ game|gametotablerow(show_player=True) }}
             {% endfor %}
           </tbody>
@@ -116,7 +116,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['role_highscores'].items() %}
+            {% for race, game in stats['bg_highscores'].items() %}
             {{ game|gametotablerow(prefix_row='god', show_player=True) }}
             {% endfor %}
           </tbody>

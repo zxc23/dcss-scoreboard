@@ -77,13 +77,13 @@ def write_website():
         outfile = os.path.join(player_html_path, player + '.html')
         records = {}
         records['combo'] = [g
-                            for g in global_stats['combo_highscores'].values()
+                            for g in global_stats['char_highscores'].values()
                             if g['name'] == player]
         records['race'] = [g
-                           for g in global_stats['race_highscores'].values()
+                           for g in global_stats['rc_highscores'].values()
                            if g['name'] == player]
         records['role'] = [g
-                           for g in global_stats['role_highscores'].values()
+                           for g in global_stats['bg_highscores'].values()
                            if g['name'] == player]
         records['streak'] = global_stats['active_streaks'].get(player, [])
         with open(outfile, 'w') as f:
