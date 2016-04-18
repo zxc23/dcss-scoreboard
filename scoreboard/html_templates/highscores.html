@@ -19,6 +19,12 @@
       <li class="nav-item">
         <a class="nav-link" data-toggle="tab" href="#god" role="tab">God</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#shortest" role="tab">Shortest (turncount)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#fastest" role="tab">Fastest (realtime)</a>
+      </li>
     </ul>
 
     <!-- Tab panes -->
@@ -116,8 +122,56 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['bg_highscores'].items() %}
+            {% for game in stats['god_highscores'].values()|sort(attribute='god') %}
             {{ game|gametotablerow(prefix_row='god', show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="fastest" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['min_dur']|sort(attribute='dur') %}
+            {{ game|gametotablerow(show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="shortest" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['min_turn']|sort(attribute='turn') %}
+            {{ game|gametotablerow(show_player=True) }}
             {% endfor %}
           </tbody>
         </table>

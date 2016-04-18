@@ -169,14 +169,14 @@ def score_game_vs_misc_stats(log):
             min_dur = sorted(min_dur, key=lambda i: i['dur'])[:5]
     set_global_scores('min_dur', min_dur)
 
-    min_turns = load_global_scores('min_turns', [])
-    if not min_turns or len(min_turns) < 5:
-        min_turns.append(log)
+    min_turn = load_global_scores('min_turn', [])
+    if not min_turn or len(min_turn) < 5:
+        min_turn.append(log)
     else:
-        if turns < min(i['turn'] for i in min_turns):
-            min_turns.append(log)
-            min_turns = sorted(min_turns, key=lambda i: i['turn'])[:5]
-    set_global_scores('min_turns', min_turns)
+        if turns < min(i['turn'] for i in min_turn):
+            min_turn.append(log)
+            min_turn = sorted(min_turn, key=lambda i: i['turn'])[:5]
+    set_global_scores('min_turn', min_turn)
 
 
 def score_game_vs_streaks(log, won):
