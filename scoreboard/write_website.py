@@ -5,13 +5,14 @@ import sys
 import json
 import jinja2
 import time
+import shutil
 
 from . import model
 from . import webutils
 from . import constants
 
 OUTDIR = 'website'
-URLBASE = os.getcwd()
+URLBASE = os.path.join(os.getcwd(), 'website')
 
 
 def jinja_env():
@@ -44,6 +45,11 @@ def write_website():
     if not os.path.isdir(OUTDIR):
         os.mkdir(OUTDIR)
 
+    print("Copying static assets")
+    src = os.path.join(os.path.dirname(__file__), 'html_static')
+    dst = os.path.join(OUTDIR, 'static')
+    shutil.copytree(src, dst)
+
     print("Writing index")
     with open(os.path.join(OUTDIR, 'index.html'), 'w') as f:
         template = env.get_template('index.html')
@@ -69,12 +75,15 @@ def write_website():
         f.write(template.render(players=players))
 
     start = time.time()
-    print("Writing player pages... ", end='')
-    sys.stdout.flush()
+    print("Writing player pages... ")
     achievements = achievement_data()
     global_stats = model.get_all_global_scores()
     template = env.get_template('player.html')
+    n = 0
     for row in model.player_scores():
+        n += 1
+        if not n % 5000:
+            print(n)
         player = row.name
         outfile = os.path.join(player_html_path, player + '.html')
         records = {}
@@ -95,7 +104,7 @@ def write_website():
                                     constants=constants,
                                     records=records))
     end = time.time()
-    print("done in %s seconds" % round(end - start, 2))
+    print("Done scoring in %s seconds" % round(end - start, 2))
 
 
 if __name__ == "__main__":
