@@ -86,7 +86,7 @@ _global_scores = Table('global_scores',
                               _JsonEncodedDict,
                               nullable=False))
 
-_engine = sqlalchemy.create_engine('sqlite:///scoredata.db', echo=False)
+_engine = sqlalchemy.create_engine('sqlite:///database.db', echo=False)
 sqlalchemy.event.listen(_engine, 'connect', sqlite_performance_over_safety)
 _metadata.create_all(_engine)
 _conn = _engine.connect()
