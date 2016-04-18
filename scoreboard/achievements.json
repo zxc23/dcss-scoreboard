@@ -171,6 +171,10 @@
     "name": "Great Enchanter",
     "description": "Won a game with every Enchanter combo."
   },
+    "greatdeathknight": {
+    "name": "Great Death Knight",
+    "description": "Won a game with every Death Knight combo."
+  },
   "greatfireelementalist": {
     "name": "Great Fire Elementalist",
     "description": "Won a game with every Fire Elementalist combo."
