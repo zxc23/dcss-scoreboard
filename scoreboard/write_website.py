@@ -26,7 +26,7 @@ def jinja_env():
     env.filters['streaktotablerow'] = webutils.streaktotablerow
     env.filters[
         'completedstreaktotablerow'] = webutils.completedstreaktotablerow
-    env.globals(urlbase=URLBASE)
+    env.globals['urlbase'] = URLBASE
     return env
 
 
