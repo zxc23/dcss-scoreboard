@@ -56,6 +56,8 @@ def load_logfiles():
                 except ValueError:
                     v = v.replace("::", ":")  # Undo logfile escaping
                 log[k] = v
+            log['rc'] = log['char'][:2]
+            log['bg'] = log['char'][2:]
             gid = calculate_game_gid(log)
             # Store the game in the database
             try:
