@@ -135,8 +135,8 @@ def great_role(role, scores, achievements):
         achievements[achievement] = True
 
 
-def score_game_vs_global_records(log, fields):
-    """Compares a game log with global records by field and updates
+def score_game_vs_global_highscores(log, fields):
+    """Compares a game log with global highscores by field and updates
     the records if necessary.
 
     Returns True if a global record was updated.
@@ -153,6 +153,53 @@ def score_game_vs_global_records(log, fields):
     return result
 
 
+def score_game_vs_misc_stats(log):
+    """Compares a game log with various misc global stats.
+
+    Note: Currently assumes the game was won.
+    """
+    dur = log['dur']
+    turns = log['turn']
+
+    min_dur = load_global_scores('min_dur')
+    if min_dur and dur < min_dur['dur']:
+        set_global_scores('min_dur', log)
+
+    min_turns = load_global_scores('min_turns')
+    if min_turns and turns < min_turns['turn']:
+        set_global_scores('min_turns', log)
+
+
+def score_game_vs_streaks(log, won):
+    """Extends active streaks if a game was won and finalises streak stats."""
+    active_streaks = load_global_scores('active_streaks', {})
+    name = log['name']
+    if won:
+        # Extend or start a streak
+        if name in active_streaks:
+            if is_valid_streak_addition(log, active_streaks[name]):
+                active_streaks[name].append(log)
+        else:
+            active_streaks[name] = [log]
+    else:
+        # If the player was on a 2+ game streak, record it
+        if len(active_streaks.get(name, [])) > 1:
+            completed_streaks = load_global_scores('completed_streaks', [])
+            streak = active_streaks[name]
+            completed_streaks.append({'player': name,
+                                      'wins': streak,
+                                      'streak_breaker': log,
+                                      'start': streak[0]['start'],
+                                      'end': streak[-1]['end']})
+            set_global_scores('completed_streaks', completed_streaks)
+        if name in active_streaks:
+            del active_streaks[name]
+        else:
+            # No need to adjust active_streaks
+            return
+    set_global_scores('active_streaks', active_streaks)
+
+
 def score_game(game):
     """Score a single game."""
     gid = game[0]
@@ -164,6 +211,7 @@ def score_game(game):
     score = log['sc']
     race = log['rc']
     role = log['bg']
+    won = log['ktyp'] == 'winning'
 
     # Player vars
     scores = load_player_scores(name)
@@ -173,19 +221,9 @@ def score_game(game):
     # Increment games
     scores['games'] += 1
 
-    active_streaks = load_global_scores('active_streaks', {})
-    completed_streaks = load_global_scores('completed_streaks', [])
-
     # Increment wins
-    if log['ktyp'] == 'winning':
+    if won:
         scores['wins'].append(log)
-
-        # Extend or start a streak
-        if name in active_streaks:
-            if is_valid_streak_addition(log, active_streaks[name]):
-                active_streaks[name].append(log)
-        else:
-            active_streaks[name] = [log]
 
         # Adjust fastest_realtime win
         if 'fastest_realtime' not in scores or log['dur'] < scores[
@@ -269,19 +307,10 @@ def score_game(game):
             else:
                 achievements['cleared_zig'] += 1
 
-    else:  # ktyp != 'winning'
-        # If the player was on a 2+ game streak, record it
-        if len(active_streaks.get(name, [])) > 1:
-            streak = active_streaks[name]
-            completed_streaks.append({'player': name,
-                                      'wins': streak,
-                                      'streak_breaker': log,
-                                      'start': streak[0]['start'],
-                                      'end': streak[-1]['end']})
-        # It has been ZERO games since the last streak
-        if name in active_streaks:
-            del active_streaks[name]
+        # Compare win against misc global stats
+        score_game_vs_misc_stats(log)
 
+    else:  # !won
         # Increment boring_games
         if log['ktyp'] in ('leaving', 'quitting'):
             scores['boring_games'] += 1
@@ -296,16 +325,16 @@ def score_game(game):
     scores['boring_rate'] = scores['boring_games'] / scores['games']
 
     # Check global highscore records
-    if score_game_vs_global_records(log, ['char']):
+    if score_game_vs_global_highscores(log, ['char']):
         # Only check rc and bg records if char record was broken
-        score_game_vs_global_records(log, ['rc', 'bg'])
-    score_game_vs_global_records(log, ['god'])
+        score_game_vs_global_highscores(log, ['rc', 'bg'])
+    score_game_vs_global_highscores(log, ['god'])
 
-    set_global_scores('active_streaks', active_streaks)
-    set_global_scores('completed_streaks', completed_streaks)
+    # Check streaks
+    score_game_vs_streaks(log, won)
 
+    # Finalise the changes to stats
     set_player_scores(name, scores)
-
     model.mark_game_scored(gid)
 
 
