@@ -48,7 +48,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['rc_highscores'].items() %}
+            {% for game in stats['rc_highscores'].values()|sort(attribute='rc') %}
             {{ game|gametotablerow(prefix_row='race', show_player=True) }}
             {% endfor %}
           </tbody>
@@ -73,7 +73,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['bg_highscores'].items() %}
+            {% for game in stats['bg_highscores'].values()|sort(attribute='bg') %}
             {{ game|gametotablerow(prefix_row='cls', show_player=True) }}
             {% endfor %}
           </tbody>
@@ -97,7 +97,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for race, game in stats['char_highscores'].items() %}
+            {% for game in stats['char_highscores'].values()|sort(attribute='char') %}
             {{ game|gametotablerow(show_player=True) }}
             {% endfor %}
           </tbody>
