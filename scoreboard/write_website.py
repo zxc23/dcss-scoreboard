@@ -23,7 +23,8 @@ def jinja_env():
     env.filters['prettycrawldate'] = webutils.prettycrawldate
     env.filters['gametotablerow'] = webutils.gametotablerow
     env.filters['streaktotablerow'] = webutils.streaktotablerow
-    env.filters['completedstreaktotablerow'] = webutils.completedstreaktotablerow
+    env.filters[
+        'completedstreaktotablerow'] = webutils.completedstreaktotablerow
     return env
 
 
@@ -69,14 +70,28 @@ def write_website():
     print("Writing player pages... ", end='')
     sys.stdout.flush()
     achievements = achievement_data()
+    global_stats = model.get_all_global_scores()
     template = env.get_template('player.html')
     for row in model.player_scores():
-        outfile = os.path.join(player_html_path, row.name + '.html')
+        player = row.name
+        outfile = os.path.join(player_html_path, player + '.html')
+        records = {}
+        records['combo'] = [g
+                            for g in global_stats['combo_highscores'].values()
+                            if g['name'] == player]
+        records['race'] = [g
+                           for g in global_stats['race_highscores'].values()
+                           if g['name'] == player]
+        records['role'] = [g
+                           for g in global_stats['role_highscores'].values()
+                           if g['name'] == player]
+        records['streak'] = global_stats['active_streaks'].get(player, [])
         with open(outfile, 'w') as f:
-            f.write(template.render(player=row.name,
+            f.write(template.render(player=player,
                                     stats=row.scoringinfo,
                                     achievement_data=achievements,
-                                    constants=constants))
+                                    constants=constants,
+                                    records=records))
     end = time.time()
     print("done in %s seconds" % round(end - start, 2))
 

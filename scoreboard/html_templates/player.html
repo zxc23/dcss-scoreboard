@@ -8,14 +8,21 @@
     <p><strong>Games Played:</strong> {{ stats['games'] }}</p>
     <p><strong>Wins:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
     <p><strong>Best Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
-    {% if stats['wins']|length > 0 %}
-    <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|prettydur }}</p>
-    <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|prettyint }} turns</p>
+    {% if stats['wins']|length %}
+        <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }}</p>
+        <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
+        <p><strong>Active Streak:</strong> {{ records['streak']|map(attribute='char')|join(', ') }}</p>
+        {% if records['combo'] or records['race'] or records['role'] %}
+            <h3>Global Highscores</h3>
+            <p><strong>Combo Highscores:</strong> {{ records['combo']|map(attribute='char')|join(', ') }}</p>
+            <p><strong>Species Highscores:</strong> {{ records['race']|map(attribute='rc')|join(', ') }}</p>
+            <p><strong>Background Highscores:</strong> {{ records['role']|map(attribute='bg')|join(', ') }}</p>
+        {% endif %}
     {% endif %}
   </div>
   <div class="col-sm-4">
     <h3>Wins</h3>
-    <p><strong>Races Won ({{ stats['race_wins']|length }}/{{ constants.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
+    <p><strong>Species Won ({{ stats['race_wins']|length }}/{{ constants.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
     <p><strong>Backgrounds Won ({{ stats['role_wins']|length }}/{{ constants.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
     <p><strong>Gods Won ({{ stats['god_wins']|length }}/{{ constants.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
   </div>
