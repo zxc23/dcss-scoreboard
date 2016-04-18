@@ -259,12 +259,12 @@ def score_game(game):
     else:  # ktyp != 'winning'
         # If the player was on a 2+ game streak, record it
         if len(active_streaks.get(name, [])) > 1:
-            completed_streaks.append(
-                {'player': name,
-                 'wins': active_streaks[name],
-                 'streak_breaker': log,
-                 'start': active_streaks[name][0]['start'],
-                 'end': active_streaks[name][-1]['end']})
+            streak = active_streaks[name]
+            completed_streaks.append({'player': name,
+                                      'wins': streak,
+                                      'streak_breaker': log,
+                                      'start': streak[0]['start'],
+                                      'end': streak[-1]['end']})
         # It has been ZERO games since the last streak
         if name in active_streaks:
             del active_streaks[name]
@@ -338,7 +338,9 @@ def score_games():
             print(scored)
 
     # clean up single-game "streaks"
-    set_global_scores('active_streaks', clean_up_active_streaks(load_global_scores('active_streaks')))
+    set_global_scores(
+        'active_streaks',
+        clean_up_active_streaks(load_global_scores('active_streaks')))
 
     # Now we have to write out everything remaining in the cache
     for name, scores in PLAYER_SCORE_CACHE.items():

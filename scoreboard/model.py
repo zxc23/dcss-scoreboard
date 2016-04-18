@@ -10,6 +10,7 @@ from sqlalchemy import String, Integer, Boolean
 
 class DatabaseError(Exception):
     """Generic error for issues with the model."""
+
     pass
 
 
