@@ -47,15 +47,15 @@ def write_website():
         template = env.get_template('index.html')
         f.write(template.render())
 
+    stats = model.get_all_global_scores()
     print("Writing highscores")
     with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
         template = env.get_template('highscores.html')
-        f.write(template.render(stats=model.get_all_global_scores()))
-
+        f.write(template.render(stats=stats))
     print("Writing streaks")
     with open(os.path.join(OUTDIR, 'streaks.html'), 'w') as f:
         template = env.get_template('streaks.html')
-        f.write(template.render(stats=model.get_all_global_scores()))
+        f.write(template.render(stats=stats))
 
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')
