@@ -8,6 +8,7 @@ import time
 
 from . import model
 from . import webutils
+from . import constants
 
 OUTDIR = 'website'
 
@@ -74,7 +75,8 @@ def write_website():
         with open(outfile, 'w') as f:
             f.write(template.render(player=row.name,
                                     stats=row.scoringinfo,
-                                    achievement_data=achievements))
+                                    achievement_data=achievements,
+                                    constants=constants))
     end = time.time()
     print("done in %s seconds" % round(end - start, 2))
 

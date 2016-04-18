@@ -15,9 +15,9 @@
   </div>
   <div class="col-sm-4">
     <h3>Wins</h3>
-    <p><strong>Races Won:</strong> {{ stats['race_wins']|prettycounter }}</p>
-    <p><strong>Backgrounds Won:</strong> {{ stats['role_wins']|prettycounter }}</p>
-    <p><strong>Gods Won:</strong> {{ stats['god_wins']|prettycounter }}</p>
+    <p><strong>Races Won ({{ stats['race_wins']|length }}/{{ constants.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
+    <p><strong>Backgrounds Won ({{ stats['role_wins']|length }}/{{ constants.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
+    <p><strong>Gods Won ({{ stats['god_wins']|length }}/{{ constants.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
   </div>
   <div class="col-sm-4">
     <h3>Achievements</h3>
