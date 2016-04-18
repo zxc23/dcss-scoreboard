@@ -3,7 +3,6 @@
 import collections
 import time
 import traceback
-import json
 import pylru
 
 from . import model, constants
@@ -84,6 +83,56 @@ def set_global_scores(key, data):
     The cache is cleared out at the end of score_games.
     """
     GLOBAL_SCORE_CACHE[key] = data
+
+
+def great_race(race, scores, achievements):
+    """Check if the player has achieved great race for the given race.
+
+    Returns True or False.
+
+    Note: requires scores['race_wins'] to already have been updated with this
+    games's result.
+    """
+    # Check the race has a greatrace achievement
+    if race not in constants.RACE_TO_GREAT_RACE:
+        return False
+    great_race = constants.RACE_TO_GREAT_RACE[race]
+    # Might have already achieved it
+    if great_race in achievements:
+        return True
+    # Speed optimisation - check we actually have enough potential wins
+    if scores['race_wins'][race] < len(constants.PLAYABLE_ROLES):
+        return False
+    # Check for completion
+    roles_won = set(win['char'][2:]
+                    for win in scores['wins'] if race == win['char'][:2])
+    if not constants.PLAYABLE_ROLES - roles_won:
+        achievements[great_race] = True
+
+
+def great_role(role, scores, achievements):
+    """Check if the player has achieved great role for the given role.
+
+    Returns True or False.
+
+    Note: requires scores['role_wins'] to already have been updated with this
+    games's result.
+    """
+    # Check the role has a greatrole achievement
+    if role not in constants.ROLE_TO_GREAT_ROLE:
+        return False
+    great_role = constants.ROLE_TO_GREAT_ROLE[role]
+    # Might have already achieved it
+    if great_role in achievements:
+        return True
+    # Speed optimisation - check we actually have enough potential wins
+    if scores['role_wins'][role] < len(constants.PLAYABLE_RACES):
+        return False
+    # Check for completion
+    races_won = set(win['char'][:2]
+                    for win in scores['wins'] if role == win['char'][2:])
+    if not constants.PLAYABLE_RACES - races_won:
+        achievements[great_role] = True
 
 
 def score_game(game):
@@ -180,39 +229,18 @@ def score_game(game):
                     log['sh'] - scores['avg_win_sh']) / wins
 
         # Adjust win-based achievements
-        if wins == 10:
+        if wins >= 10:
             achievements['goodplayer'] = True
-
-        if wins == 100:
+        if wins >= 100:
             achievements['centuryplayer'] = True
 
         # Check for great race completion
-        if race in constants.RACE_TO_GREAT_RACE:
-            great_race = constants.RACE_TO_GREAT_RACE[race]
-            if (great_race not in achievements
-                    and scores['race_wins'][race] >= len(constants.PLAYABLE_ROLES)-1):
-
-                # Get roles won with this race
-                roles_won = set([win['char'][2:] for win in scores['wins'] if race == win['char'][:2]])
-                roles_won.add(role)
-
-                # Check for completion
-                if len(constants.PLAYABLE_ROLES.difference(roles_won)) == 0:
-                    achievements[great_race] = True
+        if great_race(race, scores, achievements):
+            achievements[constants.RACE_TO_GREAT_RACE[race]] = True
 
         # Check for great role completion
-        if role in constants.ROLE_TO_GREAT_ROLE:
-            great_role = constants.ROLE_TO_GREAT_ROLE[role]
-            if (great_role not in achievements
-                    and scores['role_wins'][role] >= len(constants.PLAYABLE_RACES)-1):
-
-                # Get races won with this role
-                races_won = set([win['char'][:2] for win in scores['wins'] if role == win['char'][2:]])
-                races_won.add(race)
-
-                # Check for completion
-                if len(constants.PLAYABLE_RACES.difference(races_won)) == 0:
-                    achievements[great_role] = True
+        if great_role(role, scores, achievements):
+            achievements[constants.ROLE_TO_GREAT_ROLE[role]] = True
 
         # Older logfiles don't have these fields, so skip those games
         if 'potionsused' in log and log['potionsused'] == 0 and log[
