@@ -5,10 +5,10 @@ import time
 import traceback
 import json
 import pylru
+
 from . import model, constants
 
 PLAYER_SCORE_CACHE = pylru.lrucache(1000, callback=model.set_player_score_data)
-
 GLOBAL_SCORE_CACHE = pylru.lrucache(1000, callback=model.set_global_score)
 
 

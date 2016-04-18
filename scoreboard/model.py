@@ -1,15 +1,15 @@
 """Defines the database models for this module."""
 
-from sqlalchemy import TypeDecorator, MetaData, Table, Column
-from sqlalchemy import String, Integer, Boolean
 import json
 import collections
 import sqlalchemy.ext.mutable
 
+from sqlalchemy import TypeDecorator, MetaData, Table, Column
+from sqlalchemy import String, Integer, Boolean
+
 
 class DatabaseError(Exception):
     """Generic error for issues with the model."""
-
     pass
 
 
