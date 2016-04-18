@@ -3,6 +3,8 @@
 import collections
 import time
 import traceback
+import multiprocessing
+
 import pylru
 
 from . import model, constants
@@ -356,12 +358,14 @@ def score_games():
     print("Scoring all games...")
     start = time.time()
     scored = 0
+
+    p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    jobs = []
     for game in model.games(scored=False):
-        try:
-            score_game(game)
-        except Exception:
-            print("Couldn't score %s, skipping" % game[0])
-            traceback.print_exc()
+        jobs.append(p.apply_async(score_game, (game,)))
+
+    for async_job in jobs:
+        async_job.wait()
 
         # Periodically print our progress
         scored += 1
