@@ -4,7 +4,6 @@ import os
 import re
 import time
 import glob
-import multiprocessing
 
 from . import model
 from . import constants
@@ -19,13 +18,8 @@ def load_logfiles():
     """Read logfiles and parse their data."""
     print("Loading all logfiles")
     start = time.time()
-    p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-    # p.map(load_logfile, glob.glob("logfiles/*"))
-    jobs = []
     for logfile in glob.glob("logfiles/*"):
-        jobs.append(p.apply_async(load_logfile, (logfile,)))
-    for async_job in jobs:
-        async_job.wait()
+        load_logfile(logfile)
     end = time.time()
     print("Loaded all logfiles in %s secs" % round(end - start, 2))
 
@@ -43,8 +37,7 @@ def load_logfile(logfile):
     lines = 0
     # How many lines have we already processed?
     processed_lines = model.get_log_pos(logfile)
-    print("Reading %s%s... " % (logfile,
-                                (" from line %s" % processed_lines) if
+    print("Reading %s%s... " % (logfile, (" from line %s" % processed_lines) if
                                 processed_lines else ''))
     for line in open(logfile).readlines():
         lines += 1
@@ -82,8 +75,8 @@ def load_logfile(logfile):
     # Save the new number of lines processed in the database
     model.save_log_pos(logfile, lines)
     end = time.time()
-    print("Finished reading %s (%s new lines) in %s secs" % (logfile, lines - processed_lines,
-                                              round(end - start, 2)))
+    print("Finished reading %s (%s new lines) in %s secs" %
+          (logfile, lines - processed_lines, round(end - start, 2)))
 
 
 if __name__ == "__main__":
