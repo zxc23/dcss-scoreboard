@@ -2,8 +2,10 @@
 """Take generated score data and write out all website files."""
 
 import os
+import sys
 import json
 import jinja2
+import time
 
 from . import model
 from . import webutils
@@ -63,7 +65,9 @@ def write_website():
         template = env.get_template('players.html')
         f.write(template.render(players=players))
 
-    print("Writing player pages")
+    start = time.time()
+    print("Writing player pages... ", end='')
+    sys.stdout.flush()
     achievements = achievement_data()
     template = env.get_template('player.html')
     for row in model.player_scores():
@@ -72,6 +76,8 @@ def write_website():
             f.write(template.render(player=row.name,
                                     stats=row.scoringinfo,
                                     achievement_data=achievements))
+    end = time.time()
+    print("done in %s seconds" % round(end - start, 2))
 
 
 if __name__ == "__main__":
