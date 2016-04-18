@@ -4,7 +4,7 @@ import os
 import re
 import time
 import glob
-import sys
+import multiprocessing
 
 from . import model
 from . import constants
@@ -17,8 +17,17 @@ def calculate_game_gid(log):
 
 def load_logfiles():
     """Read logfiles and parse their data."""
+    print("Loading all logfiles")
+    start = time.time()
+    p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    # p.map(load_logfile, glob.glob("logfiles/*"))
+    jobs = []
     for logfile in glob.glob("logfiles/*"):
-        load_logfile(logfile)
+        jobs.append(p.apply_async(load_logfile, (logfile,)))
+    for async_job in jobs:
+        async_job.wait()
+    end = time.time()
+    print("Loaded all logfiles in %s secs" % round(end - start, 2))
 
 
 def load_logfile(logfile):
@@ -36,9 +45,7 @@ def load_logfile(logfile):
     processed_lines = model.get_log_pos(logfile)
     print("Reading %s%s... " % (logfile,
                                 (" from line %s" % processed_lines) if
-                                processed_lines else ''),
-          end='')
-    sys.stdout.flush()
+                                processed_lines else ''))
     for line in open(logfile).readlines():
         lines += 1
         # skip up to the first unprocessed line
@@ -75,7 +82,7 @@ def load_logfile(logfile):
     # Save the new number of lines processed in the database
     model.save_log_pos(logfile, lines)
     end = time.time()
-    print("done (%s new lines) in %s secs" % (lines - processed_lines,
+    print("Finished reading %s (%s new lines) in %s secs" % (logfile, lines - processed_lines,
                                               round(end - start, 2)))
 
 
