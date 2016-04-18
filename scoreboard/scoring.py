@@ -184,27 +184,27 @@ def score_game(game):
                 'fastest_turncount']['turn']:
             scores['fastest_turncount'] = log
 
-        # Increment god_wins
+        # Increment god_wins and check polytheist
         if god not in scores['god_wins']:
             scores['god_wins'][god] = 1
-            if len(constants.PLAYABLE_GODS.difference(scores['god_wins'].keys())) == 0:
+            if not constants.PLAYABLE_GODS - scores['god_wins'].keys():
                 achievements['polytheist'] = True
         else:
             scores['god_wins'][god] += 1
 
-        # Increment race_wins
+        # Increment race_wins and check greatplayer
         if race not in scores['race_wins']:
             scores['race_wins'][race] = 1
-            if len(constants.PLAYABLE_RACES.difference(scores['race_wins'].keys())) == 0:
+            if not constants.PLAYABLE_RACES - scores['race_wins'].keys():
                 achievements['greatplayer'] = True
         else:
             scores['race_wins'][race] += 1
 
-        # Increment role_wins
+        # Increment role_wins and check greaterplayer
         if role not in scores['role_wins']:
             scores['role_wins'][role] = 1
-            if len(constants.PLAYABLE_ROLES.difference(scores['role_wins'].keys(
-            ))) == 0 and 'greatplayer' in achievements:
+            if not constants.PLAYABLE_ROLES - scores['role_wins'] \
+                    and 'greatplayer' in achievements:
                 achievements['greaterplayer'] = True
         else:
             scores['role_wins'][role] += 1
