@@ -31,8 +31,12 @@ def jinja_env():
     return env
 
 
-def achievement_data():
-    """Load achievement data."""
+def achievement_data(ordered=False):
+    """Load achievement data.
+
+    If ordered is True, the achievements are returned as a list in display
+    order, otherwise they are returned as a dict keyed off the achievement ID.
+    """
     path = os.path.join(os.path.dirname(__file__), 'achievements.json')
     return json.load(open(path))
 
@@ -42,8 +46,10 @@ def write_website():
     env = jinja_env()
 
     print("Writing HTML to %s" % OUTDIR)
-    if not os.path.isdir(OUTDIR):
-        os.mkdir(OUTDIR)
+    if os.path.isdir(OUTDIR):
+        print("Clearing %s" % OUTDIR)
+        shutil.rmtree(OUTDIR)
+    os.mkdir(OUTDIR)
 
     print("Copying static assets")
     src = os.path.join(os.path.dirname(__file__), 'html_static')

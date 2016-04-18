@@ -1,334 +1,500 @@
-{
-  "polytheist": {
-    "name": "Polytheist",
-    "description": "Won a game with every currently playable god."
-  },
-  "greatplayer": {
-    "name": "Great Player",
-    "description": "Won a game with every currently playable species."
-  },
-  "greaterplayer": {
-    "name": "Greater Player",
-    "description": "Won a game with every currently playable species and background."
-  },
-  "goodplayer": {
+[
+  {
     "name": "Good Player",
-    "description": "Won 10 games."
+    "id": "goodplayer",
+    "description": "Won 10 games.",
+    "section": "general"
   },
-  "centuryplayer": {
+  {
+    "name": "Great Player",
+    "id": "greatplayer",
+    "description": "Won a game with every currently playable species.",
+    "section": "general"
+  },
+  {
     "name": "Century Player",
-    "description": "Won 100 games."
+    "id": "centuryplayer",
+    "description": "Won 100 games.",
+    "section": "general"
   },
-  "no_potion_or_scroll_win": {
+  {
+    "name": "Greater Player",
+    "id": "greaterplayer",
+    "description": "Won a game with every currently playable species and background.",
+    "section": "general"
+  },
+  {
+    "name": "Polytheist",
+    "id": "polytheist",
+    "description": "Won a game with every currently playable god.",
+    "section": "general"
+  },
+  {
     "name": "Potion-less and Scroll-less Win",
-    "description": "Won a game without using a single potion or scroll."
+    "id": "no_potion_or_scroll_win",
+    "description": "Won a game without using a single potion or scroll.",
+    "section": "general"
   },
-  "cleared_zig": {
+  {
     "name": "Zig Clearer",
-    "description": "Exited a ziggurat from the 27th floor."
+    "id": "cleared_zig",
+    "description": "Exited a ziggurat from the 27th floor.",
+    "section": "general"
   },
-  "greatcentaur": {
-    "name": "Great Centaur",
-    "description": "Won a game with every Centaur combo."
-  },
-  "greatdeepdwarf": {
-    "name": "Great Deep Dwarf",
-    "description": "Won a game with every Deep Dwarf combo."
-  },
-  "greatdeepelf": {
-    "name": "Great Deep Elf",
-    "description": "Won a game with every Deep Elf combo."
-  },
-  "greatdemigod": {
-    "name": "Great Demigod",
-    "description": "Won a game with every Demigod combo."
-  },
-  "greatdemonspawn": {
-    "name": "Great Demonspawn",
-    "description": "Won a game with every Demonspawn combo."
-  },
-  "greatdraconian": {
-    "name": "Great Draconian",
-    "description": "Won a game with every Draconian combo."
-  },
-  "greatfelid": {
-    "name": "Great Felid",
-    "description": "Won a game with every Felid combo."
-  },
-  "greatformicid": {
-    "name": "Great Formicid",
-    "description": "Won a game with every Formicid combo."
-  },
-  "greatghoul": {
-    "name": "Great Ghoul",
-    "description": "Won a game with every Ghoul combo."
-  },
-  "greatgargoyle": {
-    "name": "Great Gargoyle",
-    "description": "Won a game with every Gargoyle combo."
-  },
-  "greathighelf": {
-    "name": "Great High Elf",
-    "description": "Won a game with every High Elf combo."
-  },
-  "greathillorc": {
-    "name": "Great Hill Orc",
-    "description": "Won a game with every Hill Orc combo."
-  },
-  "greathalfling": {
-    "name": "Great Halfling",
-    "description": "Won a game with every Halfling combo."
-  },
-  "greathuman": {
-    "name": "Great Human",
-    "description": "Won a game with every Human combo."
-  },
-  "greatkobold": {
-    "name": "Great Kobold",
-    "description": "Won a game with every Kobold combo."
-  },
-  "greatmerfolk": {
-    "name": "Great Merfolk",
-    "description": "Won a game with every Merfolk combo."
-  },
-  "greatminotaur": {
-    "name": "Great Minotaur",
-    "description": "Won a game with every Minotaur combo."
-  },
-  "greatmummy": {
-    "name": "Great Mummy",
-    "description": "Won a game with every Mummy combo."
-  },
-  "greatnaga": {
-    "name": "Great Naga",
-    "description": "Won a game with every Naga combo."
-  },
-  "greatoctopode": {
-    "name": "Great Octopode",
-    "description": "Won a game with every Octopode combo."
-  },
-  "greatogre": {
-    "name": "Great Ogre",
-    "description": "Won a game with every Ogre combo."
-  },
-  "greatspriggan": {
-    "name": "Great Spriggan",
-    "description": "Won a game with every Spriggan combo."
-  },
-  "greattengu": {
-    "name": "Great Tengu",
-    "description": "Won a game with every Tengu combo."
-  },
-  "greattroll": {
-    "name": "Great Troll",
-    "description": "Won a game with every Troll combo."
-  },
-  "greatvinestalker": {
-    "name": "Great Vinestalker",
-    "description": "Won a game with every Vinestalker combo."
-  },
-  "greatvampire": {
-    "name": "Great Vampire",
-    "description": "Won a game with every Vampire combo."
-  },
-  "greatairelementalist": {
-    "name": "Great Air Elementalist",
-    "description": "Won a game with every Air Elementalist combo."
-  },
-  "greatabyssalknight": {
-    "name": "Great Abyssal Knight",
-    "description": "Won a game with every Abyssal Knight combo."
-  },
-  "greatarcanemarksman": {
-    "name": "Great Arcane Marksman",
-    "description": "Won a game with every Arcane Marksman combo."
-  },
-  "greatartificer": {
-    "name": "Great Artificer",
-    "description": "Won a game with every Artificer combo."
-  },
-  "greatassassin": {
-    "name": "Great Assassin",
-    "description": "Won a game with every Assassin combo."
-  },
-  "greatberserker": {
-    "name": "Great Berserker",
-    "description": "Won a game with every Berserker combo."
-  },
-  "greatchaosknight": {
-    "name": "Great Chaos Knight",
-    "description": "Won a game with every Chaos Knight combo."
-  },
-  "greatconjurer": {
-    "name": "Great Conjurer",
-    "description": "Won a game with every Conjurer combo."
-  },
-  "greatearthelementalist": {
-    "name": "Great Earth Elementalist",
-    "description": "Won a game with every Earth Elementalist combo."
-  },
-  "greatenchanter": {
-    "name": "Great Enchanter",
-    "description": "Won a game with every Enchanter combo."
-  },
-    "greatdeathknight": {
-    "name": "Great Death Knight",
-    "description": "Won a game with every Death Knight combo."
-  },
-  "greatfireelementalist": {
-    "name": "Great Fire Elementalist",
-    "description": "Won a game with every Fire Elementalist combo."
-  },
-  "greatfighter": {
-    "name": "Great Fighter",
-    "description": "Won a game with every Fighter combo."
-  },
-  "greatgladiator": {
-    "name": "Great Gladiator",
-    "description": "Won a game with every Gladiator combo."
-  },
-  "greathealer": {
-    "name": "Great Healer",
-    "description": "Won a game with every Healer combo."
-  },
-  "greathunter": {
-    "name": "Great Hunter",
-    "description": "Won a game with every Hunter combo."
-  },
-  "greaticeelementalist": {
-    "name": "Great Ice Elementalist",
-    "description": "Won a game with every Ice Elementalist combo."
-  },
-  "greatmonk": {
-    "name": "Great Monk",
-    "description": "Won a game with every Monk combo."
-  },
-  "greatnecromancer": {
-    "name": "Great Necromancer",
-    "description": "Won a game with every Necromancer combo."
-  },
-  "greatskald": {
-    "name": "Great Skald",
-    "description": "Won a game with every Skald combo."
-  },
-  "greatsummoner": {
-    "name": "Great Summoner",
-    "description": "Won a game with every Summoner combo."
-  },
-  "greattransmuter": {
-    "name": "Great Transmuter",
-    "description": "Won a game with every Transmuter combo."
-  },
-  "greatvenommage": {
-    "name": "Great Venom Mage",
-    "description": "Won a game with every Venom Mage combo."
-  },
-  "greatwanderer": {
-    "name": "Great Wanderer",
-    "description": "Won a game with every Wanderer combo."
-  },
-  "greatwarper": {
-    "name": "Great Warper",
-    "description": "Won a game with every Warper combo."
-  },
-  "greatwizard": {
-    "name": "Great Wizard",
-    "description": "Won a game with every Wizard combo."
-  },
-  "0.4_winner": {
+  {
     "name": "0.4 Tournament Winner",
-    "description": "Won the 0.4 tournament."
+    "id": "0.4_winner",
+    "description": "Won the 0.4 tournament.",
+    "section": "tournament"
   },
-  "0.5_winner": {
+  {
     "name": "0.5 Tournament Winner",
-    "description": "Won the 0.5 tournament."
+    "id": "0.5_winner",
+    "description": "Won the 0.5 tournament.",
+    "section": "tournament"
   },
-  "0.7_winner": {
+  {
     "name": "0.7 Tournament Winner",
-    "description": "Won the 0.7 tournament."
+    "id": "0.7_winner",
+    "description": "Won the 0.7 tournament.",
+    "section": "tournament"
   },
-  "0.8_winner": {
+  {
     "name": "0.8 Tournament Winner",
-    "description": "Won the 0.8 tournament."
+    "id": "0.8_winner",
+    "description": "Won the 0.8 tournament.",
+    "section": "tournament"
   },
-  "0.9_winner": {
+  {
     "name": "0.9 Tournament Winner",
-    "description": "Won the 0.9 tournament."
+    "id": "0.9_winner",
+    "description": "Won the 0.9 tournament.",
+    "section": "tournament"
   },
-  "0.10_winner": {
+  {
     "name": "0.10 Tournament Winner",
-    "description": "Won the 0.10 tournament."
+    "id": "0.10_winner",
+    "description": "Won the 0.10 tournament.",
+    "section": "tournament"
   },
-  "0.11_winner": {
+  {
     "name": "0.11 Tournament Winner",
-    "description": "Won the 0.11 tournament."
+    "id": "0.11_winner",
+    "description": "Won the 0.11 tournament.",
+    "section": "tournament"
   },
-  "0.12_winner": {
+  {
     "name": "0.12 Tournament Winner",
-    "description": "Won the 0.12 tournament."
+    "id": "0.12_winner",
+    "description": "Won the 0.12 tournament.",
+    "section": "tournament"
   },
-  "0.13_winner": {
+  {
     "name": "0.13 Tournament Winner",
-    "description": "Won the 0.13 tournament."
+    "id": "0.13_winner",
+    "description": "Won the 0.13 tournament.",
+    "section": "tournament"
   },
-  "0.14_winner": {
+  {
     "name": "0.14 Tournament Winner",
-    "description": "Won the 0.14 tournament."
+    "id": "0.14_winner",
+    "description": "Won the 0.14 tournament.",
+    "section": "tournament"
   },
-  "0.15_winner": {
+  {
     "name": "0.15 Tournament Winner",
-    "description": "Won the 0.15 tournament."
+    "id": "0.15_winner",
+    "description": "Won the 0.15 tournament.",
+    "section": "tournament"
   },
-  "0.16_winner": {
+  {
     "name": "0.16 Tournament Winner",
-    "description": "Won the 0.16 tournament."
+    "id": "0.16_winner",
+    "description": "Won the 0.16 tournament.",
+    "section": "tournament"
   },
-  "0.17_winner": {
+  {
     "name": "0.17 Tournament Winner",
-    "description": "Won the 0.17 tournament."
+    "id": "0.17_winner",
+    "description": "Won the 0.17 tournament.",
+    "section": "tournament"
   },
-  "0.18_winner": {
+  {
     "name": "0.18 Tournament Winner",
-    "description": "Won the 0.18 tournament."
+    "id": "0.18_winner",
+    "description": "Won the 0.18 tournament.",
+    "section": "tournament"
   },
-  "iron_rune_first": {
+  {
     "name": "Iron Rune First",
-    "description": "Found the iron rune before entering Pandemonium or any branch of the dungeon containing any other rune."
+    "id": "iron_rune_first",
+    "description": "Found the iron rune before entering Pandemonium or any branch of the dungeon containing any other rune.",
+    "section": "general"
   },
-  "dupz_winner": {
+  {
     "name": "DUPZ Winner",
-    "description": "Won a game by going through Dungeon, Depths, Pan, Zot and nowhere else except portals and temple."
+    "id": "dupz_winner",
+    "description": "Won a game by going through Dungeon, Depths, Pan, Zot and nowhere else except portals and temple.",
+    "section": "general"
   },
-  "duhz_winner": {
+  {
     "name": "DUHZ Winner",
-    "description": "Won a game by going through Dungeon, Depths, Hell, Zot and nowhere else except portals and temple."
+    "id": "duhz_winner",
+    "description": "Won a game by going through Dungeon, Depths, Hell, Zot and nowhere else except portals and temple.",
+    "section": "general"
   },
-  "low_skill_win": {
+  {
     "name": "Low Skill Win",
-    "description": "Won a game without increasing any skill past 12.0."
+    "id": "low_skill_win",
+    "description": "Won a game without increasing any skill past 12.0.",
+    "section": "general"
   },
-  "killed_all_uniques": {
+  {
     "name": "Unique Slayer",
-    "description": "Killed all current uniques at least once."
+    "id": "killed_all_uniques",
+    "description": "Killed all current uniques at least once.",
+    "section": "general"
   },
-  "low_xl_win": {
+  {
     "name": "Low XL Win",
-    "description": "Won a game before reaching experience level 19."
+    "id": "low_xl_win",
+    "description": "Won a game before reaching experience level 19.",
+    "section": "general"
   },
-  "orb_run_tomb": {
+  {
     "name": "Orb Run Tomb",
-    "description": "Won a game with the golden rune by entering tomb for the first time after retrieving the orb."
+    "id": "orb_run_tomb",
+    "description": "Won a game with the golden rune by entering tomb for the first time after retrieving the orb.",
+    "section": "general"
   },
-  "greater_orb_run": {
+  {
     "name": "Greater Orb Run",
-    "description": "Won a game with 15 runes after picking up the orb with only 3."
+    "id": "greater_orb_run",
+    "description": "Won a game with 15 runes after picking up the orb with only 3.",
+    "section": "general"
   },
-  "fast_win": {
+  {
     "name": "Fast Win",
-    "description": "Won a game in under two hours."
+    "id": "fast_win",
+    "description": "Won a game in under two hours.",
+    "section": "general"
   },
-  "short_win": {
+  {
     "name": "Short Win",
-    "description": "Won a game in under 40000 turns."
+    "id": "short_win",
+    "description": "Won a game in under 40000 turns.",
+    "section": "general"
+  },
+  {
+    "name": "Great Centaur",
+    "id": "greatcentaur",
+    "description": "Won a game with every Centaur combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Deep Dwarf",
+    "id": "greatdeepdwarf",
+    "description": "Won a game with every Deep Dwarf combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Deep Elf",
+    "id": "greatdeepelf",
+    "description": "Won a game with every Deep Elf combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Demigod",
+    "id": "greatdemigod",
+    "description": "Won a game with every Demigod combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Demonspawn",
+    "id": "greatdemonspawn",
+    "description": "Won a game with every Demonspawn combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Draconian",
+    "id": "greatdraconian",
+    "description": "Won a game with every Draconian combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Felid",
+    "id": "greatfelid",
+    "description": "Won a game with every Felid combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Formicid",
+    "id": "greatformicid",
+    "description": "Won a game with every Formicid combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Ghoul",
+    "id": "greatghoul",
+    "description": "Won a game with every Ghoul combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Gargoyle",
+    "id": "greatgargoyle",
+    "description": "Won a game with every Gargoyle combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great High Elf",
+    "id": "greathighelf",
+    "description": "Won a game with every High Elf combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Hill Orc",
+    "id": "greathillorc",
+    "description": "Won a game with every Hill Orc combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Halfling",
+    "id": "greathalfling",
+    "description": "Won a game with every Halfling combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Human",
+    "id": "greathuman",
+    "description": "Won a game with every Human combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Kobold",
+    "id": "greatkobold",
+    "description": "Won a game with every Kobold combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Merfolk",
+    "id": "greatmerfolk",
+    "description": "Won a game with every Merfolk combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Minotaur",
+    "id": "greatminotaur",
+    "description": "Won a game with every Minotaur combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Mummy",
+    "id": "greatmummy",
+    "description": "Won a game with every Mummy combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Naga",
+    "id": "greatnaga",
+    "description": "Won a game with every Naga combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Octopode",
+    "id": "greatoctopode",
+    "description": "Won a game with every Octopode combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Ogre",
+    "id": "greatogre",
+    "description": "Won a game with every Ogre combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Spriggan",
+    "id": "greatspriggan",
+    "description": "Won a game with every Spriggan combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Tengu",
+    "id": "greattengu",
+    "description": "Won a game with every Tengu combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Troll",
+    "id": "greattroll",
+    "description": "Won a game with every Troll combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Vinestalker",
+    "id": "greatvinestalker",
+    "description": "Won a game with every Vinestalker combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Vampire",
+    "id": "greatvampire",
+    "description": "Won a game with every Vampire combo.",
+    "section": "greatrace"
+  },
+  {
+    "name": "Great Air Elementalist",
+    "id": "greatairelementalist",
+    "description": "Won a game with every Air Elementalist combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Abyssal Knight",
+    "id": "greatabyssalknight",
+    "description": "Won a game with every Abyssal Knight combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Arcane Marksman",
+    "id": "greatarcanemarksman",
+    "description": "Won a game with every Arcane Marksman combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Artificer",
+    "id": "greatartificer",
+    "description": "Won a game with every Artificer combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Assassin",
+    "id": "greatassassin",
+    "description": "Won a game with every Assassin combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Berserker",
+    "id": "greatberserker",
+    "description": "Won a game with every Berserker combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Chaos Knight",
+    "id": "greatchaosknight",
+    "description": "Won a game with every Chaos Knight combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Conjurer",
+    "id": "greatconjurer",
+    "description": "Won a game with every Conjurer combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Earth Elementalist",
+    "id": "greatearthelementalist",
+    "description": "Won a game with every Earth Elementalist combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Enchanter",
+    "id": "greatenchanter",
+    "description": "Won a game with every Enchanter combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Death Knight",
+    "id": "greatdeathknight",
+    "description": "Won a game with every Death Knight combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Fire Elementalist",
+    "id": "greatfireelementalist",
+    "description": "Won a game with every Fire Elementalist combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Fighter",
+    "id": "greatfighter",
+    "description": "Won a game with every Fighter combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Gladiator",
+    "id": "greatgladiator",
+    "description": "Won a game with every Gladiator combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Healer",
+    "id": "greathealer",
+    "description": "Won a game with every Healer combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Hunter",
+    "id": "greathunter",
+    "description": "Won a game with every Hunter combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Ice Elementalist",
+    "id": "greaticeelementalist",
+    "description": "Won a game with every Ice Elementalist combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Monk",
+    "id": "greatmonk",
+    "description": "Won a game with every Monk combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Necromancer",
+    "id": "greatnecromancer",
+    "description": "Won a game with every Necromancer combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Skald",
+    "id": "greatskald",
+    "description": "Won a game with every Skald combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Summoner",
+    "id": "greatsummoner",
+    "description": "Won a game with every Summoner combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Transmuter",
+    "id": "greattransmuter",
+    "description": "Won a game with every Transmuter combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Venom Mage",
+    "id": "greatvenommage",
+    "description": "Won a game with every Venom Mage combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Wanderer",
+    "id": "greatwanderer",
+    "description": "Won a game with every Wanderer combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Warper",
+    "id": "greatwarper",
+    "description": "Won a game with every Warper combo.",
+    "section": "greatrole"
+  },
+  {
+    "name": "Great Wizard",
+    "id": "greatwizard",
+    "description": "Won a game with every Wizard combo.",
+    "section": "greatrole"
   }
-}
+]

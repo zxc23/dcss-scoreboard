@@ -29,11 +29,13 @@
   </div>
   <div class="col-sm-4">
     <h3>Achievements</h3>
-    {% for achievement in stats['achievements'] %}
-    <p>
-        <h5 class="card-title">{{ achievement_data[achievement]['name'] }}</h5>
-        <p class="card-text">{{ achievement_data[achievement]['description'] }}</p>
-    </p>
+    {% for achievement in achievement_data %}
+      {% if achievement['id'] in stats['achievements'].keys() %}
+      <p>
+          <h5 class="card-title">{{ achievement['name'] }}</h5>
+          <p class="card-text">{{ achievement['description'] }}</p>
+      </p>
+      {% endif %}
     {% endfor %}
   </div>
 </div>
