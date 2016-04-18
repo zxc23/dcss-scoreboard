@@ -5,6 +5,7 @@ import re
 import time
 
 from . import model
+from . import constants
 
 
 def calculate_game_gid(log):
@@ -60,6 +61,7 @@ def load_logfiles():
             log['bg'] = log['char'][2:]
             if 'god' not in log:
                 log['god'] = 'Atheist'
+            log['god'] = constants.GOD_NAME_FIXUPS.get(log['god'], log['god'])
             gid = calculate_game_gid(log)
             # Store the game in the database
             try:

@@ -11,6 +11,7 @@ PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos', 'E
                  'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas', 'Qazlal',
                  'Ru', 'Sif Muna', 'the Shining One', 'Trog', 'Vehumet', 'Xom',
                  'Yredelemnul', 'Zin'}
+GOD_NAME_FIXUPS = { 'The Shining One': 'the Shining One', 'Dithmengos' : "Dithmenos"}
 RACE_TO_GREAT_RACE = {'Ce': 'greatcentaur',
                       'DD': 'greatdeepdwarf',
                       'DE': 'greatdeepelf',
