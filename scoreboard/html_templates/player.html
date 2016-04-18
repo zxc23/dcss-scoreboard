@@ -5,6 +5,7 @@
 <div class="row">
   <div class="col-sm-4">
     <h3>Overall Statistics</h3>
+    <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
     <p><strong>Games Played:</strong> {{ stats['games'] }}</p>
     <p><strong>Wins:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
     <p><strong>Best Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
