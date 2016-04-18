@@ -11,6 +11,7 @@ from . import webutils
 from . import constants
 
 OUTDIR = 'website'
+URLBASE = os.getcwd()
 
 
 def jinja_env():
@@ -25,6 +26,7 @@ def jinja_env():
     env.filters['streaktotablerow'] = webutils.streaktotablerow
     env.filters[
         'completedstreaktotablerow'] = webutils.completedstreaktotablerow
+    env.globals(urlbase=URLBASE)
     return env
 
 
