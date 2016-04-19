@@ -263,7 +263,8 @@ def score_game(game_row):
             stats['race_wins'][race] += 1
         else:
             stats['race_wins'][race] = 1
-            if not constants.PLAYABLE_RACES - set([race for race in stats['race_wins'].keys() if stats['race_wins'][race] > 0]):
+            if not constants.PLAYABLE_RACES - \
+                    set([race for race in stats['race_wins'].keys() if stats['race_wins'][race] > 0]):
                 achievements['greatplayer'] = True
 
         # Increment role_wins and check greaterplayer
@@ -272,7 +273,8 @@ def score_game(game_row):
         else:
             stats['role_wins'][role] = 1
 
-        if 'greatplayer' in achievements and not constants.PLAYABLE_ROLES - set([role for role in stats['role_wins'].keys() if stats['role_wins'][role] > 0]):
+        if 'greatplayer' in achievements and not constants.PLAYABLE_ROLES - \
+                set([role for role in stats['role_wins'].keys() if stats['role_wins'][role] > 0]):
             achievements['greaterplayer'] = True
 
         # Adjust avg_win stats
@@ -365,8 +367,8 @@ def score_games():
         #jobs.append(p.apply_async(score_game, (game,)))
         score_game(game)
 
-    #for async_job in jobs:
-        #async_job.wait()
+    # for async_job in jobs:
+        # async_job.wait()
 
         # Periodically print our progress
         scored += 1
