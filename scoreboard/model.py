@@ -4,8 +4,7 @@ import json
 import collections
 import sqlalchemy.ext.mutable
 
-from sqlalchemy import TypeDecorator, MetaData, Table, Column
-from sqlalchemy import String, Integer, Boolean
+from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean
 
 
 class DatabaseError(Exception):
@@ -52,39 +51,39 @@ _games = Table('games',
                Column('gid',
                       String,
                       primary_key=True),
-               Column('logfile',
+               Column('raw_data',
                       _JsonEncodedDict,
                       nullable=False),
                Column('scored',
                       Boolean,
                       default=False))
 
-_log_progress = Table('log_progress',
+_logfile_progress = Table('logfile_progress',
+                          _metadata,
+                          Column('logfile',
+                                 String,
+                                 primary_key=True),
+                          Column('lines_parsed',
+                                 Integer,
+                                 nullable=False))
+
+_player_stats = Table('player_stats',
                       _metadata,
-                      Column('logfile',
+                      Column('name',
                              String,
                              primary_key=True),
-                      Column('lines_parsed',
-                             Integer,
+                      Column('stats',
+                             _JsonEncodedDict,
                              nullable=False))
 
-_player_scores = Table('player_scores',
-                       _metadata,
-                       Column('name',
-                              String,
-                              primary_key=True),
-                       Column('scoringinfo',
-                              _JsonEncodedDict,
-                              nullable=False))
-
-_global_scores = Table('global_scores',
-                       _metadata,
-                       Column('key',
-                              String,
-                              primary_key=True),
-                       Column('data',
-                              _JsonEncodedDict,
-                              nullable=False))
+_global_stats = Table('global_stats',
+                      _metadata,
+                      Column('key',
+                             String,
+                             primary_key=True),
+                      Column('data',
+                             _JsonEncodedDict,
+                             nullable=False))
 
 _engine = sqlalchemy.create_engine('sqlite:///database.db', echo=False)
 sqlalchemy.event.listen(_engine, 'connect', sqlite_performance_over_safety)
@@ -92,18 +91,17 @@ _metadata.create_all(_engine)
 _conn = _engine.connect()
 
 
-def add_game(gid, data):
+def add_game(gid, raw_data):
     """Add a game to the database."""
     try:
-        _conn.execute(_games.insert(), gid=gid, logfile=data)
+        _conn.execute(_games.insert(), gid=gid, raw_data=raw_data)
     except sqlalchemy.exc.IntegrityError:
         raise DatabaseError("Duplicate game %s, ignoring." % gid)
 
 
-def get_log_pos(logfile):
+def get_logfile_pos(logfile):
     """Get the number of lines we've already processed."""
-    # print(dir(model.log_progress.c))
-    s = _log_progress.select().where(_log_progress.c.logfile == logfile)
+    s = _logfile_progress.select().where(_logfile_progress.c.logfile == logfile)
     row = _conn.execute(s).fetchone()
     if row:
         return row.lines_parsed
@@ -111,7 +109,7 @@ def get_log_pos(logfile):
         return 0
 
 
-def save_log_pos(logfile, pos):
+def save_logfile_pos(logfile, pos):
     """Save the number of lines we've processed."""
     # print("Saving log pos for", logfile, "as", pos)
     # XXX instead of this try: except:, see if
@@ -119,12 +117,12 @@ def save_log_pos(logfile, pos):
     # http://docs.sqlalchemy.org/en/rel_1_0/core/dml.html#
     #                                       sqlalchemy.sql.expression.insert
     try:
-        _conn.execute(_log_progress.insert(),
+        _conn.execute(_logfile_progress.insert(),
                       logfile=logfile,
                       lines_parsed=pos)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_log_progress.update().where(
-            _log_progress.c.logfile == logfile).values(lines_parsed=pos))
+        _conn.execute(_logfile_progress.update().where(
+            _logfile_progress.c.logfile == logfile).values(lines_parsed=pos))
 
 
 def players():
@@ -133,30 +131,30 @@ def players():
     XXX should be at least memoised if not outright replaced with something
     saner.
     """
-    return [i.name for i in player_scores()]
+    return [i.name for i in get_all_player_stats()]
 
 
-def player_scores():
-    """Return all rows in player_scores table.
+def get_all_player_stats():
+    """Return all rows in player_stats table.
 
     XXX should be at least memoised if not outright replaced with something
     saner.
     """
-    s = _player_scores.select()
+    s = _player_stats.select()
     return _conn.execute(s).fetchall()
 
 
-def delete_all_player_scores():
-    """Deletes all player scores."""
-    _conn.execute(_player_scores.delete())
+def delete_all_player_stats():
+    """Deletes all player stats."""
+    _conn.execute(_player_stats.delete())
 
 
-def get_player_score_data(name):
-    """Return a dict of the player's current scoring data.
+def get_player_stats(name):
+    """Return a dict of the player's current stats.
 
     If the player doesn't exist, None is returned.
     """
-    s = _player_scores.select().where(_player_scores.c.name == name)
+    s = _player_stats.select().where(_player_stats.c.name == name)
     result = _conn.execute(s).fetchone()
     if result:
         score = result[1]
@@ -165,25 +163,25 @@ def get_player_score_data(name):
     return score
 
 
-def set_player_score_data(name, data):
-    """Write player's scoring data to the database.
+def set_player_stats(name, stats):
+    """Write player's stats to the database.
 
     XXX this function is the slowest part of scoring.py.
     """
     # print("Saving scoring data for", player)
     try:
-        _conn.execute(_player_scores.insert(), name=name, scoringinfo=data)
+        _conn.execute(_player_stats.insert(), name=name, stats=stats)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_player_scores.update().where(
-            _player_scores.c.name == name).values(scoringinfo=data))
+        _conn.execute(_player_stats.update().where(
+            _player_stats.c.name == name).values(stats=stats))
 
 
-def games(scored=None):
+def get_all_games(scored=None):
     """Return all games.
 
     If scored is not none, only return games who match bool(scored).
 
-    Uses a lot of RAM if there are a lot of games.
+    Note: Uses a lot of RAM if there are a lot of games.
     XXX fix this.
     """
     s = _games.select()
@@ -198,23 +196,23 @@ def mark_game_scored(gid):
     _conn.execute(s)
 
 
-def mark_all_games_unscored():
+def unscore_all_games():
     """Marks all games as being unscored."""
     _conn.execute(_games.update().values(scored=False))
 
 
-def set_global_score(key, data):
-    """Set global score data."""
+def set_global_stat(key, data):
+    """Set global stat data."""
     try:
-        _conn.execute(_global_scores.insert(), key=key, data=data)
+        _conn.execute(_global_stats.insert(), key=key, data=data)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_global_scores.update().where(
-            _global_scores.c.key == key).values(data=data))
+        _conn.execute(_global_stats.update().where(
+            _global_stats.c.key == key).values(data=data))
 
 
-def get_global_score(key):
+def get_global_stat(key):
     """Get global score data."""
-    s = _global_scores.select().where(_global_scores.c.key == key)
+    s = _global_stats.select().where(_global_stats.c.key == key)
     val = _conn.execute(s).fetchone()
     if val is not None:
         return val[1]
@@ -222,10 +220,10 @@ def get_global_score(key):
         return None
 
 
-def get_all_global_scores():
+def get_all_global_stats():
     """Get all global score data."""
     scores = {}
-    s = _global_scores.select()
+    s = _global_stats.select()
     for row in _conn.execute(s).fetchall():
         scores[row[0]] = row[1]
     return scores

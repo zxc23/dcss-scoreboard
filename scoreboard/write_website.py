@@ -1,15 +1,13 @@
 """Take generated score data and write out all website files."""
 
 import os
-import sys
 import json
-import jinja2
 import time
 import shutil
 
-from . import model
-from . import webutils
-from . import constants
+import jinja2
+
+from . import model, webutils, constants
 
 OUTDIR = 'website'
 URLBASE = os.path.join(os.getcwd(), 'website')
@@ -61,7 +59,7 @@ def write_website():
         template = env.get_template('index.html')
         f.write(template.render())
 
-    stats = model.get_all_global_scores()
+    stats = model.get_all_global_stats()
     print("Writing highscores")
     with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
         template = env.get_template('highscores.html')
@@ -83,10 +81,10 @@ def write_website():
     start = time.time()
     print("Writing player pages... ")
     achievements = achievement_data()
-    global_stats = model.get_all_global_scores()
+    global_stats = model.get_all_global_stats()
     template = env.get_template('player.html')
     n = 0
-    for row in model.player_scores():
+    for row in model.get_all_player_stats():
         n += 1
         if not n % 5000:
             print(n)
@@ -105,7 +103,7 @@ def write_website():
         records['streak'] = global_stats['active_streaks'].get(player, [])
         with open(outfile, 'w') as f:
             f.write(template.render(player=player,
-                                    stats=row.scoringinfo,
+                                    stats=row.stats,
                                     achievement_data=achievements,
                                     constants=constants,
                                     records=records))
