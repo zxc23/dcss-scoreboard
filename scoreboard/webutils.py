@@ -4,6 +4,7 @@ import datetime
 
 from . import modelutils
 
+
 def prettyint(value):
     """Jinja filter to prettify ints.
 
@@ -58,7 +59,9 @@ def gametotablerow(game, prefix_row=None, show_player=False):
         if game['ktyp'] == 'quitting' else '',
         prefix_row='' if prefix_row is None else "<td>%s</td>" % game.get(
             prefix_row),
-        player_row='' if not show_player else "<td>%s</td>" % game['name'],
+        player_row='' if not show_player else (
+            "<td><a href='players/%s.html'>%s</a></td>" % (game['name'], game[
+                'name'])),
         score=prettyint(game['sc']),
         character=game['char'],
         place=game['place'],
@@ -75,7 +78,7 @@ def streaktotablerow(streak):
     """Jinja filter to convert a streak to a table row."""
     return """<tr>
       <td>{wins}</td>
-      <td>{player}</td>
+      <td><a href="players/{player}.html">{player}<a></td>
       <td>{games}</td>
       <td>{versions}</td>
     </tr>""".format(wins=len(streak),
@@ -88,7 +91,7 @@ def completedstreaktotablerow(streak):
     """Jinja filter to convert a streak to a table row."""
     return """<tr>
       <td>{wins}</td>
-      <td>{player}</td>
+      <td><a href="players/{player}.html">{player}<a></td>
       <td>{games}</td>
       <td>{ended}</td>
       <td>{lost_game}</td>
