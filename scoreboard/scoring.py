@@ -359,14 +359,14 @@ def score_games():
     start = time.time()
     scored = 0
 
-    p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    #p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
     jobs = []
     for game in model.get_all_games(scored=False):
-        jobs.append(p.apply_async(score_game, (game,)))
+        #jobs.append(p.apply_async(score_game, (game,)))
         score_game(game)
 
-    for async_job in jobs:
-        async_job.wait()
+    #for async_job in jobs:
+        #async_job.wait()
 
         # Periodically print our progress
         scored += 1
