@@ -146,6 +146,11 @@ def player_scores():
     return _conn.execute(s).fetchall()
 
 
+def delete_all_player_scores():
+    """Deletes all player scores."""
+    _conn.execute(_player_scores.delete())
+
+
 def get_player_score_data(name):
     """Return a dict of the player's current scoring data.
 
