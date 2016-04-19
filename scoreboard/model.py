@@ -206,13 +206,14 @@ def get_all_games(scored=None):
     """Return all games.
 
     If scored is not none, only return games who match bool(scored).
+    Games are ordered by end datetime.
 
     Note: Uses a lot of RAM if there are a lot of games.
     XXX fix this.
     """
     s = _games.select()
     if scored is not None:
-        s = s.where(_games.c.scored == bool(scored))
+        s = s.where(_games.c.scored == bool(scored)).order_by(_games.c.end.asc())
     return _conn.execute(s).fetchall()
 
 
