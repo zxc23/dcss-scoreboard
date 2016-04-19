@@ -182,7 +182,7 @@ def score_game_vs_misc_stats(log):
 
 
 def score_game_vs_streaks(log, won):
-    """Extend active streaks if a game was won and finalises streak stats."""
+    """Extend active streaks if a game was won and finalise streak stats."""
     active_streaks = load_global_scores('active_streaks', {})
     name = log['name']
     if won:
