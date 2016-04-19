@@ -193,6 +193,11 @@ def mark_game_scored(gid):
     _conn.execute(s)
 
 
+def mark_all_games_unscored():
+    """Marks all games as being unscored."""
+    _conn.execute(_games.update().values(scored=False))
+
+
 def set_global_score(key, data):
     """Set global score data."""
     try:
