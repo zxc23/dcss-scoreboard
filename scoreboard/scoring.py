@@ -241,7 +241,7 @@ def score_game_vs_streaks(game, won):
 def score_game(game_row):
     """Score a single game."""
     gid = game_row[0]
-    game = game_row[4]
+    game = game_row[5]
     name = game_row[1]
 
     # Log vars

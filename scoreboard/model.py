@@ -62,6 +62,9 @@ _games = Table('games',
                Column('end',
                       sqlalchemy.types.DateTime,
                       nullable=False),
+               Column('runes',
+                      Integer,
+                      nullable=False),
                Column('raw_data',
                       _JsonEncodedDict,
                       nullable=False),
@@ -109,11 +112,13 @@ def add_game(gid, raw_data):
         start = modelutils.prettycrawldate(raw_data['start'], return_datetime=True)
         end = modelutils.prettycrawldate(raw_data['end'], return_datetime=True)
         type(start)
+        runes = raw_data['urune'] if 'urune' in raw_data else 0
         _conn.execute(_games.insert(),
                       gid=gid,
                       name=name,
                       start=start,
                       end=end,
+                      runes=runes,
                       raw_data=raw_data)
     except sqlalchemy.exc.IntegrityError:
         raise DatabaseError("Duplicate game %s, ignoring." % gid)
