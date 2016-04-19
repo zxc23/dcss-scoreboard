@@ -101,7 +101,8 @@ def add_game(gid, raw_data):
 
 def get_logfile_pos(logfile):
     """Get the number of lines we've already processed."""
-    s = _logfile_progress.select().where(_logfile_progress.c.logfile == logfile)
+    s = _logfile_progress.select().where(_logfile_progress.c.logfile ==
+                                         logfile)
     row = _conn.execute(s).fetchone()
     if row:
         return row.lines_parsed
@@ -172,8 +173,8 @@ def set_player_stats(name, stats):
     try:
         _conn.execute(_player_stats.insert(), name=name, stats=stats)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_player_stats.update().where(
-            _player_stats.c.name == name).values(stats=stats))
+        _conn.execute(_player_stats.update().where(_player_stats.c.name ==
+                                                   name).values(stats=stats))
 
 
 def get_all_games(scored=None):
@@ -206,8 +207,8 @@ def set_global_stat(key, data):
     try:
         _conn.execute(_global_stats.insert(), key=key, data=data)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_global_stats.update().where(
-            _global_stats.c.key == key).values(data=data))
+        _conn.execute(_global_stats.update().where(_global_stats.c.key ==
+                                                   key).values(data=data))
 
 
 def get_global_stat(key):

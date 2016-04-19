@@ -26,10 +26,11 @@ def prettycounter(counter):
 
     eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
-    return ", ".join("{open}{k} ({v}){close}".format(k=k,
-                                                     v=v,
-                                                     open="" if v > 0 else '<span class="text-muted">',
-                                                     close="" if v > 0 else '</span>')
+    return ", ".join("{open}{k} ({v}){close}".format(
+        k=k,
+        v=v,
+        open="" if v > 0 else '<span class="text-muted">',
+        close="" if v > 0 else '</span>')
                      for k, v in sorted(counter.items(),
                                         key=lambda i: i[0]))
 
@@ -113,9 +114,10 @@ def completedstreaktotablerow(streak):
       <td>{ended}</td>
       <td>{lost_game}</td>
       <td>{versions}</td>
-    </tr>""".format(wins=len(streak['wins']),
-                    player=streak['wins'][0]['name'],
-                    games=', '.join(g['char'] for g in streak['wins']),
-                    ended=prettycrawldate(streak['end']),
-                    lost_game=streak['streak_breaker']['char'],
-                    versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))
+    </tr>""".format(
+        wins=len(streak['wins']),
+        player=streak['wins'][0]['name'],
+        games=', '.join(g['char'] for g in streak['wins']),
+        ended=prettycrawldate(streak['end']),
+        lost_game=streak['streak_breaker']['char'],
+        versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))

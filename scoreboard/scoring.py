@@ -43,12 +43,16 @@ def load_player_stats(name):
                  'winrate': 0,
                  'total_score': 0,
                  'avg_score': 0,
-                 'last_5_games': deque([], 5),
+                 'last_5_games': deque(
+                     [], 5),
                  'boring_games': 0,
                  'boring_rate': 0,
-                 'god_wins': {k: 0 for k in constants.PLAYABLE_GODS},
-                 'race_wins': {k: 0 for k in constants.PLAYABLE_RACES},
-                 'role_wins': {k: 0 for k in constants.PLAYABLE_ROLES},
+                 'god_wins': {k: 0
+                              for k in constants.PLAYABLE_GODS},
+                 'race_wins': {k: 0
+                               for k in constants.PLAYABLE_RACES},
+                 'role_wins': {k: 0
+                               for k in constants.PLAYABLE_ROLES},
                  'achievements': {},
                  'last_active': None}
     return stats
@@ -256,41 +260,47 @@ def score_game(game_row):
                 'fastest_realtime']['dur']:
             stats['fastest_realtime'] = game
 
-        # Adjust fastest_turncount win
+# Adjust fastest_turncount win
         if 'fastest_turncount' not in stats or game['turn'] < stats[
                 'fastest_turncount']['turn']:
             stats['fastest_turncount'] = game
 
-        # Increment god_wins and check polytheist
+# Increment god_wins and check polytheist
         if god in stats['god_wins']:
             stats['god_wins'][god] += 1
-            if stats['god_wins'][god] == 1 and not constants.PLAYABLE_GODS - \
-                    {g for g, w in stats['god_wins'].items() if w > 0}:
+            if stats['god_wins'][god] == 1 and not constants.PLAYABLE_GODS - {
+                    g
+                    for g, w in stats['god_wins'].items() if w > 0
+            }:
                 achievements['polytheist'] = True
         else:
             stats['god_wins'][god] += 1
 
-        # Increment race_wins and check greatplayer
+# Increment race_wins and check greatplayer
         if race in stats['race_wins'] and stats['race_wins'][race] > 0:
             stats['race_wins'][race] += 1
         else:
             stats['race_wins'][race] = 1
-            if not constants.PLAYABLE_RACES - \
-                    set([race for race in stats['race_wins'].keys() if stats['race_wins'][race] > 0]):
+            if not constants.PLAYABLE_RACES - set(
+                [race
+                 for race in stats['race_wins'].keys()
+                 if stats['race_wins'][race] > 0]):
                 achievements['greatplayer'] = True
 
-        # Increment role_wins and check greaterplayer
+# Increment role_wins and check greaterplayer
         if role in stats['role_wins'] and stats['role_wins'][role] > 0:
             stats['role_wins'][role] += 1
         else:
             stats['role_wins'][role] = 1
 
-        if 'greatplayer' in achievements and not constants.PLAYABLE_ROLES - \
-                set([role for role in stats['role_wins'].keys() if stats['role_wins'][role] > 0]):
+        if 'greatplayer' in achievements and not constants.PLAYABLE_ROLES - set(
+            [role
+             for role in stats['role_wins'].keys()
+             if stats['role_wins'][role] > 0]):
             achievements['greaterplayer'] = True
 
-        # Adjust avg_win stats
-        # Older logfiles didn't have these fields, so skip those games
+# Adjust avg_win stats
+# Older logfiles didn't have these fields, so skip those games
         if 'ac' in game:
             if 'avg_win_ac' not in stats:
                 stats['avg_win_ac'] = game['ac']
@@ -308,21 +318,21 @@ def score_game(game_row):
                 stats['avg_win_sh'] += (
                     game['sh'] - stats['avg_win_sh']) / wins
 
-        # Adjust win-based achievements
+# Adjust win-based achievements
         if wins >= 10:
             achievements['goodplayer'] = True
         if wins >= 100:
             achievements['centuryplayer'] = True
 
-        # Check for great race completion
+# Check for great race completion
         if great_race(race, stats, achievements):
             achievements[constants.RACE_TO_GREAT_RACE[race]] = True
 
-        # Check for great role completion
+# Check for great role completion
         if great_role(role, stats, achievements):
             achievements[constants.ROLE_TO_GREAT_ROLE[role]] = True
 
-        # Older logfiles don't have these fields, so skip those games
+# Older logfiles don't have these fields, so skip those games
         if 'potionsused' in game and game['potionsused'] == 0 and game[
                 'scrollsused'] == 0:
             if 'no_potion_or_scroll_win' not in achievements:
@@ -336,7 +346,7 @@ def score_game(game_row):
             else:
                 achievements['cleared_zig'] += 1
 
-        # Compare win against misc global stats
+# Compare win against misc global stats
         score_game_vs_misc_stats(game)
 
     else:  # !won
@@ -344,7 +354,7 @@ def score_game(game_row):
         if game['ktyp'] in ('leaving', 'quitting'):
             stats['boring_games'] += 1
 
-    # Update other player stats
+# Update other player stats
     if 'highscore' not in stats or score > stats['highscore']['sc']:
         stats['highscore'] = game
     stats['winrate'] = wins / stats['games']
@@ -379,7 +389,7 @@ def score_games():
         #jobs.append(p.apply_async(score_game, (game,)))
         score_game(game)
 
-    # for async_job in jobs:
+        # for async_job in jobs:
         # async_job.wait()
 
         # Periodically print our progress
@@ -402,7 +412,6 @@ def score_games():
         model.set_global_stat(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
-
 
 if __name__ == "__main__":
     score_games()
