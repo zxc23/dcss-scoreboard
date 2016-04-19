@@ -89,6 +89,15 @@ def set_global_stat(key, data):
     GLOBAL_STATS_CACHE[key] = data
 
 
+def rescore_player(player):
+    """Rescores all of the player's games and stats."""
+    try:
+        model.delete_player_stats(player)
+        model.unscore_all_games_of_player(player)
+    except model.DatabaseError as e:
+        print(e)
+
+
 def add_manual_achievements():
     """Writes manual achievements to players' stats."""
     for player in constants.MANUAL_ACHIEVEMENTS:
@@ -232,10 +241,10 @@ def score_game_vs_streaks(game, won):
 def score_game(game_row):
     """Score a single game."""
     gid = game_row[0]
-    game = game_row[1]
+    game = game_row[4]
+    name = game_row[1]
 
     # Log vars
-    name = game['name']
     god = game['god']
     score = game['sc']
     race = game['rc']
@@ -260,12 +269,12 @@ def score_game(game_row):
                 'fastest_realtime']['dur']:
             stats['fastest_realtime'] = game
 
-# Adjust fastest_turncount win
+        # Adjust fastest_turncount win
         if 'fastest_turncount' not in stats or game['turn'] < stats[
                 'fastest_turncount']['turn']:
             stats['fastest_turncount'] = game
 
-# Increment god_wins and check polytheist
+        # Increment god_wins and check polytheist
         if god in stats['god_wins']:
             stats['god_wins'][god] += 1
             if stats['god_wins'][god] == 1 and not constants.PLAYABLE_GODS - {
@@ -276,7 +285,7 @@ def score_game(game_row):
         else:
             stats['god_wins'][god] += 1
 
-# Increment race_wins and check greatplayer
+    # Increment race_wins and check greatplayer
         if race in stats['race_wins'] and stats['race_wins'][race] > 0:
             stats['race_wins'][race] += 1
         else:
@@ -287,7 +296,7 @@ def score_game(game_row):
                  if stats['race_wins'][race] > 0]):
                 achievements['greatplayer'] = True
 
-# Increment role_wins and check greaterplayer
+        # Increment role_wins and check greaterplayer
         if role in stats['role_wins'] and stats['role_wins'][role] > 0:
             stats['role_wins'][role] += 1
         else:
@@ -299,8 +308,8 @@ def score_game(game_row):
              if stats['role_wins'][role] > 0]):
             achievements['greaterplayer'] = True
 
-# Adjust avg_win stats
-# Older logfiles didn't have these fields, so skip those games
+        # Adjust avg_win stats
+        # Older logfiles didn't have these fields, so skip those games
         if 'ac' in game:
             if 'avg_win_ac' not in stats:
                 stats['avg_win_ac'] = game['ac']
@@ -318,21 +327,21 @@ def score_game(game_row):
                 stats['avg_win_sh'] += (
                     game['sh'] - stats['avg_win_sh']) / wins
 
-# Adjust win-based achievements
+        # Adjust win-based achievements
         if wins >= 10:
             achievements['goodplayer'] = True
         if wins >= 100:
             achievements['centuryplayer'] = True
 
-# Check for great race completion
+        # Check for great race completion
         if great_race(race, stats, achievements):
             achievements[constants.RACE_TO_GREAT_RACE[race]] = True
 
-# Check for great role completion
+        # Check for great role completion
         if great_role(role, stats, achievements):
             achievements[constants.ROLE_TO_GREAT_ROLE[role]] = True
 
-# Older logfiles don't have these fields, so skip those games
+        # Older logfiles don't have these fields, so skip those games
         if 'potionsused' in game and game['potionsused'] == 0 and game[
                 'scrollsused'] == 0:
             if 'no_potion_or_scroll_win' not in achievements:
@@ -346,7 +355,7 @@ def score_game(game_row):
             else:
                 achievements['cleared_zig'] += 1
 
-# Compare win against misc global stats
+        # Compare win against misc global stats
         score_game_vs_misc_stats(game)
 
     else:  # !won
@@ -354,7 +363,7 @@ def score_game(game_row):
         if game['ktyp'] in ('leaving', 'quitting'):
             stats['boring_games'] += 1
 
-# Update other player stats
+    # Update other player stats
     if 'highscore' not in stats or score > stats['highscore']['sc']:
         stats['highscore'] = game
     stats['winrate'] = wins / stats['games']

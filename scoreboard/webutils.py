@@ -2,6 +2,7 @@
 
 import datetime
 
+from . import modelutils
 
 def prettyint(value):
     """Jinja filter to prettify ints.
@@ -35,28 +36,6 @@ def prettycounter(counter):
                                         key=lambda i: i[0]))
 
 
-def prettycrawldate(d):
-    """Jinja filter to convert crawl logfile date to pretty text.
-
-    Note: crawl dates use a 0-indexed month... I think you can blame struct_tm
-    for this.
-    """
-    # Increment the month by one
-    d = d[:4] + '%02d' % (int(d[4:6]) + 1) + d[6:]
-    try:
-        return datetime.datetime(year=int(d[:4]),
-                                 month=int(d[4:6]),
-                                 day=int(d[6:8]),
-                                 hour=int(d[8:10]),
-                                 minute=int(d[10:12]),
-                                 second=int(d[12:14])).strftime("%c")
-
-    except ValueError:
-        return d
-    except TypeError:
-        return d
-
-
 def gametotablerow(game, prefix_row=None, show_player=False):
     """Jinja filter to convert a game dict to a table row."""
     t = """<tr class="{win}">
@@ -88,7 +67,7 @@ def gametotablerow(game, prefix_row=None, show_player=False):
         turns=prettyint(game['turn']),
         duration=prettydur(game['dur']),
         runes='?',
-        date=prettycrawldate(game['end']),
+        date=modelutils.prettycrawldate(game['end']),
         version=game['v'])
 
 
@@ -118,6 +97,6 @@ def completedstreaktotablerow(streak):
         wins=len(streak['wins']),
         player=streak['wins'][0]['name'],
         games=', '.join(g['char'] for g in streak['wins']),
-        ended=prettycrawldate(streak['end']),
+        ended=modelutils.prettycrawldate(streak['end']),
         lost_game=streak['streak_breaker']['char'],
         versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))

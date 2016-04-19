@@ -3,8 +3,10 @@
 import json
 import collections
 import sqlalchemy.ext.mutable
+import datetime
 
-from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean
+from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime
+from . import modelutils
 
 
 class DatabaseError(Exception):
@@ -51,6 +53,15 @@ _games = Table('games',
                Column('gid',
                       String,
                       primary_key=True),
+               Column('name',
+                      String,
+                      nullable=False),
+               Column('start',
+                      sqlalchemy.types.DateTime,
+                      nullable=False),
+               Column('end',
+                      sqlalchemy.types.DateTime,
+                      nullable=False),
                Column('raw_data',
                       _JsonEncodedDict,
                       nullable=False),
@@ -94,7 +105,16 @@ _conn = _engine.connect()
 def add_game(gid, raw_data):
     """Add a game to the database."""
     try:
-        _conn.execute(_games.insert(), gid=gid, raw_data=raw_data)
+        name = raw_data['name']
+        start = modelutils.prettycrawldate(raw_data['start'], return_datetime=True)
+        end = modelutils.prettycrawldate(raw_data['end'], return_datetime=True)
+        type(start)
+        _conn.execute(_games.insert(),
+                      gid=gid,
+                      name=name,
+                      start=start,
+                      end=end,
+                      raw_data=raw_data)
     except sqlalchemy.exc.IntegrityError:
         raise DatabaseError("Duplicate game %s, ignoring." % gid)
 
@@ -150,6 +170,11 @@ def delete_all_player_stats():
     _conn.execute(_player_stats.delete())
 
 
+def delete_player_stats(name):
+    """Deletes a player's stats."""
+    _conn.execute(_player_stats.delete().where(_player_stats.c.name == name))
+
+
 def get_player_stats(name):
     """Return a dict of the player's current stats.
 
@@ -200,6 +225,12 @@ def mark_game_scored(gid):
 def unscore_all_games():
     """Marks all games as being unscored."""
     _conn.execute(_games.update().values(scored=False))
+
+
+def unscore_all_games_of_player(name):
+    """Marks all games by a player as being unscored."""
+    _conn.execute(_games.update().where(_games.c.name == name).values(scored=
+                                                                      False))
 
 
 def set_global_stat(key, data):

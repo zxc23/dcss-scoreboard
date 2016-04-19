@@ -20,7 +20,7 @@ def jinja_env():
     env.filters['prettyint'] = webutils.prettyint
     env.filters['prettydur'] = webutils.prettydur
     env.filters['prettycounter'] = webutils.prettycounter
-    env.filters['prettycrawldate'] = webutils.prettycrawldate
+    env.filters['prettycrawldate'] = webutils.modelutils.prettycrawldate
     env.filters['gametotablerow'] = webutils.gametotablerow
     env.filters['streaktotablerow'] = webutils.streaktotablerow
     env.filters[
