@@ -67,7 +67,12 @@ def write_website():
     print("Writing streaks")
     with open(os.path.join(OUTDIR, 'streaks.html'), 'w') as f:
         template = env.get_template('streaks.html')
-        f.write(template.render(stats=stats))
+        f.write(template.render(
+            stats=
+            {'active_streaks': sorted(stats['active_streaks'].values(),
+                                      key=lambda x: (-len(x), x[-1]['end'])),
+             'completed_streaks': sorted(stats['completed_streaks'],
+                                         key=lambda x: -len(x['wins']))}))
 
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')
@@ -89,7 +94,7 @@ def write_website():
         if not n % 5000:
             print(n)
 
-        # Don't make pages for players with no games played
+# Don't make pages for players with no games played
         if row.stats['games'] == 0:
             continue
 
@@ -100,11 +105,11 @@ def write_website():
                             for g in global_stats['char_highscores'].values()
                             if g['name'] == player]
         records['race'] = [g
-                        for g in global_stats['rc_highscores'].values()
-                        if g['name'] == player]
+                           for g in global_stats['rc_highscores'].values()
+                           if g['name'] == player]
         records['role'] = [g
-                        for g in global_stats['bg_highscores'].values()
-                        if g['name'] == player]
+                           for g in global_stats['bg_highscores'].values()
+                           if g['name'] == player]
         records['streak'] = global_stats['active_streaks'].get(player, [])
         with open(outfile, 'w') as f:
             f.write(template.render(player=player,
@@ -114,7 +119,6 @@ def write_website():
                                     records=records))
     end = time.time()
     print("Done scoring in %s seconds" % round(end - start, 2))
-
 
 if __name__ == "__main__":
     write_website()

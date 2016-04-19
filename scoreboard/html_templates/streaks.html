@@ -28,7 +28,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for player, streak in stats['active_streaks'].items() %}
+            {% for streak in stats['active_streaks'] %}
             {{ streak|streaktotablerow }}
             {% endfor %}
           </tbody>
