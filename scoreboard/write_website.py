@@ -88,6 +88,11 @@ def write_website():
         n += 1
         if not n % 5000:
             print(n)
+
+        # Don't make pages for players with no games played
+        if row.stats['games'] == 0:
+            continue
+
         player = row.name
         outfile = os.path.join(player_html_path, player + '.html')
         records = {}
@@ -95,11 +100,11 @@ def write_website():
                             for g in global_stats['char_highscores'].values()
                             if g['name'] == player]
         records['race'] = [g
-                           for g in global_stats['rc_highscores'].values()
-                           if g['name'] == player]
+                        for g in global_stats['rc_highscores'].values()
+                        if g['name'] == player]
         records['role'] = [g
-                           for g in global_stats['bg_highscores'].values()
-                           if g['name'] == player]
+                        for g in global_stats['bg_highscores'].values()
+                        if g['name'] == player]
         records['streak'] = global_stats['active_streaks'].get(player, [])
         with open(outfile, 'w') as f:
             f.write(template.render(player=player,

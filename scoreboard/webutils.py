@@ -52,6 +52,8 @@ def prettycrawldate(d):
 
     except ValueError:
         return d
+    except TypeError:
+        return d
 
 
 def gametotablerow(game, prefix_row=None, show_player=False):

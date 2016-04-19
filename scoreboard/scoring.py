@@ -85,6 +85,18 @@ def set_global_stat(key, data):
     GLOBAL_STATS_CACHE[key] = data
 
 
+def add_manual_achievements():
+    """Writes manual achievements to players' stats."""
+    for player in constants.MANUAL_ACHIEVEMENTS:
+        stats = load_player_stats(player)
+        if stats['games'] == 0:
+            continue
+        for achievement, value in constants.MANUAL_ACHIEVEMENTS[
+                player].items():
+            stats['achievements'][achievement] = value
+        set_player_stats(player, stats)
+
+
 def great_race(race, player_stats, achievements):
     """Check if the player has achieved great race for the given race.
 
@@ -379,6 +391,9 @@ def score_games():
     set_global_stat(
         'active_streaks',
         clean_up_active_streaks(load_global_stat('active_streaks')))
+
+    # Add manual achievements
+    add_manual_achievements()
 
     # Now we have to write out everything remaining in the cache
     for name, stats in PLAYER_STATS_CACHE.items():

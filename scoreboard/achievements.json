@@ -12,6 +12,12 @@
     "section": "general"
   },
   {
+    "name": "Greatest Player",
+    "id": "greatestplayer",
+    "description": "Won a game with every currently playable combo.",
+    "section": "general"
+  },
+  {
     "name": "Century Player",
     "id": "centuryplayer",
     "description": "Won 100 games.",

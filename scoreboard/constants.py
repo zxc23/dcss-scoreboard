@@ -11,7 +11,9 @@ PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos', 'E
                  'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas', 'Qazlal',
                  'Ru', 'Sif Muna', 'the Shining One', 'Trog', 'Vehumet', 'Xom',
                  'Yredelemnul', 'Zin'}
-GOD_NAME_FIXUPS = { 'The Shining One': 'the Shining One', 'Dithmengos' : "Dithmenos"}
+GOD_NAME_FIXUPS = {
+    'The Shining One': 'the Shining One',
+    'Dithmengos': "Dithmenos"}
 RACE_TO_GREAT_RACE = {'Ce': 'greatcentaur',
                       'DD': 'greatdeepdwarf',
                       'DE': 'greatdeepelf',
@@ -64,3 +66,16 @@ ROLE_TO_GREAT_ROLE = {'AE': 'greatairelementalist',
                       'Wn': 'greatwanderer',
                       'Wr': 'greatwarper',
                       'Wz': 'greatwizard'}
+MANUAL_ACHIEVEMENTS = {
+    'comborobin': {
+        'greatestplayer': True}, 'Stabwound': {
+            '0.4_winner': True}, '78291': {
+                '0.5_winner': True}, 'elliptic': {
+                    '0.7_winner': True, '0.10_winner': True}, 'mikee': {
+                        '0.8_winner': True}, 'theglow': {
+                            '0.9_winner': True, '0.11_winner': True}, 'jeanjacques': {
+                                '0.12_winner': True}, 'bmfx': {
+                                    '0.13_winner': True}, 'Tolias': {
+                                        '0.14_winner': True, '0.15_winner': True}, 'DrKe': {
+                                            '0.16_winner': True}, 'cosmonaut': {
+                                                '0.17_winner': True}}
