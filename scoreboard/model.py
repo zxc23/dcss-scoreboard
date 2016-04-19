@@ -265,3 +265,8 @@ def get_all_global_stats():
     for row in _conn.execute(s).fetchall():
         scores[row[0]] = row[1]
     return scores
+
+
+def delete_all_global_stats():
+    """Deletes all global stats."""
+    _conn.execute(_global_stats.delete())

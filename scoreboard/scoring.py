@@ -98,6 +98,13 @@ def rescore_player(player):
         print(e)
 
 
+def rebuild_database():
+    """Rebuilds the database by unscoring all games and deleting stats."""
+    model.unscore_all_games()
+    model.delete_all_player_stats()
+    model.delete_all_global_stats()
+
+
 def add_manual_achievements():
     """Writes manual achievements to players' stats."""
     for player in constants.MANUAL_ACHIEVEMENTS:
@@ -386,11 +393,17 @@ def score_game(game_row):
     model.mark_game_scored(gid)
 
 
-def score_games():
-    """Update scores with all game's data."""
+def score_games(rebuild=False):
+    """Update stats with all unscored game.
+
+    If rebuild == True, rebuilds the database as well.
+    """
     print("Scoring all games...")
     start = time.time()
     scored = 0
+
+    if rebuild:
+        rebuild_database()
 
     #p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
     jobs = []
