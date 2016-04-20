@@ -4,6 +4,8 @@ import os
 import json
 import time
 import shutil
+import multiprocessing
+import sys
 
 import jinja2
 
@@ -37,6 +39,27 @@ def achievement_data(ordered=False):
     """
     path = os.path.join(os.path.dirname(__file__), 'achievements.json')
     return json.load(open(path))
+
+
+def write_player_stats(player, stats, outfile, achievements, global_stats, template):
+    """Write stats page for an individual player."""
+    records = {}
+    records['combo'] = [g
+                        for g in global_stats['char_highscores'].values()
+                        if g['name'] == player]
+    records['race'] = [g
+                       for g in global_stats['rc_highscores'].values()
+                       if g['name'] == player]
+    records['role'] = [g
+                       for g in global_stats['bg_highscores'].values()
+                       if g['name'] == player]
+    records['streak'] = global_stats['active_streaks'].get(player, [])
+    with open(outfile, 'w') as f:
+        f.write(template.render(player=player,
+                                stats=stats,
+                                achievement_data=achievements,
+                                constants=constants,
+                                records=records))
 
 
 def write_website():
@@ -89,34 +112,39 @@ def write_website():
     global_stats = model.get_all_global_stats()
     template = env.get_template('player.html')
     n = 0
-    for row in model.get_all_player_stats():
-        n += 1
-        if not n % 5000:
-            print(n)
+    if sys.platform == 'win32':
+        for row in model.get_all_player_stats():
+            # Don't make pages for players with no games played
+            if row.stats['games'] == 0:
+                continue
 
-# Don't make pages for players with no games played
-        if row.stats['games'] == 0:
-            continue
+            player = row.name
+            stats = row.stats
+            outfile = os.path.join(player_html_path, player + '.html')
+            write_player_stats(player, stats, outfile, achievements, global_stats, template)
 
-        player = row.name
-        outfile = os.path.join(player_html_path, player + '.html')
-        records = {}
-        records['combo'] = [g
-                            for g in global_stats['char_highscores'].values()
-                            if g['name'] == player]
-        records['race'] = [g
-                           for g in global_stats['rc_highscores'].values()
-                           if g['name'] == player]
-        records['role'] = [g
-                           for g in global_stats['bg_highscores'].values()
-                           if g['name'] == player]
-        records['streak'] = global_stats['active_streaks'].get(player, [])
-        with open(outfile, 'w') as f:
-            f.write(template.render(player=player,
-                                    stats=row.stats,
-                                    achievement_data=achievements,
-                                    constants=constants,
-                                    records=records))
+            n += 1
+            if not n % 10000:
+                print(n)
+    else:
+        p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+        jobs = []
+        for row in model.get_all_player_stats():
+            # Don't make pages for players with no games played
+            if row.stats['games'] == 0:
+                continue
+
+            player = row.name
+            stats = row.stats
+            outfile = os.path.join(player_html_path, player + '.html')
+            jobs.append(p.apply_async(write_player_stats, (player, stats, outfile, achievements, global_stats, template)))
+
+        for job in jobs:
+            job.wait()
+            n += 1
+            if not n % 10000:
+                print(n)
+
     end = time.time()
     print("Done scoring in %s seconds" % round(end - start, 2))
 
