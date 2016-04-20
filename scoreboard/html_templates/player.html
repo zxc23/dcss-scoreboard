@@ -7,7 +7,8 @@
     <h3>Overall Statistics</h3>
     <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
     <p><strong>Games Played:</strong> {{ stats['games'] }}</p>
-    <p><strong>Wins:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
+    <p><strong>Won:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
+    <p><strong>Quit:</strong> {{ stats['boring_games'] }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
     <p><strong>Best Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
     {% if stats['wins']|length %}
         <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }}</p>
