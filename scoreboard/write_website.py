@@ -112,35 +112,20 @@ def write_website():
     global_stats = model.get_all_global_stats()
     template = env.get_template('player.html')
     n = 0
-    if sys.platform == 'win32':
-        for row in model.get_all_player_stats():
-            # Don't make pages for players with no games played
-            if row.stats['games'] == 0:
-                continue
+    for row in model.get_all_player_stats():
+        # Don't make pages for players with no games played
+        if row.stats['games'] == 0:
+            continue
 
-            player = row.name
-            stats = row.stats
-            outfile = os.path.join(player_html_path, player + '.html')
-            write_player_stats(player, stats, outfile, achievements,
-                               global_stats, template)
+        player = row.name
+        stats = row.stats
+        outfile = os.path.join(player_html_path, player + '.html')
+        write_player_stats(player, stats, outfile, achievements,
+                           global_stats, template)
 
-            n += 1
-            if not n % 10000:
-                print(n)
-    else:
-        for row in model.get_all_player_stats():
-            # Don't make pages for players with no games played
-            if row.stats['games'] == 0:
-                continue
-
-            player = row.name
-            stats = row.stats
-            outfile = os.path.join(player_html_path, player + '.html')
-            write_player_stats(player, stats, outfile, achievements,
-                               global_stats, template)
-            n += 1
-            if not n % 10000:
-                print(n)
+        n += 1
+        if not n % 10000:
+            print(n)
 
     end = time.time()
     print("Done scoring in %s seconds" % round(end - start, 2))
