@@ -105,3 +105,4 @@ MANUAL_ACHIEVEMENTS = {
         '0.17_winner': True
     }
 }
+MULTIPROCESSING_PROCESSES=1
