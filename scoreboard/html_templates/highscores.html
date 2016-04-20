@@ -8,7 +8,10 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" href="#race" role="tab">Race</a>
+        <a class="nav-link active" data-toggle="tab" href="#overall" role="tab">Overall</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#race" role="tab">Race</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-toggle="tab" href="#background" role="tab">Background</a>
@@ -29,7 +32,31 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
-      <div class="tab-pane active" id="race" role="tabpanel">
+      <div class="tab-pane active" id="overall" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['max_score'] %}
+            {{ game|gametotablerow(show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="race" role="tabpanel">
         <table class="table table-hover">
           <thead>
             <tr>
