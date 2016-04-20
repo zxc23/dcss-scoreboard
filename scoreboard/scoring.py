@@ -30,21 +30,24 @@ def load_player_stats(name):
 
     This requires applying some transformations to the raw stored data.
     """
+    # Try to load stats from cache
     if name in PLAYER_STATS_CACHE:
         stats = PLAYER_STATS_CACHE[name]
     else:
         stats = model.get_player_stats(name)
 
     if stats:
-        stats['last_5_games'] = deque(stats['last_5_games'], 5)
+        # Convert lists back to deques
+        stats['recent_games'] = deque(stats['recent_games'], constants.RECENT_GAMES_LENGTH)
     else:
+        # Create initial stats
         stats = {'wins': [],
                  'games': 0,
                  'winrate': 0,
                  'total_score': 0,
                  'avg_score': 0,
-                 'last_5_games': deque(
-                     [], 5),
+                 'recent_games': deque(
+                     [], constants.RECENT_GAMES_LENGTH),
                  'boring_games': 0,
                  'boring_rate': 0,
                  'god_wins': {k: 0
@@ -202,7 +205,7 @@ def score_game_vs_misc_stats(game):
     else:
         if dur < min(i['dur'] for i in min_dur):
             min_dur.append(game)
-            min_dur = sorted(min_dur, key=lambda i: i['dur'])[:5]
+            min_dur = sorted(min_dur, key=lambda i: i['dur'])[:constants.MIN_DUR_RECORD_LENGTH]
     set_global_stat('min_dur', min_dur)
 
     min_turn = load_global_stat('min_turn', [])
@@ -211,7 +214,7 @@ def score_game_vs_misc_stats(game):
     else:
         if turns < min(i['turn'] for i in min_turn):
             min_turn.append(game)
-            min_turn = sorted(min_turn, key=lambda i: i['turn'])[:5]
+            min_turn = sorted(min_turn, key=lambda i: i['turn'])[:constants.MIN_TURN_RECORD_LENGTH]
     set_global_stat('min_turn', min_turn)
 
 
@@ -376,7 +379,7 @@ def score_game(game_row):
     stats['winrate'] = wins / stats['games']
     stats['total_score'] += score
     stats['avg_score'] = stats['total_score'] / stats['games']
-    stats['last_5_games'].append(game)
+    stats['recent_games'].append(game)
     stats['boring_rate'] = stats['boring_games'] / stats['games']
 
     # Check global highscore records

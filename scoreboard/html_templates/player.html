@@ -1,24 +1,30 @@
 {% extends "base.html" %}
 {% block title %}{{ player }}{% endblock %}
-{% block heading %}Statistics for {{ player }}{% endblock %}
+{% block heading %}{{ player }}{% endblock %}
 {% block content %}
 <div class="row">
   <div class="col-sm-4">
-    <h3>Overall Statistics</h3>
+    <h3>Overall Stats</h3>
     <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
     <p><strong>Games Played:</strong> {{ stats['games'] }}</p>
-    <p><strong>Won:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
-    <p><strong>Quit:</strong> {{ stats['boring_games'] }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
-    <p><strong>Best Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
+    <p><strong>Games Won:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
+    <p><strong>Quits:</strong> {{ stats['boring_games'] }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
+    <p><strong>Highest Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
     {% if stats['wins']|length %}
         <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }}</p>
         <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
-        <p><strong>Active Streak:</strong> {{ records['streak']|map(attribute='char')|join(', ') }}</p>
-        {% if records['combo'] or records['race'] or records['role'] %}
+        {% if records['streak'] %}
+            <p><strong>Active Streak:</strong> {{ records['streak']|map(attribute='char')|join(', ') }}</p>
+        {% endif %}
+        {% if records['combo'] %}
             <h3>Global Highscores</h3>
             <p><strong>Combo Highscores:</strong> {{ records['combo']|map(attribute='char')|join(', ') }}</p>
-            <p><strong>Species Highscores:</strong> {{ records['race']|map(attribute='rc')|join(', ') }}</p>
-            <p><strong>Background Highscores:</strong> {{ records['role']|map(attribute='bg')|join(', ') }}</p>
+            {% if records['race'] %}
+                <p><strong>Species Highscores:</strong> {{ records['race']|map(attribute='rc')|join(', ') }}</p>
+            {% endif %}
+            {% if records['role'] %}
+                <p><strong>Background Highscores:</strong> {{ records['role']|map(attribute='bg')|join(', ') }}</p>
+            {% endif %}
         {% endif %}
     {% endif %}
   </div>
@@ -70,7 +76,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['last_5_games']|sort(attribute='end', reverse=True) %}
+            {% for game in stats['recent_games']|sort(attribute='end', reverse=True) %}
             {{ game|gametotablerow }}
             {% endfor %}
           </tbody>
@@ -93,7 +99,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['wins'][-5:]|sort(attribute='end', reverse=True) %}
+            {% for game in stats['wins'][-constants.RECENT_GAMES_LENGTH:]|sort(attribute='end', reverse=True) %}
             {{ game|gametotablerow }}
             {% endfor %}
           </tbody>
