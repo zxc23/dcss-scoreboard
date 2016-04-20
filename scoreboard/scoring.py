@@ -1,7 +1,6 @@
 """Take game data and figure out scoring."""
 
 import time
-import multiprocessing
 from collections import deque
 import sys
 
@@ -91,7 +90,7 @@ def set_global_stat(key, data):
 
 
 def rescore_player(player):
-    """Rescores all of the player's games and stats."""
+    """Rescore all of player's games and stats."""
     try:
         model.delete_player_stats(player)
         model.unscore_all_games_of_player(player)
@@ -100,14 +99,14 @@ def rescore_player(player):
 
 
 def rebuild_database():
-    """Rebuilds the database by unscoring all games and deleting stats."""
+    """Rebuild the database by unscoring all games and deleting stats."""
     model.unscore_all_games()
     model.delete_all_player_stats()
     model.delete_all_global_stats()
 
 
 def add_manual_achievements():
-    """Writes manual achievements to players' stats."""
+    """Add manual achievements to players' stats."""
     for player in constants.MANUAL_ACHIEVEMENTS:
         stats = load_player_stats(player)
         if stats['games'] == 0:
@@ -123,8 +122,8 @@ def great_race(race, player_stats, achievements):
 
     Returns True or False.
 
-    Note: Requires player_stats['race_wins'] to already have been updated with this
-    games's result.
+    Note: Requires player_stats['race_wins'] to already have been updated with
+    this games's result.
     """
     # Check the race has a greatrace achievement
     if race not in constants.RACE_TO_GREAT_RACE:
@@ -150,8 +149,8 @@ def great_role(role, player_stats, achievements):
 
     Returns True or False.
 
-    Note: Requires player_stats['role_wins'] to already have been updated with this
-    games's result.
+    Note: Requires player_stats['role_wins'] to already have been updated with
+    this games's result.
     """
     # Check the role has a greatrole achievement
     if role not in constants.ROLE_TO_GREAT_ROLE:
@@ -413,13 +412,8 @@ def score_games(rebuild=False):
             if scored % 10000 == 0:
                 print(scored)
     else:
-        p = multiprocessing.Pool(processes=constants.MULTIPROCESSING_PROCESSES)
-        jobs = []
         for game in model.get_all_games(scored=False):
-            jobs.append(p.apply_async(score_game, (game, )))
-
-        for job in jobs:
-            job.wait()
+            score_game(game)
             scored += 1
             if scored % 10000 == 0:
                 print(scored)

@@ -5,7 +5,7 @@ import collections
 import sqlalchemy.ext.mutable
 import datetime
 
-from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime
+from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
 import _mysql_exceptions
 
 from . import modelutils
@@ -38,15 +38,15 @@ def deque_default(obj):
 class _JsonEncodedDict(TypeDecorator):
     """Enables JSON storage by encoding and decoding on the fly."""
 
-    impl = String
+    impl = LargeBinary
 
     def process_bind_param(self, value, dialect):
         """Dict -> JSON String."""
-        return json.dumps(value, default=deque_default)
+        return json.dumps(value, default=deque_default).encode()
 
     def process_result_value(self, value, dialect):
         """JSON String -> Dict."""
-        return json.loads(value)
+        return json.loads(value.decode())
 
 
 sqlalchemy.ext.mutable.MutableDict.associate_with(_JsonEncodedDict)
@@ -96,7 +96,7 @@ _player_stats = Table('player_stats',
                              String(50),  # XXX: is this long enough?
                              primary_key=True),
                       Column('stats',
-                             _JsonEncodedDict(10000),
+                             _JsonEncodedDict(100000),
                              nullable=False),
                       mysql_engine='InnoDB',
                       mysql_charset='utf8')
@@ -107,7 +107,7 @@ _global_stats = Table('global_stats',
                              String(100),
                              primary_key=True),
                       Column('data',
-                             _JsonEncodedDict(10000),
+                             _JsonEncodedDict(100000),
                              nullable=False),
                       mysql_engine='InnoDB',
                       mysql_charset='utf8')
@@ -140,7 +140,7 @@ def add_game(gid, raw_data):
                      end=end,
                      runes=runes,
                      raw_data=raw_data)
-    except (sqlalchemy.exc.IntegrityError, _mysql_exceptions.IntegrityError):
+    except (sqlalchemy.exc.IntegrityError, _mysql_exceptions.IntegrityError, _mysql_exceptions.OperationalError):
         raise DatabaseError("Duplicate game %s, ignoring." % gid)
 
 

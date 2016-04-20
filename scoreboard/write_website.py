@@ -4,7 +4,6 @@ import os
 import json
 import time
 import shutil
-import multiprocessing
 import sys
 
 import jinja2
@@ -129,8 +128,6 @@ def write_website():
             if not n % 10000:
                 print(n)
     else:
-        p = multiprocessing.Pool(processes=constants.MULTIPROCESSING_PROCESSES)
-        jobs = []
         for row in model.get_all_player_stats():
             # Don't make pages for players with no games played
             if row.stats['games'] == 0:
@@ -139,11 +136,8 @@ def write_website():
             player = row.name
             stats = row.stats
             outfile = os.path.join(player_html_path, player + '.html')
-            jobs.append(p.apply_async(write_player_stats, (
-                player, stats, outfile, achievements, global_stats, template)))
-
-        for job in jobs:
-            job.wait()
+            write_player_stats(player, stats, outfile, achievements,
+                               global_stats, template)
             n += 1
             if not n % 10000:
                 print(n)

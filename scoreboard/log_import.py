@@ -4,8 +4,6 @@ import os
 import re
 import time
 import glob
-import multiprocessing
-import sys
 
 from . import model, constants
 
@@ -41,8 +39,6 @@ def load_logfile(logfile):
     processed_lines = model.get_logfile_pos(logfile)
     print("Reading %s%s... " % (logfile, (" from line %s" % processed_lines) if
                                 processed_lines else ''))
-    p = multiprocessing.Pool(processes=constants.MULTIPROCESSING_PROCESSES)
-    jobs = []
     for line in open(logfile, encoding='utf-8').readlines():
         lines += 1
         # skip up to the first unprocessed line
@@ -51,9 +47,7 @@ def load_logfile(logfile):
         # skip blank lines
         if not line:
             continue
-        jobs.append(p.apply_async(parse_line, (line, src)))
-    for job in jobs:
-        job.wait()
+        parse_line(line, src)
     # Save the new number of lines processed in the database
     model.save_logfile_pos(logfile, lines)
     end = time.time()
@@ -62,6 +56,7 @@ def load_logfile(logfile):
 
 
 def parse_line(line, src):
+    """Read a single logfile line and insert it into the database."""
     game = {}
     game['src'] = src
     badline = False
