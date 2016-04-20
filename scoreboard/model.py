@@ -5,6 +5,7 @@ import collections
 import sqlalchemy.ext.mutable
 
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
+from sqlalchemy import desc
 import _mysql_exceptions
 
 from . import modelutils
@@ -58,6 +59,7 @@ def setup_database(backend):
         ENGINE_OPTS = {'pool_size': 1, 'max_overflow': -1, 'pool_recycle': 60}
     else:
         raise RuntimeError("Unknown database backend %s" % db_backend)
+    print("Using database %s" % DB_URI)
 
     _metadata = MetaData()
 
@@ -69,22 +71,32 @@ def setup_database(backend):
                           primary_key=True),
                    Column('name',
                           String(50),  # XXX: is this long enough?
-                          nullable=False),
+                          nullable=False,
+                          index=True),
                    Column('start',
-                          sqlalchemy.types.DateTime,
-                          nullable=False),
+                          DateTime,
+                          nullable=False,
+                          index=True),
                    Column('end',
-                          sqlalchemy.types.DateTime,
-                          nullable=False),
+                          DateTime,
+                          nullable=False,
+                          index=True),
                    Column('runes',
                           Integer,
                           nullable=False),
+                   Column('ktyp',
+                          String(50),
+                          nullable=False,
+                          index=True),
+
+                   # These are columns not storing game data
                    Column('raw_data',
                           _JsonEncodedDict(10000),
                           nullable=False),
                    Column('scored',
                           Boolean,
-                          default=False),
+                          default=False,
+                          index=True),
                    mysql_engine='InnoDB',
                    mysql_charset='utf8')
 
@@ -137,17 +149,13 @@ def add_game(gid, raw_data):
     """Add a game to the database."""
     conn = _engine.connect()
     try:
-        name = raw_data['name']
-        start = modelutils.crawl_date_to_datetime(raw_data['start'])
-        end = modelutils.crawl_date_to_datetime(raw_data['end'])
-        type(start)
-        runes = raw_data['urune'] if 'urune' in raw_data else 0
         conn.execute(_games.insert(),
                      gid=gid,
-                     name=name,
-                     start=start,
-                     end=end,
-                     runes=runes,
+                     name=raw_data['name'],
+                     start=modelutils.crawl_date_to_datetime(raw_data['start']),
+                     end=modelutils.crawl_date_to_datetime(raw_data['end']),
+                     runes=raw_data.get('urune', 0),
+                     ktyp=raw_data['ktyp'],
                      raw_data=raw_data)
     except (sqlalchemy.exc.IntegrityError, _mysql_exceptions.IntegrityError, _mysql_exceptions.OperationalError):
         raise DatabaseError("Duplicate game %s, ignoring." % gid)
@@ -316,3 +324,10 @@ def delete_all_global_stats():
     """Deletes all global stats."""
     conn = _engine.connect()
     conn.execute(_global_stats.delete())
+
+
+def recent_wins(num=5):
+    """Return a list of recent wins."""
+    conn = _engine.connect()
+    rows = conn.execute(_games.select().where(_games.c.ktyp == 'winning').order_by(desc("end")).limit(num))
+    return rows.fetchall()

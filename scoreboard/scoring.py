@@ -190,7 +190,7 @@ def score_game_vs_global_highscores(game, fields):
 
 def score_game_vs_misc_stats(game):
     """Compare a game log with various misc global stats.
-    
+
     XXX: Consider making a helper function.
 
     Note: Currently assumes the game was won.
