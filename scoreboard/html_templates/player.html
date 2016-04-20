@@ -6,12 +6,15 @@
   <div class="col-sm-4">
     <h3>Overall Stats</h3>
     <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
-    <p><strong>Games Played:</strong> {{ stats['games'] }}</p>
+    <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
     <p><strong>Games Won:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
-    <p><strong>Quits:</strong> {{ stats['boring_games'] }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
+    <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
+    <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur }} hours</p>
+    <p><strong>Total Score:</strong> {{ stats['total_score']|prettyint }}</p>
     <p><strong>Highest Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
+    <p><strong>Average Score:</strong> {{ (stats['avg_score']|round)|prettyint }}</p>
     {% if stats['wins']|length %}
-      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }}</p>
+      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
       <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
       {% if streaks %}
       <p><strong>Longest Win Streak:</strong> {{ streaks[0]['length'] }}</p>

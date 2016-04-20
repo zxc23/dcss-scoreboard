@@ -71,6 +71,7 @@ def write_player_stats(player, stats, outfile, achievements, global_stats,
 
 def write_website():
     """Write all website files."""
+    start = time.time()
     env = jinja_env()
 
     print("Writing HTML to %s" % OUTDIR)
@@ -89,7 +90,7 @@ def write_website():
         template = env.get_template('index.html')
         f.write(template.render())
 
-# Get stats
+    # Get stats
     stats = model.get_all_global_stats()
 
     # Merge active streaks into streaks
@@ -102,7 +103,7 @@ def write_website():
             streaks.append(streak)
             sorted_active_streaks.append(streak)
 
-# Sort streaks
+    # Sort streaks
     sorted_streaks = sorted(streaks, key=lambda x: (-x['length'], x['end']))
     sorted_active_streaks.sort(key=lambda x: (-x['length'], x['end']))
 
@@ -115,7 +116,6 @@ def write_website():
         template = env.get_template('streaks.html')
         f.write(template.render(streaks=sorted_streaks,
                                 active_streaks=sorted_active_streaks))
-
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')
     if not os.path.isdir(player_html_path):
@@ -124,8 +124,6 @@ def write_website():
     with open(os.path.join(OUTDIR, 'players.html'), 'w') as f:
         template = env.get_template('players.html')
         f.write(template.render(players=players))
-
-    start = time.time()
     print("Writing player pages... ")
     achievements = achievement_data()
     global_stats = model.get_all_global_stats()
@@ -141,13 +139,11 @@ def write_website():
         outfile = os.path.join(player_html_path, player + '.html')
         write_player_stats(player, stats, outfile, achievements, global_stats,
                            sorted_streaks, active_streaks, template)
-
         n += 1
         if not n % 10000:
             print(n)
-
     end = time.time()
-    print("Done scoring in %s seconds" % round(end - start, 2))
+    print("Wrote website in %s seconds" % round(end - start, 2))
 
 if __name__ == "__main__":
     write_website()

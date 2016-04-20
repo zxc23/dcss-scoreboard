@@ -40,6 +40,7 @@ def load_player_stats(name):
         stats = {'wins': [],
                  'games': 0,
                  'winrate': 0,
+                 'total_playtime': 0,
                  'total_score': 0,
                  'avg_score': 0,
                  'recent_games': deque(
@@ -287,9 +288,10 @@ def score_game(game_row):
     achievements = stats['achievements']
     wins = len(stats['wins'])
 
-    # Increment games
+    # Start updating stats
     stats['games'] += 1
     stats['last_active'] = game['end']
+    stats['total_playtime'] += game['dur']
 
     # Increment wins
     if won:

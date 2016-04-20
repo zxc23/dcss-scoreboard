@@ -18,6 +18,8 @@ def prettydur(duration):
 
     eg, 170 to '2 minutes, 50 seconds'.
     """
+    if type(duration) != int:
+        duration = int(duration)
     return str(datetime.timedelta(seconds=duration))
 
 
