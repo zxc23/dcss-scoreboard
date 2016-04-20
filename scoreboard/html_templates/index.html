@@ -2,8 +2,11 @@
 {% block title %}Home{% endblock %}
 {% block heading %}Dungon Crawl Stone Soup Scoreboard{% endblock %}
 {% block content %}
-    <h1>Index</h1>
-    <p><a href="highscores.html">Global Highscores</a></p>
-    <p><a href="streaks.html">Streaks (beta)</a></p>
-    <p><a href="players.html">Player Pages</a></p>
+<div class="row">
+  <div class="col-sm-12">
+    {% for game in recent_wins %}
+    {{ game|gametotablerow }}
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}

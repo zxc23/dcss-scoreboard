@@ -2,6 +2,7 @@
 
 import datetime
 
+from . import model
 from . import modelutils
 
 
@@ -40,12 +41,17 @@ def prettycounter(counter):
 
 
 def prettycrawldate(d):
-    """Jinja filter to convert datetime object to pretty text."""
+    """Jinja filter to convert crawl date string to pretty text."""
     return modelutils.crawl_date_to_datetime(d).strftime('%c')
 
 
+def prettydate(d):
+    """Jinja filter to convert datetime object to pretty text."""
+    return d.strftime('%c')
+
+
 def gametotablerow(game, prefix_row=None, show_player=False):
-    """Jinja filter to convert a game dict to a table row."""
+    """Jinja filter to convert a game row to a table row."""
     t = """<tr class="{win}">
       {prefix_row}
       {player_row}
@@ -62,23 +68,22 @@ def gametotablerow(game, prefix_row=None, show_player=False):
     </tr>"""
 
     return t.format(
-        win='table-success' if game['ktyp'] == 'winning' else 'table-danger'
-        if game['ktyp'] == 'quitting' else '',
-        prefix_row='' if prefix_row is None else "<td>%s</td>" % game.get(
+        win='table-success' if game.ktyp == 'winning' else 'table-danger'
+        if game.ktyp == 'quitting' else '',
+        prefix_row='' if prefix_row is None else "<td>%s</td>" % game.raw_data.get(
             prefix_row),
-        player_row='' if not show_player else (
-            "<td><a href='players/%s.html'>%s</a></td>" % (game['name'], game[
-                'name'])),
-        score=prettyint(game['sc']),
-        character=game['char'],
-        place=game['place'],
-        end=game.get('tmsg', ''),  # Older logfiles don't have this line
-        xl=game['xl'],
-        turns=prettyint(game['turn']),
-        duration=prettydur(game['dur']),
-        runes=game.get('nrune', '?'),  # Older logfiles don't have this line
-        date=prettycrawldate(game['end']),
-        version=game['v'])
+        player_row='' if not show_player else
+            "<td><a href='players/{name}.html'>{name}</a></td>".format(name=game.name),
+        score=prettyint(game.raw_data['sc']),
+        character=game.raw_data['char'],
+        place=game.raw_data['place'],
+        end=game.raw_data.get('tmsg', ''),  # Older logfiles don't have this
+        xl=game.raw_data['xl'],
+        turns=prettyint(game.raw_data['turn']),
+        duration=prettydur(game.raw_data['dur']),
+        runes=game.raw_data.get('nrune', '?'),  # Older logfiles don't have this
+        date=prettydate(game.end),
+        version=game.raw_data['v'])
 
 
 def streaktotablerow(streak):
@@ -91,15 +96,15 @@ def streaktotablerow(streak):
       <td>{end}</td>
       <td>{versions}</td>
     </tr>""".format(
-        wins=streak['length'],
+        wins=len(streak['wins']),
         player=streak['player'],
-        games=', '.join(g['char'] for g in streak['wins']),
-        start=prettycrawldate(streak['start']),
-        end=prettycrawldate(streak['end']),
-        versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))
+        games=', '.join(model.game(g).char for g in streak['wins']),
+        start=streak['start'],
+        end=streak['end'],
+        versions=', '.join(sorted(set(model.game(g).v for g in streak['wins']))))
 
 
-def completedstreaktotablerow(streak):
+def longeststreaktotablerow(streak):
     """Jinja filter to convert a streak to a table row."""
     return """<tr>
       <td>{wins}</td>
@@ -110,10 +115,10 @@ def completedstreaktotablerow(streak):
       <td>{versions}</td>
       <td>{streak_breaker}</td>
     </tr>""".format(
-        wins=streak['length'],
+        wins=len(streak['wins']),
         player=streak['player'],
-        games=', '.join(g['char'] for g in streak['wins']),
-        start=prettycrawldate(streak['start']),
-        end=prettycrawldate(streak['end']),
-        versions=', '.join(sorted(set(g['v'] for g in streak['wins']))),
-        streak_breaker=streak.get('streak_breaker', {}).get('char', ''))
+        games=', '.join(model.game(g).char for g in streak['wins']),
+        start=streak['start'],
+        end=streak['end'],
+        versions=', '.join(sorted(set(model.game(g).v for g in streak['wins']))),
+        streak_breaker=model.game(streak['streak_breaker']).char if 'streak_breaker' in streak else '')

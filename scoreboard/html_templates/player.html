@@ -28,7 +28,7 @@
         {% endif %}
         <p><strong>Combo Highscores Held:</strong> {{ records['combo']|length }}</p>
       {% endif %}
-      {% if active_streak and active_streak['length'] > 1 %}
+      {% if active_streak and active_streak.wins|length > 1 %}
         <p><strong>Active Win Streak:</strong> {{ active_streak['wins']|map(attribute='char')|join(', ') }}</p>
       {% endif %}
       {% if records['combo'] %}
@@ -91,7 +91,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['recent_games']|sort(attribute='end', reverse=True) %}
+            {% for game in recent_games %}
             {{ game|gametotablerow }}
             {% endfor %}
           </tbody>
@@ -114,8 +114,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['wins'][-constants.RECENT_GAMES_LENGTH:]|sort(attribute='end', reverse=True) %}
-            {{ game|gametotablerow }}
+            {% for gid in stats['wins'] %}
+            {{ gid|gidtogame|gametotablerow }}
             {% endfor %}
           </tbody>
         </table>

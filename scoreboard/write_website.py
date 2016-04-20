@@ -24,8 +24,10 @@ def jinja_env():
     env.filters['prettycrawldate'] = webutils.prettycrawldate
     env.filters['gametotablerow'] = webutils.gametotablerow
     env.filters['streaktotablerow'] = webutils.streaktotablerow
-    env.filters[
-        'completedstreaktotablerow'] = webutils.completedstreaktotablerow
+    env.filters['longeststreaktotablerow'] = webutils.longeststreaktotablerow
+    env.filters['prettydate'] = webutils.prettydate
+    env.filters['gidtogame'] = model.game
+
     env.globals['urlbase'] = URLBASE
     return env
 
@@ -43,20 +45,22 @@ def achievement_data(ordered=False):
 def write_player_stats(player, stats, outfile, achievements, global_stats,
                        streaks, active_streaks, template):
     """Write stats page for an individual player."""
+    stats['wins'] = stats['wins'][-5:]
+    recent_games = model.recent_games(player=player)
     records = {}
     records['combo'] = sorted(
         [g
          for g in global_stats['char_highscores'].values()
-         if g['name'] == player],
-        key=lambda x: x['char'])
+         if model.game(g).name == player],
+        key=lambda x: model.game(x).char)
     records['race'] = sorted(
         [g for g in global_stats['rc_highscores'].values()
-         if g['name'] == player],
-        key=lambda x: x['char'][:2])
+         if model.game(g).name == player],
+        key=lambda x: model.game(x).rc)
     records['role'] = sorted(
         [g for g in global_stats['bg_highscores'].values()
-         if g['name'] == player],
-        key=lambda x: x['char'][2:])
+         if model.game(g).name == player],
+        key=lambda x: model.game(x).bg)
     streaks = [s for s in streaks if s['player'] == player]
     active_streak = global_stats['active_streaks'].get(player)
     with open(outfile, 'w') as f:
@@ -66,7 +70,8 @@ def write_player_stats(player, stats, outfile, achievements, global_stats,
                                 constants=constants,
                                 records=records,
                                 streaks=streaks,
-                                active_streak=active_streak))
+                                active_streak=active_streak,
+                                recent_games=recent_games))
 
 
 def write_website():
@@ -88,7 +93,7 @@ def write_website():
     print("Writing index")
     with open(os.path.join(OUTDIR, 'index.html'), 'w') as f:
         template = env.get_template('index.html')
-        f.write(template.render())
+        f.write(template.render(recent_wins=model.recent_games(wins=True)))
 
     # Get stats
     stats = model.get_all_global_stats()
@@ -98,14 +103,15 @@ def write_website():
     active_streaks = stats['active_streaks']
     sorted_active_streaks = []
 
+    # XXX Trimming single-game "streaks" should happen in scoring.py
     for streak in active_streaks.values():
-        if streak['length'] > 1:
+        if len(streak['wins']) > 1:
             streaks.append(streak)
             sorted_active_streaks.append(streak)
 
     # Sort streaks
-    sorted_streaks = sorted(streaks, key=lambda x: (-x['length'], x['end']))
-    sorted_active_streaks.sort(key=lambda x: (-x['length'], x['end']))
+    sorted_streaks = sorted(streaks, key=lambda s: (-len(s['wins']), s['end']))
+    sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
 
     print("Writing highscores")
     with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
@@ -144,6 +150,7 @@ def write_website():
             print(n)
     end = time.time()
     print("Wrote website in %s seconds" % round(end - start, 2))
+
 
 if __name__ == "__main__":
     write_website()

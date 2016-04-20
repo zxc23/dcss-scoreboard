@@ -2,11 +2,11 @@
 
 import json
 import collections
-import sqlalchemy.ext.mutable
+import datetime
 
+import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
 from sqlalchemy import desc
-import _mysql_exceptions
 
 from . import modelutils
 
@@ -23,13 +23,15 @@ def sqlite_performance_over_safety(dbapi_con, con_record):
     dbapi_con.execute('PRAGMA synchronous = OFF')
 
 
-def deque_default(obj):
+def json_serialise(obj):
     """Convert deques to lists.
 
     Used to persist deque data into JSON.
     """
     if isinstance(obj, collections.deque):
         return list(obj)
+    elif isinstance(obj, datetime.datetime):
+        return obj.isoformat()
     raise TypeError
 
 
@@ -40,11 +42,12 @@ class _JsonEncodedDict(TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         """Dict -> JSON String."""
-        return json.dumps(value, default=deque_default).encode()
+        return json.dumps(value, default=json_serialise).encode()
 
     def process_result_value(self, value, dialect):
         """JSON String -> Dict."""
         return json.loads(value.decode())
+
 
 sqlalchemy.ext.mutable.MutableDict.associate_with(_JsonEncodedDict)
 
@@ -73,6 +76,18 @@ def setup_database(backend):
                           String(50),  # XXX: is this long enough?
                           nullable=False,
                           index=True),
+                   Column('v', String(10), nullable=False),
+                   Column('char', String(4), nullable=False),
+                   Column('rc', String(2), nullable=False),
+                   Column('bg', String(2), nullable=False),
+                   Column('place', String(4), nullable=False),
+                   Column('xl', Integer, nullable=False),
+                   Column('tmsg', String(1000), nullable=False),
+                   Column('turn', Integer, nullable=False),
+                   Column('dur', Integer, nullable=False),
+                   Column('runes', Integer, nullable=False),
+                   Column('sc', Integer, nullable=False),
+                   Column('god', String(20), nullable=False),
                    Column('start',
                           DateTime,
                           nullable=False,
@@ -81,9 +96,6 @@ def setup_database(backend):
                           DateTime,
                           nullable=False,
                           index=True),
-                   Column('runes',
-                          Integer,
-                          nullable=False),
                    Column('ktyp',
                           String(50),
                           nullable=False,
@@ -140,7 +152,8 @@ def setup_database(backend):
     _engine = sqlalchemy.create_engine(DB_URI, **ENGINE_OPTS)
 
     if DB_URI.startswith('sqlite'):
-        sqlalchemy.event.listen(_engine, 'connect', sqlite_performance_over_safety)
+        sqlalchemy.event.listen(_engine, 'connect',
+                                sqlite_performance_over_safety)
 
     _metadata.create_all(_engine)
 
@@ -148,17 +161,25 @@ def setup_database(backend):
 def add_game(gid, raw_data):
     """Add a game to the database."""
     conn = _engine.connect()
-    try:
-        conn.execute(_games.insert(),
-                     gid=gid,
-                     name=raw_data['name'],
-                     start=modelutils.crawl_date_to_datetime(raw_data['start']),
-                     end=modelutils.crawl_date_to_datetime(raw_data['end']),
-                     runes=raw_data.get('urune', 0),
-                     ktyp=raw_data['ktyp'],
-                     raw_data=raw_data)
-    except (sqlalchemy.exc.IntegrityError, _mysql_exceptions.IntegrityError, _mysql_exceptions.OperationalError):
-        raise DatabaseError("Duplicate game %s, ignoring." % gid)
+    conn.execute(_games.insert(),
+                 gid=gid,
+                 name=raw_data['name'],
+                 v=raw_data['v'],
+                 char=raw_data['char'],
+                 rc=raw_data['char'][:2],
+                 bg=raw_data['char'][2:],
+                 god=raw_data['god'],
+                 place=raw_data['place'],
+                 xl=raw_data['xl'],
+                 tmsg=raw_data['tmsg'],
+                 turn=raw_data['turn'],
+                 dur=raw_data['dur'],
+                 runes=raw_data.get('urune', 0),
+                 sc=raw_data['sc'],
+                 start=modelutils.crawl_date_to_datetime(raw_data['start']),
+                 end=modelutils.crawl_date_to_datetime(raw_data['end']),
+                 ktyp=raw_data['ktyp'],
+                 raw_data=raw_data)
 
 
 def get_logfile_pos(logfile):
@@ -321,13 +342,39 @@ def get_all_global_stats():
 
 
 def delete_all_global_stats():
-    """Deletes all global stats."""
+    """Delete all global stats."""
     conn = _engine.connect()
     conn.execute(_global_stats.delete())
 
 
-def recent_wins(num=5):
-    """Return a list of recent wins."""
+def game(gid):
+    """Return game with matching gid."""
+    if not isinstance(gid, str):
+        raise TypeError("Must pass in string, `%s` is type %s" % (repr(gid), type(gid)))
     conn = _engine.connect()
-    rows = conn.execute(_games.select().where(_games.c.ktyp == 'winning').order_by(desc("end")).limit(num))
-    return rows.fetchall()
+    game = conn.execute(_games.select().where(
+        _games.c.gid == gid)).fetchone()
+    return game
+
+
+def recent_games(wins=False, player=None, num=5, reverse=True):
+    """Return recent games.
+
+    Parameters:
+        wins (bool) Only return wins
+        player (str) Only for this player
+        num (int) Number of rows to return
+        reverse (bool) Order in most -> least recent if True.
+    """
+    conn = _engine.connect()
+    query = _games.select()
+    if wins:
+        query = query.where(_games.c.ktyp == 'winning')
+    if player is not None:
+        query = query.where(_games.c.name == player)
+    query = query.order_by(desc("end")).limit(num)
+
+    rows = conn.execute(query).fetchall()
+    if reverse:
+        rows = rows[::-1]
+    return rows

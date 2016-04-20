@@ -50,8 +50,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['max_score'] %}
-            {{ game|gametotablerow(show_player=True) }}
+            {% for gid in stats['max_score'] %}
+            {{ gid|gidtogame|gametotablerow(show_player=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -75,8 +75,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['rc_highscores'].values()|sort(attribute='rc') %}
-            {{ game|gametotablerow(prefix_row='race', show_player=True) }}
+            {% for gid in stats['rc_highscores'].values() %}
+            {{ gid|gidtogame|gametotablerow(prefix_row='race', show_player=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -100,8 +100,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['bg_highscores'].values()|sort(attribute='bg') %}
-            {{ game|gametotablerow(prefix_row='cls', show_player=True) }}
+            {% for gid in stats['bg_highscores'].values() %}
+            {{ gid|gidtogame|gametotablerow(prefix_row='cls', show_player=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -124,8 +124,9 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['char_highscores'].values()|sort(attribute='char') %}
-            {{ game|gametotablerow(show_player=True) }}
+            {# XXX unsorted #}
+            {% for gid in stats['char_highscores'].values() %}
+            {{ gid|gidtogame|gametotablerow(show_player=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -149,8 +150,9 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['god_highscores'].values()|sort(attribute='god') %}
-            {{ game|gametotablerow(prefix_row='god', show_player=True) }}
+            {# XXX unsorted #}
+            {% for gid in stats['god_highscores'].values() %}
+            {{ gid|gidtogame|gametotablerow(prefix_row='god', show_player=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -173,8 +175,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['min_dur']|sort(attribute='dur') %}
-            {{ game|gametotablerow(show_player=True) }}
+            {% for gid in stats['min_dur'] %}
+            {{ gid|gidtogame|gametotablerow(show_player=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -197,8 +199,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for game in stats['min_turn']|sort(attribute='turn') %}
-            {{ game|gametotablerow(show_player=True) }}
+            {% for gid in stats['min_turn'] %}
+            {{ gid|gidtogame|gametotablerow(show_player=True) }}
             {% endfor %}
           </tbody>
         </table>

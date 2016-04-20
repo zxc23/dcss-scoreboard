@@ -88,6 +88,7 @@ def parse_line(line, src):
         print("Couldn't parse this line (missing start), skipping: %s" % line)
         return
     gid = calculate_game_gid(game)
+    game['gid'] = gid
     # Store the game in the database
     try:
         model.add_game(gid, game)

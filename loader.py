@@ -19,12 +19,10 @@ def error(msg):
 def read_commandline():
     """Parse command line args and validate them."""
     parser = argparse.ArgumentParser(description="Run DCSS Scoreboard.")
-    parser.add_argument(
-        '--database',
-        choices=('mysql', 'sqlite'),
-        default='sqlite',
-        help=
-        "Specify the database backend  (default: sqlite)")
+    parser.add_argument('--database',
+                        choices=('mysql', 'sqlite'),
+                        default='sqlite',
+                        help="Specify the database backend  (default: sqlite)")
     parser.add_argument('--rebuild',
                         action='store_true',
                         help="Rebuild the entire scoring database.")

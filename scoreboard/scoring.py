@@ -1,8 +1,6 @@
 """Take game data and figure out scoring."""
 
 import time
-from collections import deque
-import sys
 
 import pylru
 
@@ -10,32 +8,34 @@ from . import model, constants
 
 PLAYER_STATS_CACHE = pylru.lrucache(1000, callback=model.set_player_stats)
 GLOBAL_STATS_CACHE = pylru.lrucache(1000, callback=model.set_global_stat)
+GAME_CACHE = pylru.lrucache(1000)
+
+
+def get_game(gid):
+    """Get a game from the database."""
+    game = model.game(gid)
+    if game:
+        GAME_CACHE[gid] = game
+    return game
 
 
 def is_valid_streak_addition(game, streak):
     """Check if the game is a valid addition to the streak."""
     # Extend active streak only if win started after previous game end
-    if streak['length'] == 0:
+    if len(streak['wins']) == 0:
         return True
-    return game['start'] > streak['end']
+    return game.start > streak['end']
 
 
 def load_player_stats(name):
-    """Load the stats dictionary of a player.
-
-    This requires applying some transformations to the raw stored data.
-    """
+    """Load the stats dictionary of a player."""
     # Try to load stats from cache
     if name in PLAYER_STATS_CACHE:
         stats = PLAYER_STATS_CACHE[name]
     else:
         stats = model.get_player_stats(name)
 
-    if stats:
-        # Convert lists back to deques
-        stats['recent_games'] = deque(stats['recent_games'],
-                                      constants.RECENT_GAMES_LENGTH)
-    else:
+    if not stats:
         # Create initial stats
         stats = {'wins': [],
                  'games': 0,
@@ -43,8 +43,6 @@ def load_player_stats(name):
                  'total_playtime': 0,
                  'total_score': 0,
                  'avg_score': 0,
-                 'recent_games': deque(
-                     [], constants.RECENT_GAMES_LENGTH),
                  'boring_games': 0,
                  'boring_rate': 0,
                  'god_wins': {k: 0
@@ -178,11 +176,10 @@ def score_game_vs_global_highscores(game, fields):
     """
     result = False
     for field in fields:
-        fieldval = game[field]
+        fieldval = getattr(game, field)
         highscores = load_global_stat(field + '_highscores', {})
-        if fieldval not in highscores or game[
-                'sc'] > highscores[fieldval]['sc']:
-            highscores[fieldval] = game
+        if fieldval not in highscores or game.sc > get_game(highscores[fieldval]).sc:
+            highscores[fieldval] = game.gid
             set_global_stat(field + '_highscores', highscores)
             result = True
     return result
@@ -202,64 +199,62 @@ def score_game_vs_misc_stats(game):
     # Min duration
     min_dur = load_global_stat('min_dur', [])
     if not min_dur or len(min_dur) < constants.MIN_DUR_RECORD_LENGTH:
-        min_dur.append(game)
+        min_dur.append(game.gid)
     else:
-        if dur < max(i['dur'] for i in min_dur):
-            min_dur.append(game)
+        if dur < max(get_game(g).dur for g in min_dur):
+            min_dur.append(game.gid)
             min_dur = sorted(
                 min_dur,
-                key=lambda i: i['dur'])[:constants.MIN_DUR_RECORD_LENGTH]
+                key=lambda i: get_game(i).dur)[:constants.MIN_DUR_RECORD_LENGTH]
     set_global_stat('min_dur', min_dur)
 
     # Min turns
     min_turn = load_global_stat('min_turn', [])
     if not min_turn or len(min_turn) < constants.MIN_TURN_RECORD_LENGTH:
-        min_turn.append(game)
+        min_turn.append(game.gid)
     else:
-        if turns < max(i['turn'] for i in min_turn):
-            min_turn.append(game)
+        if turns < max(get_game(g).turn for g in min_turn):
+            min_turn.append(game.gid)
             min_turn = sorted(
                 min_turn,
-                key=lambda i: i['turn'])[:constants.MIN_TURN_RECORD_LENGTH]
+                key=lambda i: get_game(i).turn)[:constants.MIN_TURN_RECORD_LENGTH]
     set_global_stat('min_turn', min_turn)
 
     # Max score
     max_score = load_global_stat('max_score', [])
     if not max_score or len(max_score) < constants.MAX_SCORE_RECORD_LENGTH:
-        max_score.append(game)
+        max_score.append(game.gid)
     else:
-        if score > min(i['sc'] for i in max_score):
-            max_score.append(game)
+        if score > min(get_game(g)['sc'] for g in max_score):
+            max_score.append(game.gid)
             max_score = sorted(
                 max_score,
-                key=lambda i: -i['sc'])[:constants.MAX_SCORE_RECORD_LENGTH]
+                key=lambda i: -get_game(i)['sc'])[:constants.MAX_SCORE_RECORD_LENGTH]
     set_global_stat('max_score', max_score)
 
 
 def score_game_vs_streaks(game, won):
     """Extend active streaks if a game was won and finalise streak stats."""
     active_streaks = load_global_stat('active_streaks', {})
-    name = game['name']
+    name = game.name
     if won:
         # Extend or start a streak
         if name in active_streaks:
             if is_valid_streak_addition(game, active_streaks[name]):
-                active_streaks[name]['wins'].append(game)
-                active_streaks[name]['length'] += 1
-                active_streaks[name]['end'] = game['end']
+                active_streaks[name]['wins'].append(game.gid)
+                active_streaks[name]['end'] = game.end
         else:
             active_streaks[name] = {'player': name,
-                                    'wins': [game],
-                                    'length': 1,
-                                    'start': game['start'],
-                                    'end': game['end']}
+                                    'wins': [game.gid],
+                                    'start': game.start,
+                                    'end': game.end}
     else:
         # If the player was on a 2+ game streak, finalise it
         streak = active_streaks.get(name)
-        if streak and streak['length'] > 1:
+        if streak and len(streak['wins']) > 1:
             completed_streaks = load_global_stat('completed_streaks', [])
-            streak['streak_breaker'] = game
-            streak['end'] = game['end']
+            streak['streak_breaker'] = game.gid
+            streak['end'] = game.end
             completed_streaks.append(streak)
             set_global_stat('completed_streaks', completed_streaks)
         if name in active_streaks:
@@ -295,7 +290,7 @@ def score_game(game_row):
 
     # Increment wins
     if won:
-        stats['wins'].append(game)
+        stats['wins'].append(game_row.gid)
 
         # Adjust fastest_realtime win
         if 'fastest_realtime' not in stats or game['dur'] < stats[
@@ -389,7 +384,7 @@ def score_game(game_row):
                 achievements['cleared_zig'] += 1
 
         # Compare win against misc global stats
-        score_game_vs_misc_stats(game)
+        score_game_vs_misc_stats(game_row)
 
     else:  # !won
         # Increment boring_games
@@ -402,17 +397,16 @@ def score_game(game_row):
     stats['winrate'] = wins / stats['games']
     stats['total_score'] += score
     stats['avg_score'] = stats['total_score'] / stats['games']
-    stats['recent_games'].append(game)
     stats['boring_rate'] = stats['boring_games'] / stats['games']
 
     # Check global highscore records
-    if score_game_vs_global_highscores(game, ['char']):
+    if score_game_vs_global_highscores(game_row, ['char']):
         # Only check rc and bg records if char record was broken
-        score_game_vs_global_highscores(game, ['rc', 'bg'])
-    score_game_vs_global_highscores(game, ['god'])
+        score_game_vs_global_highscores(game_row, ['rc', 'bg'])
+    score_game_vs_global_highscores(game_row, ['god'])
 
     # Check streaks
-    score_game_vs_streaks(game, won)
+    score_game_vs_streaks(game_row, won)
 
     # Finalise the changes to stats
     set_player_stats(name, stats)
@@ -447,6 +441,7 @@ def score_games(rebuild=False):
         model.set_global_stat(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
+
 
 if __name__ == "__main__":
     score_games()
