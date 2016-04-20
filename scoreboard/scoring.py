@@ -8,15 +8,11 @@ from . import model, constants
 
 PLAYER_STATS_CACHE = pylru.lrucache(1000, callback=model.set_player_stats)
 GLOBAL_STATS_CACHE = pylru.lrucache(1000, callback=model.set_global_stat)
-GAME_CACHE = pylru.lrucache(1000)
 
 
 def get_game(gid):
     """Get a game from the database."""
-    game = model.game(gid)
-    if game:
-        GAME_CACHE[gid] = game
-    return game
+    return model.game(gid)
 
 
 def is_valid_streak_addition(game, streak):

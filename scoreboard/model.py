@@ -4,11 +4,15 @@ import json
 import collections
 import datetime
 
+import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
 from sqlalchemy import desc
 
 from . import modelutils
+
+
+GAME_CACHE = pylru.lrucache(10000)
 
 
 class DatabaseError(Exception):
@@ -351,9 +355,12 @@ def game(gid):
     """Return game with matching gid."""
     if not isinstance(gid, str):
         raise TypeError("Must pass in string, `%s` is type %s" % (repr(gid), type(gid)))
+    if gid in GAME_CACHE:
+        return GAME_CACHE[gid]
     conn = _engine.connect()
     game = conn.execute(_games.select().where(
         _games.c.gid == gid)).fetchone()
+    GAME_CACHE[gid] = game
     return game
 
 
