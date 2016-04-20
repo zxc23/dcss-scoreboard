@@ -65,11 +65,11 @@ def gametotablerow(game, prefix_row=None, show_player=False):
         score=prettyint(game['sc']),
         character=game['char'],
         place=game['place'],
-        end=game['tmsg'],
+        end=game.get('tmsg', ''),  # Older logfiles don't have this line
         xl=game['xl'],
         turns=prettyint(game['turn']),
         duration=prettydur(game['dur']),
-        runes='?',
+        runes=game.get('nrune', ''),  # Older logfiles don't have this line
         date=modelutils.prettycrawldate(game['end']),
         version=game['v'])
 
