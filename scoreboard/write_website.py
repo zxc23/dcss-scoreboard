@@ -41,7 +41,7 @@ def achievement_data(ordered=False):
 
 
 def write_player_stats(player, stats, outfile, achievements, global_stats,
-                       template):
+                       streaks, active_streaks, template):
     """Write stats page for an individual player."""
     records = {}
     records['combo'] = [g
@@ -53,13 +53,16 @@ def write_player_stats(player, stats, outfile, achievements, global_stats,
     records['role'] = [g
                        for g in global_stats['bg_highscores'].values()
                        if g['name'] == player]
-    records['streak'] = global_stats['active_streaks'].get(player, [])
+    streaks = [s for s in streaks if s['player'] == player]
+    active_streak = global_stats['active_streaks'].get(player)
     with open(outfile, 'w') as f:
         f.write(template.render(player=player,
                                 stats=stats,
                                 achievement_data=achievements,
                                 constants=constants,
-                                records=records))
+                                records=records,
+                                streaks=streaks,
+                                active_streak=active_streak))
 
 
 def write_website():
@@ -82,7 +85,23 @@ def write_website():
         template = env.get_template('index.html')
         f.write(template.render())
 
+    # Get stats
     stats = model.get_all_global_stats()
+
+    # Merge active streaks into streaks
+    streaks = stats['completed_streaks']
+    active_streaks = stats['active_streaks']
+    sorted_active_streaks = []
+
+    for streak in active_streaks.values():
+        if streak['length'] > 1:
+            streaks.append(streak)
+            sorted_active_streaks.append(streak)
+
+    # Sort streaks
+    sorted_streaks = sorted(streaks, key=lambda x: (-x['length'], x['end']))
+    sorted_active_streaks.sort(key=lambda x: (-x['length'], x['end']))
+
     print("Writing highscores")
     with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
         template = env.get_template('highscores.html')
@@ -90,12 +109,8 @@ def write_website():
     print("Writing streaks")
     with open(os.path.join(OUTDIR, 'streaks.html'), 'w') as f:
         template = env.get_template('streaks.html')
-        f.write(template.render(
-            stats=
-            {'active_streaks': sorted(stats['active_streaks'].values(),
-                                      key=lambda x: (-len(x), x[-1]['end'])),
-             'completed_streaks': sorted(stats['completed_streaks'],
-                                         key=lambda x: -len(x['wins']))}))
+        f.write(template.render(streaks=sorted_streaks,
+                                active_streaks=sorted_active_streaks))
 
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')
@@ -120,8 +135,8 @@ def write_website():
         player = row.name
         stats = row.stats
         outfile = os.path.join(player_html_path, player + '.html')
-        write_player_stats(player, stats, outfile, achievements,
-                           global_stats, template)
+        write_player_stats(player, stats, outfile, achievements, global_stats,
+                           sorted_streaks, active_streaks, template)
 
         n += 1
         if not n % 10000:
@@ -129,7 +144,6 @@ def write_website():
 
     end = time.time()
     print("Done scoring in %s seconds" % round(end - start, 2))
-
 
 if __name__ == "__main__":
     write_website()

@@ -11,7 +11,7 @@
         <a class="nav-link active" data-toggle="tab" href="#active_streaks" role="tab">Active Streaks</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#completed_streaks" role="tab">Completed Streaks</a>
+        <a class="nav-link" data-toggle="tab" href="#longest_streaks" role="tab">Longest Streaks</a>
       </li>
     </ul>
 
@@ -24,30 +24,33 @@
               <th>Wins</th>
               <th>Player</th>
               <th>Games</th>
+              <th>Start</th>
+              <th>End</th>
               <th>Versions</th>
             </tr>
           </thead>
           <tbody>
-            {% for streak in stats['active_streaks'] %}
+            {% for streak in active_streaks %}
             {{ streak|streaktotablerow }}
             {% endfor %}
           </tbody>
         </table>
       </div>
-      <div class="tab-pane" id="completed_streaks" role="tabpanel">
+      <div class="tab-pane" id="longest_streaks" role="tabpanel">
         <table class="table table-hover">
           <thead>
             <tr>
               <th>Wins</th>
               <th>Player</th>
               <th>Games</th>
-              <th>Date Ended</th>
-              <th>Lost Game</th>
+              <th>Start</th>
+              <th>End</th>
               <th>Versions</th>
+              <th>Streak Breaker</th>
             </tr>
           </thead>
           <tbody>
-            {% for streak in stats['completed_streaks'] %}
+            {% for streak in streaks %}
             {{ streak|completedstreaktotablerow }}
             {% endfor %}
           </tbody>

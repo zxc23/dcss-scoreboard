@@ -12,17 +12,12 @@ PLAYER_STATS_CACHE = pylru.lrucache(1000, callback=model.set_player_stats)
 GLOBAL_STATS_CACHE = pylru.lrucache(1000, callback=model.set_global_stat)
 
 
-def clean_up_active_streaks(streaks):
-    """Remove single game "streaks"."""
-    return {k: v for k, v in streaks.items() if len(v) > 1}
-
-
 def is_valid_streak_addition(game, streak):
     """Check if the game is a valid addition to the streak."""
     # Extend active streak only if win started after previous game end
-    if len(streak) == 0:
+    if streak['length'] == 0:
         return True
-    return game['start'][:-1] > streak[-1]['end']
+    return game['start'] > streak['end']
 
 
 def load_player_stats(name):
@@ -38,7 +33,8 @@ def load_player_stats(name):
 
     if stats:
         # Convert lists back to deques
-        stats['recent_games'] = deque(stats['recent_games'], constants.RECENT_GAMES_LENGTH)
+        stats['recent_games'] = deque(stats['recent_games'],
+                                      constants.RECENT_GAMES_LENGTH)
     else:
         # Create initial stats
         stats = {'wins': [],
@@ -205,7 +201,9 @@ def score_game_vs_misc_stats(game):
     else:
         if dur < min(i['dur'] for i in min_dur):
             min_dur.append(game)
-            min_dur = sorted(min_dur, key=lambda i: i['dur'])[:constants.MIN_DUR_RECORD_LENGTH]
+            min_dur = sorted(
+                min_dur,
+                key=lambda i: i['dur'])[:constants.MIN_DUR_RECORD_LENGTH]
     set_global_stat('min_dur', min_dur)
 
     min_turn = load_global_stat('min_turn', [])
@@ -214,7 +212,9 @@ def score_game_vs_misc_stats(game):
     else:
         if turns < min(i['turn'] for i in min_turn):
             min_turn.append(game)
-            min_turn = sorted(min_turn, key=lambda i: i['turn'])[:constants.MIN_TURN_RECORD_LENGTH]
+            min_turn = sorted(
+                min_turn,
+                key=lambda i: i['turn'])[:constants.MIN_TURN_RECORD_LENGTH]
     set_global_stat('min_turn', min_turn)
 
 
@@ -226,19 +226,23 @@ def score_game_vs_streaks(game, won):
         # Extend or start a streak
         if name in active_streaks:
             if is_valid_streak_addition(game, active_streaks[name]):
-                active_streaks[name].append(game)
+                active_streaks[name]['wins'].append(game)
+                active_streaks[name]['length'] += 1
+                active_streaks[name]['end'] = game['end']
         else:
-            active_streaks[name] = [game]
+            active_streaks[name] = {'player': name,
+                                    'wins': [game],
+                                    'length': 1,
+                                    'start': game['start'],
+                                    'end': game['end']}
     else:
-        # If the player was on a 2+ game streak, record it
-        if len(active_streaks.get(name, [])) > 1:
+        # If the player was on a 2+ game streak, finalise it
+        streak = active_streaks.get(name)
+        if streak and streak['length'] > 1:
             completed_streaks = load_global_stat('completed_streaks', [])
-            streak = active_streaks[name]
-            completed_streaks.append({'player': name,
-                                      'wins': streak,
-                                      'streak_breaker': game,
-                                      'start': streak[0]['start'],
-                                      'end': streak[-1]['end']})
+            streak['streak_breaker'] = game
+            streak['end'] = game['end']
+            completed_streaks.append(streak)
             set_global_stat('completed_streaks', completed_streaks)
         if name in active_streaks:
             del active_streaks[name]
@@ -295,7 +299,7 @@ def score_game(game_row):
         else:
             stats['god_wins'][god] += 1
 
-    # Increment race_wins and check greatplayer
+        # Increment race_wins and check greatplayer
         if race in stats['race_wins'] and stats['race_wins'][race] > 0:
             stats['race_wins'][race] += 1
         else:
@@ -421,11 +425,6 @@ def score_games(rebuild=False):
             if scored % 10000 == 0:
                 print(scored)
 
-    # clean up single-game "streaks"
-    set_global_stat(
-        'active_streaks',
-        clean_up_active_streaks(load_global_stat('active_streaks')))
-
     # Add manual achievements
     add_manual_achievements()
 
@@ -436,7 +435,6 @@ def score_games(rebuild=False):
         model.set_global_stat(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
-
 
 if __name__ == "__main__":
     score_games()

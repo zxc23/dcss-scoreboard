@@ -74,7 +74,7 @@ def gametotablerow(game, prefix_row=None, show_player=False):
         xl=game['xl'],
         turns=prettyint(game['turn']),
         duration=prettydur(game['dur']),
-        runes=game.get('nrune', ''),  # Older logfiles don't have this line
+        runes=game.get('nrune', '?'),  # Older logfiles don't have this line
         date=prettycrawldate(game['end']),
         version=game['v'])
 
@@ -85,11 +85,16 @@ def streaktotablerow(streak):
       <td>{wins}</td>
       <td><a href="players/{player}.html">{player}<a></td>
       <td>{games}</td>
+      <td>{start}</td>
+      <td>{end}</td>
       <td>{versions}</td>
-    </tr>""".format(wins=len(streak),
-                    player=streak[0]['name'],
-                    games=', '.join(g['char'] for g in streak),
-                    versions=', '.join(sorted(set(g['v'] for g in streak))))
+    </tr>""".format(
+        wins=streak['length'],
+        player=streak['player'],
+        games=', '.join(g['char'] for g in streak['wins']),
+        start=prettycrawldate(streak['start']),
+        end=prettycrawldate(streak['end']),
+        versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))
 
 
 def completedstreaktotablerow(streak):
@@ -98,13 +103,15 @@ def completedstreaktotablerow(streak):
       <td>{wins}</td>
       <td><a href="players/{player}.html">{player}<a></td>
       <td>{games}</td>
-      <td>{ended}</td>
-      <td>{lost_game}</td>
+      <td>{start}</td>
+      <td>{end}</td>
       <td>{versions}</td>
+      <td>{streak_breaker}</td>
     </tr>""".format(
-        wins=len(streak['wins']),
-        player=streak['wins'][0]['name'],
+        wins=streak['length'],
+        player=streak['player'],
         games=', '.join(g['char'] for g in streak['wins']),
-        ended=prettycrawldate(streak['end']),
-        lost_game=streak['streak_breaker']['char'],
-        versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))
+        start=prettycrawldate(streak['start']),
+        end=prettycrawldate(streak['end']),
+        versions=', '.join(sorted(set(g['v'] for g in streak['wins']))),
+        streak_breaker=streak.get('streak_breaker', {}).get('char', ''))
