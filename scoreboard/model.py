@@ -3,7 +3,6 @@
 import json
 import collections
 import sqlalchemy.ext.mutable
-import datetime
 
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
 import _mysql_exceptions
@@ -128,9 +127,8 @@ def add_game(gid, raw_data):
     conn = _engine.connect()
     try:
         name = raw_data['name']
-        start = modelutils.prettycrawldate(raw_data['start'],
-                                           return_datetime=True)
-        end = modelutils.prettycrawldate(raw_data['end'], return_datetime=True)
+        start = modelutils.crawl_date_to_datetime(raw_data['start'])
+        end = modelutils.crawl_date_to_datetime(raw_data['end'])
         type(start)
         runes = raw_data['urune'] if 'urune' in raw_data else 0
         conn.execute(_games.insert(),

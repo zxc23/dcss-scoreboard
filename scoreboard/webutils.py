@@ -37,6 +37,11 @@ def prettycounter(counter):
                                         key=lambda i: i[0]))
 
 
+def prettycrawldate(d):
+    """Jinja filter to convert datetime object to pretty text."""
+    return modelutils.crawl_date_to_datetime(d).strftime('%c')
+
+
 def gametotablerow(game, prefix_row=None, show_player=False):
     """Jinja filter to convert a game dict to a table row."""
     t = """<tr class="{win}">
@@ -70,7 +75,7 @@ def gametotablerow(game, prefix_row=None, show_player=False):
         turns=prettyint(game['turn']),
         duration=prettydur(game['dur']),
         runes=game.get('nrune', ''),  # Older logfiles don't have this line
-        date=modelutils.prettycrawldate(game['end']),
+        date=prettycrawldate(game['end']),
         version=game['v'])
 
 
@@ -100,6 +105,6 @@ def completedstreaktotablerow(streak):
         wins=len(streak['wins']),
         player=streak['wins'][0]['name'],
         games=', '.join(g['char'] for g in streak['wins']),
-        ended=modelutils.prettycrawldate(streak['end']),
+        ended=prettycrawldate(streak['end']),
         lost_game=streak['streak_breaker']['char'],
         versions=', '.join(sorted(set(g['v'] for g in streak['wins']))))
