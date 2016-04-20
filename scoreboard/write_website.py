@@ -44,15 +44,19 @@ def write_player_stats(player, stats, outfile, achievements, global_stats,
                        streaks, active_streaks, template):
     """Write stats page for an individual player."""
     records = {}
-    records['combo'] = [g
-                        for g in global_stats['char_highscores'].values()
-                        if g['name'] == player]
-    records['race'] = [g
-                       for g in global_stats['rc_highscores'].values()
-                       if g['name'] == player]
-    records['role'] = [g
-                       for g in global_stats['bg_highscores'].values()
-                       if g['name'] == player]
+    records['combo'] = sorted(
+        [g
+         for g in global_stats['char_highscores'].values()
+         if g['name'] == player],
+        key=lambda x: x['char'])
+    records['race'] = sorted(
+        [g for g in global_stats['rc_highscores'].values()
+         if g['name'] == player],
+        key=lambda x: x['char'][:2])
+    records['role'] = sorted(
+        [g for g in global_stats['bg_highscores'].values()
+         if g['name'] == player],
+        key=lambda x: x['char'][2:])
     streaks = [s for s in streaks if s['player'] == player]
     active_streak = global_stats['active_streaks'].get(player)
     with open(outfile, 'w') as f:
@@ -85,7 +89,7 @@ def write_website():
         template = env.get_template('index.html')
         f.write(template.render())
 
-    # Get stats
+# Get stats
     stats = model.get_all_global_stats()
 
     # Merge active streaks into streaks
@@ -98,7 +102,7 @@ def write_website():
             streaks.append(streak)
             sorted_active_streaks.append(streak)
 
-    # Sort streaks
+# Sort streaks
     sorted_streaks = sorted(streaks, key=lambda x: (-x['length'], x['end']))
     sorted_active_streaks.sort(key=lambda x: (-x['length'], x['end']))
 
