@@ -9,10 +9,10 @@ import sys
 
 from . import model, constants
 
-
 # Logfile format escapes : as ::, so we need to split with re.split
 # Instead of naive line.split(':')
 LINE_SPLIT_PATTERN = '(?<!:):(?!:)'
+
 
 def calculate_game_gid(game):
     """Calculate GID for a game. Sequell compatible."""
@@ -41,7 +41,7 @@ def load_logfile(logfile):
     processed_lines = model.get_logfile_pos(logfile)
     print("Reading %s%s... " % (logfile, (" from line %s" % processed_lines) if
                                 processed_lines else ''))
-    p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    p = multiprocessing.Pool(processes=constants.MULTIPROCESSING_PROCESSES)
     jobs = []
     for line in open(logfile, encoding='utf-8').readlines():
         lines += 1
@@ -72,9 +72,8 @@ def parse_line(line, src):
         fields = field.split('=', 1)
         if len(fields) != 2:
             badline = True
-            print(
-                "Couldn't parse this line (bad field %s), skipping: %s" %
-                (field, line))
+            print("Couldn't parse this line (bad field %s), skipping: %s" %
+                  (field, line))
             continue
         k, v = fields[0], fields[1]
         # Store numbers as int, not str
@@ -91,9 +90,7 @@ def parse_line(line, src):
         game['god'] = 'Atheist'
     game['god'] = constants.GOD_NAME_FIXUPS.get(game['god'], game['god'])
     if 'start' not in game:
-        print(
-            "Couldn't parse this line (missing start), skipping: %s" %
-            line)
+        print("Couldn't parse this line (missing start), skipping: %s" % line)
         return
     gid = calculate_game_gid(game)
     # Store the game in the database
@@ -101,6 +98,7 @@ def parse_line(line, src):
         model.add_game(gid, game)
     except model.DatabaseError as e:
         print(e)
+
 
 if __name__ == "__main__":
     load_logfiles()

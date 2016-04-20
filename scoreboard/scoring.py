@@ -413,10 +413,10 @@ def score_games(rebuild=False):
             if scored % 10000 == 0:
                 print(scored)
     else:
-        p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+        p = multiprocessing.Pool(processes=constants.MULTIPROCESSING_PROCESSES)
         jobs = []
         for game in model.get_all_games(scored=False):
-            jobs.append(p.apply_async(score_game, (game,)))
+            jobs.append(p.apply_async(score_game, (game, )))
 
         for job in jobs:
             job.wait()
@@ -439,6 +439,7 @@ def score_games(rebuild=False):
         model.set_global_stat(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
+
 
 if __name__ == "__main__":
     score_games()

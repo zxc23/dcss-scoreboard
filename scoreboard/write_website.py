@@ -41,7 +41,8 @@ def achievement_data(ordered=False):
     return json.load(open(path))
 
 
-def write_player_stats(player, stats, outfile, achievements, global_stats, template):
+def write_player_stats(player, stats, outfile, achievements, global_stats,
+                       template):
     """Write stats page for an individual player."""
     records = {}
     records['combo'] = [g
@@ -121,13 +122,14 @@ def write_website():
             player = row.name
             stats = row.stats
             outfile = os.path.join(player_html_path, player + '.html')
-            write_player_stats(player, stats, outfile, achievements, global_stats, template)
+            write_player_stats(player, stats, outfile, achievements,
+                               global_stats, template)
 
             n += 1
             if not n % 10000:
                 print(n)
     else:
-        p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+        p = multiprocessing.Pool(processes=constants.MULTIPROCESSING_PROCESSES)
         jobs = []
         for row in model.get_all_player_stats():
             # Don't make pages for players with no games played
@@ -137,7 +139,8 @@ def write_website():
             player = row.name
             stats = row.stats
             outfile = os.path.join(player_html_path, player + '.html')
-            jobs.append(p.apply_async(write_player_stats, (player, stats, outfile, achievements, global_stats, template)))
+            jobs.append(p.apply_async(write_player_stats, (
+                player, stats, outfile, achievements, global_stats, template)))
 
         for job in jobs:
             job.wait()
@@ -147,6 +150,7 @@ def write_website():
 
     end = time.time()
     print("Done scoring in %s seconds" % round(end - start, 2))
+
 
 if __name__ == "__main__":
     write_website()

@@ -10,7 +10,6 @@ import _mysql_exceptions
 
 from . import modelutils
 
-
 # DB_URI = sqlite:///database.db
 DB_URI = 'mysql://localhost/dcss_scoreboard'
 
@@ -129,17 +128,18 @@ def add_game(gid, raw_data):
     conn = _engine.connect()
     try:
         name = raw_data['name']
-        start = modelutils.prettycrawldate(raw_data['start'], return_datetime=True)
+        start = modelutils.prettycrawldate(raw_data['start'],
+                                           return_datetime=True)
         end = modelutils.prettycrawldate(raw_data['end'], return_datetime=True)
         type(start)
         runes = raw_data['urune'] if 'urune' in raw_data else 0
         conn.execute(_games.insert(),
-                      gid=gid,
-                      name=name,
-                      start=start,
-                      end=end,
-                      runes=runes,
-                      raw_data=raw_data)
+                     gid=gid,
+                     name=name,
+                     start=start,
+                     end=end,
+                     runes=runes,
+                     raw_data=raw_data)
     except (sqlalchemy.exc.IntegrityError, _mysql_exceptions.IntegrityError):
         raise DatabaseError("Duplicate game %s, ignoring." % gid)
 
@@ -166,8 +166,8 @@ def save_logfile_pos(logfile, pos):
     conn = _engine.connect()
     try:
         conn.execute(_logfile_progress.insert(),
-                      logfile=logfile,
-                      lines_parsed=pos)
+                     logfile=logfile,
+                     lines_parsed=pos)
     except sqlalchemy.exc.IntegrityError:
         conn.execute(_logfile_progress.update().where(
             _logfile_progress.c.logfile == logfile).values(lines_parsed=pos))
@@ -232,7 +232,7 @@ def set_player_stats(name, stats):
         conn.execute(_player_stats.insert(), name=name, stats=stats)
     except sqlalchemy.exc.IntegrityError:
         conn.execute(_player_stats.update().where(_player_stats.c.name ==
-                                                   name).values(stats=stats))
+                                                  name).values(stats=stats))
 
 
 def get_all_games(scored=None):
@@ -247,7 +247,8 @@ def get_all_games(scored=None):
     conn = _engine.connect()
     s = _games.select()
     if scored is not None:
-        s = s.where(_games.c.scored == bool(scored)).order_by(_games.c.end.asc())
+        s = s.where(_games.c.scored == bool(scored)).order_by(_games.c.end.asc(
+        ))
     return conn.execute(s).fetchall()
 
 
@@ -268,7 +269,7 @@ def unscore_all_games_of_player(name):
     """Marks all games by a player as being unscored."""
     conn = _engine.connect()
     conn.execute(_games.update().where(_games.c.name == name).values(scored=
-                                                                      False))
+                                                                     False))
 
 
 def set_global_stat(key, data):
@@ -278,7 +279,7 @@ def set_global_stat(key, data):
         conn.execute(_global_stats.insert(), key=key, data=data)
     except sqlalchemy.exc.IntegrityError:
         conn.execute(_global_stats.update().where(_global_stats.c.key ==
-                                                   key).values(data=data))
+                                                  key).values(data=data))
 
 
 def get_global_stat(key):
