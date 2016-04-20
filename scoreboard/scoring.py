@@ -189,33 +189,50 @@ def score_game_vs_global_highscores(game, fields):
 
 def score_game_vs_misc_stats(game):
     """Compare a game log with various misc global stats.
+    
+    XXX: Consider making a helper function.
 
     Note: Currently assumes the game was won.
     """
     dur = game['dur']
     turns = game['turn']
+    score = game['sc']
 
+    # Min duration
     min_dur = load_global_stat('min_dur', [])
-    if not min_dur or len(min_dur) < 5:
+    if not min_dur or len(min_dur) < constants.MIN_DUR_RECORD_LENGTH:
         min_dur.append(game)
     else:
-        if dur < min(i['dur'] for i in min_dur):
+        if dur < max(i['dur'] for i in min_dur):
             min_dur.append(game)
             min_dur = sorted(
                 min_dur,
                 key=lambda i: i['dur'])[:constants.MIN_DUR_RECORD_LENGTH]
     set_global_stat('min_dur', min_dur)
 
+    # Min turns
     min_turn = load_global_stat('min_turn', [])
-    if not min_turn or len(min_turn) < 5:
+    if not min_turn or len(min_turn) < constants.MIN_TURN_RECORD_LENGTH:
         min_turn.append(game)
     else:
-        if turns < min(i['turn'] for i in min_turn):
+        if turns < max(i['turn'] for i in min_turn):
             min_turn.append(game)
             min_turn = sorted(
                 min_turn,
                 key=lambda i: i['turn'])[:constants.MIN_TURN_RECORD_LENGTH]
     set_global_stat('min_turn', min_turn)
+
+    # Max score
+    max_score = load_global_stat('max_score', [])
+    if not max_score or len(max_score) < constants.MAX_SCORE_RECORD_LENGTH:
+        max_score.append(game)
+    else:
+        if score > min(i['sc'] for i in max_score):
+            max_score.append(game)
+            max_score = sorted(
+                max_score,
+                key=lambda i: -i['sc'])[:constants.MAX_SCORE_RECORD_LENGTH]
+    set_global_stat('max_score', max_score)
 
 
 def score_game_vs_streaks(game, won):
