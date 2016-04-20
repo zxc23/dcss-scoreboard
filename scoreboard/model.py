@@ -9,12 +9,10 @@ import _mysql_exceptions
 
 from . import modelutils
 
-# DB_URI = sqlite:///database.db
-DB_URI = 'mysql://localhost/dcss_scoreboard'
-
 
 class DatabaseError(Exception):
     """Generic error for issues with the model."""
+
     pass
 
 
@@ -47,79 +45,92 @@ class _JsonEncodedDict(TypeDecorator):
         """JSON String -> Dict."""
         return json.loads(value.decode())
 
-
 sqlalchemy.ext.mutable.MutableDict.associate_with(_JsonEncodedDict)
 
-_metadata = MetaData()
 
-_games = Table('games',
-               _metadata,
-               Column('gid',
-                      String(50),
-                      primary_key=True),
-               Column('name',
-                      String(50),  # XXX: is this long enough?
-                      nullable=False),
-               Column('start',
-                      sqlalchemy.types.DateTime,
-                      nullable=False),
-               Column('end',
-                      sqlalchemy.types.DateTime,
-                      nullable=False),
-               Column('runes',
-                      Integer,
-                      nullable=False),
-               Column('raw_data',
-                      _JsonEncodedDict(10000),
-                      nullable=False),
-               Column('scored',
-                      Boolean,
-                      default=False),
-               mysql_engine='InnoDB',
-               mysql_charset='utf8')
+def setup_database(backend):
+    """Set up and initialise the database."""
+    if backend == 'sqlite':
+        DB_URI = 'sqlite:///database.db'
+        ENGINE_OPTS = {}
+    elif backend == 'mysql':
+        DB_URI = 'mysql://localhost/dcss_scoreboard'
+        ENGINE_OPTS = {'pool_size': 1, 'max_overflow': -1, 'pool_recycle': 60}
+    else:
+        raise RuntimeError("Unknown database backend %s" % db_backend)
 
-_logfile_progress = Table('logfile_progress',
+    _metadata = MetaData()
+
+    global _games
+    _games = Table('games',
+                   _metadata,
+                   Column('gid',
+                          String(50),
+                          primary_key=True),
+                   Column('name',
+                          String(50),  # XXX: is this long enough?
+                          nullable=False),
+                   Column('start',
+                          sqlalchemy.types.DateTime,
+                          nullable=False),
+                   Column('end',
+                          sqlalchemy.types.DateTime,
+                          nullable=False),
+                   Column('runes',
+                          Integer,
+                          nullable=False),
+                   Column('raw_data',
+                          _JsonEncodedDict(10000),
+                          nullable=False),
+                   Column('scored',
+                          Boolean,
+                          default=False),
+                   mysql_engine='InnoDB',
+                   mysql_charset='utf8')
+
+    global _logfile_progress
+    _logfile_progress = Table('logfile_progress',
+                              _metadata,
+                              Column('logfile',
+                                     String(100),
+                                     primary_key=True),
+                              Column('lines_parsed',
+                                     Integer,
+                                     nullable=False),
+                              mysql_engine='InnoDB',
+                              mysql_charset='utf8')
+
+    global _player_stats
+    _player_stats = Table('player_stats',
                           _metadata,
-                          Column('logfile',
-                                 String(100),
+                          Column('name',
+                                 String(50),  # XXX: is this long enough?
                                  primary_key=True),
-                          Column('lines_parsed',
-                                 Integer,
+                          Column('stats',
+                                 _JsonEncodedDict(100000),
                                  nullable=False),
                           mysql_engine='InnoDB',
                           mysql_charset='utf8')
 
-_player_stats = Table('player_stats',
-                      _metadata,
-                      Column('name',
-                             String(50),  # XXX: is this long enough?
-                             primary_key=True),
-                      Column('stats',
-                             _JsonEncodedDict(100000),
-                             nullable=False),
-                      mysql_engine='InnoDB',
-                      mysql_charset='utf8')
+    global _global_stats
+    _global_stats = Table('global_stats',
+                          _metadata,
+                          Column('key',
+                                 String(100),
+                                 primary_key=True),
+                          Column('data',
+                                 _JsonEncodedDict(100000),
+                                 nullable=False),
+                          mysql_engine='InnoDB',
+                          mysql_charset='utf8')
 
-_global_stats = Table('global_stats',
-                      _metadata,
-                      Column('key',
-                             String(100),
-                             primary_key=True),
-                      Column('data',
-                             _JsonEncodedDict(100000),
-                             nullable=False),
-                      mysql_engine='InnoDB',
-                      mysql_charset='utf8')
+    global _engine
+    _engine = sqlalchemy.create_engine(DB_URI, **ENGINE_OPTS)
 
-_engine = sqlalchemy.create_engine(DB_URI,
-                                   pool_size=1,
-                                   max_overflow=-1,
-                                   pool_recycle=60)
+    if DB_URI.startswith('sqlite'):
+        sqlalchemy.event.listen(_engine, 'connect', sqlite_performance_over_safety)
 
-if DB_URI.startswith('sqlite'):
-    sqlalchemy.event.listen(_engine, 'connect', sqlite_performance_over_safety)
-
-_metadata.create_all(_engine)
+    _metadata.create_all(_engine)
 
 
 def add_game(gid, raw_data):
