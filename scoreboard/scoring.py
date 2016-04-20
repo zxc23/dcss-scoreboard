@@ -272,9 +272,9 @@ def score_game_vs_streaks(game, won):
 
 def score_game(game_row):
     """Score a single game."""
-    gid = game_row[0]
-    game = game_row[5]
-    name = game_row[1]
+    gid = game_row.gid
+    game = game_row.raw_data
+    name = game_row.name
 
     # Log vars
     god = game['god']
@@ -431,18 +431,11 @@ def score_games(rebuild=False):
     if rebuild:
         rebuild_database()
 
-    if sys.platform == 'win32':
-        for game in model.get_all_games(scored=False):
-            score_game(game)
-            scored += 1
-            if scored % 10000 == 0:
-                print(scored)
-    else:
-        for game in model.get_all_games(scored=False):
-            score_game(game)
-            scored += 1
-            if scored % 10000 == 0:
-                print(scored)
+    for game in model.get_all_games(scored=False):
+        score_game(game)
+        scored += 1
+        if scored % 10000 == 0:
+            print(scored)
 
     # Add manual achievements
     add_manual_achievements()
