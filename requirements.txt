@@ -1,3 +1,4 @@
 jinja2
 sqlalchemy
 pylru
+mysqlclient

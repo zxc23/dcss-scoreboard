@@ -6,7 +6,13 @@ import sqlalchemy.ext.mutable
 import datetime
 
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime
+import _mysql_exceptions
+
 from . import modelutils
+
+
+# DB_URI = sqlite:///database.db
+DB_URI = 'mysql://localhost/dcss_scoreboard'
 
 
 class DatabaseError(Exception):
@@ -51,10 +57,10 @@ _metadata = MetaData()
 _games = Table('games',
                _metadata,
                Column('gid',
-                      String,
+                      String(50),
                       primary_key=True),
                Column('name',
-                      String,
+                      String(50),  # XXX: is this long enough?
                       nullable=False),
                Column('start',
                       sqlalchemy.types.DateTime,
@@ -66,69 +72,84 @@ _games = Table('games',
                       Integer,
                       nullable=False),
                Column('raw_data',
-                      _JsonEncodedDict,
+                      _JsonEncodedDict(10000),
                       nullable=False),
                Column('scored',
                       Boolean,
-                      default=False))
+                      default=False),
+               mysql_engine='InnoDB',
+               mysql_charset='utf8')
 
 _logfile_progress = Table('logfile_progress',
                           _metadata,
                           Column('logfile',
-                                 String,
+                                 String(100),
                                  primary_key=True),
                           Column('lines_parsed',
                                  Integer,
-                                 nullable=False))
+                                 nullable=False),
+                          mysql_engine='InnoDB',
+                          mysql_charset='utf8')
 
 _player_stats = Table('player_stats',
                       _metadata,
                       Column('name',
-                             String,
+                             String(50),  # XXX: is this long enough?
                              primary_key=True),
                       Column('stats',
-                             _JsonEncodedDict,
-                             nullable=False))
+                             _JsonEncodedDict(10000),
+                             nullable=False),
+                      mysql_engine='InnoDB',
+                      mysql_charset='utf8')
 
 _global_stats = Table('global_stats',
                       _metadata,
                       Column('key',
-                             String,
+                             String(100),
                              primary_key=True),
                       Column('data',
-                             _JsonEncodedDict,
-                             nullable=False))
+                             _JsonEncodedDict(10000),
+                             nullable=False),
+                      mysql_engine='InnoDB',
+                      mysql_charset='utf8')
 
-_engine = sqlalchemy.create_engine('sqlite:///database.db', echo=False)
-sqlalchemy.event.listen(_engine, 'connect', sqlite_performance_over_safety)
+_engine = sqlalchemy.create_engine(DB_URI,
+                                   pool_size=1,
+                                   max_overflow=-1,
+                                   pool_recycle=60)
+
+if DB_URI.startswith('sqlite'):
+    sqlalchemy.event.listen(_engine, 'connect', sqlite_performance_over_safety)
+
 _metadata.create_all(_engine)
-_conn = _engine.connect()
 
 
 def add_game(gid, raw_data):
     """Add a game to the database."""
+    conn = _engine.connect()
     try:
         name = raw_data['name']
         start = modelutils.prettycrawldate(raw_data['start'], return_datetime=True)
         end = modelutils.prettycrawldate(raw_data['end'], return_datetime=True)
         type(start)
         runes = raw_data['urune'] if 'urune' in raw_data else 0
-        _conn.execute(_games.insert(),
+        conn.execute(_games.insert(),
                       gid=gid,
                       name=name,
                       start=start,
                       end=end,
                       runes=runes,
                       raw_data=raw_data)
-    except sqlalchemy.exc.IntegrityError:
+    except (sqlalchemy.exc.IntegrityError, _mysql_exceptions.IntegrityError):
         raise DatabaseError("Duplicate game %s, ignoring." % gid)
 
 
 def get_logfile_pos(logfile):
     """Get the number of lines we've already processed."""
+    conn = _engine.connect()
     s = _logfile_progress.select().where(_logfile_progress.c.logfile ==
                                          logfile)
-    row = _conn.execute(s).fetchone()
+    row = conn.execute(s).fetchone()
     if row:
         return row.lines_parsed
     else:
@@ -142,12 +163,13 @@ def save_logfile_pos(logfile, pos):
     # prefixes="OR REPLACE" works
     # http://docs.sqlalchemy.org/en/rel_1_0/core/dml.html#
     #                                       sqlalchemy.sql.expression.insert
+    conn = _engine.connect()
     try:
-        _conn.execute(_logfile_progress.insert(),
+        conn.execute(_logfile_progress.insert(),
                       logfile=logfile,
                       lines_parsed=pos)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_logfile_progress.update().where(
+        conn.execute(_logfile_progress.update().where(
             _logfile_progress.c.logfile == logfile).values(lines_parsed=pos))
 
 
@@ -157,6 +179,7 @@ def players():
     XXX should be at least memoised if not outright replaced with something
     saner.
     """
+    conn = _engine.connect()
     return [i.name for i in get_all_player_stats()]
 
 
@@ -166,18 +189,21 @@ def get_all_player_stats():
     XXX should be at least memoised if not outright replaced with something
     saner.
     """
+    conn = _engine.connect()
     s = _player_stats.select()
-    return _conn.execute(s).fetchall()
+    return conn.execute(s).fetchall()
 
 
 def delete_all_player_stats():
     """Deletes all player stats."""
-    _conn.execute(_player_stats.delete())
+    conn = _engine.connect()
+    conn.execute(_player_stats.delete())
 
 
 def delete_player_stats(name):
     """Deletes a player's stats."""
-    _conn.execute(_player_stats.delete().where(_player_stats.c.name == name))
+    conn = _engine.connect()
+    conn.execute(_player_stats.delete().where(_player_stats.c.name == name))
 
 
 def get_player_stats(name):
@@ -185,8 +211,9 @@ def get_player_stats(name):
 
     If the player doesn't exist, None is returned.
     """
+    conn = _engine.connect()
     s = _player_stats.select().where(_player_stats.c.name == name)
-    result = _conn.execute(s).fetchone()
+    result = conn.execute(s).fetchone()
     if result:
         score = result[1]
     else:
@@ -199,11 +226,12 @@ def set_player_stats(name, stats):
 
     XXX this function is the slowest part of scoring.py.
     """
+    conn = _engine.connect()
     # print("Saving scoring data for", player)
     try:
-        _conn.execute(_player_stats.insert(), name=name, stats=stats)
+        conn.execute(_player_stats.insert(), name=name, stats=stats)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_player_stats.update().where(_player_stats.c.name ==
+        conn.execute(_player_stats.update().where(_player_stats.c.name ==
                                                    name).values(stats=stats))
 
 
@@ -216,42 +244,48 @@ def get_all_games(scored=None):
     Note: Uses a lot of RAM if there are a lot of games.
     XXX fix this.
     """
+    conn = _engine.connect()
     s = _games.select()
     if scored is not None:
         s = s.where(_games.c.scored == bool(scored)).order_by(_games.c.end.asc())
-    return _conn.execute(s).fetchall()
+    return conn.execute(s).fetchall()
 
 
 def mark_game_scored(gid):
     """Mark a game as being scored."""
+    conn = _engine.connect()
     s = _games.update().where(_games.c.gid == gid).values(scored=True)
-    _conn.execute(s)
+    conn.execute(s)
 
 
 def unscore_all_games():
     """Marks all games as being unscored."""
-    _conn.execute(_games.update().values(scored=False))
+    conn = _engine.connect()
+    conn.execute(_games.update().values(scored=False))
 
 
 def unscore_all_games_of_player(name):
     """Marks all games by a player as being unscored."""
-    _conn.execute(_games.update().where(_games.c.name == name).values(scored=
+    conn = _engine.connect()
+    conn.execute(_games.update().where(_games.c.name == name).values(scored=
                                                                       False))
 
 
 def set_global_stat(key, data):
     """Set global stat data."""
+    conn = _engine.connect()
     try:
-        _conn.execute(_global_stats.insert(), key=key, data=data)
+        conn.execute(_global_stats.insert(), key=key, data=data)
     except sqlalchemy.exc.IntegrityError:
-        _conn.execute(_global_stats.update().where(_global_stats.c.key ==
+        conn.execute(_global_stats.update().where(_global_stats.c.key ==
                                                    key).values(data=data))
 
 
 def get_global_stat(key):
     """Get global score data."""
+    conn = _engine.connect()
     s = _global_stats.select().where(_global_stats.c.key == key)
-    val = _conn.execute(s).fetchone()
+    val = conn.execute(s).fetchone()
     if val is not None:
         return val[1]
     else:
@@ -260,13 +294,15 @@ def get_global_stat(key):
 
 def get_all_global_stats():
     """Get all global score data."""
+    conn = _engine.connect()
     scores = {}
     s = _global_stats.select()
-    for row in _conn.execute(s).fetchall():
+    for row in conn.execute(s).fetchall():
         scores[row[0]] = row[1]
     return scores
 
 
 def delete_all_global_stats():
     """Deletes all global stats."""
-    _conn.execute(_global_stats.delete())
+    conn = _engine.connect()
+    conn.execute(_global_stats.delete())
