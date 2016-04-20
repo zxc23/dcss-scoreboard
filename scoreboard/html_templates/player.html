@@ -17,29 +17,36 @@
       <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
       <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
       {% if streaks %}
-      <p><strong>Longest Win Streak:</strong> {{ streaks[0]['length'] }}</p>
-      {% endif %}
-      {% if records['combo'] %}
-        {% if records['race'] %}
-          <p><strong>Species Highscores Held:</strong> {{ records['race']|length }}</p>
-        {% endif %}
-        {% if records['role'] %}
-          <p><strong>Background Highscores Held:</strong> {{ records['role']|length }}</p>
-        {% endif %}
-        <p><strong>Combo Highscores Held:</strong> {{ records['combo']|length }}</p>
+      <p><strong>Longest Win Streak:</strong> {{ streaks[0].wins|length }} wins</p>
       {% endif %}
       {% if active_streak and active_streak.wins|length > 1 %}
-        <p><strong>Active Win Streak:</strong> {{ active_streak['wins']|map(attribute='char')|join(', ') }}</p>
+        <p><strong>Active Win Streak:</strong>
+          {% for gid in active_streak['wins'] %}
+          {{ gid|gidtogame|attr("char") }}
+          {% endfor %}
+        </p>
       {% endif %}
       {% if records['combo'] %}
-        <h3>Global Highscores</h3>
-        <p><strong>Combo Highscores:</strong> {{ records['combo']|map(attribute='char')|join(', ') }}</p>
+      <h3>Global Highscores</h3>
         {% if records['race'] %}
-          <p><strong>Species Highscores:</strong> {{ records['race']|map(attribute='rc')|join(', ') }}</p>
+          <p><strong>Species Highscores ({{ records['race']|length }}):</strong>
+            {% for gid in records['race'] %}
+            {{ gid|gidtogame|attr('rc') }}
+            {% endfor %}
+          </p>
         {% endif %}
         {% if records['role'] %}
-          <p><strong>Background Highscores:</strong> {{ records['role']|map(attribute='bg')|join(', ') }}</p>
+          <p><strong>Background Highscores ({{ records['role']|length }}):</strong>
+            {% for gid in records['role'] %}
+            {{ gid|gidtogame|attr('bg') }}
+            {% endfor %}
+          </p>
         {% endif %}
+        <p><strong>Combo Highscores Held ({{ records['combo']|length }}):</strong>
+          {% for gid in records['combo'] %}
+          {{ gid|gidtogame|attr('char') }}
+          {% endfor %}
+        </p>
       {% endif %}
     {% endif %}
   </div>
