@@ -1,7 +1,8 @@
 #!/bin/bash
 set -eu
-#wget -O logfiles/cdo-logfile-0.17.txt http://crawl.develz.org/milestones-0.17.txt
-cd logfiles
+
+mkdir -p real-logfiles
+cd real-logfiles
 
 # CAO
 wget -c -O cao-logfile-0.15 http://crawl.akrasiac.org/logfile15 &
@@ -40,14 +41,14 @@ wget -c -O cwz-logfile-0.17 http://webzook.net/soup/0.17/logfile &
 wget -c -O cwz-logfile-git http://webzook.net/soup/trunk/logfile &
 
 # LLD
-wget -c -O lld-logfile-0.15 http://lazy-life.ddo.jp/mirror/meta/0.15/logfile
-wget -c -O lld-logfile-0.16 http://lazy-life.ddo.jp/mirror/meta/0.16/logfile
-wget -c -O lld-logfile-0.17 http://lazy-life.ddo.jp/mirror/meta/0.17/logfile
-wget -c -O lld-logfile-git http://lazy-life.ddo.jp/mirror/meta/trunk/logfile
+wget -c -O lld-logfile-0.15 http://lazy-life.ddo.jp/mirror/meta/0.15/logfile &
+wget -c -O lld-logfile-0.16 http://lazy-life.ddo.jp/mirror/meta/0.16/logfile &
+wget -c -O lld-logfile-0.17 http://lazy-life.ddo.jp/mirror/meta/0.17/logfile &
+wget -c -O lld-logfile-git http://lazy-life.ddo.jp/mirror/meta/trunk/logfile &
 
 # CPO
 wget -c -O cpo-logfile-0.15 https://crawl.project357.org/dcss-logfiles-0.15 &
 wget -c -O cpo-logfile-0.16 https://crawl.project357.org/dcss-logfiles-0.16 &
 wget -c -O cpo-logfile-0.17 https://crawl.project357.org/dcss-logfiles-0.17 &
-wget -c -O cpo-logfile-trunk https://crawl.project357.org/dcss-logfiles-trunk  &
+wget -c -O cpo-logfile-trunk https://crawl.project357.org/dcss-logfiles-trunk &
 
