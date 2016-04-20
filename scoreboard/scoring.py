@@ -3,6 +3,7 @@
 import time
 import multiprocessing
 from collections import deque
+import sys
 
 import pylru
 
@@ -405,19 +406,23 @@ def score_games(rebuild=False):
     if rebuild:
         rebuild_database()
 
-    #p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-    jobs = []
-    for game in model.get_all_games(scored=False):
-        #jobs.append(p.apply_async(score_game, (game,)))
-        score_game(game)
+    if sys.platform == 'win32':
+        for game in model.get_all_games(scored=False):
+            score_game(game)
+            scored += 1
+            if scored % 10000 == 0:
+                print(scored)
+    else:
+        p = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+        jobs = []
+        for game in model.get_all_games(scored=False):
+            jobs.append(p.apply_async(score_game, (game,)))
 
-        # for async_job in jobs:
-        # async_job.wait()
-
-        # Periodically print our progress
-        scored += 1
-        if scored % 10000 == 0:
-            print(scored)
+        for job in jobs:
+            job.wait()
+            scored += 1
+            if scored % 10000 == 0:
+                print(scored)
 
     # clean up single-game "streaks"
     set_global_stat(
