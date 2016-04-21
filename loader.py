@@ -59,7 +59,7 @@ def main(player=None):
         scoreboard.log_import.load_logfiles()
     if not args.skip_scoring:
         if args.player:
-            scoreboard.scoring.rescore_player('zzxc')
+            scoreboard.scoring.rescore_player(args.player)
         scoreboard.scoring.score_games(rebuild=args.rebuild)
     if not args.skip_website:
         scoreboard.write_website.write_website()
