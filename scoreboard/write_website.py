@@ -27,6 +27,7 @@ def jinja_env():
     env.filters['gidtogame'] = model.game
 
     env.globals['urlbase'] = const.WEBSITE_URLBASE
+    env.globals['tableclasses'] = "table table-hover table-striped"
     return env
 
 
