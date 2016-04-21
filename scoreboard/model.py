@@ -224,7 +224,7 @@ def all_player_names():
     saner.
     """
     conn = _engine.connect()
-    return [p.name for p in conn.execute(_players.select('name')).fetchall()]
+    return [p.name for p in conn.execute(_player_stats.select('name')).fetchall()]
 
 
 def get_all_player_stats():
