@@ -1,6 +1,6 @@
 website/
 logfiles/*
-real_logfiles/*
+real-logfiles/*
 !logfiles/EMPTY_DIR
 venv/
 __pycache__
