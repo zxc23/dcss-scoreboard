@@ -7,7 +7,7 @@ import datetime
 import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
-from sqlalchemy import desc
+from sqlalchemy import desc, asc
 
 from . import modelutils
 
@@ -75,7 +75,8 @@ def setup_database(backend):
                    _metadata,
                    Column('gid',
                           String(50),
-                          primary_key=True),
+                          primary_key=True,
+                          nullable=False),
                    Column('name',
                           String(50),  # XXX: is this long enough?
                           nullable=False,
@@ -279,6 +280,15 @@ def set_player_stats(name, stats):
                                                   name).values(stats=stats))
 
 
+def first_game(name, src=None):
+    """Returns the first game of a player."""
+    conn = _engine.connect()
+    s = _games.select().where(_games.c.name == name).order_by(asc('start')).limit(1)
+    if src is not None:
+        s = s.where(_games.c.src == src)
+    return conn.execute(s).fetchone()
+
+
 def all_games(scored=None):
     """Return all games.
 
@@ -291,8 +301,7 @@ def all_games(scored=None):
     conn = _engine.connect()
     s = _games.select()
     if scored is not None:
-        s = s.where(_games.c.scored == bool(scored)).order_by(_games.c.end.asc(
-        ))
+        s = s.where(_games.c.scored == bool(scored)).order_by(asc('end'))
     return conn.execute(s).fetchall()
 
 

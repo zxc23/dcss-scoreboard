@@ -23,6 +23,21 @@ def is_valid_streak_addition(game, streak):
     return game.start > streak['end']
 
 
+def is_valid_streak_breaker(game):
+    """Check if the game is a valid streak breaker to the streak.
+
+    This involves experimental anti-griefing heuristics.
+    """
+    # First turn quits
+    if game['turn'] == 0:
+        return False
+    first_game = model.first_game(game['name'], game['src'])
+    # First time playing a server and early quit/death
+    if game['turn'] < 300 and game['gid'] == first_game['gid']:
+        return False
+    return True
+
+
 def is_blacklisted(name, src):
     """Check if the player is in a blacklist."""
     if name in constants.BLACKLISTS['bots']:
@@ -257,6 +272,9 @@ def score_game_vs_streaks(game, won):
         # If the player was on a 2+ game streak, finalise it
         streak = active_streaks.get(name)
         if streak and len(streak['wins']) > 1:
+            # Ignore game if griefing detected
+            if not is_valid_streak_breaker(game):
+                return
             completed_streaks = load_global_stat('completed_streaks', [])
             streak['streak_breaker'] = game.gid
             streak['end'] = game.end
