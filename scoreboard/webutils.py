@@ -73,6 +73,7 @@ def gametotablerow(game,
       {player_row}
       <td>{score}</td>
       <td>{character}</td>
+      <td>{god}</td>
       {place}
       {end}
       <td>{xl}</td>
@@ -93,6 +94,7 @@ def gametotablerow(game,
             name=game.name),
         score=prettyint(game.sc),
         character=game.char,
+        god=game.god,
         place="" if winning_games else "<td>%s</td>" % game.place,
         end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg'),
         xl=game.xl,
