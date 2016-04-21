@@ -238,39 +238,38 @@ def score_game_vs_misc_stats(game):
 
     # Min duration
     min_dur = load_global_stat('min_dur', [])
-    if not min_dur or len(min_dur) < const.MIN_DUR_RECORD_LENGTH:
+    if not min_dur or len(min_dur) < const.STANDARD_TABLE_LENGTH:
         min_dur.append(game.gid)
     else:
         if dur < max(get_game(g).dur for g in min_dur):
             min_dur.append(game.gid)
             min_dur = sorted(
                 min_dur,
-                key=lambda i: get_game(i).dur)[:const.MIN_DUR_RECORD_LENGTH]
+                key=lambda i: get_game(i).dur)[:const.STANDARD_TABLE_LENGTH]
     set_global_stat('min_dur', min_dur)
 
     # Min turns
     min_turn = load_global_stat('min_turn', [])
-    if not min_turn or len(min_turn) < const.MIN_TURN_RECORD_LENGTH:
+    if not min_turn or len(min_turn) < const.STANDARD_TABLE_LENGTH:
         min_turn.append(game.gid)
     else:
         if turns < max(get_game(g).turn for g in min_turn):
             min_turn.append(game.gid)
             min_turn = sorted(
                 min_turn,
-                key=lambda i: get_game(i).turn)[:const.MIN_TURN_RECORD_LENGTH]
+                key=lambda i: get_game(i).turn)[:const.STANDARD_TABLE_LENGTH]
     set_global_stat('min_turn', min_turn)
 
     # Max score
     max_score = load_global_stat('max_score', [])
-    if not max_score or len(max_score) < const.MAX_SCORE_RECORD_LENGTH:
+    if not max_score or len(max_score) < const.STANDARD_TABLE_LENGTH:
         max_score.append(game.gid)
     else:
         if score > min(get_game(g)['sc'] for g in max_score):
             max_score.append(game.gid)
             max_score = sorted(
                 max_score,
-                key=
-                lambda i: -get_game(i)['sc'])[:const.MAX_SCORE_RECORD_LENGTH]
+                key=lambda i: -get_game(i)['sc'])[:const.STANDARD_TABLE_LENGTH]
     set_global_stat('max_score', max_score)
 
 
