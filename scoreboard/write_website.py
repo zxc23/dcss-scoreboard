@@ -74,21 +74,27 @@ def write_player_stats(player, stats, outfile, achievements, global_stats,
                                 recent_games=recent_games))
 
 
-def write_website():
-    """Write all website files."""
+def write_website(rebuild=True, players=[]):
+    """Write all website files.
+
+    If rebuild == False, only names in the players list will have their pages built.
+    """
     start = time.time()
     env = jinja_env()
+    all_players = sorted(model.get_all_players())
 
-    print("Writing HTML to %s" % OUTDIR)
-    if os.path.isdir(OUTDIR):
-        print("Clearing %s" % OUTDIR)
-        shutil.rmtree(OUTDIR)
-    os.mkdir(OUTDIR)
+    if rebuild:
+        players = all_players
+        print("Writing HTML to %s" % OUTDIR)
+        if os.path.isdir(OUTDIR):
+            print("Clearing %s" % OUTDIR)
+            shutil.rmtree(OUTDIR)
+        os.mkdir(OUTDIR)
 
-    print("Copying static assets")
-    src = os.path.join(os.path.dirname(__file__), 'html_static')
-    dst = os.path.join(OUTDIR, 'static')
-    shutil.copytree(src, dst)
+        print("Copying static assets")
+        src = os.path.join(os.path.dirname(__file__), 'html_static')
+        dst = os.path.join(OUTDIR, 'static')
+        shutil.copytree(src, dst)
 
     print("Writing index")
     with open(os.path.join(OUTDIR, 'index.html'), 'w') as f:
@@ -103,7 +109,6 @@ def write_website():
     active_streaks = stats['active_streaks']
     sorted_active_streaks = []
 
-    # XXX Trimming single-game "streaks" should happen in scoring.py
     for streak in active_streaks.values():
         if len(streak['wins']) > 1:
             streaks.append(streak)
@@ -113,35 +118,37 @@ def write_website():
     sorted_streaks = sorted(streaks, key=lambda s: (-len(s['wins']), s['end']))
     sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
 
-    print("Writing highscores")
-    with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
-        template = env.get_template('highscores.html')
-        f.write(template.render(stats=stats))
     print("Writing streaks")
     with open(os.path.join(OUTDIR, 'streaks.html'), 'w') as f:
         template = env.get_template('streaks.html')
         f.write(template.render(streaks=sorted_streaks,
                                 active_streaks=sorted_active_streaks))
+
+    print("Writing highscores")
+    with open(os.path.join(OUTDIR, 'highscores.html'), 'w') as f:
+        template = env.get_template('highscores.html')
+        f.write(template.render(stats=stats))
+
     print("Writing players")
     player_html_path = os.path.join(OUTDIR, 'players')
     if not os.path.isdir(player_html_path):
         os.mkdir(player_html_path)
-    players = sorted(model.players())
     with open(os.path.join(OUTDIR, 'players.html'), 'w') as f:
         template = env.get_template('players.html')
-        f.write(template.render(players=players))
+        f.write(template.render(players=all_players))
+
     print("Writing player pages... ")
     achievements = achievement_data()
     global_stats = model.get_all_global_stats()
     template = env.get_template('player.html')
     n = 0
-    for row in model.get_all_player_stats():
+    for player in players:
+        stats = model.get_player_stats(player)
+
         # Don't make pages for players with no games played
-        if row.stats['games'] == 0:
+        if stats['games'] == 0:
             continue
 
-        player = row.name
-        stats = row.stats
         outfile = os.path.join(player_html_path, player + '.html')
         write_player_stats(player, stats, outfile, achievements, global_stats,
                            sorted_streaks, active_streaks, template)

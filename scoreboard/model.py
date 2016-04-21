@@ -215,7 +215,7 @@ def save_logfile_pos(logfile, pos):
             _logfile_progress.c.logfile == logfile).values(lines_parsed=pos))
 
 
-def players():
+def get_all_players():
     """Return list of all players.
 
     XXX should be at least memoised if not outright replaced with something
