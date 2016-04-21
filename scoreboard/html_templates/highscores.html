@@ -38,8 +38,6 @@
               <th>Player</th>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -50,7 +48,7 @@
           </thead>
           <tbody>
             {% for gid in stats['max_score'] %}
-            {{ gid|gidtogame|gametotablerow(show_player=True) }}
+            {{ gid|gidtogame|gametotablerow(show_player=True, winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -63,8 +61,6 @@
               <th>Player</th>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -75,7 +71,7 @@
           </thead>
           <tbody>
             {% for gid in stats['rc_highscores'].values() %}
-            {{ gid|gidtogame|gametotablerow(prefix_row='race', show_player=True) }}
+            {{ gid|gidtogame|gametotablerow(prefix_row='race', show_player=True, winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -88,8 +84,6 @@
               <th>Player</th>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -100,7 +94,7 @@
           </thead>
           <tbody>
             {% for gid in stats['bg_highscores'].values() %}
-            {{ gid|gidtogame|gametotablerow(prefix_row='cls', show_player=True) }}
+            {{ gid|gidtogame|gametotablerow(prefix_row='cls', show_player=True, winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -112,8 +106,6 @@
               <th>Player</th>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -125,7 +117,7 @@
           <tbody>
             {# XXX unsorted #}
             {% for gid in stats['char_highscores'].values() %}
-            {{ gid|gidtogame|gametotablerow(show_player=True) }}
+            {{ gid|gidtogame|gametotablerow(show_player=True, winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -138,8 +130,6 @@
               <th>Player</th>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -151,7 +141,7 @@
           <tbody>
             {# XXX unsorted #}
             {% for gid in stats['god_highscores'].values() %}
-            {{ gid|gidtogame|gametotablerow(prefix_row='god', show_player=True) }}
+            {{ gid|gidtogame|gametotablerow(prefix_row='god', show_player=True, winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -163,8 +153,6 @@
               <th>Player</th>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -175,7 +163,7 @@
           </thead>
           <tbody>
             {% for gid in stats['min_dur'] %}
-            {{ gid|gidtogame|gametotablerow(show_player=True) }}
+            {{ gid|gidtogame|gametotablerow(show_player=True, winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>
@@ -187,8 +175,6 @@
               <th>Player</th>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -199,7 +185,7 @@
           </thead>
           <tbody>
             {% for gid in stats['min_turn'] %}
-            {{ gid|gidtogame|gametotablerow(show_player=True) }}
+            {{ gid|gidtogame|gametotablerow(show_player=True, winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>
