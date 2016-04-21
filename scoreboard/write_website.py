@@ -102,7 +102,7 @@ def write_website(rebuild=True, players=[]):
     # Get stats
     stats = model.global_stats()
 
-    # Invert combo list:
+    # Invert combo list for 'top combo holders' on index:
     combo_high_scores = {}
     for char, gid in stats['char_highscores'].items():
         name = model.game(gid).name
@@ -150,16 +150,9 @@ def write_website(rebuild=True, players=[]):
         template = env.get_template('highscores.html')
         f.write(template.render(stats=stats))
 
-    print("Writing players")
-    player_html_path = os.path.join(constants.WEBSITE_DIR, 'players')
-    if not os.path.isdir(player_html_path):
-        os.mkdir(player_html_path)
-    with open(
-            os.path.join(constants.WEBSITE_DIR, 'players.html'), 'w') as f:
-        template = env.get_template('players.html')
-        f.write(template.render(players=all_players))
-
     print("Writing player pages... ")
+    player_html_path = os.path.join(constants.WEBSITE_DIR, 'players')
+    os.mkdir(player_html_path)
     achievements = achievement_data()
     global_stats = model.global_stats()
     template = env.get_template('player.html')
