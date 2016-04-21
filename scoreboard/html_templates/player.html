@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}{{ player }}{% endblock %}
+{% block heading %}{{ player }}{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-sm-4">
+    <h3>Overall Stats</h3>
+    <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
+    <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
+    <p><strong>Games Won:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
+    <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
+    <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur }} hours</p>
+    <p><strong>Total Score:</strong> {{ stats['total_score']|prettyint }}</p>
+    <p><strong>Highest Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
+    <p><strong>Average Score:</strong> {{ (stats['avg_score']|round)|prettyint }}</p>
+    {% if stats['wins']|length %}
+      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
+      <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
+      {% if streaks %}
+      <p><strong>Longest Win Streak:</strong> {{ streaks[0]['length'] }}</p>
+      {% endif %}
+      {% if records['combo'] %}
+        {% if records['race'] %}
+          <p><strong>Species Highscores Held:</strong> {{ records['race']|length }}</p>
+        {% endif %}
+        {% if records['role'] %}
+          <p><strong>Background Highscores Held:</strong> {{ records['role']|length }}</p>
+        {% endif %}
+        <p><strong>Combo Highscores Held:</strong> {{ records['combo']|length }}</p>
+      {% endif %}
+      {% if active_streak and active_streak['length'] > 1 %}
+        <p><strong>Active Win Streak:</strong> {{ active_streak['wins']|map(attribute='char')|join(', ') }}</p>
+      {% endif %}
+      {% if records['combo'] %}
+        <h3>Global Highscores</h3>
+        <p><strong>Combo Highscores:</strong> {{ records['combo']|map(attribute='char')|join(', ') }}</p>
+        {% if records['race'] %}
+          <p><strong>Species Highscores:</strong> {{ records['race']|map(attribute='rc')|join(', ') }}</p>
+        {% endif %}
+        {% if records['role'] %}
+          <p><strong>Background Highscores:</strong> {{ records['role']|map(attribute='bg')|join(', ') }}</p>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  </div>
+  <div class="col-sm-4">
+    <h3>Wins</h3>
+    <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ constants.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
+    <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ constants.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
+    <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ constants.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
+  </div>
+  <div class="col-sm-4">
+    <h3>Achievements</h3>
+    {% for achievement in achievement_data %}
+      {% if achievement['id'] in stats['achievements'].keys() %}
+      <p>
+        <h5 class="card-title">{{ achievement['name'] }}</h5>
+        <p class="card-text">{{ achievement['description'] }}</p>
+      </p>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#games" role="tab">Recent Games</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#wins" role="tab">Recent Wins</a>
+      </li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="games" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['recent_games']|sort(attribute='end', reverse=True) %}
+            {{ game|gametotablerow }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="wins" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['wins'][-constants.RECENT_GAMES_LENGTH:]|sort(attribute='end', reverse=True) %}
+            {{ game|gametotablerow }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

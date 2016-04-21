@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}High Scores{% endblock %}
+{% block heading %}Global High Scores{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-sm-12">
+    <h3>Highscores</h3>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#overall" role="tab">Overall</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#race" role="tab">Race</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#background" role="tab">Background</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#char" role="tab">Combo</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#god" role="tab">God (beta)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#shortest" role="tab">Shortest (turncount)</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#fastest" role="tab">Fastest (realtime)</a>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="overall" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['max_score'] %}
+            {{ game|gametotablerow(show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="race" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Race</th>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['rc_highscores'].values()|sort(attribute='rc') %}
+            {{ game|gametotablerow(prefix_row='race', show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="background" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Background</th>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['bg_highscores'].values()|sort(attribute='bg') %}
+            {{ game|gametotablerow(prefix_row='cls', show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="char" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['char_highscores'].values()|sort(attribute='char') %}
+            {{ game|gametotablerow(show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="god" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>God</th>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['god_highscores'].values()|sort(attribute='god') %}
+            {{ game|gametotablerow(prefix_row='god', show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="fastest" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['min_dur']|sort(attribute='dur') %}
+            {{ game|gametotablerow(show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-pane" id="shortest" role="tabpanel">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Character</th>
+              <th>Place</th>
+              <th>End</th>
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Runes</th>
+              <th>Date</th>
+              <th>Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for game in stats['min_turn']|sort(attribute='turn') %}
+            {{ game|gametotablerow(show_player=True) }}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

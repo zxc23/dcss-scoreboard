@@ -1,5 +1,7 @@
-*.json
-dcss-scoreboard-html/
+website/
 logfiles/*
 !logfiles/EMPTY_DIR
 venv/
+__pycache__
+*.db
+.vscode/

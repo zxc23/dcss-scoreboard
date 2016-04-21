@@ -15,13 +15,17 @@
     <div class="container">
       {# header #}
       <div class="row">
+        <a href="{{ urlbase }}/index.html"><img src="{{ urlbase }}/static/images/logo.png" class="center-block"></a>
+      </div>
+      <div class="row">
         <div class="col-sm-12">
           <nav class="navbar navbar-light bg-faded">
-            <a class="navbar-brand" href="#">DCSS Scoreboard</a>
+            <a class="navbar-brand" href="{{ urlbase }}/index.html">DCSS Scoreboard</a>
             <div class="nav navbar-nav">
-              <a class="nav-item nav-link active" href="#">Home</span></a>
-              <a class="nav-item nav-link" href="#">High Scores</a>
-              <a class="nav-item nav-link" href="#">Players</a>
+              <a class="nav-item nav-link active" href="{{ urlbase }}/index.html">Home</span></a>
+              <a class="nav-item nav-link" href="{{ urlbase }}/highscores.html">High Scores</a>
+              <a class="nav-item nav-link" href="{{ urlbase }}/streaks.html">Streaks</a>
+              <a class="nav-item nav-link" href="{{ urlbase }}/players.html">Players</a>
             </div>
           </nav>
         </div>
