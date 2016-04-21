@@ -20,8 +20,8 @@
       <p><strong>Longest Win Streak:</strong> {{ streaks[0].wins|length }} wins</p>
       {% endif %}
       {% if active_streak and active_streak.wins|length > 1 %}
-        <p><strong>Active Win Streak:</strong>
-          {% for gid in active_streak['wins'] %}
+        <p><strong>Active Win Streak ({{ active_streak.wins|length }}):</strong>
+          {% for gid in active_streak.wins %}
           {{ gid|gidtogame|attr("char") }}
           {% endfor %}
         </p>
