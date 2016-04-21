@@ -1,3 +1,13 @@
+{# On child pages, {% set active_page = 'index' %} to highlight the relevant
+  navigation_bar entry
+#}
+{% set navigation_bar = [
+  ('/index.html', 'index', 'Home'),
+  ('/highscores.html', 'highscores', 'High Scores'),
+  ('/streaks.html', 'streaks', 'Streaks'),
+  ] %}
+{% set active_page = active_page|default('none') %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -41,9 +51,9 @@
           <nav class="navbar navbar-light bg-faded">
             <a class="navbar-brand" href="{{ urlbase }}/index.html">DCSS Scoreboard</a>
             <div class="nav navbar-nav">
-              <a class="nav-item nav-link active" href="{{ urlbase }}/index.html">Home</span></a>
-              <a class="nav-item nav-link" href="{{ urlbase }}/highscores.html">High Scores</a>
-              <a class="nav-item nav-link" href="{{ urlbase }}/streaks.html">Streaks</a>
+              {% for href, id, title in navigation_bar %}
+              <a class="nav-item nav-link {% if id == active_page %}active{% endif %}" href="{{ urlbase }}{{ href }}">{{ title }}</span></a>
+              {% endfor %}
               <form class="nav-item form-inline pull-sm-right">
                 <input id="playersearch" class="form-control" type="text" placeholder="Player Search" />
               </form>
