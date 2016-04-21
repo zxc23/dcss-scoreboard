@@ -121,3 +121,4 @@ BLACKLISTS = {'griefers': {},
                'beemell', 'beem', 'drasked', 'phybot'}}
 WEBSITE_DIR = 'website'
 WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)
+# WEBSITE_URLBASE = 'https://crawl.project357.org/static/scoreboard'

@@ -95,6 +95,9 @@ def write_website(rebuild=True, players=[]):
         src = os.path.join(os.path.dirname(__file__), 'html_static')
         dst = os.path.join(constants.WEBSITE_DIR, 'static')
         shutil.copytree(src, dst)
+        print("Generating static player list")
+        with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
+            f.write(json.dumps(all_players))
 
     # Get stats
     stats = model.global_stats()
