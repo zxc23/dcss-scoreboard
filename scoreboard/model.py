@@ -11,13 +11,11 @@ from sqlalchemy import desc, asc
 
 from . import modelutils
 
-
 GAME_CACHE = pylru.lrucache(10000)
 
 
 class DatabaseError(Exception):
     """Generic error for issues with the model."""
-
     pass
 
 
@@ -130,12 +128,27 @@ def setup_database(backend):
                               mysql_engine='InnoDB',
                               mysql_charset='utf8')
 
+    global _blacklisted_players
+    _blacklisted_players = Table('blacklisted_players',
+                                 _metadata,
+                                 Column('name',
+                                        String(50),
+                                        primary_key=True,
+                                        nullable=False),
+                                 Column('src',
+                                        String(4),
+                                        primary_key=True,
+                                        nullable=False),
+                                 mysql_engine='InnoDB',
+                                 mysql_charset='utf8')
+
     global _player_stats
     _player_stats = Table('player_stats',
                           _metadata,
                           Column('name',
                                  String(50),  # XXX: is this long enough?
-                                 primary_key=True),
+                                 primary_key=True,
+                                 nullable=False),
                           Column('stats',
                                  _JsonEncodedDict(100000),
                                  nullable=False),
@@ -147,7 +160,8 @@ def setup_database(backend):
                           _metadata,
                           Column('key',
                                  String(100),
-                                 primary_key=True),
+                                 primary_key=True,
+                                 nullable=False),
                           Column('data',
                                  _JsonEncodedDict(100000),
                                  nullable=False),
@@ -283,7 +297,8 @@ def set_player_stats(name, stats):
 def first_game(name, src=None):
     """Returns the first game of a player."""
     conn = _engine.connect()
-    s = _games.select().where(_games.c.name == name).order_by(asc('start')).limit(1)
+    s = _games.select().where(_games.c.name == name).order_by(asc(
+        'start')).limit(1)
     if src is not None:
         s = s.where(_games.c.src == src)
     return conn.execute(s).fetchone()
@@ -365,12 +380,12 @@ def delete_all_global_stats():
 def game(gid):
     """Return game with matching gid."""
     if not isinstance(gid, str):
-        raise TypeError("Must pass in string, `%s` is type %s" % (repr(gid), type(gid)))
+        raise TypeError("Must pass in string, `%s` is type %s" %
+                        (repr(gid), type(gid)))
     if gid in GAME_CACHE:
         return GAME_CACHE[gid]
     conn = _engine.connect()
-    game = conn.execute(_games.select().where(
-        _games.c.gid == gid)).fetchone()
+    game = conn.execute(_games.select().where(_games.c.gid == gid)).fetchone()
     GAME_CACHE[gid] = game
     return game
 
@@ -396,3 +411,27 @@ def recent_games(wins=False, player=None, num=5, reverse=False):
     if reverse:
         rows = rows[::-1]
     return rows
+
+
+def add_player_to_blacklist(name, src):
+    """Add a player to the blacklist."""
+    conn = _engine.connect()
+    conn.execute(_blacklisted_players.insert(), name=name, src=src)
+
+
+def remove_player_from_blacklist(name, src):
+    """Remove a player from the blacklist."""
+    conn = _engine.connect()
+    s = _blacklisted_players.delete().where(
+        _blacklisted_players.c.name == name).where(_blacklisted_players.c.src
+                                                   == src)
+    conn.execute(s)
+
+
+def player_in_blacklist(name, src):
+    """Returns True if a player is on the blacklist."""
+    conn = _engine.connect()
+    s = _blacklisted_players.select().where(
+        _blacklisted_players.c.name == name).where(_blacklisted_players.c.src
+                                                   == src)
+    return conn.execute(s).fetchone() is True

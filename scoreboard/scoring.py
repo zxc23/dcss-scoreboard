@@ -28,12 +28,11 @@ def is_grief(game):
 
     This involves experimental anti-griefing heuristics.
     """
-    # First turn quits
-    if game['turn'] == 0:
-        return True
     # First time playing a server and fast loss
     first_game = model.first_game(game['name'], game['src'])
-    if game['dur'] < 1200 and game['gid'] == first_game['gid']:
+    if game['gid'] == first_game['gid'] and (game['dur'] < 1200 or
+                                             game['turn'] < 1000):
+        model.add_player_to_blacklist(game['name'], game['src'])
         return True
     return False
 
@@ -42,8 +41,10 @@ def is_blacklisted(name, src):
     """Check if the player is in a blacklist."""
     if name in constants.BLACKLISTS['bots']:
         return True
-    if name in constants.BLACKLISTS['griefers']:
-        return src in constants.BLACKLISTS['griefers'][name]
+    if src in constants.BLACKLISTS['griefers'].get(name, {}):
+        return True
+    if model.player_in_blacklist(name, src):
+        return True
     return False
 
 
@@ -198,7 +199,8 @@ def score_game_vs_global_highscores(game, fields):
     for field in fields:
         fieldval = getattr(game, field)
         highscores = load_global_stat(field + '_highscores', {})
-        if fieldval not in highscores or game.sc > get_game(highscores[fieldval]).sc:
+        if fieldval not in highscores or game.sc > get_game(highscores[
+                fieldval]).sc:
             highscores[fieldval] = game.gid
             set_global_stat(field + '_highscores', highscores)
             result = True
@@ -225,7 +227,8 @@ def score_game_vs_misc_stats(game):
             min_dur.append(game.gid)
             min_dur = sorted(
                 min_dur,
-                key=lambda i: get_game(i).dur)[:constants.MIN_DUR_RECORD_LENGTH]
+                key=lambda i: get_game(i).dur)[:
+                                               constants.MIN_DUR_RECORD_LENGTH]
     set_global_stat('min_dur', min_dur)
 
     # Min turns
@@ -237,7 +240,8 @@ def score_game_vs_misc_stats(game):
             min_turn.append(game.gid)
             min_turn = sorted(
                 min_turn,
-                key=lambda i: get_game(i).turn)[:constants.MIN_TURN_RECORD_LENGTH]
+                key=
+                lambda i: get_game(i).turn)[:constants.MIN_TURN_RECORD_LENGTH]
     set_global_stat('min_turn', min_turn)
 
     # Max score
@@ -249,7 +253,8 @@ def score_game_vs_misc_stats(game):
             max_score.append(game.gid)
             max_score = sorted(
                 max_score,
-                key=lambda i: -get_game(i)['sc'])[:constants.MAX_SCORE_RECORD_LENGTH]
+                key=lambda i: -get_game(i)['sc'])[:constants.
+                                                  MAX_SCORE_RECORD_LENGTH]
     set_global_stat('max_score', max_score)
 
 
@@ -469,7 +474,6 @@ def score_games(rebuild=False):
         model.set_global_stat(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
-
 
 if __name__ == "__main__":
     score_games()
