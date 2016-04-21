@@ -81,7 +81,7 @@ def write_website(rebuild=True, players=[]):
     """
     start = time.time()
     env = jinja_env()
-    all_players = sorted(model.get_all_players())
+    all_players = sorted(model.all_player_names())
 
     if rebuild:
         players = all_players
@@ -102,7 +102,7 @@ def write_website(rebuild=True, players=[]):
         f.write(template.render(recent_wins=model.recent_games(wins=True)))
 
     # Get stats
-    stats = model.get_all_global_stats()
+    stats = model.global_stats()
 
     # Merge active streaks into streaks
     streaks = stats['completed_streaks']
@@ -139,7 +139,7 @@ def write_website(rebuild=True, players=[]):
 
     print("Writing player pages... ")
     achievements = achievement_data()
-    global_stats = model.get_all_global_stats()
+    global_stats = model.global_stats()
     template = env.get_template('player.html')
     n = 0
     for player in players:

@@ -77,7 +77,7 @@ def load_global_stat(key, default=None):
     if key in GLOBAL_STATS_CACHE:
         val = GLOBAL_STATS_CACHE[key]
     else:
-        val = model.get_global_stat(key)
+        val = model.global_stat(key)
     if val is None:
         return default
     else:
@@ -435,7 +435,7 @@ def score_games(rebuild=False):
     if rebuild:
         rebuild_database()
 
-    for game in model.get_all_games(scored=False):
+    for game in model.all_games(scored=False):
         score_game(game)
         scored += 1
         if scored % 10000 == 0:

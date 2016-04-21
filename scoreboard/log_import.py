@@ -36,7 +36,7 @@ def load_logfile(logfile):
     src = os.path.basename(logfile.split('-', 1)[0])
     lines = 0
     # How many lines have we already processed?
-    processed_lines = model.get_logfile_pos(logfile)
+    processed_lines = model.logfile_pos(logfile)
     print("Reading %s%s... " % (logfile, (" from line %s" % processed_lines) if
                                 processed_lines else ''))
     for line in open(logfile, encoding='utf-8').readlines():

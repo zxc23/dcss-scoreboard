@@ -188,7 +188,7 @@ def add_game(gid, raw_data):
                  raw_data=raw_data)
 
 
-def get_logfile_pos(logfile):
+def logfile_pos(logfile):
     """Get the number of lines we've already processed."""
     conn = _engine.connect()
     s = _logfile_progress.select().where(_logfile_progress.c.logfile ==
@@ -217,14 +217,14 @@ def save_logfile_pos(logfile, pos):
             _logfile_progress.c.logfile == logfile).values(lines_parsed=pos))
 
 
-def get_all_players():
-    """Return list of all players.
+def all_player_names():
+    """Return list of all player names.
 
     XXX should be at least memoised if not outright replaced with something
     saner.
     """
     conn = _engine.connect()
-    return [i.name for i in get_all_player_stats()]
+    return [p.name for p in conn.execute(_players.select('name')).fetchall()]
 
 
 def get_all_player_stats():
@@ -279,7 +279,7 @@ def set_player_stats(name, stats):
                                                   name).values(stats=stats))
 
 
-def get_all_games(scored=None):
+def all_games(scored=None):
     """Return all games.
 
     If scored is not none, only return games who match bool(scored).
@@ -326,7 +326,7 @@ def set_global_stat(key, data):
                                                   key).values(data=data))
 
 
-def get_global_stat(key):
+def global_stat(key):
     """Get global score data."""
     conn = _engine.connect()
     s = _global_stats.select().where(_global_stats.c.key == key)
@@ -337,7 +337,7 @@ def get_global_stat(key):
         return None
 
 
-def get_all_global_stats():
+def global_stats():
     """Get all global score data."""
     conn = _engine.connect()
     scores = {}
