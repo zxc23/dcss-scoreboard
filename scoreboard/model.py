@@ -80,6 +80,7 @@ def setup_database(backend):
                           String(50),  # XXX: is this long enough?
                           nullable=False,
                           index=True),
+                   Column('src', String(3), nullable=False),
                    Column('v', String(10), nullable=False),
                    Column('char', String(4), nullable=False),
                    Column('rc', String(2), nullable=False),
@@ -168,6 +169,7 @@ def add_game(gid, raw_data):
     conn.execute(_games.insert(),
                  gid=gid,
                  name=raw_data['name'],
+                 src=raw_data['src'],
                  v=raw_data['v'],
                  char=raw_data['char'],
                  rc=raw_data['char'][:2],

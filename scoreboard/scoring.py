@@ -23,6 +23,15 @@ def is_valid_streak_addition(game, streak):
     return game.start > streak['end']
 
 
+def is_blacklisted(name, src):
+    """Check if the player is in a blacklist."""
+    if name in constants.BLACKLISTS['bots']:
+        return True
+    if name in constants.BLACKLISTS['griefers']:
+        return src in constants.BLACKLISTS['griefers'][name]
+    return False
+
+
 def load_player_stats(name):
     """Load the stats dictionary of a player."""
     # Try to load stats from cache
@@ -266,6 +275,11 @@ def score_game(game_row):
     gid = game_row.gid
     game = game_row.raw_data
     name = game_row.name
+    src = game_row.src
+
+    # Skip if player blacklisted
+    if is_blacklisted(name, src):
+        return
 
     # Log vars
     god = game['god']

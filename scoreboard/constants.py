@@ -110,3 +110,10 @@ RECENT_GAMES_LENGTH = 10
 MIN_DUR_RECORD_LENGTH = 5
 MIN_TURN_RECORD_LENGTH = 5
 MAX_SCORE_RECORD_LENGTH = 10
+BLACKLISTS = {'griefers': {},
+              'bots':
+              {'autorobin', 'xw', 'auto7hm', 'rw', 'qw', 'ow', 'qwrobin', 'gw',
+               'notqw', 'jw', 'parabodrick', 'hyperqwbe', 'cashybrid',
+               'tstbtto', 'parabolic', 'oppbolic', 'ew', 'rushxxi', 'gaubot',
+               'cojitobot', 'paulcdejean', 'otabotab', 'nakatomy', 'testingqw',
+               'beemell', 'beem', 'drasked', 'phybot'}}
