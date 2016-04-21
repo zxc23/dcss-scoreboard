@@ -435,3 +435,9 @@ def player_in_blacklist(name, src):
         _blacklisted_players.c.name == name).where(_blacklisted_players.c.src
                                                    == src)
     return conn.execute(s).fetchone() is True
+
+
+def all_blacklisted_players():
+    """Returns all blacklisted player-src combinations."""
+    conn = _engine.connect()
+    return conn.execute(_blacklisted_players.select()).fetchall()

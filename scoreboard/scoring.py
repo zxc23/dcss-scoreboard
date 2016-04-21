@@ -8,6 +8,7 @@ from . import model, constants
 
 PLAYER_STATS_CACHE = pylru.lrucache(1000, callback=model.set_player_stats)
 GLOBAL_STATS_CACHE = pylru.lrucache(1000, callback=model.set_global_stat)
+BLACKLISTED_PLAYERS_CACHE = pylru.lrucache(1000)
 
 
 def get_game(gid):
@@ -29,10 +30,13 @@ def is_grief(game):
     This involves experimental anti-griefing heuristics.
     """
     # First time playing a server and fast loss
-    first_game = model.first_game(game['name'], game['src'])
+    name = game['name']
+    src = game['src']
+    first_game = model.first_game(name, src)
     if game['gid'] == first_game['gid'] and (game['dur'] < 1200 or
                                              game['turn'] < 1000):
-        model.add_player_to_blacklist(game['name'], game['src'])
+        model.add_player_to_blacklist(name, src)
+        add_to_blacklist_cache(name, src)
         return True
     return False
 
@@ -43,9 +47,23 @@ def is_blacklisted(name, src):
         return True
     if src in constants.BLACKLISTS['griefers'].get(name, {}):
         return True
-    if model.player_in_blacklist(name, src):
+    if src in BLACKLISTED_PLAYERS_CACHE.get(name, []):
         return True
     return False
+
+
+def load_blacklisted_players():
+    """Loads blacklisted players into a read cache."""
+    for name, src in model.all_blacklisted_players():
+        add_to_blacklist_cache(name, src)
+
+
+def add_to_blacklist_cache(name, src):
+    """Adds player to the blacklisted players cache."""
+    if name not in BLACKLISTED_PLAYERS_CACHE:
+        BLACKLISTED_PLAYERS_CACHE[name] = [src]
+    else:
+        BLACKLISTED_PLAYERS_CACHE[name] += src
 
 
 def load_player_stats(name):
@@ -302,7 +320,7 @@ def score_game(game_row):
 
     # Skip if player blacklisted
     if is_blacklisted(name, src):
-        return
+        return False
 
     # Log vars
     god = game['god']
@@ -445,6 +463,9 @@ def score_game(game_row):
     set_player_stats(name, stats)
     model.mark_game_scored(gid)
 
+    # Return True to indicate success
+    return True
+
 
 def score_games(rebuild=False):
     """Update stats with all unscored game.
@@ -455,13 +476,16 @@ def score_games(rebuild=False):
     start = time.time()
     scored = 0
 
+    # Load blacklisted players into cache
+    load_blacklisted_players()
+
     if rebuild:
         rebuild_database()
 
     for game in model.all_games(scored=False):
-        score_game(game)
-        scored += 1
-        if scored % 10000 == 0:
+        if score_game(game):
+            scored += 1
+        if scored % 10000 == 0 and scored > 0:
             print(scored)
 
     # Add manual achievements
