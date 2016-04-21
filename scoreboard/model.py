@@ -366,14 +366,14 @@ def game(gid):
     return game
 
 
-def recent_games(wins=False, player=None, num=5, reverse=True):
+def recent_games(wins=False, player=None, num=5, reverse=False):
     """Return recent games.
 
-    Parameters:
+        Parameters:
         wins (bool) Only return wins
         player (str) Only for this player
         num (int) Number of rows to return
-        reverse (bool) Order in most -> least recent if True.
+        reverse (bool) Order in least -> most recent if True.
     """
     conn = _engine.connect()
     query = _games.select()

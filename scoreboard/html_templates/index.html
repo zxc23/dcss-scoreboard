@@ -4,9 +4,27 @@
 {% block content %}
 <div class="row">
   <div class="col-sm-12">
-    {% for game in recent_wins %}
-    {{ game|gametotablerow }}
-    {% endfor %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Score</th>
+          <th>Character</th>
+          <th>Place</th>
+          <th>End</th>
+          <th>XL</th>
+          <th>Turns</th>
+          <th>Duration</th>
+          <th>Runes</th>
+          <th>Date</th>
+          <th>Version</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for game in recent_wins %}
+        {{ game|gametotablerow }}
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}
