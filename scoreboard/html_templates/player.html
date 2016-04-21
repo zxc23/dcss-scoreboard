@@ -57,9 +57,9 @@
   </div>
   <div class="col-sm-4">
     <h3>Wins</h3>
-    <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ constants.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
-    <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ constants.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
-    <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ constants.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
+    <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
+    <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
+    <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
   </div>
   <div class="col-sm-4">
     <h3>Achievements</h3>

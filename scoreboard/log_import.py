@@ -5,7 +5,8 @@ import re
 import time
 import glob
 
-from . import model, constants
+from . import model
+from . import constants as const
 
 # Logfile format escapes : as ::, so we need to split with re.split
 # Instead of naive line.split(':')
@@ -83,7 +84,7 @@ def parse_line(line, src):
     game['bg'] = game['char'][2:]
     if 'god' not in game:
         game['god'] = 'Atheist'
-    game['god'] = constants.GOD_NAME_FIXUPS.get(game['god'], game['god'])
+    game['god'] = const.GOD_NAME_FIXUPS.get(game['god'], game['god'])
     if 'start' not in game:
         print("Couldn't parse this line (missing start), skipping: %s" % line)
         return

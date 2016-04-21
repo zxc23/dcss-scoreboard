@@ -8,7 +8,8 @@ import jsmin
 
 import jinja2
 
-from . import model, webutils, constants
+from . import model, webutils
+from . import constants as const
 
 
 def jinja_env():
@@ -25,7 +26,7 @@ def jinja_env():
     env.filters['prettydate'] = webutils.prettydate
     env.filters['gidtogame'] = model.game
 
-    env.globals['urlbase'] = constants.WEBSITE_URLBASE
+    env.globals['urlbase'] = const.WEBSITE_URLBASE
     return env
 
 
@@ -66,7 +67,7 @@ def write_player_stats(player, stats, outfile, achievements, global_stats,
         f.write(template.render(player=player,
                                 stats=stats,
                                 achievement_data=achievements,
-                                constants=constants,
+                                const=const,
                                 records=records,
                                 streaks=streaks,
                                 active_streak=active_streak,
@@ -86,15 +87,15 @@ def write_website(rebuild=True, players=[]):
 
     if rebuild:
         players = all_players
-        print("Writing HTML to %s" % constants.WEBSITE_DIR)
-        if os.path.isdir(constants.WEBSITE_DIR):
-            print("Clearing %s" % constants.WEBSITE_DIR)
-            shutil.rmtree(constants.WEBSITE_DIR)
-        os.mkdir(constants.WEBSITE_DIR)
+        print("Writing HTML to %s" % const.WEBSITE_DIR)
+        if os.path.isdir(const.WEBSITE_DIR):
+            print("Clearing %s" % const.WEBSITE_DIR)
+            shutil.rmtree(const.WEBSITE_DIR)
+        os.mkdir(const.WEBSITE_DIR)
 
         print("Copying static assets")
         src = os.path.join(os.path.dirname(__file__), 'html_static')
-        dst = os.path.join(constants.WEBSITE_DIR, 'static')
+        dst = os.path.join(const.WEBSITE_DIR, 'static')
         shutil.copytree(src, dst)
         print("Generating static player list")
         with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
@@ -131,35 +132,32 @@ def write_website(rebuild=True, players=[]):
     sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
 
     print("Writing index")
-    with open(os.path.join(constants.WEBSITE_DIR, 'index.html'), 'w') as f:
+    with open(os.path.join(const.WEBSITE_DIR, 'index.html'), 'w') as f:
         template = env.get_template('index.html')
         f.write(template.render(recent_wins=model.recent_games(wins=True),
                                 active_streaks=sorted_active_streaks,
                                 combo_high_scores=combo_high_scores))
 
     print("Writing minified local JS")
-    scoreboard_path = os.path.join(constants.WEBSITE_DIR,
+    scoreboard_path = os.path.join(const.WEBSITE_DIR,
                                    'static/js/dcss-scoreboard.js')
     with open(scoreboard_path, 'w') as f:
         template = env.get_template('dcss-scoreboard.js')
         f.write(jsmin.jsmin(template.render()))
 
     print("Writing streaks")
-    with open(
-            os.path.join(constants.WEBSITE_DIR, 'streaks.html'), 'w') as f:
+    with open(os.path.join(const.WEBSITE_DIR, 'streaks.html'), 'w') as f:
         template = env.get_template('streaks.html')
         f.write(template.render(streaks=sorted_streaks,
                                 active_streaks=sorted_active_streaks))
 
     print("Writing highscores")
-    with open(
-            os.path.join(constants.WEBSITE_DIR,
-                         'highscores.html'), 'w') as f:
+    with open(os.path.join(const.WEBSITE_DIR, 'highscores.html'), 'w') as f:
         template = env.get_template('highscores.html')
         f.write(template.render(stats=stats))
 
     print("Writing player pages... ")
-    player_html_path = os.path.join(constants.WEBSITE_DIR, 'players')
+    player_html_path = os.path.join(const.WEBSITE_DIR, 'players')
     os.mkdir(player_html_path)
     achievements = achievement_data()
     global_stats = model.global_stats()

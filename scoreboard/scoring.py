@@ -4,7 +4,8 @@ import time
 
 import pylru
 
-from . import model, constants
+from . import model
+from . import constants as const
 
 PLAYER_STATS_CACHE = pylru.lrucache(1000, callback=model.set_player_stats)
 GLOBAL_STATS_CACHE = pylru.lrucache(1000, callback=model.set_global_stat)
@@ -43,9 +44,9 @@ def is_grief(game):
 
 def is_blacklisted(name, src):
     """Check if the player is in a blacklist."""
-    if name in constants.BLACKLISTS['bots']:
+    if name in const.BLACKLISTS['bots']:
         return True
-    if src in constants.BLACKLISTS['griefers'].get(name, {}):
+    if src in const.BLACKLISTS['griefers'].get(name, {}):
         return True
     if src in BLACKLISTED_PLAYERS_CACHE.get(name, []):
         return True
@@ -53,13 +54,13 @@ def is_blacklisted(name, src):
 
 
 def load_blacklisted_players():
-    """Loads blacklisted players into a read cache."""
+    """Load blacklisted players into a read cache."""
     for name, src in model.all_blacklisted_players():
         add_to_blacklist_cache(name, src)
 
 
 def add_to_blacklist_cache(name, src):
-    """Adds player to the blacklisted players cache."""
+    """Add player to the blacklisted players cache."""
     if name not in BLACKLISTED_PLAYERS_CACHE:
         BLACKLISTED_PLAYERS_CACHE[name] = [src]
     else:
@@ -85,11 +86,11 @@ def load_player_stats(name):
                  'boring_games': 0,
                  'boring_rate': 0,
                  'god_wins': {k: 0
-                              for k in constants.PLAYABLE_GODS},
+                              for k in const.PLAYABLE_GODS},
                  'race_wins': {k: 0
-                               for k in constants.PLAYABLE_RACES},
+                               for k in const.PLAYABLE_RACES},
                  'role_wins': {k: 0
-                               for k in constants.PLAYABLE_ROLES},
+                               for k in const.PLAYABLE_ROLES},
                  'achievements': {},
                  'last_active': None}
     return stats
@@ -144,12 +145,11 @@ def rebuild_database():
 
 def add_manual_achievements():
     """Add manual achievements to players' stats."""
-    for player in constants.MANUAL_ACHIEVEMENTS:
+    for player in const.MANUAL_ACHIEVEMENTS:
         stats = load_player_stats(player)
         if stats['games'] == 0:
             continue
-        for achievement, value in constants.MANUAL_ACHIEVEMENTS[
-                player].items():
+        for achievement, value in const.MANUAL_ACHIEVEMENTS[player].items():
             stats['achievements'][achievement] = value
         set_player_stats(player, stats)
 
@@ -163,19 +163,19 @@ def great_race(race, player_stats, achievements):
     this games's result.
     """
     # Check the race has a greatrace achievement
-    if race not in constants.RACE_TO_GREAT_RACE:
+    if race not in const.RACE_TO_GREAT_RACE:
         return False
-    achievement = constants.RACE_TO_GREAT_RACE[race]
+    achievement = const.RACE_TO_GREAT_RACE[race]
     # Might have already achieved it
     if achievement in achievements:
         return True
     # Check we actually have enough potential wins (for speed)
-    if player_stats['race_wins'][race] < len(constants.PLAYABLE_ROLES):
+    if player_stats['race_wins'][race] < len(const.PLAYABLE_ROLES):
         return False
     # Check for completion
     roles_won = set(win['char'][2:]
                     for win in player_stats['wins'] if race == win['char'][:2])
-    if not constants.PLAYABLE_ROLES - roles_won:
+    if not const.PLAYABLE_ROLES - roles_won:
         achievements[achievement] = True
         return True
     return False
@@ -190,19 +190,19 @@ def great_role(role, player_stats, achievements):
     this games's result.
     """
     # Check the role has a greatrole achievement
-    if role not in constants.ROLE_TO_GREAT_ROLE:
+    if role not in const.ROLE_TO_GREAT_ROLE:
         return False
-    achievement = constants.ROLE_TO_GREAT_ROLE[role]
+    achievement = const.ROLE_TO_GREAT_ROLE[role]
     # Might have already achieved it
     if achievement in achievements:
         return True
     # Check we actually have enough potential wins (for speed)
-    if player_stats['role_wins'][role] < len(constants.PLAYABLE_RACES):
+    if player_stats['role_wins'][role] < len(const.PLAYABLE_RACES):
         return False
     # Check for completion
     races_won = set(win['char'][:2]
                     for win in player_stats['wins'] if role == win['char'][2:])
-    if not constants.PLAYABLE_RACES - races_won:
+    if not const.PLAYABLE_RACES - races_won:
         achievements[achievement] = True
         return True
     return False
@@ -238,33 +238,31 @@ def score_game_vs_misc_stats(game):
 
     # Min duration
     min_dur = load_global_stat('min_dur', [])
-    if not min_dur or len(min_dur) < constants.MIN_DUR_RECORD_LENGTH:
+    if not min_dur or len(min_dur) < const.MIN_DUR_RECORD_LENGTH:
         min_dur.append(game.gid)
     else:
         if dur < max(get_game(g).dur for g in min_dur):
             min_dur.append(game.gid)
             min_dur = sorted(
                 min_dur,
-                key=lambda i: get_game(i).dur)[:
-                                               constants.MIN_DUR_RECORD_LENGTH]
+                key=lambda i: get_game(i).dur)[:const.MIN_DUR_RECORD_LENGTH]
     set_global_stat('min_dur', min_dur)
 
     # Min turns
     min_turn = load_global_stat('min_turn', [])
-    if not min_turn or len(min_turn) < constants.MIN_TURN_RECORD_LENGTH:
+    if not min_turn or len(min_turn) < const.MIN_TURN_RECORD_LENGTH:
         min_turn.append(game.gid)
     else:
         if turns < max(get_game(g).turn for g in min_turn):
             min_turn.append(game.gid)
             min_turn = sorted(
                 min_turn,
-                key=
-                lambda i: get_game(i).turn)[:constants.MIN_TURN_RECORD_LENGTH]
+                key=lambda i: get_game(i).turn)[:const.MIN_TURN_RECORD_LENGTH]
     set_global_stat('min_turn', min_turn)
 
     # Max score
     max_score = load_global_stat('max_score', [])
-    if not max_score or len(max_score) < constants.MAX_SCORE_RECORD_LENGTH:
+    if not max_score or len(max_score) < const.MAX_SCORE_RECORD_LENGTH:
         max_score.append(game.gid)
     else:
         if score > min(get_game(g)['sc'] for g in max_score):
@@ -272,8 +270,7 @@ def score_game_vs_misc_stats(game):
             max_score = sorted(
                 max_score,
                 key=
-                lambda i: -get_game(i)['sc'])[:
-                                              constants.MAX_SCORE_RECORD_LENGTH]
+                lambda i: -get_game(i)['sc'])[:const.MAX_SCORE_RECORD_LENGTH]
     set_global_stat('max_score', max_score)
 
 
@@ -357,7 +354,7 @@ def score_game(game_row):
         # Increment god_wins and check polytheist
         if god in stats['god_wins']:
             stats['god_wins'][god] += 1
-            if stats['god_wins'][god] == 1 and not constants.PLAYABLE_GODS - {
+            if stats['god_wins'][god] == 1 and not const.PLAYABLE_GODS - {
                     g
                     for g, w in stats['god_wins'].items() if w > 0
             }:
@@ -370,7 +367,7 @@ def score_game(game_row):
             stats['race_wins'][race] += 1
         else:
             stats['race_wins'][race] = 1
-            if not constants.PLAYABLE_RACES - set(
+            if not const.PLAYABLE_RACES - set(
                 [race
                  for race in stats['race_wins'].keys()
                  if stats['race_wins'][race] > 0]):
@@ -382,7 +379,7 @@ def score_game(game_row):
         else:
             stats['role_wins'][role] = 1
 
-        if 'greatplayer' in achievements and not constants.PLAYABLE_ROLES - set(
+        if 'greatplayer' in achievements and not const.PLAYABLE_ROLES - set(
             [role
              for role in stats['role_wins'].keys()
              if stats['role_wins'][role] > 0]):
@@ -415,11 +412,11 @@ def score_game(game_row):
 
         # Check for great race completion
         if great_race(race, stats, achievements):
-            achievements[constants.RACE_TO_GREAT_RACE[race]] = True
+            achievements[const.RACE_TO_GREAT_RACE[race]] = True
 
         # Check for great role completion
         if great_role(role, stats, achievements):
-            achievements[constants.ROLE_TO_GREAT_ROLE[role]] = True
+            achievements[const.ROLE_TO_GREAT_ROLE[role]] = True
 
         # Older logfiles don't have these fields, so skip those games
         if 'potionsused' in game and game['potionsused'] == 0 and game[

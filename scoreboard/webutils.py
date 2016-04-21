@@ -6,7 +6,7 @@ import dateutil.parser
 
 from . import model
 from . import modelutils
-from . import constants
+from . import constants as const
 
 
 def prettyint(value):
@@ -89,7 +89,7 @@ def gametotablerow(game,
         game.raw_data.get(prefix_row),
         player_row='' if not show_player else
         "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
-            base=constants.WEBSITE_URLBASE,
+            base=const.WEBSITE_URLBASE,
             name=game.name),
         score=prettyint(game.sc),
         character=game.char,
