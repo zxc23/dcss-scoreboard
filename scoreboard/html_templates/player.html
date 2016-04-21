@@ -110,8 +110,6 @@
             <tr>
               <th>Score</th>
               <th>Character</th>
-              <th>Place</th>
-              <th>End</th>
               <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
@@ -121,8 +119,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for gid in stats['wins'] %}
-            {{ gid|gidtogame|gametotablerow }}
+            {% for gid in stats['wins']|reverse %}
+            {{ gid|gidtogame|gametotablerow(winning_games=True) }}
             {% endfor %}
           </tbody>
         </table>

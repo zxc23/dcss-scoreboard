@@ -53,15 +53,22 @@ def prettydate(d):
     return d.strftime('%c')
 
 
-def gametotablerow(game, prefix_row=None, show_player=False):
-    """Jinja filter to convert a game row to a table row."""
+def gametotablerow(game, prefix_row=None, show_player=False, winning_games=False):
+    """Jinja filter to convert a game row to a table row.
+
+    Parameters:
+        prefix_row (str): Add an extra row at the start with data from
+                          game.raw_data[prefix_row]
+        show_player (bool): Show the player name column
+        winning_games (bool): The table has only winning games, so don't show
+                              place or end columns"""
     t = """<tr class="{win}">
       {prefix_row}
       {player_row}
       <td>{score}</td>
       <td>{character}</td>
-      <td>{place}</td>
-      <td>{end}</td>
+      {place}
+      {end}
       <td>{xl}</td>
       <td>{turns}</td>
       <td>{duration}</td>
@@ -77,16 +84,16 @@ def gametotablerow(game, prefix_row=None, show_player=False):
             prefix_row),
         player_row='' if not show_player else
             "<td><a href='players/{name}.html'>{name}</a></td>".format(name=game.name),
-        score=prettyint(game.raw_data['sc']),
-        character=game.raw_data['char'],
-        place=game.raw_data['place'],
-        end=game.raw_data.get('tmsg', ''),  # Older logfiles don't have this
-        xl=game.raw_data['xl'],
-        turns=prettyint(game.raw_data['turn']),
-        duration=prettydur(game.raw_data['dur']),
-        runes=game.raw_data.get('nrune', '0'),
+        score=prettyint(game.sc),
+        character=game.char,
+        place="" if winning_games else "<td>%s</td>" % game.place,
+        end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg', ''),  # Older logfiles don't have this
+        xl=game.xl,
+        turns=prettyint(game.turn),
+        duration=prettydur(game.dur),
+        runes=game.runes,
         date=prettydate(game.end),
-        version=game.raw_data['v'])
+        version=game.v)
 
 
 def streaktotablerow(streak):

@@ -10,8 +10,6 @@
         <tr>
           <th>Score</th>
           <th>Character</th>
-          <th>Place</th>
-          <th>End</th>
           <th>XL</th>
           <th>Turns</th>
           <th>Duration</th>
@@ -22,7 +20,7 @@
       </thead>
       <tbody>
         {% for game in recent_wins %}
-        {{ game|gametotablerow }}
+        {{ game|gametotablerow(show_player=True, winning_games=True) }}
         {% endfor %}
       </tbody>
     </table>
