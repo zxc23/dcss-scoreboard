@@ -80,7 +80,7 @@ def setup_database(backend):
                           String(50),  # XXX: is this long enough?
                           nullable=False,
                           index=True),
-                   Column('src', String(3), nullable=False),
+                   Column('src', String(4), nullable=False),
                    Column('v', String(10), nullable=False),
                    Column('char', String(4), nullable=False),
                    Column('rc', String(2), nullable=False),
