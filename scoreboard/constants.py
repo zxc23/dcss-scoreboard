@@ -1,5 +1,7 @@
 """Defines useful constants."""
 
+import os
+
 PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Dr', 'Ds', 'Fe', 'Fo', 'Gh', 'Gr',
                   'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu', 'Na', 'Op',
                   'Og', 'Sp', 'Te', 'Tr', 'VS', 'Vp'}
@@ -117,3 +119,5 @@ BLACKLISTS = {'griefers': {},
                'tstbtto', 'parabolic', 'oppbolic', 'ew', 'rushxxi', 'gaubot',
                'cojitobot', 'paulcdejean', 'otabotab', 'nakatomy', 'testingqw',
                'beemell', 'beem', 'drasked', 'phybot'}}
+WEBSITE_DIR = 'website'
+WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)

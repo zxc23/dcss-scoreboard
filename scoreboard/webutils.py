@@ -2,11 +2,11 @@
 
 import datetime
 
-
 import dateutil.parser
 
 from . import model
 from . import modelutils
+from . import constants
 
 
 def prettyint(value):
@@ -53,7 +53,10 @@ def prettydate(d):
     return d.strftime('%c')
 
 
-def gametotablerow(game, prefix_row=None, show_player=False, winning_games=False):
+def gametotablerow(game,
+                   prefix_row=None,
+                   show_player=False,
+                   winning_games=False):
     """Jinja filter to convert a game row to a table row.
 
     Parameters:
@@ -61,7 +64,10 @@ def gametotablerow(game, prefix_row=None, show_player=False, winning_games=False
                           game.raw_data[prefix_row]
         show_player (bool): Show the player name column
         winning_games (bool): The table has only winning games, so don't show
-                              place or end columns"""
+                              place or end columns
+
+    Returns: (string) '<tr>contents</tr>'.
+    """
     t = """<tr class="{win}">
       {prefix_row}
       {player_row}
@@ -78,16 +84,17 @@ def gametotablerow(game, prefix_row=None, show_player=False, winning_games=False
     </tr>"""
 
     return t.format(
-        win='table-success' if game.ktyp == 'winning' else 'table-danger'
-        if game.ktyp == 'quitting' else '',
-        prefix_row='' if prefix_row is None else "<td>%s</td>" % game.raw_data.get(
-            prefix_row),
+        win='table-success' if game.ktyp == 'winning' else '',
+        prefix_row='' if prefix_row is None else "<td>%s</td>" %
+        game.raw_data.get(prefix_row),
         player_row='' if not show_player else
-            "<td><a href='players/{name}.html'>{name}</a></td>".format(name=game.name),
+        "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
+            base=constants.WEBSITE_URLBASE,
+            name=game.name),
         score=prettyint(game.sc),
         character=game.char,
         place="" if winning_games else "<td>%s</td>" % game.place,
-        end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg', ''),  # Older logfiles don't have this
+        end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg'),
         xl=game.xl,
         turns=prettyint(game.turn),
         duration=prettydur(game.dur),
@@ -111,7 +118,8 @@ def streaktotablerow(streak):
         games=', '.join(model.game(g).char for g in streak['wins']),
         start=prettydate(dateutil.parser.parse(streak['start'])),
         end=prettydate(dateutil.parser.parse(streak['end'])),
-        versions=', '.join(sorted(set(model.game(g).v for g in streak['wins']))))
+        versions=', '.join(sorted(set(model.game(g).v for g in streak[
+            'wins']))))
 
 
 def longeststreaktotablerow(streak):
@@ -130,5 +138,7 @@ def longeststreaktotablerow(streak):
         games=', '.join(model.game(g).char for g in streak['wins']),
         start=prettydate(dateutil.parser.parse(streak['start'])),
         end=prettydate(dateutil.parser.parse(streak['end'])),
-        versions=', '.join(sorted(set(model.game(g).v for g in streak['wins']))),
-        streak_breaker=model.game(streak['streak_breaker']).char if 'streak_breaker' in streak else '')
+        versions=', '.join(sorted(set(model.game(g).v for g in streak[
+            'wins']))),
+        streak_breaker=model.game(streak[
+            'streak_breaker']).char if 'streak_breaker' in streak else '')

@@ -271,8 +271,9 @@ def score_game_vs_misc_stats(game):
             max_score.append(game.gid)
             max_score = sorted(
                 max_score,
-                key=lambda i: -get_game(i)['sc'])[:constants.
-                                                  MAX_SCORE_RECORD_LENGTH]
+                key=
+                lambda i: -get_game(i)['sc'])[:
+                                              constants.MAX_SCORE_RECORD_LENGTH]
     set_global_stat('max_score', max_score)
 
 
@@ -498,6 +499,7 @@ def score_games(rebuild=False):
         model.set_global_stat(key, data)
     end = time.time()
     print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
+
 
 if __name__ == "__main__":
     score_games()
