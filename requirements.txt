@@ -3,3 +3,4 @@ sqlalchemy
 pylru
 mysqlclient
 python-dateutil
+jsmin

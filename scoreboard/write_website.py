@@ -4,6 +4,7 @@ import os
 import json
 import time
 import shutil
+import jsmin
 
 import jinja2
 
@@ -135,6 +136,13 @@ def write_website(rebuild=True, players=[]):
         f.write(template.render(recent_wins=model.recent_games(wins=True),
                                 active_streaks=sorted_active_streaks,
                                 combo_high_scores=combo_high_scores))
+
+    print("Writing minified local JS")
+    scoreboard_path = os.path.join(constants.WEBSITE_DIR,
+                                   'static/js/dcss-scoreboard.js')
+    with open(scoreboard_path, 'w') as f:
+        template = env.get_template('dcss-scoreboard.js')
+        f.write(jsmin.jsmin(template.render()))
 
     print("Writing streaks")
     with open(

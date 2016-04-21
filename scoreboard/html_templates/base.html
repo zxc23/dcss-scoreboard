@@ -22,23 +22,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
     <script src="{{ urlbase }}/static/js/awesomplete.min.js"></script>
-
-    <script>
-      // Load the list of players and set up player autocomplete
-      var ajax = new XMLHttpRequest();
-      ajax.open("GET", "{{ urlbase }}/static/js/players.json", true);
-      ajax.onload = function() {
-        var list = JSON.parse(ajax.responseText);
-        new Awesomplete(document.querySelector("#playersearch"),{ list: list });
-      };
-      ajax.send();
-      // Handle selecting a usernames
-      $('document').ready(function() {
-        document.querySelector("#playersearch").addEventListener("awesomplete-selectcomplete", function() {
-          window.location.href = '{{ urlbase }}/players/' + document.querySelector("#playersearch").value + '.html';
-        });
-      });
-    </script>
+    <script src="{{ urlbase }}/static/js/dcss-scoreboard.js"></script>
   </head>
   <body>
     <div class="container">
