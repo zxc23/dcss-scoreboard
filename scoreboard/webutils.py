@@ -137,7 +137,8 @@ def longeststreaktotablerow(streak):
         player=streak['player'],
         games=', '.join(model.game(g).char for g in streak['wins']),
         start=prettydate(dateutil.parser.parse(streak['start'])),
-        end=prettydate(dateutil.parser.parse(streak['end'])),
+        end='' if 'streak_breaker' not in streak else prettydate(
+            dateutil.parser.parse(streak['end'])),
         versions=', '.join(sorted(set(model.game(g).v for g in streak[
             'wins']))),
         streak_breaker=model.game(streak[
