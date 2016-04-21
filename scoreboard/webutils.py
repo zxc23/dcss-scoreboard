@@ -2,6 +2,9 @@
 
 import datetime
 
+
+import dateutil.parser
+
 from . import model
 from . import modelutils
 
@@ -81,7 +84,7 @@ def gametotablerow(game, prefix_row=None, show_player=False):
         xl=game.raw_data['xl'],
         turns=prettyint(game.raw_data['turn']),
         duration=prettydur(game.raw_data['dur']),
-        runes=game.raw_data.get('nrune', '?'),  # Older logfiles don't have this
+        runes=game.raw_data.get('nrune', '0'),
         date=prettydate(game.end),
         version=game.raw_data['v'])
 
@@ -99,8 +102,8 @@ def streaktotablerow(streak):
         wins=len(streak['wins']),
         player=streak['player'],
         games=', '.join(model.game(g).char for g in streak['wins']),
-        start=streak['start'],
-        end=streak['end'],
+        start=prettydate(dateutil.parser.parse(streak['start'])),
+        end=prettydate(dateutil.parser.parse(streak['end'])),
         versions=', '.join(sorted(set(model.game(g).v for g in streak['wins']))))
 
 
@@ -118,7 +121,7 @@ def longeststreaktotablerow(streak):
         wins=len(streak['wins']),
         player=streak['player'],
         games=', '.join(model.game(g).char for g in streak['wins']),
-        start=streak['start'],
-        end=streak['end'],
+        start=prettydate(dateutil.parser.parse(streak['start'])),
+        end=prettydate(dateutil.parser.parse(streak['end'])),
         versions=', '.join(sorted(set(model.game(g).v for g in streak['wins']))),
         streak_breaker=model.game(streak['streak_breaker']).char if 'streak_breaker' in streak else '')
