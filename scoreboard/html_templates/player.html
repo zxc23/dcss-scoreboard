@@ -1,10 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{{ player }}{% endblock %}
-{% block heading %}{{ player }}{% endblock %}
 {% block content %}
 <div class="row">
+  <div class="col-sm-12">
+    <h2>Stats for {{ player }}</h2>
+    <hr>
+  </div>
+</div>
+<div class="row">
   <div class="col-sm-4">
-    <h3>Overall Stats</h3>
+    <h3>Overall</h3>
     <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
     <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
     <p><strong>Games Won:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
