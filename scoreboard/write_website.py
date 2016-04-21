@@ -96,13 +96,18 @@ def write_website(rebuild=True, players=[]):
         dst = os.path.join(OUTDIR, 'static')
         shutil.copytree(src, dst)
 
-    print("Writing index")
-    with open(os.path.join(OUTDIR, 'index.html'), 'w') as f:
-        template = env.get_template('index.html')
-        f.write(template.render(recent_wins=model.recent_games(wins=True)))
-
     # Get stats
     stats = model.global_stats()
+
+    # Invert combo list:
+    combo_high_scores = {}
+    for char, gid in stats['char_highscores'].items():
+        name = model.game(gid).name
+        if name not in combo_high_scores:
+            combo_high_scores[name] = [char]
+        else:
+            combo_high_scores[name].append(char)
+    combo_high_scores = sorted(((k, sorted(v)) for k, v in combo_high_scores.items()), key=lambda x: len(x[1]), reverse=True)[:5]
 
     # Merge active streaks into streaks
     streaks = stats['completed_streaks']
@@ -117,6 +122,13 @@ def write_website(rebuild=True, players=[]):
     # Sort streaks
     sorted_streaks = sorted(streaks, key=lambda s: (-len(s['wins']), s['end']))
     sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
+
+    print("Writing index")
+    with open(os.path.join(OUTDIR, 'index.html'), 'w') as f:
+        template = env.get_template('index.html')
+        f.write(template.render(recent_wins=model.recent_games(wins=True),
+            active_streaks=sorted_active_streaks,
+            combo_high_scores=combo_high_scores))
 
     print("Writing streaks")
     with open(os.path.join(OUTDIR, 'streaks.html'), 'w') as f:
