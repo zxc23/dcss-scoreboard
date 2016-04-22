@@ -87,6 +87,7 @@ def write_website(rebuild=True, players=[]):
         with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
             f.write(json.dumps(all_players))
 
+    print("Loading scoring data")
     # Get stats
     stats = model.global_stats()
     overall_highscores = model.highscores()
