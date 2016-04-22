@@ -22,16 +22,20 @@ def load_logfiles():
     """Read logfiles and parse their data."""
     print("Loading all logfiles")
     start = time.time()
+    count = 0
     for logfile in glob.glob("logfiles/*"):
-        load_logfile(logfile)
+        count += load_logfile(logfile)
     end = time.time()
-    print("Loaded all logfiles in %s secs" % round(end - start, 2))
+    print("Loaded logfiles with %s new games in %s secs" % (count, round(end - start, 2)))
 
 
 def load_logfile(logfile):
-    """Load a single logfile into the database."""
+    """Load a single logfile into the database.
+
+    Returns the number of new games loaded.
+    """
     if os.stat(logfile).st_size == 0:
-        return
+        return 0
     start = time.time()
     # Should be server source, eg cao, cpo, etc
     src = os.path.basename(logfile.split('-', 1)[0])
@@ -54,6 +58,7 @@ def load_logfile(logfile):
     end = time.time()
     print("Finished reading %s (%s new lines) in %s secs" %
           (logfile, lines - processed_lines, round(end - start, 2)))
+    return lines - processed_lines
 
 
 def parse_line(line, src):

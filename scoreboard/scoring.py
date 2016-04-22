@@ -494,7 +494,7 @@ def score_games(rebuild=False):
     for key, data in GLOBAL_STATS_CACHE.items():
         model.set_global_stat(key, data)
     end = time.time()
-    print("Scored %s games in %s secs" % (scored, round(end - start, 2)))
+    print("Scored %s new games in %s secs" % (scored, round(end - start, 2)))
 
 
 if __name__ == "__main__":
