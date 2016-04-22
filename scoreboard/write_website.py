@@ -42,26 +42,11 @@ def achievement_data(ordered=False):
 
 
 def write_player_stats(player, stats, outfile, achievements, global_stats,
-                       streaks, active_streaks, template):
+                       streaks, active_streaks, highscores, template):
     """Write stats page for an individual player."""
     stats['wins'] = stats['wins'][-5:]
     recent_games = model.recent_games(player=player)
-    records = {}
-    records['combo'] = sorted(
-        [g
-         for g in global_stats['char_highscores'].values()
-         if model.game(g).name == player],
-        key=lambda x: model.game(x).char)
-    records['race'] = sorted(
-        [g
-         for g in global_stats['rc_highscores'].values()
-         if model.game(g).name == player],
-        key=lambda x: model.game(x).rc)
-    records['role'] = sorted(
-        [g
-         for g in global_stats['bg_highscores'].values()
-         if model.game(g).name == player],
-        key=lambda x: model.game(x).bg)
+    records = highscores.get(player, {})
     streaks = [s for s in streaks if s['player'] == player]
     active_streak = global_stats['active_streaks'].get(player)
     with open(outfile, 'w') as f:
@@ -104,19 +89,14 @@ def write_website(rebuild=True, players=[]):
 
     # Get stats
     stats = model.global_stats()
-
-    # Invert combo list for 'top combo holders' on index:
-    combo_high_scores = {}
-    for char, gid in stats['char_highscores'].items():
-        name = model.game(gid).name
-        if name not in combo_high_scores:
-            combo_high_scores[name] = [char]
-        else:
-            combo_high_scores[name].append(char)
-    combo_high_scores = sorted(
-        ((k, sorted(v)) for k, v in combo_high_scores.items()),
-        key=lambda x: len(x[1]),
-        reverse=True)[:5]
+    overall_highscores = model.highscores()
+    race_highscores = model.race_highscores()
+    role_highscores = model.role_highscores()
+    god_highscores = model.god_highscores()
+    combo_highscores = model.combo_highscores()
+    fastest_wins = model.fastest_wins()
+    shortest_wins = model.shortest_wins()
+    recent_wins = model.recent_games(wins=True)
 
     # Merge active streaks into streaks
     streaks = stats['completed_streaks']
@@ -135,9 +115,9 @@ def write_website(rebuild=True, players=[]):
     print("Writing index")
     with open(os.path.join(const.WEBSITE_DIR, 'index.html'), 'w') as f:
         template = env.get_template('index.html')
-        f.write(template.render(recent_wins=model.recent_games(wins=True),
+        f.write(template.render(recent_wins=recent_wins,
                                 active_streaks=sorted_active_streaks,
-                                combo_high_scores=combo_high_scores))
+                                combo_high_scores=combo_highscores))
 
     print("Writing minified local JS")
     scoreboard_path = os.path.join(const.WEBSITE_DIR,
@@ -155,7 +135,13 @@ def write_website(rebuild=True, players=[]):
     print("Writing highscores")
     with open(os.path.join(const.WEBSITE_DIR, 'highscores.html'), 'w') as f:
         template = env.get_template('highscores.html')
-        f.write(template.render(stats=stats))
+        f.write(template.render(overall_highscores=overall_highscores,
+                                race_highscores=race_highscores,
+                                role_highscores=role_highscores,
+                                god_highscores=god_highscores,
+                                combo_highscores=combo_highscores,
+                                fastest_wins=fastest_wins,
+                                shortest_wins=shortest_wins))
 
     print("Writing player pages... ")
     player_html_path = os.path.join(const.WEBSITE_DIR, 'players')
@@ -163,9 +149,24 @@ def write_website(rebuild=True, players=[]):
     achievements = achievement_data()
     global_stats = model.global_stats()
     template = env.get_template('player.html')
+
+    player_highscores = {}
+    for game in race_highscores:
+        player_highscores.get(game.name, {}).get('race_highscores', []).append(game)
+
+    for game in role_highscores:
+        player_highscores.get(game.name, {}).get('role_highscores', []).append(game)
+
+    for game in combo_highscores:
+        player_highscores.get(game.name, {}).get('combo_highscores', []).append(game)
+
+    for game in god_highscores:
+        player_highscores.get(game.name, {}).get('god_highscores', []).append(game)
+
     n = 0
     for player in players:
         stats = model.get_player_stats(player)
+        highscores = player_highscores.get(player, {})
 
         # Don't make pages for players with no games played
         if stats['games'] == 0:
@@ -173,7 +174,8 @@ def write_website(rebuild=True, players=[]):
 
         outfile = os.path.join(player_html_path, player + '.html')
         write_player_stats(player, stats, outfile, achievements, global_stats,
-                           sorted_streaks, active_streaks, template)
+                           sorted_streaks, active_streaks, highscores,
+                           template)
         n += 1
         if not n % 10000:
             print(n)

@@ -7,9 +7,9 @@ import datetime
 import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, select
 
-from . import modelutils
+from . import modelutils, constants
 
 GAME_CACHE = pylru.lrucache(10000)
 
@@ -441,3 +441,67 @@ def all_blacklisted_players():
     """Returns all blacklisted player-src combinations."""
     conn = _engine.connect()
     return conn.execute(_blacklisted_players.select()).fetchall()
+
+
+def shortest_wins(n=10):
+    """Returns the n shortest wins by turncount."""
+    conn = _engine.connect()
+    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc('turn')).limit(n)
+    return conn.execute(s).fetchall()
+
+
+def fastest_wins(n=10):
+    """Returns the n fastest wins by duration."""
+    conn = _engine.connect()
+    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc('dur')).limit(n)
+    return conn.execute(s).fetchall()
+
+
+def highscores(n=10):
+    """Returns the n highest scoring games."""
+    conn = _engine.connect()
+    s = _games.select().order_by(desc('sc')).limit(n)
+    return conn.execute(s).fetchall()
+
+
+def race_highscores():
+    """Returns the highest scoring game for each race."""
+    conn = _engine.connect()
+    result = []
+    for rc in constants.PLAYABLE_RACES:
+        s = _games.select().where(_games.c.rc == rc).order_by(desc('sc')).limit(1)
+        result.append(conn.execute(s).fetchone())
+    return result
+
+
+def role_highscores():
+    """Returns the highest scoring game for each role."""
+    conn = _engine.connect()
+    result = []
+    for bg in constants.PLAYABLE_ROLES:
+        s = _games.select().where(_games.c.bg == bg).order_by(desc('sc')).limit(1)
+        result.append(conn.execute(s).fetchone())
+    return result
+
+
+def god_highscores():
+    """Returns the highest scoring game for each god."""
+    conn = _engine.connect()
+    result = []
+    for god in constants.PLAYABLE_GODS:
+        s = _games.select().where(_games.c.god == god).order_by(desc('sc')).limit(1)
+        result.append(conn.execute(s).fetchone())
+    return result
+
+
+def combo_highscores():
+    """Returns the highest scoring game for each combo."""
+    conn = _engine.connect()
+    s1 = select([_games.c.char]).distinct('char')
+    combos = conn.execute(s1).fetchall()
+    result = []
+    for combo in combos:
+        s2 = _games.select().where(_games.c.char == combo[0]).order_by(desc('sc')).limit(1)
+        result.append(conn.execute(s2).fetchone())
+    return result
+

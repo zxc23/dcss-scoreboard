@@ -208,71 +208,6 @@ def great_role(role, player_stats, achievements):
     return False
 
 
-def score_game_vs_global_highscores(game, fields):
-    """Update global highscores with log's data.
-
-    Returns True if a global record was updated.
-    """
-    result = False
-    for field in fields:
-        fieldval = getattr(game, field)
-        highscores = load_global_stat(field + '_highscores', {})
-        if fieldval not in highscores or game.sc > get_game(highscores[
-                fieldval]).sc:
-            highscores[fieldval] = game.gid
-            set_global_stat(field + '_highscores', highscores)
-            result = True
-    return result
-
-
-def score_game_vs_misc_stats(game):
-    """Compare a game log with various misc global stats.
-
-    XXX: Consider making a helper function.
-
-    Note: Currently assumes the game was won.
-    """
-    dur = game['dur']
-    turns = game['turn']
-    score = game['sc']
-
-    # Min duration
-    min_dur = load_global_stat('min_dur', [])
-    if not min_dur or len(min_dur) < const.STANDARD_TABLE_LENGTH:
-        min_dur.append(game.gid)
-    else:
-        if dur < max(get_game(g).dur for g in min_dur):
-            min_dur.append(game.gid)
-            min_dur = sorted(
-                min_dur,
-                key=lambda i: get_game(i).dur)[:const.STANDARD_TABLE_LENGTH]
-    set_global_stat('min_dur', min_dur)
-
-    # Min turns
-    min_turn = load_global_stat('min_turn', [])
-    if not min_turn or len(min_turn) < const.STANDARD_TABLE_LENGTH:
-        min_turn.append(game.gid)
-    else:
-        if turns < max(get_game(g).turn for g in min_turn):
-            min_turn.append(game.gid)
-            min_turn = sorted(
-                min_turn,
-                key=lambda i: get_game(i).turn)[:const.STANDARD_TABLE_LENGTH]
-    set_global_stat('min_turn', min_turn)
-
-    # Max score
-    max_score = load_global_stat('max_score', [])
-    if not max_score or len(max_score) < const.STANDARD_TABLE_LENGTH:
-        max_score.append(game.gid)
-    else:
-        if score > min(get_game(g)['sc'] for g in max_score):
-            max_score.append(game.gid)
-            max_score = sorted(
-                max_score,
-                key=lambda i: -get_game(i)['sc'])[:const.STANDARD_TABLE_LENGTH]
-    set_global_stat('max_score', max_score)
-
-
 def score_game_vs_streaks(game, won):
     """Extend active streaks if a game was won and finalise streak stats."""
     active_streaks = load_global_stat('active_streaks', {})
@@ -431,9 +366,6 @@ def score_game(game_row):
             else:
                 achievements['cleared_zig'] += 1
 
-        # Compare win against misc global stats
-        score_game_vs_misc_stats(game_row)
-
     else:  # !won
         # Increment boring_games
         if game['ktyp'] in ('leaving', 'quitting'):
@@ -446,12 +378,6 @@ def score_game(game_row):
     stats['total_score'] += score
     stats['avg_score'] = stats['total_score'] / stats['games']
     stats['boring_rate'] = stats['boring_games'] / stats['games']
-
-    # Check global highscore records
-    if score_game_vs_global_highscores(game_row, ['char']):
-        # Only check rc and bg records if char record was broken
-        score_game_vs_global_highscores(game_row, ['rc', 'bg'])
-    score_game_vs_global_highscores(game_row, ['god'])
 
     # Check streaks
     score_game_vs_streaks(game_row, won)
