@@ -44,7 +44,6 @@ def achievement_data(ordered=False):
 def write_player_stats(player, stats, outfile, achievements, global_stats,
                        streaks, active_streaks, highscores, template):
     """Write stats page for an individual player."""
-    stats['wins'] = stats['wins'][-5:]
     recent_games = model.recent_games(player=player)
     records = highscores.get(player, {})
     streaks = [s for s in streaks if s['player'] == player]

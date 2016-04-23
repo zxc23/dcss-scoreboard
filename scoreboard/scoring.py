@@ -274,6 +274,7 @@ def score_game(game_row):
     # Increment wins
     if won:
         stats['wins'].append(game_row.gid)
+        wins += 1
 
         # Adjust fastest_realtime win
         if 'fastest_realtime' not in stats or game['dur'] < stats[
