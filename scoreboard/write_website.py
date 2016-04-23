@@ -99,6 +99,22 @@ def write_website(rebuild=True, players=[]):
     shortest_wins = model.shortest_wins()
     recent_wins = model.recent_games(wins=True)
 
+    # I'm not proud of this block of code, but it works
+    # Create a list of [(name, [streak_chars]), ...] for the index
+    inverted_combo_highscores = {}
+    for entry in combo_highscores:
+        if entry.name not in inverted_combo_highscores:
+            inverted_combo_highscores[entry.name] = [entry.char]
+        else:
+            inverted_combo_highscores[entry.name].append(entry.char)
+    temp = []
+    for k, v in inverted_combo_highscores.items():
+        temp.append((k, v))
+    inverted_combo_highscores = temp
+    inverted_combo_highscores = sorted(inverted_combo_highscores,
+                                       reverse=True,
+                                       key=lambda i: len(i[1]))[:5]
+
     # Merge active streaks into streaks
     streaks = stats['completed_streaks']
     active_streaks = stats['active_streaks']
@@ -118,7 +134,7 @@ def write_website(rebuild=True, players=[]):
         template = env.get_template('index.html')
         f.write(template.render(recent_wins=recent_wins,
                                 active_streaks=sorted_active_streaks,
-                                combo_high_scores=combo_highscores))
+                                combo_high_scores=inverted_combo_highscores))
 
     print("Writing minified local JS")
     scoreboard_path = os.path.join(const.WEBSITE_DIR,
