@@ -126,7 +126,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for gid in stats['wins']|reverse %}
+            {% for gid in stats['wins'][-5:]|reverse %}
             {{ gid|gidtogame|gametotablerow(winning_games=True) }}
             {% endfor %}
           </tbody>
