@@ -495,13 +495,25 @@ def god_highscores():
 
 
 def combo_highscores():
-    """Returns the highest scoring game for each combo."""
-    conn = _engine.connect()
-    s1 = select([_games.c.char]).distinct('char')
-    combos = conn.execute(s1).fetchall()
-    result = []
-    for combo in combos:
-        s2 = _games.select().where(_games.c.char == combo[0]).order_by(desc('sc')).limit(1)
-        result.append(conn.execute(s2).fetchone())
-    return result
+    """Returns the highest scoring game for each combo.
 
+    XXX: Needs major fixing-up.
+    """
+    conn = _engine.connect()
+    a1 = _games.alias()
+    a2 = _games.alias()
+    s = "SELECT a.gid FROM games a INNER JOIN (SELECT gid, max(sc) sc FROM games GROUP BY char) b ON a.gid = b.gid AND a.sc = b.sc ORDER BY a.end ASC"
+
+    # Various old attempts below:
+    #s = select([a1.c.gid]).join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), and_(a1.c.sc == a2.c.sc, a1.c.gid == a2.c.gid))
+    #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), (a1.c.sc == a2.c.sc))
+    #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid, a1.c.sc == a2.c.sc)
+    #s = a1.select().select_from(a2.join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid))
+    #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid)
+    #s = _games.select().select_from(_games.join(_games, select([_games.c.gid, func.max(_games.c.sc)]).group_by(_games.c.char)))
+    #s = _games.select().select_from(_games.join(_games.c.gid, select([_games.c.gid, func.max(_games.c.sc)]).group_by(_games.c.char)))
+    gids = conn.execute(s).fetchall()
+    result = []
+    for gid in gids:
+        result.append(game(gid[0]))
+    return result
