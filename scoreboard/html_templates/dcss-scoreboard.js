@@ -3,7 +3,10 @@ var ajax = new XMLHttpRequest();
 ajax.open("GET", "{{ urlbase }}/static/js/players.json", true);
 ajax.onload = function() {
   var list = JSON.parse(ajax.responseText);
-  new Awesomplete(document.querySelector("#playersearch"),{ list: list });
+  new Awesomplete(
+      document.querySelector("#playersearch"),
+      { list: list, filter: Awesomplete.FILTER_STARTSWITH }
+  );
 };
 ajax.send();
 // Handle selecting a usernames
