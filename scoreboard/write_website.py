@@ -43,12 +43,10 @@ def achievement_data(ordered=False):
 
 
 def write_player_stats(player, stats, outfile, achievements, global_stats,
-                       streaks, active_streaks, highscores, template):
+                       streaks, active_streak, highscores, template):
     """Write stats page for an individual player."""
     recent_games = model.recent_games(player=player)
     records = highscores.get(player, {})
-    streaks = [s for s in streaks if s['player'] == player]
-    active_streak = global_stats['active_streaks'].get(player)
     with open(outfile, 'w') as f:
         f.write(template.render(player=player,
                                 stats=stats,
@@ -183,10 +181,16 @@ def write_website(players=[]):
     for game in god_highscores:
         player_highscores.get(game.name, {}).get('god_highscores', []).append(game)
 
+    player_streaks = {}
+    for streak in sorted_streaks:
+        player_streaks.get(streak['player'], []).append(streak)
+
     n = 0
     for player in players:
         stats = model.get_player_stats(player)
         highscores = player_highscores.get(player, {})
+        streaks = player_streaks.get(player, [])
+        active_streak = active_streaks.get(player, {})
 
         # Don't make pages for players with no games played
         if stats['games'] == 0:
@@ -194,8 +198,7 @@ def write_website(players=[]):
 
         outfile = os.path.join(player_html_path, player + '.html')
         write_player_stats(player, stats, outfile, achievements, global_stats,
-                           sorted_streaks, active_streaks, highscores,
-                           template)
+                           streaks, active_streak, highscores, template)
         n += 1
         if not n % 10000:
             print(n)
