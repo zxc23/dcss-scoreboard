@@ -11,10 +11,13 @@ PLAYABLE_ROLES = {'AE', 'AK', 'AM', 'Ar', 'As', 'Be', 'CK', 'Cj', 'EE', 'En',
 PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos',
                  'Elyvilon', 'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha',
                  'Lugonu', 'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas',
-                 'Qazlal', 'Ru', 'Sif Muna', 'the Shining One', 'Trog',
+                 'Qazlal', 'Ru', 'Sif Muna', 'The Shining One', 'Trog',
                  'Vehumet', 'Xom', 'Yredelemnul', 'Zin'}
 GOD_NAME_FIXUPS = {
-    'The Shining One': 'the Shining One',
+    # Actually, the ingame name is 'the Shining One', but that looks
+    # ugly since the capitalisation is wrong.
+    'the Shining One': 'The Shining One',
+    # Old name
     'Dithmengos': "Dithmenos"
 }
 RACE_TO_GREAT_RACE = {'Ce': 'greatcentaur',
