@@ -5,6 +5,7 @@ import json
 import time
 import shutil
 import jsmin
+import subprocess
 
 import jinja2
 
@@ -59,7 +60,7 @@ def write_player_stats(player, stats, outfile, achievements, global_stats,
                                 recent_games=recent_games))
 
 
-def write_website(rebuild=True, players=[]):
+def write_website(players=[]):
     """Write all website files.
 
     Paramers:
@@ -70,21 +71,21 @@ def write_website(rebuild=True, players=[]):
     env = jinja_env()
     all_players = sorted(model.all_player_names())
 
-    if rebuild:
-        players = all_players
-        print("Writing HTML to %s" % const.WEBSITE_DIR)
-        if os.path.isdir(const.WEBSITE_DIR):
-            print("Clearing %s" % const.WEBSITE_DIR)
-            shutil.rmtree(const.WEBSITE_DIR)
-        os.mkdir(const.WEBSITE_DIR)
+    players = all_players
+    print("Writing HTML to %s" % const.WEBSITE_DIR)
+    if os.path.isdir(const.WEBSITE_DIR):
+        print("Clearing %s" % const.WEBSITE_DIR)
+        shutil.rmtree(const.WEBSITE_DIR)
+    os.mkdir(const.WEBSITE_DIR)
 
-        print("Copying static assets")
-        src = os.path.join(os.path.dirname(__file__), 'html_static')
-        dst = os.path.join(const.WEBSITE_DIR, 'static')
-        shutil.copytree(src, dst)
-        print("Generating static player list")
-        with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
-            f.write(json.dumps(all_players))
+    print("Copying static assets")
+    src = os.path.join(os.path.dirname(__file__), 'html_static')
+    dst = os.path.join(const.WEBSITE_DIR, 'static')
+    subprocess.run(['rsync', '-a', src + '/', dst + '/'])
+
+    print("Generating player list")
+    with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
+        f.write(json.dumps(all_players))
 
     print("Loading scoring data")
     start2 = time.time()
