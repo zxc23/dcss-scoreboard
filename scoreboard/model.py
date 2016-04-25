@@ -503,11 +503,11 @@ def combo_highscores():
     XXX: Needs major fixing-up.
     """
     conn = _engine.connect()
-    a1 = _games.alias()
-    a2 = _games.alias()
     s = "SELECT a.gid FROM games a INNER JOIN (SELECT gid, max(sc) sc FROM games GROUP BY char) b ON a.gid = b.gid AND a.sc = b.sc ORDER BY a.end ASC"
 
     # Various old attempts below:
+    #a1 = _games.alias()
+    #a2 = _games.alias()
     #s = select([a1.c.gid]).join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), and_(a1.c.sc == a2.c.sc, a1.c.gid == a2.c.gid))
     #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), (a1.c.sc == a2.c.sc))
     #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid, a1.c.sc == a2.c.sc)
