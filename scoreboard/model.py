@@ -7,7 +7,7 @@ import datetime
 import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
-from sqlalchemy import desc, asc, select
+from sqlalchemy import desc, asc, select, func
 
 from . import modelutils
 from . import constants as const
@@ -475,8 +475,9 @@ def race_highscores():
     conn = _engine.connect()
     result = []
     for rc in const.PLAYABLE_RACES:
-        s = _games.select().where(_games.c.rc == rc).order_by(desc('sc')).limit(1)
-        result.append(conn.execute(s).fetchone())
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.rc == rc)
+        gid = (conn.execute(s).fetchone())
+        result.append(game(gid[0]))
     return result
 
 
@@ -485,8 +486,9 @@ def role_highscores():
     conn = _engine.connect()
     result = []
     for bg in const.PLAYABLE_ROLES:
-        s = _games.select().where(_games.c.bg == bg).order_by(desc('sc')).limit(1)
-        result.append(conn.execute(s).fetchone())
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.bg == bg)
+        gid = (conn.execute(s).fetchone())
+        result.append(game(gid[0]))
     return result
 
 
@@ -495,8 +497,9 @@ def god_highscores():
     conn = _engine.connect()
     result = []
     for god in const.PLAYABLE_GODS:
-        s = _games.select().where(_games.c.god == god).order_by(desc('sc')).limit(1)
-        result.append(conn.execute(s).fetchone())
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.god == god)
+        gid = (conn.execute(s).fetchone())
+        result.append(game(gid[0]))
     return result
 
 
@@ -506,11 +509,11 @@ def combo_highscores():
     XXX: Needs major fixing-up.
     """
     conn = _engine.connect()
-    a1 = _games.alias()
-    a2 = _games.alias()
     s = "SELECT a.gid FROM games a INNER JOIN (SELECT gid, max(sc) sc FROM games GROUP BY char) b ON a.gid = b.gid AND a.sc = b.sc ORDER BY a.end ASC"
 
     # Various old attempts below:
+    #a1 = _games.alias()
+    #a2 = _games.alias()
     #s = select([a1.c.gid]).join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), and_(a1.c.sc == a2.c.sc, a1.c.gid == a2.c.gid))
     #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), (a1.c.sc == a2.c.sc))
     #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid, a1.c.sc == a2.c.sc)
