@@ -87,6 +87,7 @@ def write_website(rebuild=True, players=[]):
             f.write(json.dumps(all_players))
 
     print("Loading scoring data")
+    start2 = time.time()
     # Get stats
     stats = model.global_stats()
     overall_highscores = model.highscores()
@@ -128,6 +129,7 @@ def write_website(rebuild=True, players=[]):
     sorted_streaks = sorted(streaks, key=lambda s: (-len(s['wins']), s['end']))
     sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
 
+    print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
     print("Writing index")
     with open(os.path.join(const.WEBSITE_DIR, 'index.html'), 'w') as f:
         template = env.get_template('index.html')
@@ -160,6 +162,7 @@ def write_website(rebuild=True, players=[]):
                                 shortest_wins=shortest_wins))
 
     print("Writing player pages... ")
+    start2 = time.time()
     player_html_path = os.path.join(const.WEBSITE_DIR, 'players')
     os.mkdir(player_html_path)
     achievements = achievement_data()
@@ -196,8 +199,8 @@ def write_website(rebuild=True, players=[]):
         if not n % 10000:
             print(n)
     end = time.time()
+    print("Wrote player pages in %s seconds" % round(end - start2, 2))
     print("Wrote website in %s seconds" % round(end - start, 2))
-
 
 if __name__ == "__main__":
     write_website()
