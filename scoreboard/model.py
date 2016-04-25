@@ -7,7 +7,7 @@ import datetime
 import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
-from sqlalchemy import desc, asc, select
+from sqlalchemy import desc, asc, select, func
 
 from . import modelutils, constants
 
@@ -469,8 +469,9 @@ def race_highscores():
     conn = _engine.connect()
     result = []
     for rc in constants.PLAYABLE_RACES:
-        s = _games.select().where(_games.c.rc == rc).order_by(desc('sc')).limit(1)
-        result.append(conn.execute(s).fetchone())
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.rc == rc)
+        gid = (conn.execute(s).fetchone())
+        result.append(game(gid[0]))
     return result
 
 
@@ -479,8 +480,9 @@ def role_highscores():
     conn = _engine.connect()
     result = []
     for bg in constants.PLAYABLE_ROLES:
-        s = _games.select().where(_games.c.bg == bg).order_by(desc('sc')).limit(1)
-        result.append(conn.execute(s).fetchone())
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.bg == bg)
+        gid = (conn.execute(s).fetchone())
+        result.append(game(gid[0]))
     return result
 
 
@@ -489,8 +491,9 @@ def god_highscores():
     conn = _engine.connect()
     result = []
     for god in constants.PLAYABLE_GODS:
-        s = _games.select().where(_games.c.god == god).order_by(desc('sc')).limit(1)
-        result.append(conn.execute(s).fetchone())
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.god == god)
+        gid = (conn.execute(s).fetchone())
+        result.append(game(gid[0]))
     return result
 
 
