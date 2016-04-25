@@ -64,7 +64,7 @@ def gametotablerow(game,
                           game.raw_data[prefix_row]
         show_player (bool): Show the player name column
         winning_games (bool): The table has only winning games, so don't show
-                              place or end columns
+                              place or end columns, and do show runes.
 
     Returns: (string) '<tr>contents</tr>'.
     """
@@ -79,7 +79,7 @@ def gametotablerow(game,
       <td>{xl}</td>
       <td>{turns}</td>
       <td>{duration}</td>
-      <td>{runes}</td>
+      {runes}
       <td>{date}</td>
       <td>{version}</td>
     </tr>"""
@@ -100,7 +100,7 @@ def gametotablerow(game,
         xl=game.xl,
         turns=prettyint(game.turn),
         duration=prettydur(game.dur),
-        runes=game.runes,
+        runes="" if not winning_games else "<td>%s</td>" % game.runes,
         date=prettydate(game.end),
         version=game.v)
 
