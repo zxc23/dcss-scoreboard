@@ -89,7 +89,6 @@ def parse_line(line, src):
     game['bg'] = game['char'][2:]
     if 'god' not in game:
         game['god'] = 'Atheist'
-    game['god'] = const.GOD_NAME_FIXUPS.get(game['god'], game['god'])
     if 'start' not in game:
         print("Couldn't parse this line (missing start), skipping: %s" % line)
         return

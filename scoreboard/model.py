@@ -9,7 +9,8 @@ import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
 from sqlalchemy import desc, asc, select
 
-from . import modelutils, constants
+from . import modelutils
+from . import constants as const
 
 GAME_CACHE = pylru.lrucache(10000)
 
@@ -179,7 +180,12 @@ def setup_database(backend):
 
 
 def add_game(gid, raw_data):
-    """Add a game to the database."""
+    """Normalise and add a game to the database."""
+    raw_data['god'] = const.GOD_NAME_FIXUPS.get(raw_data['god'],
+                                                raw_data['god'])
+    raw_data['original_race'] = raw_data['race']
+    raw_data['race'] = const.RACE_NAME_FIXUPS.get(raw_data['race'],
+                                                  raw_data['race'])
     conn = _engine.connect()
     conn.execute(_games.insert(),
                  gid=gid,
@@ -468,7 +474,7 @@ def race_highscores():
     """Returns the highest scoring game for each race."""
     conn = _engine.connect()
     result = []
-    for rc in constants.PLAYABLE_RACES:
+    for rc in const.PLAYABLE_RACES:
         s = _games.select().where(_games.c.rc == rc).order_by(desc('sc')).limit(1)
         result.append(conn.execute(s).fetchone())
     return result
@@ -478,7 +484,7 @@ def role_highscores():
     """Returns the highest scoring game for each role."""
     conn = _engine.connect()
     result = []
-    for bg in constants.PLAYABLE_ROLES:
+    for bg in const.PLAYABLE_ROLES:
         s = _games.select().where(_games.c.bg == bg).order_by(desc('sc')).limit(1)
         result.append(conn.execute(s).fetchone())
     return result
@@ -488,7 +494,7 @@ def god_highscores():
     """Returns the highest scoring game for each god."""
     conn = _engine.connect()
     result = []
-    for god in constants.PLAYABLE_GODS:
+    for god in const.PLAYABLE_GODS:
         s = _games.select().where(_games.c.god == god).order_by(desc('sc')).limit(1)
         result.append(conn.execute(s).fetchone())
     return result

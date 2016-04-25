@@ -20,6 +20,17 @@ GOD_NAME_FIXUPS = {
     # Old name
     'Dithmengos': "Dithmenos"
 }
+RACE_NAME_FIXUPS = {
+    'Yellow Draconian': 'Draconian',
+    'Grey Draconian': 'Draconian',
+    'White Draconian': 'Draconian',
+    'Green Draconian': 'Draconian',
+    'Purple Draconian': 'Draconian',
+    'Mottled Draconian': 'Draconian',
+    'Black Draconian': 'Draconian',
+    'Red Draconian': 'Draconian',
+    'Pale Draconian': 'Draconian',
+}
 RACE_TO_GREAT_RACE = {'Ce': 'greatcentaur',
                       'DD': 'greatdeepdwarf',
                       'DE': 'greatdeepelf',
