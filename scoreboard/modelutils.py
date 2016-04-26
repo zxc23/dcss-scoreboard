@@ -17,3 +17,46 @@ def crawl_date_to_datetime(d):
                              hour=int(d[8:10]),
                              minute=int(d[10:12]),
                              second=int(d[12:14]))
+
+
+def morgue_url(game):
+    """Generates a morgue URL from a game."""
+    if game.src == "CAO":
+        prefix = "http://crawl.akrasiac.org/rawdata"
+    elif game.src == "CDO":
+        prefix = "http://crawl.develz.org/morgues"
+        prefix += "/" + version_url(game.v)
+    elif game.src == "CSZO":
+        prefix = "http://dobrazupa.org/morgue"
+    elif game.src == "CUE" or game.src == "CLAN":
+        prefix = "http://underhound.eu:81/crawl/morgue"
+    elif game.src == "CBRO":
+        prefix = "http://crawl.berotato.org/crawl/morgue"
+    elif game.src == "CXC":
+        prefix = "http://crawl.xtahua.com/crawl/morgue"
+    elif game.src == "LLD":
+        prefix = "http://lazy-life.ddo.jp:8080/morgue"
+        prefix += "/" + version_url(game.v)
+    elif game.src == "CPO":
+        prefix = "https://crawl.project357.org/morgue"
+    elif game.src == "CJR":
+        prefix = "http://www.jorgrun.rocks/morgue"
+    else:
+        return None
+    date = game.raw_data['end'][:4] \
+    + "%02d" % (int(game.raw_data['end'][4:6]) + 1) \
+    + game.raw_data['end'][6:8]
+    time = game.raw_data['end'][8:14]
+    result = "%s/%s/morgue-%s-%s-%s.txt" % (prefix, game.name, game.name, date, time)
+    return result
+
+
+def version_url(version):
+    """Cleans up version strings for use in morgue URLs."""
+    if version[-2:] == "a0":
+        return "trunk"
+    if len(version) > 4:
+        for i in range(len(version)):
+            if version[-(i+1)] == ".":
+                return version[:-(i+1)]
+    return version
