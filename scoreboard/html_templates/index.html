@@ -5,26 +5,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Recent Wins</h3>
-    <table class="{{ tableclasses }}">
-      <thead>
-        <tr>
-          <th>Score</th>
-          <th>Character</th>
-          <th>God</th>
-          <th>XL</th>
-          <th>Turns</th>
-          <th>Duration</th>
-          <th>Runes</th>
-          <th>Date</th>
-          <th>Version</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for game in recent_wins %}
-        {{ game|gametotablerow(show_player=True, winning_games=True) }}
-        {% endfor %}
-      </tbody>
-    </table>
+    {{ recent_wins|gamestotable(show_player=True, winning_games=True) }}
   </div>
 </div>
 <div class="row">

@@ -132,3 +132,4 @@ BLACKLISTS = {'griefers': {},
 WEBSITE_DIR = 'website'
 WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)
 # WEBSITE_URLBASE = 'https://crawl.project357.org/static/scoreboard'
+TABLE_CLASSES = "table table-hover table-striped"

@@ -53,11 +53,11 @@ def prettydate(d):
     return d.strftime('%c')
 
 
-def gametotablerow(game,
-                   prefix_row=None,
-                   show_player=False,
-                   winning_games=False):
-    """Jinja filter to convert a game row to a table row.
+def gamestotable(games,
+                 prefix_row=None,
+                 show_player=False,
+                 winning_games=False):
+    """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
         prefix_row (str): Add an extra row at the start with data from
@@ -68,7 +68,58 @@ def gametotablerow(game,
 
     Returns: (string) '<tr>contents</tr>'.
     """
-    t = """<tr class="{win}">
+    def format_trow(game):
+        """Convert a game to a table row."""
+        return trow.format(
+            win='table-success' if game.ktyp == 'winning' else '',
+            prefix_row='' if not prefix_row else "<td>%s</td>" %
+                game.raw_data.get(prefix_row),
+            player_row='' if not show_player else
+            "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
+                base=const.WEBSITE_URLBASE,
+                name=game.name),
+            score=prettyint(game.sc),
+            character=game.char,
+            god=game.god,
+            place="" if winning_games else "<td>%s</td>" % game.place,
+            end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg'),
+            xl=game.xl,
+            turns=prettyint(game.turn),
+            duration=prettydur(game.dur),
+            date=prettydate(game.end),
+            version=game.v)
+
+    t = """<table class="{classes}">
+          <thead>
+            <tr>
+            {thead}
+            </tr>
+          </thead>
+          <tbody>
+            {tbody}
+          </tbody>
+        </table>"""
+
+    classes = const.TABLE_CLASSES
+
+    thead = """{prefix}
+              {player}
+              <th>Score</th>
+              <th>Character</th>
+              <th>God</th>
+              {place}
+              {end}
+              <th>XL</th>
+              <th>Turns</th>
+              <th>Duration</th>
+              <th>Date</th>
+              <th>Version</th>""".format(
+        prefix='' if not prefix_row else '<th>%s</th>' % prefix_row,
+        player='' if not show_player else '<th>Player</th>',
+        place='' if winning_games else '<th>Place</th>',
+        end='' if winning_games else '<th>End</th>')
+
+    trow = """<tr>
       {prefix_row}
       {player_row}
       <td>{score}</td>
@@ -79,30 +130,13 @@ def gametotablerow(game,
       <td>{xl}</td>
       <td>{turns}</td>
       <td>{duration}</td>
-      {runes}
       <td>{date}</td>
       <td>{version}</td>
     </tr>"""
 
-    return t.format(
-        win='table-success' if game.ktyp == 'winning' else '',
-        prefix_row='' if prefix_row is None else "<td>%s</td>" %
-        game.raw_data.get(prefix_row),
-        player_row='' if not show_player else
-        "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
-            base=const.WEBSITE_URLBASE,
-            name=game.name),
-        score=prettyint(game.sc),
-        character=game.char,
-        god=game.god,
-        place="" if winning_games else "<td>%s</td>" % game.place,
-        end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg'),
-        xl=game.xl,
-        turns=prettyint(game.turn),
-        duration=prettydur(game.dur),
-        runes="" if not winning_games else "<td>%s</td>" % game.runes,
-        date=prettydate(game.end),
-        version=game.v)
+    return t.format(classes=classes,
+                    thead=thead,
+                    tbody="\n".join(format_trow(game) for game in games))
 
 
 def streaktotablerow(streak):

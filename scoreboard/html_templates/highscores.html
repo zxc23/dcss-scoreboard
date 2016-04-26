@@ -32,170 +32,25 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div class="tab-pane active" id="overall" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for game in overall_highscores %}
-            {{ game|gametotablerow(show_player=True, winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ overall_highscores|gamestotable(show_player=True, winning_games=True) }}
       </div>
       <div class="tab-pane" id="race" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Race</th>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for game in race_highscores %}
-            {{ game|gametotablerow(prefix_row='race', show_player=True, winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ race_highscores|gamestotable(show_player=True, winning_games=True) }}
       </div>
       <div class="tab-pane" id="background" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Background</th>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for game in role_highscores %}
-            {{ game|gametotablerow(prefix_row='cls', show_player=True, winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ role_highscores|gamestotable(show_player=True, winning_games=True) }}
       </div>
       <div class="tab-pane" id="char" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {# XXX unsorted #}
-            {% for game in combo_highscores %}
-            {{ game|gametotablerow(show_player=True, winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ combo_highscores|gamestotable(show_player=True, winning_games=True) }}
       </div>
       <div class="tab-pane" id="god" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>God</th>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {# XXX unsorted #}
-            {% for game in god_highscores %}
-            {{ game|gametotablerow(prefix_row='god', show_player=True, winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ god_highscores|gamestotable(show_player=True, winning_games=True) }}
       </div>
       <div class="tab-pane" id="fastest" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for game in fastest_wins %}
-            {{ game|gametotablerow(show_player=True, winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ fastest_wins|gamestotable(show_player=True, winning_games=True) }}
       </div>
       <div class="tab-pane" id="shortest" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for game in shortest_wins %}
-            {{ game|gametotablerow(show_player=True, winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ shortest_wins|gamestotable(show_player=True, winning_games=True) }}
       </div>
     </div>
   </div>

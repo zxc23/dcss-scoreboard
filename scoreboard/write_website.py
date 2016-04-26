@@ -21,14 +21,14 @@ def jinja_env():
     env.filters['prettydur'] = webutils.prettydur
     env.filters['prettycounter'] = webutils.prettycounter
     env.filters['prettycrawldate'] = webutils.prettycrawldate
-    env.filters['gametotablerow'] = webutils.gametotablerow
+    env.filters['gamestotable'] = webutils.gamestotable
     env.filters['streaktotablerow'] = webutils.streaktotablerow
     env.filters['longeststreaktotablerow'] = webutils.longeststreaktotablerow
     env.filters['prettydate'] = webutils.prettydate
     env.filters['gidtogame'] = model.game
 
     env.globals['urlbase'] = const.WEBSITE_URLBASE
-    env.globals['tableclasses'] = "table table-hover table-striped"
+    env.globals['tableclasses'] = const.TABLE_CLASSES
     return env
 
 

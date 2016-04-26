@@ -87,49 +87,10 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div class="tab-pane active" id="games" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>Place</th>
-              <th>End</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for game in recent_games %}
-            {{ game|gametotablerow }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ recent_games|gamestotable }}
       </div>
       <div class="tab-pane" id="wins" role="tabpanel">
-        <table class="{{ tableclasses }}">
-          <thead>
-            <tr>
-              <th>Score</th>
-              <th>Character</th>
-              <th>God</th>
-              <th>XL</th>
-              <th>Turns</th>
-              <th>Duration</th>
-              <th>Runes</th>
-              <th>Date</th>
-              <th>Version</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for gid in stats['wins'][-5:]|reverse %}
-            {{ gid|gidtogame|gametotablerow(winning_games=True) }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ stats['wins']|map('gidtogame')|list|gamestotable(winning_games=True) }}
       </div>
     </div>
   </div>
