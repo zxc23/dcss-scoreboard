@@ -8,6 +8,8 @@ from . import model
 from . import modelutils
 from . import constants as const
 
+DATE_FORMAT = '%d %b %Y'
+
 
 def prettyint(value):
     """Jinja filter to prettify ints.
@@ -45,12 +47,12 @@ def prettycounter(counter):
 
 def prettycrawldate(d):
     """Jinja filter to convert crawl date string to pretty text."""
-    return modelutils.crawl_date_to_datetime(d).strftime('%c')
+    return modelutils.crawl_date_to_datetime(d).strftime(DATE_FORMAT)
 
 
 def prettydate(d):
     """Jinja filter to convert datetime object to pretty text."""
-    return d.strftime('%c')
+    return d.strftime(DATE_FORMAT)
 
 
 def gamestotable(games,
