@@ -42,11 +42,46 @@ def achievement_data(ordered=False):
     return json.load(open(path))
 
 
-def write_player_stats(player, stats, outfile, achievements, global_stats,
-                       streaks, active_streak, highscores, template):
-    """Write stats page for an individual player."""
+def player_records(player, race_highscores, role_highscores, combo_highscores, god_highscores):
+    """Return a dictionary of player records.
+
+    Dict is of the form { 'race': [('Ce', gid), ('Vp', gid)], 'role': [],
+        'combo': [...], 'god': [...] }.
+    """
+    records = {'race': [], 'role': [], 'combo': [], 'god': []}
+    for game in race_highscores:
+        if game.name == player:
+            records['race'].append(game)
+    for game in role_highscores:
+        if game.name == player:
+            records['role'].append(game)
+    for game in combo_highscores:
+        if game.name == player:
+            records['combo'].append(game)
+    for game in god_highscores:
+        if game.name == player:
+            records['god'].append(game)
+
+    return records
+
+
+def write_player_stats(*, player, stats, outfile, achievements,
+                       streaks, active_streak, template, records):
+    """Write stats page for an individual player.
+
+    Parameters:
+        player (str) Player Name
+        stats (dict) Player's stats dict from model.player_stats
+        outfile (str) Output filename
+        acheivements (dict) Player's achievements
+        streaks (list) Player's streaks or []
+        active_streak (dict) Player's active streak or {}
+        template (Jinja template) Template to render with.
+        records (dict) Player's global highscores
+
+    Returns: None.
+    """
     recent_games = model.recent_games(player=player)
-    records = highscores.get(player, {})
     with open(outfile, 'w') as f:
         f.write(template.render(player=player,
                                 stats=stats,
@@ -100,6 +135,7 @@ def write_website(players=[]):
 
     # I'm not proud of this block of code, but it works
     # Create a list of [(name, [streak_chars]), ...] for the index
+    # It's sorted by streak length
     inverted_combo_highscores = {}
     for entry in combo_highscores:
         if entry.name not in inverted_combo_highscores:
@@ -165,25 +201,7 @@ def write_website(players=[]):
     player_html_path = os.path.join(const.WEBSITE_DIR, 'players')
     os.mkdir(player_html_path)
     achievements = achievement_data()
-    global_stats = model.global_stats()
     template = env.get_template('player.html')
-
-    player_highscores = {}
-    for game in race_highscores:
-        player_highscores.get(game.name, {}).get('race_highscores',
-                                                 []).append(game)
-
-    for game in role_highscores:
-        player_highscores.get(game.name, {}).get('role_highscores',
-                                                 []).append(game)
-
-    for game in combo_highscores:
-        player_highscores.get(game.name, {}).get('combo_highscores',
-                                                 []).append(game)
-
-    for game in god_highscores:
-        player_highscores.get(game.name, {}).get('god_highscores',
-                                                 []).append(game)
 
     player_streaks = {}
     for streak in sorted_streaks:
@@ -192,17 +210,27 @@ def write_website(players=[]):
     n = 0
     for player in players:
         stats = model.get_player_stats(player)
-        highscores = player_highscores.get(player, {})
         streaks = player_streaks.get(player, [])
         active_streak = active_streaks.get(player, {})
+        records = player_records(player,
+                                 race_highscores,
+                                 role_highscores,
+                                 combo_highscores,
+                                 god_highscores)
 
         # Don't make pages for players with no games played
         if stats['games'] == 0:
             continue
 
         outfile = os.path.join(player_html_path, player + '.html')
-        write_player_stats(player, stats, outfile, achievements, global_stats,
-                           streaks, active_streak, highscores, template)
+        write_player_stats(player=player,
+                           stats=stats,
+                           outfile=outfile,
+                           achievements=achievements,
+                           streaks=streaks,
+                           active_streak=active_streak,
+                           template=template,
+                           records=records)
         n += 1
         if not n % 10000:
             print(n)

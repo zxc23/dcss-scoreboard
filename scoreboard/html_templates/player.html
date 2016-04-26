@@ -31,27 +31,29 @@
           {% endfor %}
         </p>
       {% endif %}
-      {% if records['combo_highscores'] %}
+      {# if player has a race/role highscore, they also have a combo highscore by definition #}
+      {% if records['combo'] or records['god'] %}
       <h3>Global Highscores</h3>
-        {% if records['race_highscores'] %}
-          <p><strong>Species Highscores ({{ records['race_highscores']|length }}):</strong>
-            {% for game in records['race_highscores'] %}
-            {{ game|attr('rc') }}
-            {% endfor %}
+        {% if records['race'] %}
+          <p><strong>Species:</strong>
+            {{ records['race']|map(attribute='rc')|join(', ') }}
           </p>
         {% endif %}
-        {% if records['role_highscores'] %}
-          <p><strong>Background Highscores ({{ records['role_highscores']|length }}):</strong>
-            {% for game in records['role_highscores'] %}
-            {{ game|attr('bg') }}
-            {% endfor %}
+        {% if records['role'] %}
+          <p><strong>Background:</strong>
+            {{ records['role']|map(attribute='bg')|join(', ') }}
           </p>
         {% endif %}
-        <p><strong>Combo Highscores Held ({{ records['combo_highscores']|length }}):</strong>
-          {% for game in records['combo_highscores'] %}
-          {{ game|attr('char') }}
-          {% endfor %}
+        {% if records['combo'] %}
+        <p><strong>Combo:</strong>
+          {{ records['combo']|map(attribute='char')|join(', ') }}
         </p>
+        {% endif %}
+        {% if records['god'] %}
+        <p><strong>God:</strong>
+          {{ records['god']|map(attribute='god')|join(', ') }}
+        </p>
+        {% endif %}
       {% endif %}
     {% endif %}
   </div>
