@@ -68,14 +68,20 @@ def prettydate(d):
 
 
 def gamestotable(games,
-                 prefix_row=None,
+                 *,
+                 prefix_col=None,
+                 prefix_col_title=None,
                  show_player=False,
-                 winning_games=False):
+                 winning_games=False,
+                 sort_col=None):
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
-        prefix_row (str): Add an extra row at the start with data from
-                          game.raw_data[prefix_row]
+        prefix_col (str): Add an extra column at the start with data from
+                          game.raw_data.
+                          The table will also be sorted by this column.
+        prefix_col_title (str): Title for the prefix_col column
+        sort_col (str): Sort the table by this column from game.raw_data.
         show_player (bool): Show the player name column
         winning_games (bool): The table has only winning games, so don't show
                               place or end columns, and do show runes.
@@ -86,8 +92,8 @@ def gamestotable(games,
         """Convert a game to a table row."""
         return trow.format(
             win='table-success' if game.ktyp == 'winning' else '',
-            prefix_row='' if not prefix_row else "<td>%s</td>" %
-                game.raw_data.get(prefix_row),
+            prefix_col='' if not prefix_col else "<td>%s</td>" %
+                game.raw_data.get(prefix_col),
             player_row='' if not show_player else
             "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
                 base=const.WEBSITE_URLBASE,
@@ -128,13 +134,13 @@ def gamestotable(games,
               <th>Duration</th>
               <th>Date</th>
               <th>Version</th>""".format(
-        prefix='' if not prefix_row else '<th>%s</th>' % prefix_row,
+        prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
         player='' if not show_player else '<th>Player</th>',
         place='' if winning_games else '<th>Place</th>',
         end='' if winning_games else '<th>End</th>')
 
     trow = """<tr>
-      {prefix_row}
+      {prefix_col}
       {player_row}
       <td>{score}</td>
       <td>{character}</td>
@@ -147,6 +153,11 @@ def gamestotable(games,
       <td>{date}</td>
       <td>{version}</td>
     </tr>"""
+
+    if sort_col:
+        games = sorted(games, key=lambda g: g['raw_data'][sort_col])
+    elif prefix_col:
+        games = sorted(games, key=lambda g: g['raw_data'][prefix_col])
 
     return t.format(classes=classes,
                     thead=thead,

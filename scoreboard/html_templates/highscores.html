@@ -35,22 +35,34 @@
         {{ overall_highscores|gamestotable(show_player=True, winning_games=True) }}
       </div>
       <div class="tab-pane" id="race" role="tabpanel">
-        {{ race_highscores|gamestotable(show_player=True, winning_games=True) }}
+        {{ race_highscores|gamestotable(show_player=True,
+                                        prefix_col='race',
+                                        prefix_col_title='Species',
+                                        winning_games=True) }}
       </div>
       <div class="tab-pane" id="background" role="tabpanel">
-        {{ role_highscores|gamestotable(show_player=True, winning_games=True) }}
+        {{ role_highscores|gamestotable(show_player=True,
+                                        prefix_col='cls',
+                                        prefix_col_title='Background',
+                                        winning_games=True) }}
       </div>
       <div class="tab-pane" id="char" role="tabpanel">
-        {{ combo_highscores|gamestotable(show_player=True, winning_games=True) }}
+        {{ combo_highscores|gamestotable(show_player=True,
+                                         winning_games=True,
+                                         sort_col='char') }}
       </div>
       <div class="tab-pane" id="god" role="tabpanel">
-        {{ god_highscores|gamestotable(show_player=True, winning_games=True) }}
+        {{ god_highscores|gamestotable(show_player=True,
+                                       winning_games=True,
+                                       sort_col='god') }}
       </div>
       <div class="tab-pane" id="fastest" role="tabpanel">
-        {{ fastest_wins|gamestotable(show_player=True, winning_games=True) }}
+        {{ fastest_wins|gamestotable(show_player=True,
+                                     winning_games=True) }}
       </div>
       <div class="tab-pane" id="shortest" role="tabpanel">
-        {{ shortest_wins|gamestotable(show_player=True, winning_games=True) }}
+        {{ shortest_wins|gamestotable(show_player=True,
+                                      winning_games=True) }}
       </div>
     </div>
   </div>
