@@ -19,14 +19,26 @@ def prettyint(value):
     return "{0:,}".format(value)
 
 
-def prettydur(duration):
-    """Jinja filter to convert seconds to a pretty duration.
+def prettydur(duration, hours=False):
+    """Jinja filter to convert seconds to a pretty duration "HH:MM:SS".
 
-    eg, 170 to '2 minutes, 50 seconds'.
+    Parameters:
+        hours (bool) Convert to only hours (with a minimum of 1 -- for player
+            'hours played' metric).
+
+    Examples:
+        prettydur(170) => '0:2:50'
+        prettydur(0, hours=True) => '1'
+        prettydur(86400, hours=True) => '24'
     """
     if type(duration) != int:
         duration = int(duration)
-    return str(datetime.timedelta(seconds=duration))
+    delta = datetime.timedelta(seconds=duration)
+    if hours:
+        dur = delta.total_seconds()/3600
+        return str(int(dur)) if dur > 1 else '1'
+    else:
+        return str(delta)
 
 
 def prettycounter(counter):
