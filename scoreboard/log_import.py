@@ -90,6 +90,8 @@ def parse_line(line, src):
     game['bg'] = game['char'][2:]
     if 'god' not in game:
         game['god'] = 'Atheist'
+    # Simplify version to 0.17/0.18/etc
+    game['v'] = re.match('(0.\d+)', game['v']).group()
     if 'start' not in game:
         print("Couldn't parse this line (missing start), skipping: %s" % line)
         return
