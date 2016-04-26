@@ -50,7 +50,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for streak in streaks %}
+            {% for streak in streaks[:10] %}
             {{ streak|longeststreaktotablerow }}
             {% endfor %}
           </tbody>
