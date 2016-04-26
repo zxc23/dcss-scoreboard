@@ -79,7 +79,7 @@
         {{ recent_games|gamestotable }}
       </div>
       <div class="tab-pane" id="wins" role="tabpanel">
-        {{ stats['wins']|map('gidtogame')|list|gamestotable(winning_games=True) }}
+        {{ stats['wins'][-5:]|reverse|map('gidtogame')|list|gamestotable(winning_games=True) }}
       </div>
     </div>
   </div>
