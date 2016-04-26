@@ -8,7 +8,7 @@ from . import model
 from . import modelutils
 from . import constants as const
 
-DATE_FORMAT = '%d %b %Y'
+DATE_FORMAT = '%-d %B %Y'
 
 
 def prettyint(value):
