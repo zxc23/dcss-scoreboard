@@ -6,7 +6,6 @@ import time
 import glob
 
 from . import model
-from . import constants as const
 
 # Logfile format escapes : as ::, so we need to split with re.split
 # Instead of naive line.split(':')
