@@ -55,22 +55,11 @@
       {% endif %}
     {% endif %}
   </div>
-  <div class="col-sm-4">
+  <div class="col-sm-8">
     <h3>Wins</h3>
     <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
     <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
     <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
-  </div>
-  <div class="col-sm-4">
-    <h3>Achievements</h3>
-    {% for achievement in achievement_data %}
-      {% if achievement['id'] in stats['achievements'].keys() %}
-      <p>
-        <h5 class="card-title">{{ achievement['name'] }}</h5>
-        <p class="card-text">{{ achievement['description'] }}</p>
-      </p>
-      {% endif %}
-    {% endfor %}
   </div>
 </div>
 <div class="row">
