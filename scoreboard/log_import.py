@@ -26,7 +26,8 @@ def load_logfiles():
     for logfile in glob.glob("logfiles/*"):
         count += load_logfile(logfile)
     end = time.time()
-    print("Loaded logfiles with %s new games in %s secs" % (count, round(end - start, 2)))
+    print("Loaded logfiles with %s new games in %s secs" %
+          (count, round(end - start, 2)))
 
 
 def load_logfile(logfile):

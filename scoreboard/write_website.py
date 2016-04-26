@@ -170,16 +170,20 @@ def write_website(players=[]):
 
     player_highscores = {}
     for game in race_highscores:
-        player_highscores.get(game.name, {}).get('race_highscores', []).append(game)
+        player_highscores.get(game.name, {}).get('race_highscores',
+                                                 []).append(game)
 
     for game in role_highscores:
-        player_highscores.get(game.name, {}).get('role_highscores', []).append(game)
+        player_highscores.get(game.name, {}).get('role_highscores',
+                                                 []).append(game)
 
     for game in combo_highscores:
-        player_highscores.get(game.name, {}).get('combo_highscores', []).append(game)
+        player_highscores.get(game.name, {}).get('combo_highscores',
+                                                 []).append(game)
 
     for game in god_highscores:
-        player_highscores.get(game.name, {}).get('god_highscores', []).append(game)
+        player_highscores.get(game.name, {}).get('god_highscores',
+                                                 []).append(game)
 
     player_streaks = {}
     for streak in sorted_streaks:
@@ -205,6 +209,7 @@ def write_website(players=[]):
     end = time.time()
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
     print("Wrote website in %s seconds" % round(end - start, 2))
+
 
 if __name__ == "__main__":
     write_website()

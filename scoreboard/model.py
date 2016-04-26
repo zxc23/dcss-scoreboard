@@ -6,7 +6,8 @@ import datetime
 
 import pylru
 import sqlalchemy.ext.mutable
-from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, Integer, Boolean, DateTime, LargeBinary
+from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, \
+                       Integer, Boolean, DateTime, LargeBinary
 from sqlalchemy import desc, asc, select, func
 
 from . import modelutils
@@ -17,6 +18,7 @@ GAME_CACHE = pylru.lrucache(10000)
 
 class DatabaseError(Exception):
     """Generic error for issues with the model."""
+
     pass
 
 
@@ -244,7 +246,6 @@ def all_player_names():
     XXX should be at least memoised if not outright replaced with something
     saner.
     """
-    conn = _engine.connect()
     return [p.name for p in get_all_player_stats()]
 
 
@@ -260,13 +261,13 @@ def get_all_player_stats():
 
 
 def delete_all_player_stats():
-    """Deletes all player stats."""
+    """Delete all player stats."""
     conn = _engine.connect()
     conn.execute(_player_stats.delete())
 
 
 def delete_player_stats(name):
-    """Deletes a player's stats."""
+    """Delete a player's stats."""
     conn = _engine.connect()
     conn.execute(_player_stats.delete().where(_player_stats.c.name == name))
 
@@ -301,7 +302,7 @@ def set_player_stats(name, stats):
 
 
 def first_game(name, src=None):
-    """Returns the first game of a player."""
+    """Return the first game of a player."""
     conn = _engine.connect()
     s = _games.select().where(_games.c.name == name).order_by(asc(
         'start')).limit(1)
@@ -334,16 +335,16 @@ def mark_game_scored(gid):
 
 
 def unscore_all_games():
-    """Marks all games as being unscored."""
+    """Mark all games as being unscored."""
     conn = _engine.connect()
     conn.execute(_games.update().values(scored=False))
 
 
 def unscore_all_games_of_player(name):
-    """Marks all games by a player as being unscored."""
+    """Mark all games by a player as being unscored."""
     conn = _engine.connect()
-    conn.execute(_games.update().where(_games.c.name == name).values(scored=
-                                                                     False))
+    q = _games.update().where(_games.c.name == name).values(scored=False)
+    conn.execute(q)
 
 
 def set_global_stat(key, data):
@@ -399,11 +400,13 @@ def game(gid):
 def recent_games(wins=False, player=None, num=5, reverse=False):
     """Return recent games.
 
-        Parameters:
+    Parameters:
         wins (bool) Only return wins
         player (str) Only for this player
         num (int) Number of rows to return
-        reverse (bool) Order in least -> most recent if True.
+        reverse (bool) Order in least -> most recent if True
+
+    Returns recent games as a list of Games.
     """
     conn = _engine.connect()
     query = _games.select()
@@ -428,99 +431,101 @@ def add_player_to_blacklist(name, src):
 def remove_player_from_blacklist(name, src):
     """Remove a player from the blacklist."""
     conn = _engine.connect()
-    s = _blacklisted_players.delete().where(
-        _blacklisted_players.c.name == name).where(_blacklisted_players.c.src
-                                                   == src)
+    table = _blacklisted_players
+    s = table.delete().where(table.c.name == name).where(table.c.src == src)
     conn.execute(s)
 
 
 def player_in_blacklist(name, src):
-    """Returns True if a player is on the blacklist."""
+    """Return True if a player is on the blacklist."""
     conn = _engine.connect()
-    s = _blacklisted_players.select().where(
-        _blacklisted_players.c.name == name).where(_blacklisted_players.c.src
-                                                   == src)
+    table = _blacklisted_players
+    s = table.select().where(
+        table.c.name == name).where(table.c.src == src)
     return conn.execute(s).fetchone() is True
 
 
 def all_blacklisted_players():
-    """Returns all blacklisted player-src combinations."""
+    """Return all blacklisted player-src combinations."""
     conn = _engine.connect()
     return conn.execute(_blacklisted_players.select()).fetchall()
 
 
 def shortest_wins(n=10):
-    """Returns the n shortest wins by turncount."""
+    """Return the n shortest wins by turncount."""
     conn = _engine.connect()
-    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc('turn')).limit(n)
+    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
+        'turn')).limit(n)
     return conn.execute(s).fetchall()
 
 
 def fastest_wins(n=10):
-    """Returns the n fastest wins by duration."""
+    """Return the n fastest wins by duration."""
     conn = _engine.connect()
-    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc('dur')).limit(n)
+    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
+        'dur')).limit(n)
     return conn.execute(s).fetchall()
 
 
 def highscores(n=10):
-    """Returns the n highest scoring games."""
+    """Return the n highest scoring games."""
     conn = _engine.connect()
     s = _games.select().order_by(desc('sc')).limit(n)
     return conn.execute(s).fetchall()
 
 
 def race_highscores():
-    """Returns the highest scoring game for each race."""
+    """Return the highest scoring game for each race."""
     conn = _engine.connect()
     result = []
     for rc in const.PLAYABLE_RACES:
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.rc == rc)
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.rc ==
+                                                                rc)
         gid = (conn.execute(s).fetchone())
         result.append(game(gid[0]))
     return result
 
 
 def role_highscores():
-    """Returns the highest scoring game for each role."""
+    """Return the highest scoring game for each role."""
     conn = _engine.connect()
     result = []
     for bg in const.PLAYABLE_ROLES:
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.bg == bg)
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.bg ==
+                                                                bg)
         gid = (conn.execute(s).fetchone())
         result.append(game(gid[0]))
     return result
 
 
 def god_highscores():
-    """Returns the highest scoring game for each god."""
+    """Return the highest scoring game for each god."""
     conn = _engine.connect()
     result = []
     for god in const.PLAYABLE_GODS:
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.god == god)
+        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.god ==
+                                                                god)
         gid = (conn.execute(s).fetchone())
         result.append(game(gid[0]))
     return result
 
 
 def combo_highscores():
-    """Returns the highest scoring game for each combo.
+    """Return the highest scoring game for each combo.
 
     XXX: Needs major fixing-up.
     """
     conn = _engine.connect()
-    s = "SELECT a.gid FROM games a INNER JOIN (SELECT gid, max(sc) sc FROM games GROUP BY char) b ON a.gid = b.gid AND a.sc = b.sc ORDER BY a.end ASC"
-
-    # Various old attempts below:
-    #a1 = _games.alias()
-    #a2 = _games.alias()
-    #s = select([a1.c.gid]).join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), and_(a1.c.sc == a2.c.sc, a1.c.gid == a2.c.gid))
-    #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), (a1.c.sc == a2.c.sc))
-    #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid, a1.c.sc == a2.c.sc)
-    #s = a1.select().select_from(a2.join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid))
-    #s = a1.select().join(select([a2.c.gid, func.max(a2.c.sc)]).group_by(a2.c.char), a1.c.gid == a2.c.gid)
-    #s = _games.select().select_from(_games.join(_games, select([_games.c.gid, func.max(_games.c.sc)]).group_by(_games.c.char)))
-    #s = _games.select().select_from(_games.join(_games.c.gid, select([_games.c.gid, func.max(_games.c.sc)]).group_by(_games.c.char)))
+    s = """SELECT a.gid
+                FROM games a
+                INNER JOIN (
+                    SELECT gid, max(sc) sc
+                        FROM games
+                        GROUP BY char
+                ) b ON
+                    a.gid = b.gid
+                    AND a.sc = b.sc
+                ORDER BY a.end ASC"""
     gids = conn.execute(s).fetchall()
     result = []
     for gid in gids:
