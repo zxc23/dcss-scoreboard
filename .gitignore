@@ -6,3 +6,4 @@ venv/
 __pycache__
 *.db
 .vscode/
+.vagrant/
