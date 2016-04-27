@@ -27,6 +27,7 @@ You can see development status here: https://docs.google.com/document/d/1gTOGx1C
 ## Setting up a development environment using Vagrant
 
 1. First, get Vagrant at https://www.vagrantup.com/ and install it.
-2. Next, cd to the git repository which should contain 'Vagrantfile', and run 'vagrant up'. This will set things up and might take a while.
-3. Open scoreboard/constants.py and change the line 'WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)' to point to a 'website' folder in your current directory. E.g. "WEBSITE_URLBASE = 'D:\David\Documents\DCSS Scoreboard\website'".
-4. To run the scripts, do 'vagrant ssh' which will open a terminal in the VM and 'cd vagrant'. Finally, 'python loader.py' will start the scripts.
+2. Next, cd to the git repository which should contain 'Vagrantfile', and run `vagrant up`. This will set things up and might take a while.
+3. Open scoreboard/constants.py and change the line `WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)` to point to a 'website' folder in your current directory, e.g. `WEBSITE_URLBASE = 'D:\David\Documents\DCSS Scoreboard\website'`.
+4. To run the scripts, `vagrant ssh` will open a terminal in the VM and `cd vagrant`. Finally, `python loader.py` will start the scripts.
+5. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely. 
