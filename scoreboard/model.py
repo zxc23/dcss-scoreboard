@@ -486,10 +486,8 @@ def race_highscores():
     conn = _engine.connect()
     result = []
     for rc in const.PLAYABLE_RACES:
-        # The redundant group_by is for MySQL compatibility, see:
-        # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(
-            _games.c.rc == rc).group_by(_games.c.gid)
+        s = select([func.ANY_VALUE(_games.c.gid), func.max(_games.c.sc)]).where(
+            _games.c.rc == rc)
         gid = (conn.execute(s).fetchone())
         result.append(game(gid[0]))
     return result
@@ -500,10 +498,8 @@ def role_highscores():
     conn = _engine.connect()
     result = []
     for bg in const.PLAYABLE_ROLES:
-        # The redundant group_by is for MySQL compatibility, see:
-        # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(
-            _games.c.bg == bg).group_by(_games.c.gid)
+        s = select([func.ANY_VALUE(_games.c.gid), func.max(_games.c.sc)]).where(
+            _games.c.bg == bg)
         gid = (conn.execute(s).fetchone())
         result.append(game(gid[0]))
     return result
@@ -514,10 +510,8 @@ def god_highscores():
     conn = _engine.connect()
     result = []
     for god in const.PLAYABLE_GODS:
-        # The redundant group_by is for MySQL compatibility, see:
-        # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(
-            _games.c.god == god).group_by(_games.c.gid)
+        s = select([func.ANY_VALUE(_games.c.gid), func.max(_games.c.sc)]).where(
+            _games.c.god == god)
         gid = (conn.execute(s).fetchone())
         result.append(game(gid[0]))
     return result
@@ -529,14 +523,12 @@ def combo_highscores():
     XXX: Needs major fixing-up.
     """
     conn = _engine.connect()
-    # The redundant `group by ..., gid` is for MySQL compatibility, see:
-    # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
     s = """SELECT a.gid
                 FROM games AS a
                 INNER JOIN (
-                    SELECT gid, max(sc) sc
+                    SELECT ANY_VALUE(gid) gid, max(sc) sc
                         FROM games
-                        GROUP BY "char", gid
+                        GROUP BY ANY_VALUE("char")
                 ) AS b ON
                     a.gid = b.gid
                     AND a.sc = b.sc
