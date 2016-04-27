@@ -106,7 +106,8 @@ def gamestotable(games,
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
             date=prettydate(game.end),
-            version=game.v)
+            version=game.v,
+            morgue=morgue_link(game))
 
     t = """<table class="{classes}">
           <thead>
@@ -131,7 +132,8 @@ def gamestotable(games,
               <th>Turns</th>
               <th>Duration</th>
               <th>Date</th>
-              <th>Version</th>""".format(
+              <th>Version</th>
+              <th>Morgue File</th>""".format(
         prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
         player='' if not show_player else '<th>Player</th>',
         place='' if winning_games else '<th>Place</th>',
@@ -149,6 +151,7 @@ def gamestotable(games,
       <td>{duration}</td>
       <td>{date}</td>
       <td>{version}</td>
+      <td>{morgue}</td>
     </tr>"""
 
     if sort_col:
@@ -173,7 +176,7 @@ def streaktotablerow(streak):
     </tr>""".format(
         wins=len(streak['wins']),
         player=streak['player'],
-        games=', '.join(model.game(g).char for g in streak['wins']),
+        games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
         start=prettydate(dateutil.parser.parse(streak['start'])),
         end=prettydate(dateutil.parser.parse(streak['end'])),
         versions=', '.join(sorted(set(model.game(g).v for g in streak[
@@ -193,11 +196,24 @@ def longeststreaktotablerow(streak):
     </tr>""".format(
         wins=len(streak['wins']),
         player=streak['player'],
-        games=', '.join(model.game(g).char for g in streak['wins']),
+        games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
         start=prettydate(dateutil.parser.parse(streak['start'])),
         end='' if 'streak_breaker' not in streak else prettydate(
             dateutil.parser.parse(streak['end'])),
         versions=', '.join(sorted(set(model.game(g).v for g in streak[
             'wins']))),
-        streak_breaker=model.game(streak[
-            'streak_breaker']).char if 'streak_breaker' in streak else '')
+        streak_breaker=morgue_link(model.game(streak[
+            'streak_breaker']), model.game(streak[
+            'streak_breaker']).char) if 'streak_breaker' in streak else '')
+
+
+def morgue_link(game, text="Morgue"):
+    """Returns a hyperlink to a morgue file.
+
+    Game can be either a gid string or a game object.
+    """
+    if type(game) is str:
+        # Treat as gid
+        game = model.game(game)
+    result = "<a href='" + modelutils.morgue_url(game) + "'>" + text + "</a>"
+    return result

@@ -21,27 +21,28 @@ def crawl_date_to_datetime(d):
 
 def morgue_url(game):
     """Generates a morgue URL from a game."""
-    if game.src == "CAO":
+    if game.src == "cao":
         prefix = "http://crawl.akrasiac.org/rawdata"
-    elif game.src == "CDO":
+    elif game.src == "cdo":
         prefix = "http://crawl.develz.org/morgues"
         prefix += "/" + version_url(game.v)
-    elif game.src == "CSZO":
+    elif game.src == "cszo":
         prefix = "http://dobrazupa.org/morgue"
-    elif game.src == "CUE" or game.src == "CLAN":
+    elif game.src == "cue" or game.src == "clan":
         prefix = "http://underhound.eu:81/crawl/morgue"
-    elif game.src == "CBRO":
+    elif game.src == "cbro":
         prefix = "http://crawl.berotato.org/crawl/morgue"
-    elif game.src == "CXC":
+    elif game.src == "cxc":
         prefix = "http://crawl.xtahua.com/crawl/morgue"
-    elif game.src == "LLD":
+    elif game.src == "lld":
         prefix = "http://lazy-life.ddo.jp:8080/morgue"
         prefix += "/" + version_url(game.v)
-    elif game.src == "CPO":
+    elif game.src == "cpo":
         prefix = "https://crawl.project357.org/morgue"
-    elif game.src == "CJR":
+    elif game.src == "cjr":
         prefix = "http://www.jorgrun.rocks/morgue"
     else:
+        print("Failed", game)
         return None
     date = game.raw_data['end'][:4] \
     + "%02d" % (int(game.raw_data['end'][4:6]) + 1) \
