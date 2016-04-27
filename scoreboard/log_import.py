@@ -102,9 +102,9 @@ def parse_line(line, src):
     game['gid'] = calculate_game_gid(game)
     # Data cleansing
     # Simplify version to 0.17/0.18/etc
+    game['v'] = re.match('(0.\d+)', game['v']).group()
     if 'god' not in game:
         game['god'] = 'Atheist'
-    game['v'] = re.match('(0.\d+)', game['v']).group()
     return game
 
 
