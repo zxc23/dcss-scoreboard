@@ -13,7 +13,7 @@ from sqlalchemy import desc, asc, select, func
 from . import modelutils
 from . import constants as const
 
-GAME_CACHE = pylru.lrucache(10000)
+GAME_CACHE = pylru.lrucache(1000)
 
 
 class DatabaseError(Exception):
