@@ -1,5 +1,5 @@
 body {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
 }
 
 nav {
@@ -12,4 +12,8 @@ h2 {
 
 h3 {
     font-size: 1.5rem;
+}
+
+.table td, .table th {
+    padding: .5rem .75rem;
 }
