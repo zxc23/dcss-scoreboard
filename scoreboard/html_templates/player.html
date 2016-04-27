@@ -12,7 +12,7 @@
     <h3>Overall</h3>
     <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
     <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
-    <p><strong>Games Won:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
+    <p><strong>Wins:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
     <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
     <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur(hours=True) }} hours</p>
     <p><strong>Total Score:</strong> {{ stats['total_score']|prettyint }}</p>
