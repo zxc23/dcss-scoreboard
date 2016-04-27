@@ -75,10 +75,7 @@ def parse_line(line, src):
             continue
         fields = field.split('=', 1)
         if len(fields) != 2:
-            badline = True
-            print("Couldn't parse this line (bad field %s), skipping: %s" %
-                  (field, line))
-            continue
+            raise ValueError("Couldn't parse this line (bad field %s), skipping: %s" % (field, line))
         k, v = fields[0], fields[1]
         # Store numbers as int, not str
         try:
@@ -86,8 +83,6 @@ def parse_line(line, src):
         except ValueError:
             v = v.replace("::", ":")  # Undo logfile escaping
         game[k] = v
-    if badline:
-        return
     game['rc'] = game['char'][:2]
     game['bg'] = game['char'][2:]
     if 'god' not in game:
