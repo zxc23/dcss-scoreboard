@@ -4,10 +4,24 @@ html {
 
 body {
     font-size: 0.875rem;
+    background-image: url("../images/background.png");
 }
 
 nav {
-    font-size: 1rem;
+    font-size: 1.05rem;
+    border-bottom: 1px solid rgb(190,190,190);
+}
+
+.navbar-nav .nav-link {
+    color: #A0C3E5;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.active:hover,
+.navbar-nav .nav-link.active:focus,
+.navbar-nav .nav-link:focus,
+.navbar-nav .nav-link:hover {
+    color: #E7A937;
 }
 
 h2 {
@@ -20,6 +34,14 @@ h3 {
 
 .table td, .table th {
     padding: .5rem .75rem;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(240,240,240,0.5);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(220,220,220,0.5);
 }
 
 /* Columns with a date should never split the date over multiple lines. */

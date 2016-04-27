@@ -26,6 +26,7 @@
     <script src="{{ urlbase }}/static/js/dcss-scoreboard.js"></script>
   </head>
   <body>
+    <img src="{{ urlbase }}/static/images/background.png" style="display:none;" alt="" />
     <div class="container">
       {# header #}
       <div class="row">
@@ -33,7 +34,7 @@
       </div>
       <div class="row">
         <div class="col-sm-12">
-          <nav class="navbar navbar-light bg-faded">
+          <nav class="navbar">
             <div class="nav navbar-nav">
               {% for href, id, title in navigation_bar %}
               <a class="nav-item nav-link {% if id == active_page %}active{% endif %}" href="{{ urlbase }}{{ href }}">{{ title }}</span></a>
