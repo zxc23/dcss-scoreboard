@@ -103,7 +103,6 @@ def gamestotable(games,
             god=game.god,
             place="" if winning_games else "<td>%s</td>" % game.place,
             end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg'),
-            xl=game.xl,
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
             date=prettydate(game.end),
@@ -129,7 +128,6 @@ def gamestotable(games,
               <th>God</th>
               {place}
               {end}
-              <th>XL</th>
               <th>Turns</th>
               <th>Duration</th>
               <th>Date</th>
@@ -147,7 +145,6 @@ def gamestotable(games,
       <td>{god}</td>
       {place}
       {end}
-      <td>{xl}</td>
       <td>{turns}</td>
       <td>{duration}</td>
       <td>{date}</td>
