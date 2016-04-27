@@ -172,15 +172,12 @@ def streaktotablerow(streak):
       <td>{games}</td>
       <td>{start}</td>
       <td>{end}</td>
-      <td>{versions}</td>
     </tr>""".format(
         wins=len(streak['wins']),
         player=streak['player'],
         games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
         start=prettydate(dateutil.parser.parse(streak['start'])),
-        end=prettydate(dateutil.parser.parse(streak['end'])),
-        versions=', '.join(sorted(set(model.game(g).v for g in streak[
-            'wins']))))
+        end=prettydate(dateutil.parser.parse(streak['end'])))
 
 
 def longeststreaktotablerow(streak):
@@ -191,17 +188,13 @@ def longeststreaktotablerow(streak):
       <td>{games}</td>
       <td>{start}</td>
       <td>{end}</td>
-      <td>{versions}</td>
       <td>{streak_breaker}</td>
     </tr>""".format(
         wins=len(streak['wins']),
         player=streak['player'],
         games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
         start=prettydate(dateutil.parser.parse(streak['start'])),
-        end='' if 'streak_breaker' not in streak else prettydate(
-            dateutil.parser.parse(streak['end'])),
-        versions=', '.join(sorted(set(model.game(g).v for g in streak[
-            'wins']))),
+        end=prettydate(dateutil.parser.parse(streak['end'])),
         streak_breaker=morgue_link(model.game(streak[
             'streak_breaker']), model.game(streak[
             'streak_breaker']).char) if 'streak_breaker' in streak else '')
