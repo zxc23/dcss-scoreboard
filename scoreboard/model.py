@@ -211,7 +211,7 @@ def add_game(gid, raw_data):
                      ktyp=raw_data['ktyp'],
                      raw_data=raw_data)
     except sqlalchemy.exc.IntegrityError as e:
-        if e.orig[0] == 1062:  # duplicate entry for private key
+        if e.orig.args[0] == 1062:  # duplicate entry for private key
             raise DatabaseError("Gid %s already exists in the database." % gid)
 
 
