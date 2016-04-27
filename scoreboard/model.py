@@ -87,7 +87,7 @@ def setup_database(backend):
                    Column('char', String(4), nullable=False, index=True),
                    Column('rc', String(2), nullable=False, index=True),
                    Column('bg', String(2), nullable=False, index=True),
-                   Column('place', String(4), nullable=False),
+                   Column('place', String(12), nullable=False),
                    Column('xl', Integer, nullable=False),
                    Column('tmsg', String(1000), nullable=False),
                    Column('turn', Integer, nullable=False),
