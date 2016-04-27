@@ -10,6 +10,12 @@
 </div>
 <div class="row">
   <div class="col-sm-12">
+    <h3>Overall Highscores</h3>
+    {{ overall_highscores|gamestotable(show_player=True, winning_games=True, limit=5) }}
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
     <h3>Active Win Streaks</h3>
     <table class="{{ tableclasses }}">
       <thead>

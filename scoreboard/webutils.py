@@ -73,7 +73,8 @@ def gamestotable(games,
                  prefix_col_title=None,
                  show_player=False,
                  winning_games=False,
-                 sort_col=None):
+                 sort_col=None,
+                 limit=None):
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
@@ -85,6 +86,7 @@ def gamestotable(games,
         show_player (bool): Show the player name column
         winning_games (bool): The table has only winning games, so don't show
                               place or end columns, and do show runes.
+        limit (int): The table won't display more games than this.
 
     Returns: (string) '<tr>contents</tr>'.
     """
@@ -153,6 +155,9 @@ def gamestotable(games,
       <td>{version}</td>
       <td>{morgue}</td>
     </tr>"""
+
+    if limit:
+        games = games[:limit]
 
     if sort_col:
         games = sorted(games, key=lambda g: g['raw_data'][sort_col])

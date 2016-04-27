@@ -170,6 +170,7 @@ def write_website(players=[]):
         template = env.get_template('index.html')
         f.write(template.render(recent_wins=recent_wins,
                                 active_streaks=sorted_active_streaks,
+                                overall_highscores=overall_highscores,
                                 combo_high_scores=inverted_combo_highscores))
 
     print("Writing minified local JS")
