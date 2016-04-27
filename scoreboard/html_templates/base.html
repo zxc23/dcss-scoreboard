@@ -18,6 +18,7 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ urlbase }}/static/css/awesomplete.css">
+    <link rel="stylesheet" href="{{ urlbase }}/static/css/style.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
@@ -33,7 +34,6 @@
       <div class="row">
         <div class="col-sm-12">
           <nav class="navbar navbar-light bg-faded">
-            <a class="navbar-brand" href="{{ urlbase }}/index.html">DCSS Scoreboard</a>
             <div class="nav navbar-nav">
               {% for href, id, title in navigation_bar %}
               <a class="nav-item nav-link {% if id == active_page %}active{% endif %}" href="{{ urlbase }}{{ href }}">{{ title }}</span></a>
