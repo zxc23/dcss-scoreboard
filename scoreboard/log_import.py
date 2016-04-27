@@ -52,7 +52,10 @@ def load_logfile(logfile):
         # skip blank lines
         if not line:
             continue
-        parse_line(line, src)
+        try:
+            parse_line(line, src)
+        except Exception as e:
+            print("Couldn't parse line (%s): %s" % (e, line))
     # Save the new number of lines processed in the database
     model.save_logfile_pos(logfile, lines)
     end = time.time()
