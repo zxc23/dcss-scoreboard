@@ -17,3 +17,8 @@ h3 {
 .table td, .table th {
     padding: .5rem .75rem;
 }
+
+/* Columns with a date should never split the date over multiple lines. */
+.date-table-col {
+    min-width: 10rem;
+}
