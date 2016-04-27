@@ -322,9 +322,6 @@ def all_games(scored=None, limit=0):
     If scored is not none, only return games who match bool(scored).
     Return (up to) limit rows (0 = all rows).
     Games are ordered by end datetime.
-
-    Note: Uses a lot of RAM if there are a lot of games.
-    XXX fix this.
     """
     conn = _engine.connect()
     s = _games.select()

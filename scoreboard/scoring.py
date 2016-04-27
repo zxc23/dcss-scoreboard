@@ -174,7 +174,7 @@ def great_race(race, player_stats, achievements):
         return False
     # Check for completion
     roles_won = set(win['char'][2:]
-                    for win in player_stats['wins'] if race == win['char'][:2])
+                    for win in player_stats['wins'] if race == win.rc)
     if not const.PLAYABLE_ROLES - roles_won:
         achievements[achievement] = True
         return True
@@ -252,7 +252,8 @@ def score_game(game_row):
 
     # Skip if player blacklisted
     if is_blacklisted(name, src):
-        return False
+        model.mark_game_scored(gid)
+        return
 
     # Log vars
     god = game['god']
@@ -387,9 +388,6 @@ def score_game(game_row):
     set_player_stats(name, stats)
     model.mark_game_scored(gid)
 
-    # Return True to indicate success
-    return True
-
 
 def score_games(rebuild=False):
     """Update stats with all unscored game.
@@ -408,12 +406,13 @@ def score_games(rebuild=False):
 
     more_games = True
     while True:
-        for game in model.all_games(scored=False, limit=1000):
-            if not game:
-                more_games = False
-                break
-            if score_game(game):
-                scored += 1
+        games = model.all_games(scored=False, limit=1000)
+        if not games:
+            more_games = False
+            break
+        for game in games:
+            score_game(game)
+            scored += 1
             if scored % 10000 == 0 and scored > 0:
                 print(scored)
         if not more_games:
