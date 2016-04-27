@@ -22,7 +22,7 @@ def load_logfiles():
     print("Loading all logfiles")
     start = time.time()
     count = 0
-    for logfile in glob.glob("logfiles/*"):
+    for logfile in sorted(glob.glob("logfiles/*")):
         count += load_logfile(logfile)
     end = time.time()
     print("Loaded logfiles with %s new games in %s secs" %
