@@ -74,7 +74,9 @@ def parse_line(line, src):
             continue
         fields = field.split('=', 1)
         if len(fields) != 2:
-            raise ValueError("Couldn't parse this line (bad field %s), skipping: %s" % (field, line))
+            raise ValueError(
+                "Couldn't parse line (bad field %s), skipping: %s" %
+                (field, line))
         k, v = fields[0], fields[1]
         # Store numbers as int, not str
         try:
