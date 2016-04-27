@@ -40,17 +40,17 @@
           </p>
         {% endif %}
         {% if records['role'] %}
-          <p><strong>Background:</strong>
+          <p><strong>Backgrounds:</strong>
             {{ records['role']|map(attribute='bg')|join(', ') }}
           </p>
         {% endif %}
         {% if records['combo'] %}
-        <p><strong>Combo:</strong>
+        <p><strong>Combos:</strong>
           {{ records['combo']|map(attribute='char')|join(', ') }}
         </p>
         {% endif %}
         {% if records['god'] %}
-        <p><strong>God:</strong>
+        <p><strong>Gods:</strong>
           {{ records['god']|map(attribute='god')|join(', ') }}
         </p>
         {% endif %}
