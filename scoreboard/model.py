@@ -189,26 +189,30 @@ def add_game(gid, raw_data):
     raw_data['race'] = const.RACE_NAME_FIXUPS.get(raw_data['race'],
                                                   raw_data['race'])
     conn = _engine.connect()
-    conn.execute(_games.insert(),
-                 gid=gid,
-                 name=raw_data['name'],
-                 src=raw_data['src'],
-                 v=raw_data['v'],
-                 char=raw_data['char'],
-                 rc=raw_data['char'][:2],
-                 bg=raw_data['char'][2:],
-                 god=raw_data['god'],
-                 place=raw_data['place'],
-                 xl=raw_data['xl'],
-                 tmsg=raw_data['tmsg'],
-                 turn=raw_data['turn'],
-                 dur=raw_data['dur'],
-                 runes=raw_data.get('urune', 0),
-                 sc=raw_data['sc'],
-                 start=modelutils.crawl_date_to_datetime(raw_data['start']),
-                 end=modelutils.crawl_date_to_datetime(raw_data['end']),
-                 ktyp=raw_data['ktyp'],
-                 raw_data=raw_data)
+    try:
+        conn.execute(_games.insert(),
+                     gid=gid,
+                     name=raw_data['name'],
+                     src=raw_data['src'],
+                     v=raw_data['v'],
+                     char=raw_data['char'],
+                     rc=raw_data['char'][:2],
+                     bg=raw_data['char'][2:],
+                     god=raw_data['god'],
+                     place=raw_data['place'],
+                     xl=raw_data['xl'],
+                     tmsg=raw_data['tmsg'],
+                     turn=raw_data['turn'],
+                     dur=raw_data['dur'],
+                     runes=raw_data.get('urune', 0),
+                     sc=raw_data['sc'],
+                     start=modelutils.crawl_date_to_datetime(raw_data['start']),
+                     end=modelutils.crawl_date_to_datetime(raw_data['end']),
+                     ktyp=raw_data['ktyp'],
+                     raw_data=raw_data)
+    except sqlalchemy.exc.IntegrityError as e:
+        if e.orig[0] == 1062:  # duplicate entry for private key
+            raise DatabaseError("Gid %s already exists in the database." % gid)
 
 
 def logfile_pos(logfile):
