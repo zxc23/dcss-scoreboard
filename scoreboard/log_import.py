@@ -53,9 +53,15 @@ def load_logfile(logfile):
         if not line:
             continue
         try:
-            parse_line(line, src)
+            game = parse_line(line, src)
         except Exception as e:
             print("Couldn't parse line (%s): %s" % (e, line))
+            continue
+        # Store the game in the database
+        try:
+            model.add_game(game['gid'], game)
+        except model.DatabaseError as e:
+            print(e)
     # Save the new number of lines processed in the database
     model.save_logfile_pos(logfile, lines)
     end = time.time()
@@ -68,6 +74,8 @@ def parse_line(line, src):
     """Read a single logfile line and insert it into the database."""
     game = {}
     game['src'] = src
+
+    # Parse the log's raw field data
     for field in re.split(LINE_SPLIT_PATTERN, line):
         # skip blank fields
         if not field:
@@ -84,22 +92,20 @@ def parse_line(line, src):
         except ValueError:
             v = v.replace("::", ":")  # Undo logfile escaping
         game[k] = v
+
+    # Validate the data
+    if 'start' not in game:
+        raise ValueError("Couldn't parse this line (missing start field)" % line)
+    # Create some derived fields
     game['rc'] = game['char'][:2]
     game['bg'] = game['char'][2:]
+    game['gid'] = calculate_game_gid(game)
+    # Data cleansing
+    # Simplify version to 0.17/0.18/etc
     if 'god' not in game:
         game['god'] = 'Atheist'
-    # Simplify version to 0.17/0.18/etc
     game['v'] = re.match('(0.\d+)', game['v']).group()
-    if 'start' not in game:
-        print("Couldn't parse this line (missing start), skipping: %s" % line)
-        return
-    gid = calculate_game_gid(game)
-    game['gid'] = gid
-    # Store the game in the database
-    try:
-        model.add_game(gid, game)
-    except model.DatabaseError as e:
-        print(e)
+    return game
 
 
 if __name__ == "__main__":
