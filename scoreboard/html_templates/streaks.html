@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% set active_page = 'streaks' %}
-{% block title %}Streaks{% endblock %}
-{% block heading %}Streaks{% endblock %}
+{% block title %}Win Streaks{% endblock %}
+{% block heading %}Win Streaks{% endblock %}
 {% block content %}
 <div class="row">
   <div class="col-sm-12">
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" href="#active_streaks" role="tab">Active Streaks</a>
+        <a class="nav-link active" data-toggle="tab" href="#longest_streaks" role="tab">Longest Win Streaks</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#longest_streaks" role="tab">Longest Streaks</a>
+        <a class="nav-link" data-toggle="tab" href="#active_streaks" role="tab">Active Win Streaks</a>
       </li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
-      <div class="tab-pane active" id="active_streaks" role="tabpanel">
+      <div class="tab-pane active" id="longest_streaks" role="tabpanel">
         <table class="table table-hover">
           <thead>
             <tr>
@@ -26,25 +26,7 @@
               <th>Games</th>
               <th class="date-table-col">Start</th>
               <th class="date-table-col">End</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for streak in active_streaks %}
-            {{ streak|streaktotablerow }}
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      <div class="tab-pane" id="longest_streaks" role="tabpanel">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Wins</th>
-              <th>Player</th>
-              <th>Games</th>
-              <th class="date-table-col">Start</th>
-              <th class="date-table-col">End</th>
-              <th>Streak Breaker</th>
+              <th>Loss</th>
             </tr>
           </thead>
           <tbody>
@@ -54,6 +36,24 @@
           </tbody>
         </table>
       </div>
+      <div class="tab-pane" id="active_streaks" role="tabpanel">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Wins</th>
+                <th>Player</th>
+                <th>Games</th>
+                <th class="date-table-col">Start</th>
+                <th class="date-table-col">End</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for streak in active_streaks %}
+              {{ streak|streaktotablerow }}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
     </div>
   </div>
 </div>
