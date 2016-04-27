@@ -68,7 +68,6 @@ def parse_line(line, src):
     """Read a single logfile line and insert it into the database."""
     game = {}
     game['src'] = src
-    badline = False
     for field in re.split(LINE_SPLIT_PATTERN, line):
         # skip blank fields
         if not field:
