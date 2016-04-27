@@ -316,10 +316,11 @@ def first_game(name, src=None):
     return conn.execute(s).fetchone()
 
 
-def all_games(scored=None):
+def all_games(scored=None, limit=0):
     """Return all games.
 
     If scored is not none, only return games who match bool(scored).
+    Return (up to) limit rows (0 = all rows).
     Games are ordered by end datetime.
 
     Note: Uses a lot of RAM if there are a lot of games.
@@ -329,6 +330,8 @@ def all_games(scored=None):
     s = _games.select()
     if scored is not None:
         s = s.where(_games.c.scored == bool(scored)).order_by(asc('end'))
+    if limit:
+        s = s.limit(limit)
     return conn.execute(s).fetchall()
 
 
