@@ -3,6 +3,7 @@
 
 import argparse
 import sys
+import subprocess
 
 import scoreboard.model
 import scoreboard.log_import
@@ -33,7 +34,10 @@ def read_commandline():
     parser.add_argument('--player',
                         default='',
                         help="Rebuild just this player's scores.")
-    parser.add_argument('--skip-log-import',
+    parser.add_argument('--skip-download',
+                        action='store_true',
+                        help="Skip log download.")
+    parser.add_argument('--skip-import',
                         action='store_true',
                         help="Skip log import.")
     parser.add_argument('--skip-scoring',
@@ -57,7 +61,9 @@ def main(player=None):
 
     scoreboard.model.setup_database(args.database)
 
-    if not args.skip_log_import:
+    if not args.skip_download:
+        subprocess.run('./download-logs.sh')
+    if not args.skip_import:
         scoreboard.log_import.load_logfiles()
     if not args.skip_scoring:
         if args.player:
