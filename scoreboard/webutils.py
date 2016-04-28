@@ -35,7 +35,7 @@ def prettydur(duration, hours=False):
         duration = int(duration)
     delta = datetime.timedelta(seconds=duration)
     if hours:
-        dur = delta.total_seconds()/3600
+        dur = delta.total_seconds() / 3600
         return str(int(dur)) if dur > 1 else '1'
     else:
         return str(delta)
@@ -90,12 +90,13 @@ def gamestotable(games,
 
     Returns: (string) '<tr>contents</tr>'.
     """
+
     def format_trow(game):
         """Convert a game to a table row."""
         return trow.format(
             win='table-success' if game.ktyp == 'winning' else '',
             prefix_col='' if not prefix_col else "<td>%s</td>" %
-                game.raw_data.get(prefix_col),
+            game.raw_data.get(prefix_col),
             player_row='' if not show_player else
             "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
                 base=const.WEBSITE_URLBASE,
@@ -104,7 +105,8 @@ def gamestotable(games,
             character=game.char,
             god=game.god,
             place="" if winning_games else "<td>%s</td>" % game.place,
-            end="" if winning_games else "<td>%s</td>" % game.raw_data.get('tmsg'),
+            end="" if winning_games else "<td>%s</td>" % game.raw_data.get(
+                'tmsg'),
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
             date=prettydate(game.end),
@@ -169,10 +171,7 @@ def gamestotable(games,
                     tbody="\n".join(format_trow(game) for game in games))
 
 
-def streakstotable(streaks,
-                   show_player=True,
-                   show_loss=True,
-                   limit=None):
+def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
     """Jinja filter to convert a list of streaks into a standard table.
 
     Parameters:
@@ -182,19 +181,25 @@ def streakstotable(streaks,
 
     Returns: (string) '<tr>contents</tr>'.
     """
+
     def format_trow(streak, show_player, show_loss):
         """Convert a streak to a table row."""
         player = ""
         loss = ""
         if show_player:
-            player = "<td><a href='players/{player}.html'>{player}<a></td>".format(player=streak['player'])
+            player = "<td><a href='players/{player}.html'>{player}<a></td>".format(
+                player=streak['player'])
         if show_loss:
-            loss = "<td>%s</td>" % (morgue_link(model.game(streak['streak_breaker']), model.game(streak['streak_breaker']).char) if 'streak_breaker' in streak else '')
+            loss = "<td>%s</td>" % (morgue_link(
+                model.game(streak['streak_breaker']),
+                model.game(streak['streak_breaker']).char)
+                                    if 'streak_breaker' in streak else '')
 
         return trow.format(
             wins=len(streak['wins']),
             player=player,
-            games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
+            games=', '.join(morgue_link(
+                model.game(g), model.game(g).char) for g in streak['wins']),
             start=prettydate(dateutil.parser.parse(streak['start'])),
             end=prettydate(dateutil.parser.parse(streak['end'])),
             streak_breaker=loss)
@@ -218,8 +223,8 @@ def streakstotable(streaks,
                <th class="date-table-col">Start</th>
                <th class="date-table-col">End</th>
                {loss}""".format(
-                   player='' if not show_player else '<th>Player</th>',
-                   loss='' if not show_loss else '<th>Loss</th>')
+        player='' if not show_player else '<th>Player</th>',
+        loss='' if not show_loss else '<th>Loss</th>')
 
     trow = """<tr>
         <td>{wins}</td>
@@ -235,7 +240,8 @@ def streakstotable(streaks,
 
     return t.format(classes=classes,
                     thead=thead,
-                    tbody="\n".join(format_trow(streak, show_player, show_loss) for streak in streaks))
+                    tbody="\n".join(format_trow(streak, show_player, show_loss)
+                                    for streak in streaks))
 
 
 def morgue_link(game, text="Morgue"):

@@ -4,9 +4,9 @@ import os
 import json
 import time
 import shutil
-import jsmin
 import subprocess
 
+import jsmin
 import jinja2
 
 from . import model, webutils
@@ -41,7 +41,8 @@ def achievement_data(ordered=False):
     return json.load(open(path))
 
 
-def player_records(player, race_highscores, role_highscores, combo_highscores, god_highscores):
+def player_records(player, race_highscores, role_highscores, combo_highscores,
+                   god_highscores):
     """Return a dictionary of player records.
 
     Dict is of the form { 'race': [('Ce', gid), ('Vp', gid)], 'role': [],
@@ -64,8 +65,8 @@ def player_records(player, race_highscores, role_highscores, combo_highscores, g
     return records
 
 
-def write_player_stats(*, player, stats, outfile, achievements,
-                       streaks, active_streak, template, records):
+def write_player_stats(*, player, stats, outfile, achievements, streaks,
+                       active_streak, template, records):
     """Write stats page for an individual player.
 
     Parameters:
@@ -212,11 +213,8 @@ def write_website(players=[]):
         stats = model.get_player_stats(player)
         streaks = player_streaks.get(player, [])
         active_streak = active_streaks.get(player, {})
-        records = player_records(player,
-                                 race_highscores,
-                                 role_highscores,
-                                 combo_highscores,
-                                 god_highscores)
+        records = player_records(player, race_highscores, role_highscores,
+                                 combo_highscores, god_highscores)
 
         # Don't make pages for players with no games played
         if stats['games'] == 0:
@@ -237,7 +235,6 @@ def write_website(players=[]):
     end = time.time()
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
     print("Wrote website in %s seconds" % round(end - start, 2))
-
 
 if __name__ == "__main__":
     write_website()
