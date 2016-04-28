@@ -8,20 +8,20 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" href="#longest_streaks" role="tab">Longest Win Streaks</a>
+        <a class="nav-link active" data-toggle="tab" href="#active" role="tab">Active Win Streaks</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#active_streaks" role="tab">Active Win Streaks</a>
+        <a class="nav-link" data-toggle="tab" href="#longest" role="tab">Longest Win Streaks</a>
       </li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
-      <div class="tab-pane active" id="longest_streaks" role="tabpanel">
-        {{ streaks|streakstotable }}
-      </div>
-      <div class="tab-pane" id="active_streaks" role="tabpanel">
+      <div class="tab-pane active" id="active" role="tabpanel">
         {{ active_streaks|streakstotable(show_loss=False) }}
+      </div>
+      <div class="tab-pane" id="longest" role="tabpanel">
+        {{ streaks|streakstotable }}
       </div>
     </div>
   </div>
