@@ -404,19 +404,15 @@ def score_games(rebuild=False):
     if rebuild:
         rebuild_database()
 
-    more_games = True
     while True:
         games = model.all_games(scored=False, limit=1000)
         if not games:
-            more_games = False
             break
         for game in games:
             score_game(game)
             scored += 1
             if scored % 10000 == 0 and scored > 0:
                 print(scored)
-        if not more_games:
-            break
 
     # Add manual achievements
     add_manual_achievements()
