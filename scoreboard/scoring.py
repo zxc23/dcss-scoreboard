@@ -405,7 +405,7 @@ def score_games(rebuild=False):
         rebuild_database()
 
     while True:
-        games = model.all_games(scored=False, limit=1000)
+        games = model.all_games(scored=False, limit=5000)
         if not games:
             break
         for game in games:
