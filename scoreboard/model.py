@@ -59,6 +59,7 @@ sqlalchemy.ext.mutable.MutableDict.associate_with(_JsonEncodedDict)
 
 def setup_database(backend):
     """Set up and initialise the database."""
+    global DB_URI
     if backend == 'sqlite':
         DB_URI = 'sqlite:///database.db'
         ENGINE_OPTS = {}
@@ -478,60 +479,38 @@ def highscores(n=10):
     return conn.execute(s).fetchall()
 
 
+def _highscores(col, values):
+    conn = _engine.connect()
+    cols = [_games.c.gid, func.max(_games.c.sc)]
+    if DB_URI.startswith('mysql'):
+        cols[0] = func.ANY_VALUE(cols[0])
+    s = select(cols)
+
+    result = []
+    for val in values:
+        q = s.where(col == val)
+        g = conn.execute(q).fetchone()
+        if g[0]:
+            result.append(game(g[0]))
+
+    return result
+
+
 def race_highscores():
     """Return the highest scoring game for each race."""
-    conn = _engine.connect()
-    result = []
-    for rc in const.PLAYABLE_RACES:
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.rc ==
-                                                                rc)
-        gid = (conn.execute(s).fetchone())
-        result.append(game(gid[0]))
-    return result
+    return _highscores(_games.c.rc, const.PLAYABLE_RACES)
 
 
 def role_highscores():
     """Return the highest scoring game for each role."""
-    conn = _engine.connect()
-    result = []
-    for bg in const.PLAYABLE_ROLES:
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.bg ==
-                                                                bg)
-        gid = (conn.execute(s).fetchone())
-        result.append(game(gid[0]))
-    return result
+    return _highscores(_games.c.bg, const.PLAYABLE_ROLES)
 
 
 def god_highscores():
     """Return the highest scoring game for each god."""
-    conn = _engine.connect()
-    result = []
-    for god in const.PLAYABLE_GODS:
-        s = select([_games.c.gid, func.max(_games.c.sc)]).where(_games.c.god ==
-                                                                god)
-        gid = (conn.execute(s).fetchone())
-        result.append(game(gid[0]))
-    return result
+    return _highscores(_games.c.god, const.PLAYABLE_GODS)
 
 
 def combo_highscores():
-    """Return the highest scoring game for each combo.
-
-    XXX: Needs major fixing-up.
-    """
-    conn = _engine.connect()
-    s = """SELECT a.gid
-                FROM games a
-                INNER JOIN (
-                    SELECT gid, max(sc) sc
-                        FROM games
-                        GROUP BY char
-                ) b ON
-                    a.gid = b.gid
-                    AND a.sc = b.sc
-                ORDER BY a.end ASC"""
-    gids = conn.execute(s).fetchall()
-    result = []
-    for gid in gids:
-        result.append(game(gid[0]))
-    return result
+    """Return the highest scoring game for each combo."""
+    return _highscores(_games.c.char, const.PLAYABLE_COMBOS)
