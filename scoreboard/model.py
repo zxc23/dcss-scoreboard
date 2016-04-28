@@ -65,7 +65,7 @@ def setup_database(backend):
         DB_URI = 'sqlite:///database.db'
         ENGINE_OPTS = {}
     elif backend == 'mysql':
-        auth = '' if 'DB_USER' not in os.environ else '%s:%s' % (
+        auth = '' if 'DB_USER' not in os.environ else '%s:%s@' % (
             os.environ.get('DB_USER'), os.environ.get('DB_PASS'))
         DB_URI = 'mysql://%slocalhost/dcss_scoreboard' % auth
         ENGINE_OPTS = {'pool_size': 1, 'max_overflow': -1, 'pool_recycle': 60}
