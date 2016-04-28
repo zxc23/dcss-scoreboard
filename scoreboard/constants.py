@@ -13,6 +13,11 @@ PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos',
                  'Lugonu', 'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas',
                  'Qazlal', 'Ru', 'Sif Muna', 'The Shining One', 'Trog',
                  'Vehumet', 'Xom', 'Yredelemnul', 'Zin'}
+NONPLAYABLE_COMBOS = ['FeGl', 'FeAs', 'FeHu', 'FeAM', 'DgBe', 'DgCK', 'DgAK',
+                      'GhTm', 'MuTm']
+PLAYABLE_COMBOS = ('%s%s' % (rc, bg)
+                   for rc in PLAYABLE_RACES for bg in PLAYABLE_ROLES
+                   if '%s%s' % (rc, bg) not in NONPLAYABLE_COMBOS)
 GOD_NAME_FIXUPS = {
     # Actually, the ingame name is 'the Shining One', but that looks
     # ugly since the capitalisation is wrong.
