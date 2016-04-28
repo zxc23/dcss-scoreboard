@@ -31,10 +31,13 @@ The sqlite database is `scoredata.db` and the website is written to `dcss-scoreb
 ## Windows users
 
 1. First, get Vagrant at https://www.vagrantup.com/ and install it.
-2. Next, cd to the git repository which should contain 'Vagrantfile', and run `vagrant up`. This will set up an Ubuntu VM and might take a while.
-3. Open scoreboard/constants.py and change the line `WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)` to point to a 'website' folder in your current directory, e.g. `WEBSITE_URLBASE = 'D:\David\Documents\DCSS Scoreboard\website'`.
-4. To run the scripts, `vagrant ssh` will open a terminal in the VM and `cd vagrant`. Finally, `python loader.py` will start the scripts.
-5. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely. 
+2. Install the vbguest plugin with `vagrant plugin install vagrant-vbguest`.
+3. Next, open in the git folder in cmd which should contain 'Vagrantfile', and run `vagrant up`. This will set up an Ubuntu VM and might take a while.
+4. Next, `vagrant ssh` to ssh into the VM and run `bash /vagrant/setup1.sh`.
+5. Exit with ctrl-d and reopen with `vagrant ssh`. Run `bash /vagrant/setup2.sh` but be aware this can take a while.
+6. Open scoreboard/constants.py and change the line `WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)` to point to a 'website' folder in your current directory, e.g. `WEBSITE_URLBASE = 'D:\David\Documents\DCSS Scoreboard\website'`.
+7. `python loader.py` will start the scripts. Ensure you have some logfiles to process.
+8. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
 
 ## Logfile locations
 
