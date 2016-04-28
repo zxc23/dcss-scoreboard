@@ -109,7 +109,7 @@ def gamestotable(env,
             prefix_col='' if not prefix_col else "<td>%s</td>" %
             game.raw_data.get(prefix_col),
             player_row='' if not show_player else
-                "<td>%s</td>" % link_player(env.globals['urlbase'], game.name),
+                "<td>%s</td>" % link_player(game.name, env.globals['urlbase']),
             score=prettyint(game.sc),
             character=game.char,
             god=game.god,
