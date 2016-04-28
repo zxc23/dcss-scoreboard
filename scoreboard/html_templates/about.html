@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set active_page = 'about' %}
+{% block title %}About{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <p>
+      This scoreboard is an open source project written by <a href="{{ urlbase }}/players/chequers.html">chequers</a> and <a href="{{ urlbase }}/players/zzxc.html">zxc</a>.
+    </p>
+    <p>
+      You can find the code <a href="https://github.com/zxc23/dcss-scoreboard">here</a>, contributions are welcome! In particular, we'd love some frontend/UI/graphic design help.
+    </p>
+    <p>
+      To discuss the scoreboard, find us in #dcss-scoreboard on the <a href="https://discord.gg/0YYpvjcOUySHJVB3">crawl-aus Discord server</a>.
+    </p>
+  </div>
+</div>
+{% endblock %}
