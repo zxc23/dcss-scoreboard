@@ -25,7 +25,7 @@ def read_commandline():
                         help="Specify the database backend  (default: sqlite)")
     parser.add_argument('--rebuild',
                         action='store_true',
-                        help="Rebuild the entire scoring database.")
+                        help="Rebuild the entire database.")
     parser.add_argument('--player',
                         default='',
                         help="Rebuild just this player's scores.")
