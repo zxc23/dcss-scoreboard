@@ -21,6 +21,8 @@ def read_commandline():
     description = "Run DCSS Scoreboard."
     epilog = "Specify DB_USER/DB_PASS environment variables if required."
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
+    parser.add_argument('--urlbase',
+                        help="Override website base URL. Default: file:///CWD")
     parser.add_argument('--database',
                         choices=('mysql', 'sqlite'),
                         default='sqlite',
@@ -62,7 +64,7 @@ def main(player=None):
             scoreboard.scoring.rescore_player(args.player)
         scoreboard.scoring.score_games(rebuild=args.rebuild)
     if not args.skip_website:
-        scoreboard.write_website.write_website()
+        scoreboard.write_website.write_website(urlbase=args.urlbase)
 
 
 if __name__ == '__main__':
