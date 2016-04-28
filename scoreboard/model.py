@@ -491,19 +491,19 @@ def highscores(n=10):
 
 def _highscores(col, values):
     conn = _engine.connect()
-    cols = [_games.c.gid, func.max(_games.c.sc)]
+    cols = [_games.c.gid, _games.c.sc]
     # For info on this mysql 5.7+ workaround, see:
     # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
     # XXX should rewrite the query so it doesn't require this workaround.
     if DB_URI.startswith('mysql') and _engine.MYSQL_VERSION[1] >= 7:
         cols[0] = func.ANY_VALUE(cols[0])
-    s = select(cols)
+    s = select(cols).order_by(desc(_games.c.sc)).limit(1)
 
     result = []
     for val in values:
         q = s.where(col == val)
         g = conn.execute(q).fetchone()
-        if g[0]:
+        if g:
             result.append(game(g[0]))
 
     return result
