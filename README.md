@@ -36,7 +36,7 @@ The sqlite database is `scoredata.db` and the website is written to `dcss-scoreb
 4. Next, `vagrant ssh` to ssh into the VM and run `bash /vagrant/setup1.sh`.
 5. Exit with ctrl-d and reopen with `vagrant ssh`. Run `bash /vagrant/setup2.sh` but be aware this can take a while.
 6. Open scoreboard/constants.py and change the line `WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)` to point to a 'website' folder in your current directory, e.g. `WEBSITE_URLBASE = 'D:\David\Documents\DCSS Scoreboard\website'`.
-7. `python loader.py` will start the scripts. Ensure you have some logfiles to process.
+7. `cd /vagrant` and `python loader.py` will start the scripts. Ensure you have some logfiles to process.
 8. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
 
 ## Logfile locations
