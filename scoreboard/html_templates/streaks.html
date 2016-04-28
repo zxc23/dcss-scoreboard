@@ -18,42 +18,11 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div class="tab-pane active" id="longest_streaks" role="tabpanel">
-        <table class="table table-hover table-striped">
-          <thead>
-            <tr>
-              <th>Wins</th>
-              <th>Player</th>
-              <th>Games</th>
-              <th class="date-table-col">Start</th>
-              <th class="date-table-col">End</th>
-              <th>Loss</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for streak in streaks[:10] %}
-            {{ streak|longeststreaktotablerow }}
-            {% endfor %}
-          </tbody>
-        </table>
+        {{ streaks|streakstotable }}
       </div>
       <div class="tab-pane" id="active_streaks" role="tabpanel">
-          <table class="table table-hover table-striped">
-            <thead>
-              <tr>
-                <th>Wins</th>
-                <th>Player</th>
-                <th>Games</th>
-                <th class="date-table-col">Start</th>
-                <th class="date-table-col">End</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for streak in active_streaks %}
-              {{ streak|streaktotablerow }}
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+        {{ active_streaks|streakstotable(show_loss=False) }}
+      </div>
     </div>
   </div>
 </div>

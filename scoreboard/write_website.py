@@ -22,8 +22,7 @@ def jinja_env():
     env.filters['prettycounter'] = webutils.prettycounter
     env.filters['prettycrawldate'] = webutils.prettycrawldate
     env.filters['gamestotable'] = webutils.gamestotable
-    env.filters['streaktotablerow'] = webutils.streaktotablerow
-    env.filters['longeststreaktotablerow'] = webutils.longeststreaktotablerow
+    env.filters['streakstotable'] = webutils.streakstotable
     env.filters['prettydate'] = webutils.prettydate
     env.filters['gidtogame'] = model.game
 

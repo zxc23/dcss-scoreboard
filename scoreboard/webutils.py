@@ -169,40 +169,73 @@ def gamestotable(games,
                     tbody="\n".join(format_trow(game) for game in games))
 
 
-def streaktotablerow(streak):
-    """Jinja filter to convert a streak to a table row."""
-    return """<tr>
-      <td>{wins}</td>
-      <td><a href="players/{player}.html">{player}<a></td>
-      <td>{games}</td>
-      <td>{start}</td>
-      <td>{end}</td>
-    </tr>""".format(
-        wins=len(streak['wins']),
-        player=streak['player'],
-        games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
-        start=prettydate(dateutil.parser.parse(streak['start'])),
-        end=prettydate(dateutil.parser.parse(streak['end'])))
+def streakstotable(streaks,
+                   show_player=True,
+                   show_loss=True,
+                   limit=None):
+    """Jinja filter to convert a list of streaks into a standard table.
 
+    Parameters:
+        show_player (bool): Show the player name column.
+        show_loss (bool): Show the losing game column.
+        limit (int): The table won't display more games than this.
 
-def longeststreaktotablerow(streak):
-    """Jinja filter to convert a streak to a table row."""
-    return """<tr>
-      <td>{wins}</td>
-      <td><a href="players/{player}.html">{player}<a></td>
-      <td>{games}</td>
-      <td>{start}</td>
-      <td>{end}</td>
-      <td>{streak_breaker}</td>
-    </tr>""".format(
-        wins=len(streak['wins']),
-        player=streak['player'],
-        games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
-        start=prettydate(dateutil.parser.parse(streak['start'])),
-        end=prettydate(dateutil.parser.parse(streak['end'])),
-        streak_breaker=morgue_link(model.game(streak[
-            'streak_breaker']), model.game(streak[
-            'streak_breaker']).char) if 'streak_breaker' in streak else '')
+    Returns: (string) '<tr>contents</tr>'.
+    """
+    def format_trow(streak, show_player, show_loss):
+        """Convert a streak to a table row."""
+        player = ""
+        loss = ""
+        if show_player:
+            player = "<td><a href='players/{player}.html'>{player}<a></td>".format(player=streak['player'])
+        if show_loss:
+            loss = "<td>%s</td>" % (morgue_link(model.game(streak['streak_breaker']), model.game(streak['streak_breaker']).char) if 'streak_breaker' in streak else '')
+
+        return trow.format(
+            wins=len(streak['wins']),
+            player=player,
+            games=', '.join(morgue_link(model.game(g), model.game(g).char) for g in streak['wins']),
+            start=prettydate(dateutil.parser.parse(streak['start'])),
+            end=prettydate(dateutil.parser.parse(streak['end'])),
+            streak_breaker=loss)
+
+    t = """<table class="{classes}">
+          <thead>
+            <tr>
+            {thead}
+            </tr>
+          </thead>
+          <tbody>
+            {tbody}
+          </tbody>
+        </table>"""
+
+    classes = const.TABLE_CLASSES
+
+    thead = """<th>Wins</th>
+               {player}
+               <th>Games</th>
+               <th class="date-table-col">Start</th>
+               <th class="date-table-col">End</th>
+               {loss}""".format(
+                   player='' if not show_player else '<th>Player</th>',
+                   loss='' if not show_loss else '<th>Loss</th>')
+
+    trow = """<tr>
+        <td>{wins}</td>
+        {player}
+        <td>{games}</td>
+        <td>{start}</td>
+        <td>{end}</td>
+        {streak_breaker}
+        </tr>"""
+
+    if limit:
+        streaks = streaks[:limit]
+
+    return t.format(classes=classes,
+                    thead=thead,
+                    tbody="\n".join(format_trow(streak, show_player, show_loss) for streak in streaks))
 
 
 def morgue_link(game, text="Morgue"):
