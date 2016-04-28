@@ -66,7 +66,7 @@ def setup_database(backend):
         DB_URI = 'mysql://localhost/dcss_scoreboard'
         ENGINE_OPTS = {'pool_size': 1, 'max_overflow': -1, 'pool_recycle': 60}
     else:
-        raise RuntimeError("Unknown database backend %s" % db_backend)
+        raise RuntimeError("Unknown database backend %s" % backend)
     print("Using database %s" % DB_URI)
 
     _metadata = MetaData()
