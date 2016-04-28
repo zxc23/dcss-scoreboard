@@ -34,7 +34,7 @@
       <tbody>
         {% for entry in combo_high_scores %}
           <tr>
-            <td>{{ entry[0] }}</td>
+            <td>{{ entry[0]|link_player(urlbase) }}</td>
             <td>{{ entry[1]|length }}</td>
             <td>{{ entry[1]|join(', ') }}</td>
           </tr>

@@ -68,6 +68,13 @@ def prettydate(d):
     return d.strftime(DATE_FORMAT)
 
 
+def link_player(player, urlbase):
+    """Convert a player name into a link."""
+    return "<a href='{base}/players/{name}.html'>{name}</a>".format(
+        base=urlbase,
+        name=player)
+
+
 @jinja2.environmentfilter
 def gamestotable(env,
                  games,
@@ -102,9 +109,7 @@ def gamestotable(env,
             prefix_col='' if not prefix_col else "<td>%s</td>" %
             game.raw_data.get(prefix_col),
             player_row='' if not show_player else
-            "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
-                base=env.globals['urlbase'],
-                name=game.name),
+                "<td>%s</td>" % link_player(env.globals['urlbase'], game.name),
             score=prettyint(game.sc),
             character=game.char,
             god=game.god,

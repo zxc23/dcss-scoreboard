@@ -27,6 +27,7 @@ def jinja_env():
     env.filters['streakstotable'] = webutils.streakstotable
     env.filters['prettydate'] = webutils.prettydate
     env.filters['gidtogame'] = model.game
+    env.filters['link_player'] = webutils.link_player
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
     return env
