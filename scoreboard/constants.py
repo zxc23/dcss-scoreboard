@@ -61,7 +61,7 @@ RACE_TO_GREAT_RACE = {'Ce': 'greatcentaur',
                       'Te': 'greattengu',
                       'Tr': 'greattroll',
                       'VS': 'greatvinestalker',
-                      'Vp': 'greatvampire'}
+                      'Vp': 'greatvampire', }
 ROLE_TO_GREAT_ROLE = {'AE': 'greatairelementalist',
                       'AK': 'greatabyssalknight',
                       'AM': 'greatarcanemarksman',
@@ -87,7 +87,7 @@ ROLE_TO_GREAT_ROLE = {'AE': 'greatairelementalist',
                       'VM': 'greatvenommage',
                       'Wn': 'greatwanderer',
                       'Wr': 'greatwarper',
-                      'Wz': 'greatwizard'}
+                      'Wz': 'greatwizard', }
 MANUAL_ACHIEVEMENTS = {
     'comborobin': {
         'greatestplayer': True
@@ -124,7 +124,7 @@ MANUAL_ACHIEVEMENTS = {
     },
     'cosmonaut': {
         '0.17_winner': True
-    }
+    },
 }
 STANDARD_TABLE_LENGTH = 10
 BLACKLISTS = {'griefers': {},
