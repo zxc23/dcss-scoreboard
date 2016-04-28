@@ -3,6 +3,7 @@
 import json
 import collections
 import datetime
+import os
 
 import pylru
 import sqlalchemy.ext.mutable
@@ -64,7 +65,9 @@ def setup_database(backend):
         DB_URI = 'sqlite:///database.db'
         ENGINE_OPTS = {}
     elif backend == 'mysql':
-        DB_URI = 'mysql://localhost/dcss_scoreboard'
+        auth = '' if 'DB_USER' not in os.environ else '%s:%s' % (
+            os.environ.get('DB_USER'), os.environ.get('DB_PASS'))
+        DB_URI = 'mysql://%slocalhost/dcss_scoreboard' % auth
         ENGINE_OPTS = {'pool_size': 1, 'max_overflow': -1, 'pool_recycle': 60}
     else:
         raise RuntimeError("Unknown database backend %s" % backend)

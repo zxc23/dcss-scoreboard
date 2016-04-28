@@ -18,7 +18,9 @@ def error(msg):
 
 def read_commandline():
     """Parse command line args and validate them."""
-    parser = argparse.ArgumentParser(description="Run DCSS Scoreboard.")
+    description = "Run DCSS Scoreboard."
+    epilog = "Specify DB_USER/DB_PASS environment variables if required."
+    parser = argparse.ArgumentParser(description=description, epilog=epilog)
     parser.add_argument('--database',
                         choices=('mysql', 'sqlite'),
                         default='sqlite',
