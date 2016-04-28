@@ -181,6 +181,13 @@ def setup_database(backend):
     if DB_URI.startswith('sqlite'):
         sqlalchemy.event.listen(_engine, 'connect',
                                 sqlite_performance_over_safety)
+    elif DB_URI.startswith('mysql'):
+        version = _engine.execute('select VERSION()').fetchone()[0]
+        # We split on '-' to get rid of OS-specific junk like:
+        # 5.5.49-0ubuntu0.14.04.1
+        _engine.MYSQL_VERSION = [int(v) for v in
+                                 version.split('-')[0].split('.')]
+        assert (_engine.MYSQL_VERSION[0] == 5)
 
     _metadata.create_all(_engine)
 
@@ -485,7 +492,10 @@ def highscores(n=10):
 def _highscores(col, values):
     conn = _engine.connect()
     cols = [_games.c.gid, func.max(_games.c.sc)]
-    if DB_URI.startswith('mysql'):
+    # For info on this mysql 5.7+ workaround, see:
+    # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
+    # XXX should rewrite the query so it doesn't require this workaround.
+    if DB_URI.startswith('mysql') and _engine.MYSQL_VERSION[1] >= 7:
         cols[0] = func.ANY_VALUE(cols[0])
     s = select(cols)
 
