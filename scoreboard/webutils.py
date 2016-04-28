@@ -3,6 +3,7 @@
 import datetime
 
 import dateutil.parser
+import jinja2
 
 from . import model
 from . import modelutils
@@ -67,7 +68,9 @@ def prettydate(d):
     return d.strftime(DATE_FORMAT)
 
 
-def gamestotable(games,
+@jinja2.environmentfilter
+def gamestotable(env,
+                 games,
                  *,
                  prefix_col=None,
                  prefix_col_title=None,
@@ -78,6 +81,7 @@ def gamestotable(games,
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
+        env: Environment -- passed in automatically
         prefix_col (str): Add an extra column at the start with data from
                           game.raw_data.
                           The table will also be sorted by this column.
@@ -99,7 +103,7 @@ def gamestotable(games,
             game.raw_data.get(prefix_col),
             player_row='' if not show_player else
             "<td><a href='{base}/players/{name}.html'>{name}</a></td>".format(
-                base=const.WEBSITE_URLBASE,
+                base=env.globals['urlbase'],
                 name=game.name),
             score=prettyint(game.sc),
             character=game.char,
