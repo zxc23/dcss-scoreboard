@@ -291,16 +291,16 @@ def recordsformatted(records):
     combo = ''
 
     if records['race']:
-        race = "<p><strong>Species:</strong> %s</p>" % (', '.join([morgue_link(game, game.rc) for game in records['race']]))
+        race = "<p><strong>Species (%s):</strong> %s</p>" % (len(records['race']), ', '.join([morgue_link(game, game.rc) for game in records['race']]))
 
     if records['role']:
-        role = "<p><strong>Backgrounds:</strong> %s</p>" % (', '.join([morgue_link(game, game.bg) for game in records['role']]))
+        role = "<p><strong>Backgrounds (%s):</strong> %s</p>" % (len(records['role']), ', '.join([morgue_link(game, game.bg) for game in records['role']]))
 
     if records['god']:
-        god = "<p><strong>Gods:</strong> %s</p>" % (', '.join([morgue_link(game, game.god) for game in records['god']]))
+        god = "<p><strong>Gods (%s):</strong> %s</p>" % (len(records['god']), ', '.join([morgue_link(game, game.god) for game in records['god']]))
 
     if records['combo']:
-        combo = "<p><strong>Combos:</strong> %s</p>" % (', '.join([morgue_link(game, game.char) for game in records['combo']]))
+        combo = "<p><strong>Combos (%s):</strong> %s</p>" % (len(records['combo']), ', '.join([morgue_link(game, game.char) for game in records['combo']]))
 
     return result.format(race=race,
                          role=role,
