@@ -220,7 +220,10 @@ def write_website(players=[], urlbase=None):
 
     player_streaks = {}
     for streak in sorted_streaks:
-        player_streaks.get(streak['player'], []).append(streak)
+        if streak['player'] not in player_streaks:
+            player_streaks[streak['player']] = [streak]
+        else:
+            player_streaks[streak['player']].append(streak)
 
     n = 0
     for player in players:
