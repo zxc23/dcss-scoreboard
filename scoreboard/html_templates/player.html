@@ -53,7 +53,7 @@
   <div class="row playerstatsrow">
     <div class="col-sm-12">
       <h3>Win Streaks</h3>
-      {{ streaks|streakstotable(show_player=False) }}
+      {{ streaks|streakstotable(show_player=False, limit=10) }}
     </div>
   </div>
 {% endif %}

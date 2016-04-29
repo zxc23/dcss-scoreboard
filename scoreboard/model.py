@@ -413,7 +413,7 @@ def game(gid):
     return game
 
 
-def recent_games(wins=False, player=None, num=5, reverse=False):
+def recent_games(wins=False, player=None, num=const.PLAYER_TABLE_LENGTH, reverse=False):
     """Return recent games.
 
     Parameters:
@@ -466,7 +466,7 @@ def all_blacklisted_players():
     return conn.execute(_blacklisted_players.select()).fetchall()
 
 
-def shortest_wins(n=10):
+def shortest_wins(n=const.GLOBAL_TABLE_LENGTH):
     """Return the n shortest wins by turncount."""
     conn = _engine.connect()
     s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
@@ -474,7 +474,7 @@ def shortest_wins(n=10):
     return conn.execute(s).fetchall()
 
 
-def fastest_wins(n=10):
+def fastest_wins(n=const.GLOBAL_TABLE_LENGTH):
     """Return the n fastest wins by duration."""
     conn = _engine.connect()
     s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
@@ -482,7 +482,7 @@ def fastest_wins(n=10):
     return conn.execute(s).fetchall()
 
 
-def highscores(n=10):
+def highscores(n=const.GLOBAL_TABLE_LENGTH):
     """Return the n highest scoring games."""
     conn = _engine.connect()
     s = _games.select().order_by(desc('sc')).limit(n)

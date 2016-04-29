@@ -143,7 +143,7 @@ def write_website(players=[], urlbase=None):
     combo_highscores = model.combo_highscores()
     fastest_wins = model.fastest_wins()
     shortest_wins = model.shortest_wins()
-    recent_wins = model.recent_games(wins=True)
+    recent_wins = model.recent_games(wins=True, num=5)
 
     # I'm not proud of this block of code, but it works
     # Create a list of [(name, [highscoregame]), ...] for the index

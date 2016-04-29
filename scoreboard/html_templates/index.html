@@ -17,7 +17,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Active Win Streaks</h3>
-    {{ active_streaks|streakstotable(show_loss=False) }}
+    {{ active_streaks|streakstotable(show_loss=False, limit=5) }}
   </div>
 </div>
 <div class="row">
