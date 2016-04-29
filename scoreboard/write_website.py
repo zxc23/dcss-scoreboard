@@ -76,7 +76,7 @@ def write_player_stats(*, player, stats, outfile, achievements, streaks,
         player (str) Player Name
         stats (dict) Player's stats dict from model.player_stats
         outfile (str) Output filename
-        acheivements (dict) Player's achievements
+        achievements (dict) Player's achievements
         streaks (list) Player's streaks or []
         active_streak (dict) Player's active streak or {}
         template (Jinja template) Template to render with.

@@ -22,7 +22,7 @@
       <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
       <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
       {% if streaks %}
-      <p><strong>Longest Win Streak:</strong> {{ streaks[0].wins|length }} wins</p>
+        <p><strong>Longest Win Streak:</strong> {{ streaks[0].wins|length }} wins</p>
       {% endif %}
       {% if active_streak and active_streak.wins|length > 1 %}
         <p><strong>Active Win Streak ({{ active_streak.wins|length }}):</strong>
@@ -64,6 +64,14 @@
     {% endif %}
   </div>
 </div>
+{% if streaks %}
+  <div class="row">
+    <div class="col-sm-12">
+      <h3>Win Streaks</h3>
+      {{ streaks|streakstotable(show_player=False) }}
+    </div>
+  </div>
+{% endif %}
 <div class="row">
   <div class="col-sm-12">
     <!-- Nav tabs -->
