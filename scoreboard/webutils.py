@@ -99,7 +99,7 @@ def gamestotable(env,
                               place or end columns, and do show runes.
         limit (int): The table won't display more games than this.
 
-    Returns: (string) '<tr>contents</tr>'.
+    Returns: (string) '<table>contents</table>'.
     """
 
     def format_trow(game):
@@ -188,7 +188,7 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
         show_loss (bool): Show the losing game column.
         limit (int): The table won't display more games than this.
 
-    Returns: (string) '<tr>contents</tr>'.
+    Returns: (string) '<table>contents</table>'.
     """
 
     def format_trow(streak, show_player, show_loss):
