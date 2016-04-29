@@ -18,8 +18,8 @@
     <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur(hours=True) }} hours</p>
     <p><strong>Highest Score:</strong> {{ stats['highscore']|morgue_link(stats['highscore']['sc']|prettyint) }}</p>
     {% if stats['wins']|length %}
-      <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']|morgue_link(stats['fastest_turncount']['turn']|default(0)|prettyint + ' turns')}}</p>
-      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']|morgue_link(stats['fastest_realtime']['dur']|default(0)|prettydur) }}</p>
+      <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']|morgue_link(stats['fastest_turncount']['turn']|default(0)|prettyint + ' turns') }}</p>
+      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']|morgue_link(stats['fastest_realtime']['dur']|default(0)|prettydur + ' hours') }}</p>
     {% endif %}
   </div>
   <div class="col-sm-3">
