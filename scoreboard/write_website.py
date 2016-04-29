@@ -28,6 +28,7 @@ def jinja_env():
     env.filters['prettydate'] = webutils.prettydate
     env.filters['gidtogame'] = model.game
     env.filters['link_player'] = webutils.link_player
+    env.filters['mosthighscorestotable'] = webutils.mosthighscorestotable
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
     return env
@@ -143,14 +144,14 @@ def write_website(players=[], urlbase=None):
     recent_wins = model.recent_games(wins=True)
 
     # I'm not proud of this block of code, but it works
-    # Create a list of [(name, [streak_chars]), ...] for the index
-    # It's sorted by streak length
+    # Create a list of [(name, [highscoregame]), ...] for the index
+    # It's sorted by number of highscores length
     inverted_combo_highscores = {}
     for entry in combo_highscores:
         if entry.name not in inverted_combo_highscores:
-            inverted_combo_highscores[entry.name] = [entry.char]
+            inverted_combo_highscores[entry.name] = [entry]
         else:
-            inverted_combo_highscores[entry.name].append(entry.char)
+            inverted_combo_highscores[entry.name].append(entry)
     temp = []
     for k, v in inverted_combo_highscores.items():
         temp.append((k, v))

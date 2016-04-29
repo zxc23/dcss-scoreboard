@@ -23,24 +23,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Most Highscores</h3>
-    <table class="{{ tableclasses }}">
-      <thead>
-        <tr>
-          <th>Player</th>
-          <th>Highscores</th>
-          <th>Characters</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for entry in combo_high_scores %}
-          <tr>
-            <td>{{ entry[0]|link_player(urlbase) }}</td>
-            <td>{{ entry[1]|length }}</td>
-            <td>{{ entry[1]|join(', ') }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {{ combo_high_scores|mosthighscorestotable }}
   </div>
 </div>
 {% endblock %}

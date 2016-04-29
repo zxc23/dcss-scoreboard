@@ -253,6 +253,37 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
                                     for streak in streaks))
 
 
+def mosthighscorestotable(highscores):
+    """Jinja filter to convert a list of combo highscores by players into a standard table."""
+    table = """<table class="{classes}">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Highscores</th>
+              <th>Characters</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tbody}
+          </tbody>
+        </table>"""
+
+    tbody = ""
+    for entry in highscores:
+        combos = ', '.join([morgue_link(game, game.char) for game in entry[1]])
+        tbody += ("""<tr>
+                       <td>%s</td>
+                       <td>%s</td>
+                       <td>%s</td>
+                     </tr>"""
+                  % ("<a href='players/{player}.html'>{player}<a>".format(player=entry[0]),
+                     len(entry[1]),
+                     combos
+                    ))
+
+    return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
+
+
 def morgue_link(game, text="Morgue"):
     """Returns a hyperlink to a morgue file.
 
