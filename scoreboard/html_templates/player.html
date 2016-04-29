@@ -50,7 +50,7 @@
 {% endif %}
 {% if streaks %}
   <hr/>
-  <div class="row playerstatsrow">
+  <div class="row">
     <div class="col-sm-12">
       <h3>Win Streaks</h3>
       {{ streaks|streakstotable(show_player=False, limit=10) }}
@@ -58,12 +58,18 @@
   </div>
 {% endif %}
 <hr/>
-<div class="row playerstatsrow">
+<div class="row">
   <div class="col-sm-12">
     <h3>Wins</h3>
-    <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
-    <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
-    <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
+    <div class="col-sm-4">
+      <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
+    </div>
+    <div class="col-sm-4">
+      <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
+    </div>
+    <div class="col-sm-4">
+      <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
+    </div>
     {{ stats['wins']|map('gidtogame')|list|gamestotable(winning_games=True) }}
   </div>
 </div>
