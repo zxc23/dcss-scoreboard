@@ -5,6 +5,7 @@ import json
 import time
 import shutil
 import subprocess
+import datetime
 
 import jsmin
 import jinja2
@@ -176,6 +177,20 @@ def write_website(players=[], urlbase=None):
     sorted_streaks = sorted(streaks, key=lambda s: (-len(s['wins']), s['end']))
     sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
 
+    # Get streaks by player
+    player_streaks = {}
+    for streak in sorted_streaks:
+        if streak['player'] not in player_streaks:
+            player_streaks[streak['player']] = [streak]
+        else:
+            player_streaks[streak['player']].append(streak)
+
+    # Remove streaks from active streaks if last game played more than 3 months ago
+    for streak in sorted_active_streaks:
+        timedelta = datetime.datetime.now() - model.game(streak['wins'][-1]).end
+        if timedelta.days > 90:
+            sorted_active_streaks.remove(streak)
+
     print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
     print("Writing index")
     with open(os.path.join(WEBSITE_DIR, 'index.html'), 'w') as f:
@@ -219,13 +234,6 @@ def write_website(players=[], urlbase=None):
     os.mkdir(player_html_path)
     achievements = achievement_data()
     template = env.get_template('player.html')
-
-    player_streaks = {}
-    for streak in sorted_streaks:
-        if streak['player'] not in player_streaks:
-            player_streaks[streak['player']] = [streak]
-        else:
-            player_streaks[streak['player']].append(streak)
 
     n = 0
     for player in players:
