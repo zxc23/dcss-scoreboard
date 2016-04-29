@@ -31,30 +31,6 @@
           {% endfor %}
         </p>
       {% endif %}
-      {# if player has a race/role highscore, they also have a combo highscore by definition #}
-      {% if records['combo'] or records['god'] %}
-      <h3>Global Highscores</h3>
-        {% if records['race'] %}
-          <p><strong>Species:</strong>
-            {{ records['race']|map(attribute='rc')|join(', ') }}
-          </p>
-        {% endif %}
-        {% if records['role'] %}
-          <p><strong>Backgrounds:</strong>
-            {{ records['role']|map(attribute='bg')|join(', ') }}
-          </p>
-        {% endif %}
-        {% if records['combo'] %}
-        <p><strong>Combos:</strong>
-          {{ records['combo']|map(attribute='char')|join(', ') }}
-        </p>
-        {% endif %}
-        {% if records['god'] %}
-        <p><strong>Gods:</strong>
-          {{ records['god']|map(attribute='god')|join(', ') }}
-        </p>
-        {% endif %}
-      {% endif %}
     {% endif %}
   </div>
   <div class="col-sm-8">
@@ -62,6 +38,30 @@
     <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
     <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
     <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
+    {# if player has a race/role highscore, they also have a combo highscore by definition #}
+    {% if records['combo'] or records['god'] %}
+      <h3>Global Highscores</h3>
+      {% if records['race'] %}
+        <p><strong>Species:</strong>
+          {{ records['race']|map(attribute='rc')|join(', ') }}
+        </p>
+      {% endif %}
+      {% if records['role'] %}
+        <p><strong>Backgrounds:</strong>
+          {{ records['role']|map(attribute='bg')|join(', ') }}
+        </p>
+      {% endif %}
+      {% if records['combo'] %}
+        <p><strong>Combos:</strong>
+          {{ records['combo']|map(attribute='char')|join(', ') }}
+        </p>
+      {% endif %}
+      {% if records['god'] %}
+        <p><strong>Gods:</strong>
+          {{ records['god']|map(attribute='god')|join(', ') }}
+        </p>
+      {% endif %}
+    {% endif %}
   </div>
 </div>
 <div class="row">

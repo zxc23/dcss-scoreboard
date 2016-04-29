@@ -58,6 +58,10 @@ h3 {
     background-color: rgba(255,255,255,0.5);
 }
 
+p {
+    margin-bottom: 0.5rem;   
+}
+
 footer p {
     font-size: 0.6rem;
     text-align: center;
