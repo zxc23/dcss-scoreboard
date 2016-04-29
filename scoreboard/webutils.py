@@ -138,7 +138,7 @@ def gamestotable(env,
     thead = """{prefix}
               {player}
               <th>Score</th>
-              <th>Character</th>
+              <th>Combo</th>
               <th>God</th>
               {place}
               {end}
@@ -260,7 +260,7 @@ def mosthighscorestotable(highscores):
             <tr>
               <th>Player</th>
               <th>Highscores</th>
-              <th>Characters</th>
+              <th>Combos</th>
             </tr>
           </thead>
           <tbody>
