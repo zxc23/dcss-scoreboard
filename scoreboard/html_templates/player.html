@@ -15,9 +15,7 @@
     <p><strong>Wins:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
     <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
     <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur(hours=True) }} hours</p>
-    <p><strong>Total Score:</strong> {{ stats['total_score']|prettyint }}</p>
     <p><strong>Highest Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
-    <p><strong>Average Score:</strong> {{ (stats['avg_score']|round)|prettyint }}</p>
     {% if stats['wins']|length %}
       <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
       <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
