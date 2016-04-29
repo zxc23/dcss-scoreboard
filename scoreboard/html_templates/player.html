@@ -16,10 +16,10 @@
   </div>
   <div class="col-sm-3">
     <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur(hours=True) }} hours</p>
-    <p><strong>Highest Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
+    <p><strong>Highest Score:</strong> {{ stats['highscore']|morgue_link(stats['highscore']['sc']|prettyint) }}</p>
     {% if stats['wins']|length %}
-      <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
-      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
+      <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']|morgue_link(stats['fastest_turncount']['turn']|default(0)|prettyint + ' turns')}}</p>
+      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']|morgue_link(stats['fastest_realtime']['dur']|default(0)|prettydur) }}</p>
     {% endif %}
   </div>
   <div class="col-sm-3">
@@ -44,26 +44,7 @@
   <div class="row">
     <div class="col-sm-12">
       <h3>Highscores</h3>
-      {% if records['race'] %}
-        <p><strong>Species:</strong>
-          {{ records['race']|map(attribute='rc')|join(', ') }}
-        </p>
-      {% endif %}
-      {% if records['role'] %}
-        <p><strong>Backgrounds:</strong>
-          {{ records['role']|map(attribute='bg')|join(', ') }}
-        </p>
-      {% endif %}
-      {% if records['combo'] %}
-        <p><strong>Combos:</strong>
-          {{ records['combo']|map(attribute='char')|join(', ') }}
-        </p>
-      {% endif %}
-      {% if records['god'] %}
-        <p><strong>Gods:</strong>
-          {{ records['god']|map(attribute='god')|join(', ') }}
-        </p>
-      {% endif %}
+      {{ records|recordsformatted }}
     </div>
   </div>
 {% endif %}

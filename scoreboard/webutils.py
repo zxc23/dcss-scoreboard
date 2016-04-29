@@ -284,6 +284,34 @@ def mosthighscorestotable(highscores):
     return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
 
 
+def recordsformatted(records):
+    result = """{race}
+                {role}
+                {god}
+                {combo}"""
+    race = ''
+    role = ''
+    god = ''
+    combo = ''
+
+    if records['race']:
+        race = "<p><strong>Species:</strong> %s</p>" % (', '.join([morgue_link(game, game.rc) for game in records['race']]))
+
+    if records['role']:
+        role = "<p><strong>Backgrounds:</strong> %s</p>" % (', '.join([morgue_link(game, game.bg) for game in records['role']]))
+
+    if records['god']:
+        god = "<p><strong>Gods:</strong> %s</p>" % (', '.join([morgue_link(game, game.god) for game in records['god']]))
+
+    if records['combo']:
+        combo = "<p><strong>Combos:</strong> %s</p>" % (', '.join([morgue_link(game, game.char) for game in records['combo']]))
+
+    return result.format(race=race,
+                         role=role,
+                         god=god,
+                         combo=combo)
+
+
 def morgue_link(game, text="Morgue"):
     """Returns a hyperlink to a morgue file.
 
@@ -292,5 +320,8 @@ def morgue_link(game, text="Morgue"):
     if type(game) is str:
         # Treat as gid
         game = model.game(game)
+    elif 'raw_data' not in game:
+        # Treat as raw_data
+        game = model.game(game['gid'])
     result = "<a href='" + modelutils.morgue_url(game) + "'>" + text + "</a>"
     return result

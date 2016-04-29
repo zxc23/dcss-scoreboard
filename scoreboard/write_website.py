@@ -28,7 +28,9 @@ def jinja_env():
     env.filters['prettydate'] = webutils.prettydate
     env.filters['gidtogame'] = model.game
     env.filters['link_player'] = webutils.link_player
+    env.filters['morgue_link'] = webutils.morgue_link
     env.filters['mosthighscorestotable'] = webutils.mosthighscorestotable
+    env.filters['recordsformatted'] = webutils.recordsformatted
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
     return env
