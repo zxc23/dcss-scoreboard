@@ -8,37 +8,42 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-sm-4">
-    <h3>Overall</h3>
+  <div class="col-sm-3">
     <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
     <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
     <p><strong>Wins:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
     <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
+  </div>
+  <div class="col-sm-3">
     <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur(hours=True) }} hours</p>
     <p><strong>Highest Score:</strong> {{ stats['highscore']['sc']|prettyint }}</p>
     {% if stats['wins']|length %}
-      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
       <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']['turn']|default(0)|prettyint }} turns</p>
-      {% if streaks %}
+      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']['dur']|default(0)|prettydur }} hours</p>
+    {% endif %}
+  </div>
+  <div class="col-sm-3">
+    {% if streaks %}
         <p><strong>Longest Win Streak:</strong> {{ streaks[0].wins|length }} wins</p>
-      {% endif %}
       {% if active_streak and active_streak.wins|length > 1 %}
-        <p><strong>Active Win Streak ({{ active_streak.wins|length }}):</strong>
-          {% for gid in active_streak.wins %}
-          {{ gid|gidtogame|attr("char") }}
-          {% endfor %}
-        </p>
+        <p><strong>Active Win Streak:</strong> {{ active_streak.wins|length }} wins</p>
       {% endif %}
     {% endif %}
   </div>
-  <div class="col-sm-8">
-    <h3>Wins</h3>
-    <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
-    <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
-    <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
-    {# if player has a race/role highscore, they also have a combo highscore by definition #}
-    {% if records['combo'] or records['god'] %}
-      <h3>Global Highscores</h3>
+</div>
+<hr/>
+<div class="row">
+  <div class="col-sm-12">
+    <h3>Recent Games</h3>
+    {{ recent_games|gamestotable }}
+  </div>
+</div>
+{# if player has a race/role highscore, they also have a combo highscore by definition #}
+{% if records['combo'] or records['god'] %}
+  <hr/>
+  <div class="row">
+    <div class="col-sm-12">
+      <h3>Highscores</h3>
       {% if records['race'] %}
         <p><strong>Species:</strong>
           {{ records['race']|map(attribute='rc')|join(', ') }}
@@ -59,37 +64,26 @@
           {{ records['god']|map(attribute='god')|join(', ') }}
         </p>
       {% endif %}
-    {% endif %}
+    </div>
   </div>
-</div>
+{% endif %}
 {% if streaks %}
-  <div class="row">
+  <hr/>
+  <div class="row playerstatsrow">
     <div class="col-sm-12">
       <h3>Win Streaks</h3>
       {{ streaks|streakstotable(show_player=False) }}
     </div>
   </div>
 {% endif %}
-<div class="row">
+<hr/>
+<div class="row playerstatsrow">
   <div class="col-sm-12">
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
-      <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" href="#games" role="tab">Recent Games</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#wins" role="tab">Recent Wins</a>
-      </li>
-    </ul>
-    <!-- Tab panes -->
-    <div class="tab-content">
-      <div class="tab-pane active" id="games" role="tabpanel">
-        {{ recent_games|gamestotable }}
-      </div>
-      <div class="tab-pane" id="wins" role="tabpanel">
-        {{ stats['wins'][-5:]|reverse|map('gidtogame')|list|gamestotable(winning_games=True) }}
-      </div>
-    </div>
+    <h3>Wins</h3>
+    <p><strong>Species Won ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong> {{ stats['race_wins']|prettycounter }}</p>
+    <p><strong>Backgrounds Won ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong> {{ stats['role_wins']|prettycounter }}</p>
+    <p><strong>Gods Won ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong> {{ stats['god_wins']|prettycounter }}</p>
+    {{ stats['wins']|map('gidtogame')|list|gamestotable(winning_games=True) }}
   </div>
 </div>
 {% endblock %}
