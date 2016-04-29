@@ -16,7 +16,7 @@ A bundle of scripts to create a scoreboard website for DCSS.
 
 ## How to use
 
-Install pre-requisites with `pip install -r requirements.txt`.
+Python 3.5 is required. Install pre-requisites with `pip install -r requirements.txt`.
 
 For testing purposes, you can download lots of logfiles with `download-logs.sh`.
 
