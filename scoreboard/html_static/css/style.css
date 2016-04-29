@@ -44,6 +44,10 @@ h3 {
     background-color: rgba(220,220,220,0.5);
 }
 
+.right-align {
+    text-align: right;
+}
+
 /* Columns with a date should never split the date over multiple lines. */
 .date-table-col {
     min-width: 10rem;
