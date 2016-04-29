@@ -133,8 +133,6 @@ def gamestotable(env,
           </tbody>
         </table>"""
 
-    classes = const.TABLE_CLASSES
-
     thead = """{prefix}
               {player}
               <th>Score</th>
@@ -175,7 +173,7 @@ def gamestotable(env,
     elif prefix_col:
         games = sorted(games, key=lambda g: g['raw_data'][prefix_col])
 
-    return t.format(classes=classes,
+    return t.format(classes=const.TABLE_CLASSES,
                     thead=thead,
                     tbody="\n".join(format_trow(game) for game in games))
 
@@ -224,8 +222,6 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
           </tbody>
         </table>"""
 
-    classes = const.TABLE_CLASSES
-
     thead = """<th>Wins</th>
                {player}
                <th>Games</th>
@@ -247,7 +243,7 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
     if limit:
         streaks = streaks[:limit]
 
-    return t.format(classes=classes,
+    return t.format(classes=const.TABLE_CLASSES,
                     thead=thead,
                     tbody="\n".join(format_trow(streak, show_player, show_loss)
                                     for streak in streaks))
