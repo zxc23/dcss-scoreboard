@@ -41,12 +41,14 @@ def morgue_url(game):
         prefix = "https://crawl.project357.org/morgue"
     elif game.src == "cjr":
         prefix = "http://www.jorgrun.rocks/morgue"
+    elif game.src == "cwz":
+        prefix = "http://webzook.net/soup/morgue/"
+        prefix += "/" + version_url(game.v)
     else:
-        print("Failed", game)
-        return None
+        raise ValueError("No prefix for %s" % game.src)
     date = game.raw_data['end'][:4] \
-    + "%02d" % (int(game.raw_data['end'][4:6]) + 1) \
-    + game.raw_data['end'][6:8]
+        + "%02d" % (int(game.raw_data['end'][4:6]) + 1) \
+        + game.raw_data['end'][6:8]
     time = game.raw_data['end'][8:14]
     result = "%s/%s/morgue-%s-%s-%s.txt" % (prefix, game.name, game.name, date, time)
     return result
