@@ -319,5 +319,7 @@ def morgue_link(game, text="Morgue"):
     elif 'raw_data' not in game:
         # Treat as raw_data
         game = model.game(game['gid'])
+    if not game:
+        return "Not Found"
     result = "<a href='" + modelutils.morgue_url(game) + "'>" + text + "</a>"
     return result
