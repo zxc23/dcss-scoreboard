@@ -58,6 +58,7 @@
   </div>
 {% endif %}
 <hr/>
+{% if stats['wins']|length %}
 <div class="row">
   <div class="col-sm-12">
     <h3>Wins</h3>
@@ -76,4 +77,5 @@
     {{ stats['wins']|map('gidtogame')|list|gamestotable(winning_games=True) }}
   </div>
 </div>
+{% endif %}
 {% endblock %}
