@@ -37,9 +37,7 @@ wget --no-verbose -c -O cxc-logfile-0.17 http://crawl.xtahua.com/crawl/meta/0.17
 wget --no-verbose -c -O cxc-logfile-0.18 http://crawl.xtahua.com/crawl/meta/0.18/logfile ;
 wget --no-verbose -c -O cxc-logfile-git http://crawl.xtahua.com/crawl/meta/git/logfile" &
 
-bash -c "wget --no-verbose -c -O cwz-logfile-0.15 http://webzook.net/soup/0.15/logfile ;
-wget --no-verbose -c -O cwz-logfile-0.16 http://webzook.net/soup/0.16/logfile ;
-wget --no-verbose -c -O cwz-logfile-0.17 http://webzook.net/soup/0.17/logfile ;
+bash -c "wget --no-verbose -c -O cwz-logfile-0.17 http://webzook.net/soup/0.17/logfile ;
 wget --no-verbose -c -O cwz-logfile-0.18 http://webzook.net/soup/0.18/logfile ;
 wget --no-verbose -c -O cwz-logfile-git http://webzook.net/soup/trunk/logfile" &
 
