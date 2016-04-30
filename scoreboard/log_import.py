@@ -44,7 +44,7 @@ def load_logfile(logfile):
     processed_lines = model.logfile_pos(logfile)
     print("Reading %s%s... " % (logfile, (" from line %s" % processed_lines) if
                                 processed_lines else ''))
-    for line in open(logfile, encoding='utf-8').readlines():
+    for line in open(logfile, encoding='utf-8'):
         lines += 1
         # skip up to the first unprocessed line
         if lines <= processed_lines:
