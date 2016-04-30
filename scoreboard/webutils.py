@@ -144,7 +144,7 @@ def gamestotable(env,
               <th class="right-align">Duration</th>
               <th class="right-align">Date</th>
               <th>Version</th>
-              <th>Morgue File</th>""".format(
+              <th>Morgue</th>""".format(
         prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
         player='' if not show_player else '<th>Player</th>',
         place='' if winning_games else '<th>Place</th>',
