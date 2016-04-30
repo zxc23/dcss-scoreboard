@@ -200,10 +200,6 @@ def write_website(players=[], urlbase=None):
                                 overall_highscores=overall_highscores,
                                 combo_high_scores=inverted_combo_highscores))
 
-    with open(os.path.join(WEBSITE_DIR, 'about.html'), 'w') as f:
-        template = env.get_template('about.html')
-        f.write(template.render())
-
     print("Writing minified local JS")
     scoreboard_path = os.path.join(WEBSITE_DIR,
                                    'static/js/dcss-scoreboard.js')
