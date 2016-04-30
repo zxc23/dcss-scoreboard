@@ -225,8 +225,8 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
     thead = """<th class="text-xs-right">Wins</th>
                {player}
                <th>Games</th>
-               <th class="date-table-col text-xs-right">Start</th>
-               <th class="date-table-col text-xs-right">End</th>
+               <th class="date-table-col text-xs-right">First Win</th>
+               <th class="date-table-col text-xs-right">Last Win</th>
                {loss}""".format(
         player='' if not show_player else '<th>Player</th>',
         loss='' if not show_loss else '<th>Loss</th>')
