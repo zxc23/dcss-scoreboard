@@ -2,6 +2,8 @@
 
 set -u
 
+echo "Downloading logfiles to $(pwd)/real-logfiles..."
+
 mkdir -p real-logfiles
 cd real-logfiles
 
@@ -60,4 +62,3 @@ wget -qc -O cpo-logfile-0.16 https://crawl.project357.org/dcss-logfiles-0.16
 wget -qc -O cpo-logfile-0.17 https://crawl.project357.org/dcss-logfiles-0.17
 wget -qc -O cpo-logfile-0.18 https://crawl.project357.org/dcss-logfiles-0.18
 wget -qc -O cpo-logfile-trunk https://crawl.project357.org/dcss-logfiles-trunk
-

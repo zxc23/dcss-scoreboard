@@ -135,14 +135,14 @@ def gamestotable(env,
 
     thead = """{prefix}
               {player}
-              <th class="right-align">Score</th>
+              <th class="text-xs-right">Score</th>
               <th>Combo</th>
               <th>God</th>
               {place}
               {end}
-              <th class="right-align">Turns</th>
-              <th class="right-align">Duration</th>
-              <th class="right-align">Date</th>
+              <th class="text-xs-right">Turns</th>
+              <th class="text-xs-right">Duration</th>
+              <th class="text-xs-right">Date</th>
               <th>Version</th>
               <th>Morgue</th>""".format(
         prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
@@ -153,14 +153,14 @@ def gamestotable(env,
     trow = """<tr>
       {prefix_col}
       {player_row}
-      <td class="right-align">{score}</td>
+      <td class="text-xs-right">{score}</td>
       <td>{character}</td>
       <td>{god}</td>
       {place}
       {end}
-      <td class="right-align">{turns}</td>
-      <td class="right-align">{duration}</td>
-      <td class="right-align">{date}</td>
+      <td class="text-xs-right">{turns}</td>
+      <td class="text-xs-right">{duration}</td>
+      <td class="text-xs-right">{date}</td>
       <td>{version}</td>
       <td>{morgue}</td>
     </tr>"""
@@ -222,21 +222,21 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
           </tbody>
         </table>"""
 
-    thead = """<th class="right-align">Wins</th>
+    thead = """<th class="text-xs-right">Wins</th>
                {player}
                <th>Games</th>
-               <th class="date-table-col right-align">Start</th>
-               <th class="date-table-col right-align">End</th>
+               <th class="date-table-col text-xs-right">Start</th>
+               <th class="date-table-col text-xs-right">End</th>
                {loss}""".format(
         player='' if not show_player else '<th>Player</th>',
         loss='' if not show_loss else '<th>Loss</th>')
 
     trow = """<tr>
-        <td class="right-align">{wins}</td>
+        <td class="text-xs-right">{wins}</td>
         {player}
         <td>{games}</td>
-        <td class="right-align">{start}</td>
-        <td class="right-align">{end}</td>
+        <td class="text-xs-right">{start}</td>
+        <td class="text-xs-right">{end}</td>
         {streak_breaker}
         </tr>"""
 
@@ -255,7 +255,7 @@ def mosthighscorestotable(highscores):
           <thead>
             <tr>
               <th>Player</th>
-              <th class="right-align">Highscores</th>
+              <th class="text-xs-right">Highscores</th>
               <th>Combos</th>
             </tr>
           </thead>
@@ -269,7 +269,7 @@ def mosthighscorestotable(highscores):
         combos = ', '.join([morgue_link(game, game.char) for game in entry[1]])
         tbody += ("""<tr>
                        <td>%s</td>
-                       <td class="right-align">%s</td>
+                       <td class="text-xs-right">%s</td>
                        <td>%s</td>
                      </tr>"""
                   % ("<a href='players/{player}.html'>{player}<a>".format(player=entry[0]),
