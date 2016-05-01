@@ -49,7 +49,7 @@ def prettycounter(counter):
 
     eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
-    return ",&nbsp;".join("{open}{k} ({v}){close}".format(
+    return ", ".join("{open}{k}&nbsp;({v}){close}".format(
         k=k,
         v=v,
         open="" if v > 0 else '<span class="text-muted">',
