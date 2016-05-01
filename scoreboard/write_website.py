@@ -88,10 +88,17 @@ def write_player_stats(*, player, stats, outfile, achievements, streaks,
     """
     recent_games = model.recent_games(player=player)
     all_wins = model.recent_games(wins=True, player=player, num=None)
+    race_wins = model.games_by_type(player, 'rc', const.PLAYABLE_RACES)
+    background_wins = model.games_by_type(player, 'bg', const.PLAYABLE_ROLES)
+    god_wins = model.games_by_type(player, 'god', const.PLAYABLE_GODS)
+
     with open(outfile, 'w', encoding='utf8') as f:
         f.write(template.render(player=player,
                                 stats=stats,
                                 all_wins=all_wins,
+                                race_wins=race_wins,
+                                background_wins=background_wins,
+                                god_wins=god_wins,
                                 achievement_data=achievements,
                                 const=const,
                                 records=records,

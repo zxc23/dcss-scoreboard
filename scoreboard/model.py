@@ -9,7 +9,7 @@ import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, \
                        Integer, Boolean, DateTime, LargeBinary, Index
-from sqlalchemy import desc, asc, select, func
+from sqlalchemy import desc, asc, select, func, column
 
 from . import modelutils
 from . import constants as const
@@ -446,6 +446,20 @@ def recent_games(wins=False,
     if reverse:
         rows = rows[::-1]
     return rows
+
+
+def games_by_type(player, col, eligible, winning=True):
+    """Find the count of games for a player grouped by values of col."""
+    conn = _engine.connect()
+    count = sqlalchemy.sql.functions.count()
+    query = select([column(col), count]).group_by(col)
+    query = query.where(_games.c.name == player)
+    if winning:
+        query = query.where(_games.c.ktyp == 'winning')
+    query = query.group_by(col)
+    print(query.compile(compile_kwargs={"literal_binds": True}))
+    return {i[0]: i[1]
+            for i in conn.execute(query).fetchall() if i[0] in eligible}
 
 
 def add_player_to_blacklist(name, src):
