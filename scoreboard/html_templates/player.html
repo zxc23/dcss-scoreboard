@@ -74,7 +74,17 @@
       <p><strong>By God ({{ god_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong></p>
       <p class="counter">{{ god_wins|prettycounter|safe }}</p>
     </div>
-    {{ all_wins|gamestotable(winning_games=True) }}
+    {% if all_wins|length > 10 %}
+      {{ all_wins[:10]|gamestotable(winning_games=True) }}
+      <div class="collapse" id="lessrecentwins">
+        {{ all_wins[10:]|gamestotable(winning_games=True, skip_header=True) }}
+      </div>
+      <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
+        Show remaining {{ all_wins[10:]|length }} wins...
+      </button>
+    {% else %}
+      {{ all_wins|gamestotable(winning_games=True) }}
+    {% endif %}
   </div>
 </div>
 {% endif %}
