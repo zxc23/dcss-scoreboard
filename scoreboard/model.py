@@ -418,13 +418,16 @@ def game(gid):
     return game
 
 
-def recent_games(wins=False, player=None, num=const.PLAYER_TABLE_LENGTH, reverse=False):
+def recent_games(wins=False,
+                 player=None,
+                 num=const.PLAYER_TABLE_LENGTH,
+                 reverse=False):
     """Return recent games.
 
     Parameters:
         wins (bool) Only return wins
-        player (str) Only for this player
-        num (int) Number of rows to return
+        player (str) Only for this player, None for all
+        num (int) Number of rows to return, None for all
         reverse (bool) Order in least -> most recent if True
 
     Returns recent games as a list of Games.
@@ -435,7 +438,9 @@ def recent_games(wins=False, player=None, num=const.PLAYER_TABLE_LENGTH, reverse
         query = query.where(_games.c.ktyp == 'winning')
     if player is not None:
         query = query.where(_games.c.name == player)
-    query = query.order_by(desc("end")).limit(num)
+    if num is not None:
+        query = query.limit(num)
+    query = query.order_by(desc("end"))
 
     rows = conn.execute(query).fetchall()
     if reverse:

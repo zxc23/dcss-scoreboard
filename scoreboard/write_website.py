@@ -88,9 +88,11 @@ def write_player_stats(*, player, stats, outfile, achievements, streaks,
     Returns: None.
     """
     recent_games = model.recent_games(player=player)
+    all_wins = model.recent_games(wins=True, player=player, num=None)
     with open(outfile, 'w') as f:
         f.write(template.render(player=player,
                                 stats=stats,
+                                all_wins=all_wins,
                                 achievement_data=achievements,
                                 const=const,
                                 records=records,
