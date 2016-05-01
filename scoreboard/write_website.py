@@ -104,7 +104,9 @@ def write_website(players=set(), urlbase=None):
 
     Paramers:
         urlbase (str) Base URL for the website
-        players (iterable of strings) Only write these player pages
+        players (iterable of strings) Only write these player pages.
+            If you pass in False, no player pages will be rebuilt.
+            If you pass in None, all player pages will be rebuilt.
     """
     start = time.time()
 
@@ -115,8 +117,10 @@ def write_website(players=set(), urlbase=None):
         env.globals['urlbase'] = os.path.join(os.getcwd(), WEBSITE_DIR)
 
     all_players = sorted(model.all_player_names())
-    if not players:
+    if players is None:
         players = all_players
+    elif not players:
+        players = []
 
     print("Writing HTML to %s" % WEBSITE_DIR)
     if not os.path.exists(WEBSITE_DIR):

@@ -46,6 +46,9 @@ def read_commandline():
     parser.add_argument('--skip-website',
                         action='store_true',
                         help="Skip website generation.")
+    parser.add_argument('--rebuild-player-pages',
+                        action='store_true',
+                        help="Re-write all player pages for the website.")
     args = parser.parse_args()
     if args.rebuild and args.player:
         error("You can't specify --rebuild and --player together.")
@@ -70,6 +73,8 @@ def main(player=None):
             scoreboard.scoring.rescore_player(args.player)
         players = scoreboard.scoring.score_games(rebuild=args.rebuild)
     if not args.skip_website:
+        if args.rebuild_player_pages:
+            players = None
         scoreboard.write_website.write_website(urlbase=args.urlbase,
                                                players=players)
 
