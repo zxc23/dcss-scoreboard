@@ -8,7 +8,7 @@ import os
 import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, \
-                       Integer, Boolean, DateTime, LargeBinary
+                       Integer, Boolean, DateTime, LargeBinary, Index
 from sqlalchemy import desc, asc, select, func
 
 from . import modelutils
@@ -122,6 +122,11 @@ def setup_database(backend):
                           index=True),
                    mysql_engine='InnoDB',
                    mysql_charset='utf8')
+
+    Index('ix_games_rc_sc', _games.c.rc, _games.c.sc)
+    Index('ix_games_bg_sc', _games.c.rc, _games.c.sc)
+    Index('ix_games_char_sc', _games.c.char, _games.c.sc)
+    Index('ix_games_god_sc', _games.c.god, _games.c.sc)
 
     global _logfile_progress
     _logfile_progress = Table('logfile_progress',
