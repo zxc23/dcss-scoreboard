@@ -124,7 +124,7 @@ def setup_database(backend):
                    mysql_charset='utf8')
 
     Index('ix_games_rc_sc', _games.c.rc, _games.c.sc)
-    Index('ix_games_bg_sc', _games.c.rc, _games.c.sc)
+    Index('ix_games_bg_sc', _games.c.bg, _games.c.sc)
     Index('ix_games_char_sc', _games.c.char, _games.c.sc)
     Index('ix_games_god_sc', _games.c.god, _games.c.sc)
 
