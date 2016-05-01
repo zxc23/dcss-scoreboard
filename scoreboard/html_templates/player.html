@@ -64,15 +64,15 @@
     <h3>Wins</h3>
     <div class="col-sm-3">
       <p><strong>By Species ({{ stats['race_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong></p>
-      <p class="counter">{{ stats['race_wins']|prettycounter }}</p>
+      <p class="counter">{{ stats['race_wins']|prettycounter|s }}</p>
     </div>
     <div class="col-sm-3">
       <p><strong>By Background ({{ stats['role_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong></p>
-      <p class="counter">{{ stats['role_wins']|prettycounter }}</p>
+      <p class="counter">{{ stats['role_wins']|prettycounter|s }}</p>
     </div>
     <div class="col-sm-5">
       <p><strong>By God ({{ stats['god_wins'].values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong></p>
-      <p class="counter">{{ stats['god_wins']|prettycounter }}</p>
+      <p class="counter">{{ stats['god_wins']|prettycounter|s }}</p>
     </div>
     {{ stats['wins']|map('gidtogame')|list|gamestotable(winning_games=True) }}
   </div>
