@@ -89,7 +89,7 @@ def write_player_stats(*, player, stats, outfile, achievements, streaks,
     """
     recent_games = model.recent_games(player=player)
     all_wins = model.recent_games(wins=True, player=player, num=None)
-    with open(outfile, 'w') as f:
+    with open(outfile, 'w', encoding='utf8') as f:
         f.write(template.render(player=player,
                                 stats=stats,
                                 all_wins=all_wins,
@@ -198,7 +198,7 @@ def write_website(players=set(), urlbase=None):
 
     print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
     print("Writing index")
-    with open(os.path.join(WEBSITE_DIR, 'index.html'), 'w') as f:
+    with open(os.path.join(WEBSITE_DIR, 'index.html'), 'w', encoding='utf8') as f:
         template = env.get_template('index.html')
         f.write(template.render(recent_wins=recent_wins,
                                 active_streaks=sorted_active_streaks,
@@ -213,13 +213,13 @@ def write_website(players=set(), urlbase=None):
         f.write(jsmin.jsmin(template.render()))
 
     print("Writing streaks")
-    with open(os.path.join(WEBSITE_DIR, 'streaks.html'), 'w') as f:
+    with open(os.path.join(WEBSITE_DIR, 'streaks.html'), 'w', encoding='utf8') as f:
         template = env.get_template('streaks.html')
         f.write(template.render(streaks=sorted_streaks,
                                 active_streaks=sorted_active_streaks))
 
     print("Writing highscores")
-    with open(os.path.join(WEBSITE_DIR, 'highscores.html'), 'w') as f:
+    with open(os.path.join(WEBSITE_DIR, 'highscores.html'), 'w', encoding='utf8') as f:
         template = env.get_template('highscores.html')
         f.write(template.render(overall_highscores=overall_highscores,
                                 race_highscores=race_highscores,
