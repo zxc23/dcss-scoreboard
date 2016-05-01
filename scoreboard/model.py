@@ -449,7 +449,16 @@ def recent_games(wins=False,
 
 
 def games_by_type(player, col, eligible, winning=True):
-    """Find the count of games for a player grouped by values of col."""
+    """Find the count of games for a player grouped by values of col.
+
+    Parameters:
+        player (str) Player's name
+        col (str)   Name of the colum to search
+        eligible (iterable) List of eligible column values
+        winning (bool) Only winning games?
+
+    Returns: list of games.
+    """
     conn = _engine.connect()
     count = sqlalchemy.sql.functions.count()
     query = select([column(col), count]).group_by(col)
