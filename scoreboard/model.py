@@ -190,8 +190,8 @@ def setup_database(backend):
         version = _engine.execute('select VERSION()').fetchone()[0]
         # We split on '-' to get rid of OS-specific junk like:
         # 5.5.49-0ubuntu0.14.04.1
-        _engine.MYSQL_VERSION = [int(v) for v in
-                                 version.split('-')[0].split('.')]
+        _engine.MYSQL_VERSION = [int(v)
+                                 for v in version.split('-')[0].split('.')]
         assert (_engine.MYSQL_VERSION[0] == 5)
 
     _metadata.create_all(_engine)

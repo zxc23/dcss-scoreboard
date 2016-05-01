@@ -54,8 +54,8 @@ def prettycounter(counter):
         v=v,
         open="" if v > 0 else '<span class="text-muted">',
         close="" if v > 0 else '</span>')
-                     for k, v in sorted(counter.items(),
-                                        key=lambda i: i[0]))
+                          for k, v in sorted(counter.items(),
+                                             key=lambda i: i[0]))
 
 
 def prettycrawldate(d):
@@ -108,8 +108,8 @@ def gamestotable(env,
             win='table-success' if game.ktyp == 'winning' else '',
             prefix_col='' if not prefix_col else "<td>%s</td>" %
             game.raw_data.get(prefix_col),
-            player_row='' if not show_player else
-                "<td>%s</td>" % link_player(game.name, env.globals['urlbase']),
+            player_row='' if not show_player else "<td>%s</td>" % link_player(
+                game.name, env.globals['urlbase']),
             score=prettyint(game.sc),
             character=game.char,
             god=game.god,
@@ -199,8 +199,8 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
         if show_loss:
             loss = "<td>%s</td>" % (morgue_link(
                 model.game(streak['streak_breaker']),
-                model.game(streak['streak_breaker']).char)
-                                    if 'streak_breaker' in streak else '')
+                model.game(streak['streak_breaker']).char) if
+                                    'streak_breaker' in streak else '')
 
         return trow.format(
             wins=len(streak['wins']),
@@ -271,11 +271,9 @@ def mosthighscorestotable(highscores):
                        <td>%s</td>
                        <td class="text-xs-right">%s</td>
                        <td>%s</td>
-                     </tr>"""
-                  % ("<a href='players/{player}.html'>{player}<a>".format(player=entry[0]),
-                     len(entry[1]),
-                     combos
-                    ))
+                     </tr>""" %
+                  ("<a href='players/{player}.html'>{player}<a>".format(
+                      player=entry[0]), len(entry[1]), combos))
 
     return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
 
@@ -285,27 +283,33 @@ def recordsformatted(records):
                 {role}
                 {god}
                 {combo}"""
+
     race = ''
     role = ''
     god = ''
     combo = ''
 
     if records['race']:
-        race = "<p><strong>Species (%s):</strong> %s</p>" % (len(records['race']), ', '.join([morgue_link(game, game.rc) for game in records['race']]))
+        race = "<p><strong>Species (%s):</strong> %s</p>" % (
+            len(records['race']), ', '.join([morgue_link(game, game.rc)
+                                             for game in records['race']]))
 
     if records['role']:
-        role = "<p><strong>Backgrounds (%s):</strong> %s</p>" % (len(records['role']), ', '.join([morgue_link(game, game.bg) for game in records['role']]))
+        role = "<p><strong>Backgrounds (%s):</strong> %s</p>" % (
+            len(records['role']), ', '.join([morgue_link(game, game.bg)
+                                             for game in records['role']]))
 
     if records['god']:
-        god = "<p><strong>Gods (%s):</strong> %s</p>" % (len(records['god']), ', '.join([morgue_link(game, game.god) for game in records['god']]))
+        god = "<p><strong>Gods (%s):</strong> %s</p>" % (
+            len(records['god']), ', '.join([morgue_link(game, game.god)
+                                            for game in records['god']]))
 
     if records['combo']:
-        combo = "<p><strong>Combos (%s):</strong> %s</p>" % (len(records['combo']), ', '.join([morgue_link(game, game.char) for game in records['combo']]))
+        combo = "<p><strong>Combos (%s):</strong> %s</p>" % (
+            len(records['combo']), ', '.join([morgue_link(game, game.char)
+                                              for game in records['combo']]))
 
-    return result.format(race=race,
-                         role=role,
-                         god=god,
-                         combo=combo)
+    return result.format(race=race, role=role, god=god, combo=combo)
 
 
 def morgue_link(game, text="Morgue"):

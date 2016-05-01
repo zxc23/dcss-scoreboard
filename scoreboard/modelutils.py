@@ -50,7 +50,8 @@ def morgue_url(game):
         + "%02d" % (int(game.raw_data['end'][4:6]) + 1) \
         + game.raw_data['end'][6:8]
     time = game.raw_data['end'][8:14]
-    result = "%s/%s/morgue-%s-%s-%s.txt" % (prefix, game.name, game.name, date, time)
+    result = "%s/%s/morgue-%s-%s-%s.txt" % (prefix, game.name, game.name, date,
+                                            time)
     return result
 
 
@@ -60,6 +61,6 @@ def version_url(version):
         return "trunk"
     if len(version) > 4:
         for i in range(len(version)):
-            if version[-(i+1)] == ".":
-                return version[:-(i+1)]
+            if version[-(i + 1)] == ".":
+                return version[:-(i + 1)]
     return version

@@ -82,9 +82,8 @@ def parse_line(line, src):
             continue
         fields = field.split('=', 1)
         if len(fields) != 2:
-            raise ValueError(
-                "Couldn't parse line (bad field %s), skipping: %s" %
-                (field, line))
+            raise ValueError("Couldn't parse line (bad field %s), skipping: %s"
+                             % (field, line))
         k, v = fields[0], fields[1]
         # Store numbers as int, not str
         try:
@@ -95,7 +94,8 @@ def parse_line(line, src):
 
     # Validate the data
     if 'start' not in game:
-        raise ValueError("Couldn't parse this line (missing start field)" % line)
+        raise ValueError("Couldn't parse this line (missing start field)" %
+                         line)
     # Create some derived fields
     game['rc'] = game['char'][:2]
     game['bg'] = game['char'][2:]

@@ -3,7 +3,6 @@
 import os
 import json
 import time
-import shutil
 import subprocess
 import datetime
 
@@ -190,15 +189,19 @@ def write_website(players=set(), urlbase=None):
         else:
             player_streaks[streak['player']].append(streak)
 
-    # Remove streaks from active streaks if last game played more than 3 months ago
+    # Only show streaks active in the past 3 months
     for streak in sorted_active_streaks:
-        timedelta = datetime.datetime.now() - model.game(streak['wins'][-1]).end
+        timedelta = datetime.datetime.now() - model.game(streak['wins'][-
+                                                                        1]).end
         if timedelta.days > 90:
             sorted_active_streaks.remove(streak)
 
     print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
     print("Writing index")
-    with open(os.path.join(WEBSITE_DIR, 'index.html'), 'w', encoding='utf8') as f:
+    with open(
+            os.path.join(WEBSITE_DIR, 'index.html'),
+            'w',
+            encoding='utf8') as f:
         template = env.get_template('index.html')
         f.write(template.render(recent_wins=recent_wins,
                                 active_streaks=sorted_active_streaks,
@@ -206,20 +209,25 @@ def write_website(players=set(), urlbase=None):
                                 combo_high_scores=inverted_combo_highscores))
 
     print("Writing minified local JS")
-    scoreboard_path = os.path.join(WEBSITE_DIR,
-                                   'static/js/dcss-scoreboard.js')
+    scoreboard_path = os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js')
     with open(scoreboard_path, 'w') as f:
         template = env.get_template('dcss-scoreboard.js')
         f.write(jsmin.jsmin(template.render()))
 
     print("Writing streaks")
-    with open(os.path.join(WEBSITE_DIR, 'streaks.html'), 'w', encoding='utf8') as f:
+    with open(
+            os.path.join(WEBSITE_DIR, 'streaks.html'),
+            'w',
+            encoding='utf8') as f:
         template = env.get_template('streaks.html')
         f.write(template.render(streaks=sorted_streaks,
                                 active_streaks=sorted_active_streaks))
 
     print("Writing highscores")
-    with open(os.path.join(WEBSITE_DIR, 'highscores.html'), 'w', encoding='utf8') as f:
+    with open(
+            os.path.join(WEBSITE_DIR, 'highscores.html'),
+            'w',
+            encoding='utf8') as f:
         template = env.get_template('highscores.html')
         f.write(template.render(overall_highscores=overall_highscores,
                                 race_highscores=race_highscores,
@@ -264,6 +272,7 @@ def write_website(players=set(), urlbase=None):
     end = time.time()
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
     print("Wrote website in %s seconds" % round(end - start, 2))
+
 
 if __name__ == "__main__":
     write_website()

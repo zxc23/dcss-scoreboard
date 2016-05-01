@@ -180,8 +180,8 @@ def great_race(race, player_stats, achievements):
         return False
     # Check for completion
     roles_won = set(get_game(gid)['char'][2:]
-                    for gid in player_stats['wins'] if
-                    race == get_game(gid).rc)
+                    for gid in player_stats['wins']
+                    if race == get_game(gid).rc)
     if not const.PLAYABLE_ROLES - roles_won:
         achievements[achievement] = True
         return True
@@ -208,8 +208,8 @@ def great_role(role, player_stats, achievements):
         return False
     # Check for completion
     races_won = set(get_game(gid)['char'][:2]
-                    for gid in player_stats['wins'] if
-                    role == get_game(gid)['char'][2:])
+                    for gid in player_stats['wins']
+                    if role == get_game(gid)['char'][2:])
     if not const.PLAYABLE_RACES - races_won:
         achievements[achievement] = True
         return True
@@ -434,10 +434,8 @@ def score_games(rebuild=False):
     for key, data in GLOBAL_STATS_CACHE.items():
         model.set_global_stat(key, data)
     end = time.time()
-    print("Scored %s new games (for %s players) in %s secs" % (
-        scored,
-        len(scored_players),
-        round(end - start, 2)))
+    print("Scored %s new games (for %s players) in %s secs" %
+          (scored, len(scored_players), round(end - start, 2)))
 
     return scored_players
 
