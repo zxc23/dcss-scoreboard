@@ -230,7 +230,8 @@ def write_website(players=set(), urlbase=None):
     print("Writing %s player pages... " % len(players))
     start2 = time.time()
     player_html_path = os.path.join(WEBSITE_DIR, 'players')
-    os.mkdir(player_html_path)
+    if not os.path.exists(player_html_path):
+        os.mkdir(player_html_path)
     achievements = achievement_data()
     template = env.get_template('player.html')
 
