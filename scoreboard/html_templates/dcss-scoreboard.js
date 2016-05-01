@@ -15,3 +15,8 @@ $('document').ready(function() {
     window.location.href = '{{ urlbase }}/players/' + document.querySelector("#playersearch").value + '.html';
   });
 });
+
+// Convert all timestamps to relative
+jQuery(document).ready(function() {
+  jQuery("time.timeago").timeago();
+});

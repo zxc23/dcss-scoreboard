@@ -9,8 +9,8 @@ from . import model
 from . import modelutils
 from . import constants as const
 
-DATE_FORMAT = '%-d %B %Y'
-
+PRETTY_TIME_FORMAT = '%-d %B %Y'
+TIME_FORMAT = '<time class="timeago" datetime="{ts}Z">{t}</time>'
 
 def prettyint(value):
     """Jinja filter to prettify ints.
@@ -60,12 +60,14 @@ def prettycounter(counter):
 
 def prettycrawldate(d):
     """Jinja filter to convert crawl date string to pretty text."""
-    return modelutils.crawl_date_to_datetime(d).strftime(DATE_FORMAT)
+    d = modelutils.crawl_date_to_datetime(d)
+    return prettydate(d)
 
 
 def prettydate(d):
     """Jinja filter to convert datetime object to pretty text."""
-    return d.strftime(DATE_FORMAT)
+    return TIME_FORMAT.format(ts=d.isoformat(),
+                              t=d.strftime(PRETTY_TIME_FORMAT))
 
 
 def link_player(player, urlbase):
