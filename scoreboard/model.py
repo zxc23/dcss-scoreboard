@@ -457,7 +457,6 @@ def games_by_type(player, col, eligible, winning=True):
     if winning:
         query = query.where(_games.c.ktyp == 'winning')
     query = query.group_by(col)
-    print(query.compile(compile_kwargs={"literal_binds": True}))
     return {i[0]: i[1]
             for i in conn.execute(query).fetchall() if i[0] in eligible}
 
@@ -551,3 +550,12 @@ def god_highscores():
 def combo_highscores():
     """Return the highest scoring game for each combo."""
     return _highscores(_games.c.char, const.PLAYABLE_COMBOS)
+
+
+def last_active(player):
+    """Return the date of most recent activity for player."""
+    conn = _engine.connect()
+    s = select([_games.c.end]).order_by(desc('end')).limit(1)
+    result = conn.execute(s).fetchone()
+    if result:
+        return result[0]

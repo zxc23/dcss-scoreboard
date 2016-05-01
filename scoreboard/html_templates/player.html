@@ -9,9 +9,9 @@
 </div>
 <div class="row">
   <div class="col-sm-3">
-    <p><strong>Last Active:</strong> {{ stats['last_active']|prettycrawldate }}</p>
+    <p><strong>Last Active:</strong> {{ last_active|prettydate }}</p>
     <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
-    <p><strong>Wins:</strong> {{ stats['wins']|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
+    <p><strong>Wins:</strong> {{ all_wins|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
     <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
   </div>
   <div class="col-sm-3">
@@ -58,7 +58,7 @@
   </div>
 {% endif %}
 <hr/>
-{% if stats['wins']|length %}
+{% if all_wins|length %}
 <div class="row">
   <div class="col-sm-12">
     <h3>Wins</h3>

@@ -91,10 +91,12 @@ def write_player_stats(*, player, stats, outfile, achievements, streaks,
     race_wins = model.games_by_type(player, 'rc', const.PLAYABLE_RACES)
     background_wins = model.games_by_type(player, 'bg', const.PLAYABLE_ROLES)
     god_wins = model.games_by_type(player, 'god', const.PLAYABLE_GODS)
+    last_active = model.last_active(player)
 
     with open(outfile, 'w', encoding='utf8') as f:
         f.write(template.render(player=player,
                                 stats=stats,
+                                last_active=last_active,
                                 all_wins=all_wins,
                                 race_wins=race_wins,
                                 background_wins=background_wins,
