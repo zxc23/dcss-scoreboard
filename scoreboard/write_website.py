@@ -99,12 +99,12 @@ def write_player_stats(*, player, stats, outfile, achievements, streaks,
                                 recent_games=recent_games))
 
 
-def write_website(players=[], urlbase=None):
+def write_website(players=set(), urlbase=None):
     """Write all website files.
 
     Paramers:
-        rebuild (bool) If True, recreate the website from scratch
-        players (list of strings) Only rebuild these players (if rebuild=False)
+        urlbase (str) Base URL for the website
+        players (iterable of strings) Only write these player pages
     """
     start = time.time()
 
@@ -224,7 +224,7 @@ def write_website(players=[], urlbase=None):
                                 fastest_wins=fastest_wins,
                                 shortest_wins=shortest_wins))
 
-    print("Writing player pages... ")
+    print("Writing %s player pages... " % len(players))
     start2 = time.time()
     player_html_path = os.path.join(WEBSITE_DIR, 'players')
     os.mkdir(player_html_path)

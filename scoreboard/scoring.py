@@ -406,6 +406,8 @@ def score_games(rebuild=False):
     start = time.time()
     scored = 0
 
+    scored_players = set()
+
     # Load blacklisted players into cache
     load_blacklisted_players()
 
@@ -418,6 +420,7 @@ def score_games(rebuild=False):
             break
         for game in games:
             score_game(game)
+            scored_players.add(game.name)
             scored += 1
             if scored % 10000 == 0 and scored > 0:
                 print(scored)
@@ -431,7 +434,12 @@ def score_games(rebuild=False):
     for key, data in GLOBAL_STATS_CACHE.items():
         model.set_global_stat(key, data)
     end = time.time()
-    print("Scored %s new games in %s secs" % (scored, round(end - start, 2)))
+    print("Scored %s new games (for %s players) in %s secs" % (
+        scored,
+        len(scored_players),
+        round(end - start, 2)))
+
+    return scored_players
 
 
 if __name__ == "__main__":
