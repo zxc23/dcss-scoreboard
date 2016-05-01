@@ -220,20 +220,23 @@ def score_game_vs_streaks(game, won):
     """Extend active streaks if a game was won and finalise streak stats."""
     active_streaks = load_global_stat('active_streaks', {})
     name = game.name
+    # Player might have different capitalisation between
+    # servers.
+    cname = name.lower()
     if won:
         # Extend or start a streak
-        if name in active_streaks:
-            if is_valid_streak_addition(game, active_streaks[name]):
-                active_streaks[name]['wins'].append(game.gid)
-                active_streaks[name]['end'] = game.end
+        if cname in active_streaks:
+            if is_valid_streak_addition(game, active_streaks[cname]):
+                active_streaks[cname]['wins'].append(game.gid)
+                active_streaks[cname]['end'] = game.end
         else:
-            active_streaks[name] = {'player': name,
-                                    'wins': [game.gid],
-                                    'start': game.start,
-                                    'end': game.end}
+            active_streaks[cname] = {'player': name,
+                                     'wins': [game.gid],
+                                     'start': game.start,
+                                     'end': game.end}
     else:
         # If the player was on a 2+ game streak, finalise it
-        streak = active_streaks.get(name)
+        streak = active_streaks.get(cname)
         if streak and len(streak['wins']) > 1:
             # Ignore game if griefing detected
             if is_grief(game):
@@ -243,8 +246,8 @@ def score_game_vs_streaks(game, won):
             streak['end'] = game.end
             completed_streaks.append(streak)
             set_global_stat('completed_streaks', completed_streaks)
-        if name in active_streaks:
-            del active_streaks[name]
+        if cname in active_streaks:
+            del active_streaks[cname]
         else:
             # No need to adjust active_streaks
             return

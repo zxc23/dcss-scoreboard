@@ -248,8 +248,8 @@ def write_website(players=set(), urlbase=None):
     n = 0
     for player in players:
         stats = model.get_player_stats(player)
-        streaks = player_streaks.get(player, [])
-        active_streak = active_streaks.get(player, {})
+        streaks = player_streaks.get(player.lower(), [])
+        active_streak = active_streaks.get(player.lower(), {})
         records = player_records(player, race_highscores, role_highscores,
                                  combo_highscores, god_highscores)
 
