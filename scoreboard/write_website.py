@@ -119,10 +119,9 @@ def write_website(players=set(), urlbase=None):
         players = all_players
 
     print("Writing HTML to %s" % WEBSITE_DIR)
-    if os.path.isdir(WEBSITE_DIR):
-        print("Clearing %s" % WEBSITE_DIR)
-        shutil.rmtree(WEBSITE_DIR)
-    os.mkdir(WEBSITE_DIR)
+    if not os.path.exists(WEBSITE_DIR):
+        print("mkdir %s/" % WEBSITE_DIR)
+        os.mkdir(WEBSITE_DIR)
 
     print("Copying static assets")
     src = os.path.join(os.path.dirname(__file__), 'html_static')
