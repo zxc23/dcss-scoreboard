@@ -36,16 +36,32 @@ def is_grief(game):
 
     This involves experimental anti-griefing heuristics.
     """
-    # First time playing a server and fast loss
     name = game['name']
+
+    # Not a grief if not the player's first game on a server
     src = game['src']
     first_game = model.first_game(name, src)
-    if game['gid'] == first_game['gid'] and (game['dur'] < 1200 or
-                                             game['turn'] < 1000):
-        model.add_player_to_blacklist(name, src)
-        add_to_blacklist_cache(name, src)
-        return True
+    if game['gid'] != first_game['gid']:
+        return False
+
+    # Were consumables used?
+    if game.raw_data['potionsused'] > 0 or game.raw_data['scrollsused'] > 0:
+        # Tighter thresholds for grief detection
+        if game['dur'] < 600 or game['turn'] < 1000:
+            blacklist_player(name, src)
+            return True
+    else:
+        # Very loose thresholds for grief detection
+        if game['dur'] < 1200 or game['turn'] < 5000:
+            blacklist_player(name, src)
+            return True
     return False
+
+
+def blacklist_player(name, src):
+    """Adds a player-server combo to the blacklist."""
+    add_to_blacklist_cache(name, src)
+    model.add_player_to_blacklist(name, src)
 
 
 def is_blacklisted(name, src):
