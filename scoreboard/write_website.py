@@ -198,13 +198,6 @@ def write_website(players=set(), urlbase=None):
         else:
             player_streaks[streak['player']].append(streak)
 
-    # Only show streaks active in the past 3 months
-    for streak in sorted_active_streaks:
-        timedelta = datetime.datetime.now() - model.game(streak['wins'][-
-                                                                        1]).end
-        if timedelta.days > 90:
-            sorted_active_streaks.remove(streak)
-
     print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
     print("Writing index")
     with open(
