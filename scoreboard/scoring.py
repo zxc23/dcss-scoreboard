@@ -257,7 +257,6 @@ def score_game_vs_streaks(game, won):
 def score_game(game_row):
     """Score a single game."""
     gid = game_row.gid
-    game = game_row.raw_data
     name = game_row.name
     src = game_row.src
 
@@ -267,11 +266,11 @@ def score_game(game_row):
         return
 
     # Log vars
-    god = game['god']
-    score = game['sc']
-    race = game['rc']
-    role = game['bg']
-    won = game['ktyp'] == 'winning'
+    god = game_row.god
+    score = game_row.sc
+    race = game_row.rc
+    role = game_row.bg
+    won = game_row.ktyp == 'winning'
 
     # Player vars
     stats = load_player_stats(name)
@@ -280,8 +279,8 @@ def score_game(game_row):
 
     # Start updating stats
     stats['games'] += 1
-    stats['last_active'] = game['end']
-    stats['total_playtime'] += game['dur']
+    stats['last_active'] = game_row.end
+    stats['total_playtime'] += game_row.dur
 
     # Increment wins
     if won:
@@ -289,14 +288,14 @@ def score_game(game_row):
         wins += 1
 
         # Adjust fastest_realtime win
-        if 'fastest_realtime' not in stats or game['dur'] < stats[
-                'fastest_realtime']['dur']:
-            stats['fastest_realtime'] = game
+        if 'fastest_realtime' not in stats or game_row.dur < get_game(stats[
+                'fastest_realtime']).dur:
+            stats['fastest_realtime'] = game_row.gid
 
         # Adjust fastest_turncount win
-        if 'fastest_turncount' not in stats or game['turn'] < stats[
-                'fastest_turncount']['turn']:
-            stats['fastest_turncount'] = game
+        if 'fastest_turncount' not in stats or game_row.turn < get_game(stats[
+                'fastest_turncount']).turn:
+            stats['fastest_turncount'] = game_row.gid
 
         # Increment god_wins and check polytheist
         if god in stats['god_wins']:
@@ -332,25 +331,6 @@ def score_game(game_row):
              if stats['role_wins'][role] > 0]):
             achievements['greaterplayer'] = True
 
-        # Adjust avg_win stats
-        # Older logfiles didn't have these fields, so skip those games
-        if 'ac' in game:
-            if 'avg_win_ac' not in stats:
-                stats['avg_win_ac'] = game['ac']
-            else:
-                stats['avg_win_ac'] += (
-                    game['ac'] - stats['avg_win_ac']) / wins
-            if 'avg_win_ev' not in stats:
-                stats['avg_win_ev'] = game['ev']
-            else:
-                stats['avg_win_ev'] += (
-                    game['ev'] - stats['avg_win_ev']) / wins
-            if 'avg_win_sh' not in stats:
-                stats['avg_win_sh'] = game['sh']
-            else:
-                stats['avg_win_sh'] += (
-                    game['sh'] - stats['avg_win_sh']) / wins
-
         # Adjust win-based achievements
         if wins >= 10:
             achievements['goodplayer'] = True
@@ -365,15 +345,16 @@ def score_game(game_row):
         if great_role(role, stats, achievements):
             achievements[const.ROLE_TO_GREAT_ROLE[role]] = True
 
-        # Older logfiles don't have these fields, so skip those games
-        if 'potionsused' in game and game['potionsused'] == 0 and game[
-                'scrollsused'] == 0:
+        potions = game_row['raw_data'].get('potionsused')
+        scrolls = game_row['raw_data'].get('scrollsused')
+        if potions is not None and not potions and \
+                scrolls is not None and not scrolls:
             if 'no_potion_or_scroll_win' not in achievements:
                 achievements['no_potion_or_scroll_win'] = 1
             else:
                 achievements['no_potion_or_scroll_win'] += 1
 
-        if 'zigdeepest' in game and game['zigdeepest'] == '27':
+        if game_row['raw_data'].get('zigdeepest') == '27':
             if 'cleared_zig' not in achievements:
                 achievements['cleared_zig'] = 1
             else:
@@ -381,12 +362,12 @@ def score_game(game_row):
 
     else:  # !won
         # Increment boring_games
-        if game['ktyp'] in ('leaving', 'quitting'):
+        if game_row.ktyp in ('leaving', 'quitting'):
             stats['boring_games'] += 1
 
     # Update other player stats
-    if 'highscore' not in stats or score > stats['highscore']['sc']:
-        stats['highscore'] = game
+    if 'highscore' not in stats or score > get_game(stats['highscore'])['sc']:
+        stats['highscore'] = game_row.gid
     stats['winrate'] = wins / stats['games']
     stats['total_score'] += score
     stats['avg_score'] = stats['total_score'] / stats['games']
