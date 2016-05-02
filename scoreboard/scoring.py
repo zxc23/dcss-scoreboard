@@ -21,13 +21,13 @@ def get_game(gid):
 
 def is_valid_streak_addition(game, streak):
     """Check if the game is a valid addition to the streak."""
-    # Extend active streak only if win started after previous game end
-    if isinstance(streak['start'], datetime.datetime):
-        end = streak['start']
-    else:
-        end = dateutil.parser.parse(streak['start'])
     if len(streak['wins']) == 0:
         return True
+    # Extend active streak only if win started after previous game end
+    if isinstance(streak['end'], datetime.datetime):
+        end = streak['end']
+    else:
+        end = dateutil.parser.parse(streak['end'])
     return game.start > end
 
 
