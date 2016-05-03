@@ -21,14 +21,15 @@ def get_game(gid):
 
 def is_valid_streak_addition(game, streak):
     """Check if the game is a valid addition to the streak."""
-    if len(streak['wins']) == 0:
+    # Valid if no streak to begin with
+    if not streak:
         return True
-    # Extend active streak only if win started after previous game end
-    if isinstance(streak['end'], datetime.datetime):
-        end = streak['end']
+    # Valid if the game started after the start of the streak
+    if isinstance(streak['start'], datetime.datetime):
+        start = streak['start']
     else:
-        end = dateutil.parser.parse(streak['end'])
-    return game.start > end
+        start = dateutil.parser.parse(streak['start'])
+    return game.start > start
 
 
 def is_grief(game):
@@ -234,39 +235,48 @@ def great_role(role, player_stats, achievements):
 
 def score_game_vs_streaks(game, won):
     """Extend active streaks if a game was won and finalise streak stats."""
+
+    # Player might have different capitalisation between servers
+    cname = game.name.lower()
+
+    # Retrieve active streak
     active_streaks = load_global_stat('active_streaks', {})
-    name = game.name
-    # Player might have different capitalisation between
-    # servers.
-    cname = name.lower()
+    streak = active_streaks.get(cname)
+
+    # Ignore game if not a valid streak addition
+    if not is_valid_streak_addition(game, streak):
+        return
+
     if won:
         # Extend or start a streak
-        if cname in active_streaks:
-            if is_valid_streak_addition(game, active_streaks[cname]):
-                active_streaks[cname]['wins'].append(game.gid)
-                active_streaks[cname]['end'] = game.end
+        if streak:
+            streak['wins'].append(game.gid)
+            streak['end'] = game.end
         else:
-            active_streaks[cname] = {'player': name,
-                                     'wins': [game.gid],
-                                     'start': game.start,
-                                     'end': game.end}
+            streak = {'player': cname,
+                      'wins': [game.gid],
+                      'start': game.end}
+        # Update the active streak dict
+        active_streaks[cname] = streak
     else:
-        # If the player was on a 2+ game streak, finalise it
-        streak = active_streaks.get(cname)
+        # Finalise 2+ win streaks
         if streak and len(streak['wins']) > 1:
+
             # Ignore game if griefing detected
             if is_grief(game):
                 return
+
             completed_streaks = load_global_stat('completed_streaks', [])
             streak['streak_breaker'] = game.gid
-            streak['end'] = game.end
             completed_streaks.append(streak)
             set_global_stat('completed_streaks', completed_streaks)
+
         if cname in active_streaks:
             del active_streaks[cname]
         else:
             # No need to adjust active_streaks
             return
+    # Update global stat with new active streak dict
     set_global_stat('active_streaks', active_streaks)
 
 
