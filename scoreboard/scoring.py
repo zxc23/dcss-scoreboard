@@ -253,7 +253,7 @@ def score_game_vs_streaks(game, won):
             streak['wins'].append(game.gid)
             streak['end'] = game.end
         else:
-            streak = {'player': cname,
+            streak = {'cname': cname,
                       'wins': [game.gid],
                       'start': game.end}
         # Update the active streak dict

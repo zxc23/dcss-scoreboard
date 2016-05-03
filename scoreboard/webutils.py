@@ -199,7 +199,7 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
         loss = ""
         if show_player:
             player = "<td><a href='players/{player}.html'>{player}<a></td>".format(
-                player=streak['player'])
+                player=model.game(streak['wins'][-1]).name)
         if show_loss:
             loss = "<td>%s</td>" % (morgue_link(
                 model.game(streak['streak_breaker']),

@@ -193,10 +193,10 @@ def write_website(players=set(), urlbase=None):
     # Get streaks by player
     player_streaks = {}
     for streak in sorted_streaks:
-        if streak['player'] not in player_streaks:
-            player_streaks[streak['player']] = [streak]
+        if streak['cname'] not in player_streaks:
+            player_streaks[streak['cname']] = [streak]
         else:
-            player_streaks[streak['player']].append(streak)
+            player_streaks[streak['cname']].append(streak)
 
     print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
     print("Writing index")
