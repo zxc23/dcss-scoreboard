@@ -254,7 +254,11 @@ def write_website(players=set(), urlbase=None):
         active_streak = active_streaks.get(player.lower(), {})
         records = player_records(player, race_highscores, role_highscores,
                                  combo_highscores, god_highscores)
-
+        # Don't make pages for players with no stats
+        # This can happen for players that are blacklisted, eg bots
+        # and griefers.
+        if stats is None:
+            continue
         # Don't make pages for players with no games played
         if stats['games'] == 0:
             continue
