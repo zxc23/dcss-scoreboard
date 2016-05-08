@@ -177,8 +177,8 @@ def write_website(players=set(), urlbase=None):
                                        key=lambda i: len(i[1]))[:5]
 
     # Merge active streaks into streaks
-    streaks = stats['completed_streaks']
-    active_streaks = stats['active_streaks']
+    streaks = stats.get('completed_streaks', [])
+    active_streaks = stats.get('active_streaks', {})
     sorted_active_streaks = []
 
     for streak in active_streaks.values():
