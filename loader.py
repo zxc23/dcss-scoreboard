@@ -3,12 +3,12 @@
 
 import argparse
 import sys
-import subprocess
 
 import scoreboard.model
 import scoreboard.log_import
 import scoreboard.scoring
 import scoreboard.write_website
+import scoreboard.sources
 
 
 def error(msg):
@@ -22,6 +22,9 @@ def read_commandline():
     description = "Run DCSS Scoreboard."
     epilog = "Specify DB_USER/DB_PASS environment variables if required."
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
+    parser.add_argument('--logdir',
+                        help="Override logfile source. Default: logfiles/",
+                        default="logfiles")
     parser.add_argument('--urlbase',
                         help="Override website base URL. Default: file:///CWD")
     parser.add_argument('--database',
@@ -60,14 +63,15 @@ def read_commandline():
 
 
 def main(player=None):
+    """Run CLI."""
     args = read_commandline()
 
     scoreboard.model.setup_database(args.database)
 
     if not args.skip_download:
-        subprocess.run('./download-logs.sh')
+        scoreboard.sources.download_sources(args.logdir)
     if not args.skip_import:
-        scoreboard.log_import.load_logfiles()
+        scoreboard.log_import.load_logfiles(logdir=args.logdir)
     if not args.skip_scoring:
         if args.player:
             scoreboard.scoring.rescore_player(args.player)

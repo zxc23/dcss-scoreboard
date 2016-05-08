@@ -3,13 +3,14 @@
 import os
 import re
 import time
-import glob
 
 from . import model
 
-# Logfile format escapes : as ::, so we need to split with re.split
-# Instead of naive line.split(':')
-LINE_SPLIT_PATTERN = '(?<!:):(?!:)'
+# Logfile format escapes : as ::, so we use re.split
+# instead of the näive line.split(':')
+LINE_SPLIT_PATTERN = re.compile('(?<!:):(?!:)')
+LOGFILE_REGEX = re.compile('(logfile|allgames)')
+MILESTONE_REGEX = re.compile('milestone')
 
 
 def calculate_game_gid(game):
@@ -17,19 +18,38 @@ def calculate_game_gid(game):
     return "%s:%s:%s" % (game['name'], game['src'], game['start'])
 
 
-def load_logfiles():
-    """Read logfiles and parse their data."""
+def load_logfiles(logdir):
+    """Read logfiles and parse their data.
+
+    Logfiles are kept in a directory with structure:
+    logdir/{src}/{log or milestone file}.
+    """
     print("Loading all logfiles")
     start = time.time()
     count = 0
-    for logfile in sorted(glob.glob("logfiles/*")):
-        count += load_logfile(logfile)
+    for d in os.scandir(logdir):
+        if not d.is_dir():
+            continue
+        src = d.name
+        src_path = os.path.join(logdir, src)
+        print("Loading logfiles from %s" % src_path)
+        for f in os.scandir(src_path):
+            f_path = os.path.join(src_path, f.name)
+            if not f.is_file() or f.stat().st_size == 0:
+                continue
+            elif re.search(MILESTONE_REGEX, f.name):
+                # XXX to be handled later
+                continue
+            elif re.search(LOGFILE_REGEX, f.name):
+                count += load_logfile(f_path, src)
+            else:
+                print("Skipping unknown file {}".format(f.name))
     end = time.time()
     print("Loaded logfiles with %s new games in %s secs" %
           (count, round(end - start, 2)))
 
 
-def load_logfile(logfile):
+def load_logfile(logfile, src):
     """Load a single logfile into the database.
 
     Returns the number of new games loaded.
@@ -37,8 +57,6 @@ def load_logfile(logfile):
     if os.stat(logfile).st_size == 0:
         return 0
     start = time.time()
-    # Should be server source, eg cao, cpo, etc
-    src = os.path.basename(logfile.split('-', 1)[0])
     lines = 0
     # How many lines have we already processed?
     processed_lines = model.logfile_pos(logfile)
@@ -46,6 +64,8 @@ def load_logfile(logfile):
                                 processed_lines else ''))
     for line in open(logfile, encoding='utf-8'):
         lines += 1
+        if lines == processed_lines + 10:
+            break
         # skip up to the first unprocessed line
         if lines <= processed_lines:
             continue
@@ -56,6 +76,9 @@ def load_logfile(logfile):
             game = parse_line(line, src)
         except Exception as e:
             print("Couldn't parse line (%s): %s" % (e, line))
+            continue
+        # Check we got a game back
+        if game is None:
             continue
         # Store the game in the database
         try:
@@ -71,7 +94,11 @@ def load_logfile(logfile):
 
 
 def parse_line(line, src):
-    """Read a single logfile line and insert it into the database."""
+    """Read a single logfile line and insert it into the database.
+
+    If the game is not a vanilla crawl game (eg sprint or zotdef), None is
+    returned.
+    """
     game = {}
     game['src'] = src
 
@@ -96,6 +123,8 @@ def parse_line(line, src):
     if 'start' not in game:
         raise ValueError("Couldn't parse this line (missing start field)" %
                          line)
+    if game['lv'] != '0.1':
+        return None
     # Create some derived fields
     game['rc'] = game['char'][:2]
     game['bg'] = game['char'][2:]

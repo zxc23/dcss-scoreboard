@@ -4,3 +4,4 @@ pylru
 mysqlclient
 python-dateutil
 jsmin
+braceexpand
