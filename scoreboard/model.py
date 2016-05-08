@@ -83,9 +83,12 @@ def setup_database(backend):
                           primary_key=True,
                           nullable=False),
                    Column('name',
-                          String(50),  # XXX: is this long enough?
+                          String(20),
                           nullable=False,
                           index=True),
+                   Column('displayname',
+                          String(20),
+                          nullable=False),
                    Column('src', String(4), nullable=False),
                    Column('v', String(10), nullable=False),
                    Column('char', String(4), nullable=False, index=True),
@@ -199,6 +202,8 @@ def setup_database(backend):
 
 def add_game(gid, raw_data):
     """Normalise and add a game to the database."""
+    if 'end' not in raw_data:
+        raise DatabaseError("No end field in this log: %s" % raw_data)
     raw_data['god'] = const.GOD_NAME_FIXUPS.get(raw_data['god'],
                                                 raw_data['god'])
     raw_data['original_race'] = raw_data['race']
@@ -209,7 +214,8 @@ def add_game(gid, raw_data):
         conn.execute(
             _games.insert(),
             gid=gid,
-            name=raw_data['name'],
+            name=raw_data['name'].lower(),
+            displayname=raw_data['name'],
             src=raw_data['src'],
             v=raw_data['v'],
             char=raw_data['char'],
@@ -432,6 +438,8 @@ def recent_games(wins=False,
 
     Returns recent games as a list of Games.
     """
+    if player is not None:
+        player = player.lower()
     conn = _engine.connect()
     query = _games.select()
     if wins:

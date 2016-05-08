@@ -113,9 +113,13 @@ def parse_line(line, src):
                              % (field, line))
         k, v = fields[0], fields[1]
         # Store numbers as int, not str
-        try:
-            v = int(v)
-        except ValueError:
+        # Name field is sometimes parseable as an int
+        if k != 'name':
+            try:
+                v = int(v)
+            except ValueError:
+                pass
+        if isinstance(v, str):
             v = v.replace("::", ":")  # Undo logfile escaping
         game[k] = v
 
