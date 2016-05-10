@@ -142,11 +142,11 @@ def parse_line(line, src):
 
     # Parse the log's raw field data
     for field in re.split(LINE_SPLIT_PATTERN, line):
-        if not field:
+        if not field.strip():
             continue
         fields = field.split('=', 1)
         if len(fields) != 2:
-            raise ValueError("Couldn't parse line (bad field %s), skipping: %s"
+            raise ValueError("Couldn't parse line (bad field %r), skipping: %r"
                              % (field, line))
         k, v = parse_field(*fields)
         game[k] = v
