@@ -77,7 +77,7 @@ def download_source_files(urls, dest):
                            stderr=subprocess.PIPE)
         if p.returncode:
             print("Couldn't download {}. Error: {}".format(url, p.stderr))
-            if 'ERROR 404' in p.stderr or 'ERROR 403' in p.stderr:
+            if b'ERROR 404' in p.stderr or b'ERROR 403' in p.stderr:
                 # Write a zero-byte file so we don't try it again in future
                 open(destfile, 'w').close()
         else:
@@ -90,7 +90,7 @@ def download_sources(dest):
     if not os.path.exists(dest):
         os.mkdir(dest)
     sources = source_data()
-    p = multiprocessing.Pool(8)
+    p = multiprocessing.Pool(10)
     jobs = []
     for src, urls in sources.items():
         destdir = os.path.join(dest, src)
