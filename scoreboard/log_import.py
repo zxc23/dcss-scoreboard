@@ -66,29 +66,28 @@ def load_logfile(logfile, src):
     new_games = 0
     # How many lines have we already processed?
     try:
-        processed_lines = model.logfile_pos(logfile)
+        seek_pos = model.logfile_pos(logfile)
     except model.DatabaseError as e:
         print(e)
         return
 
-    print("Reading %s%s... " % (logfile, (" from line %s" % processed_lines) if
-                                processed_lines else ''))
-    for line in open(logfile, encoding='utf-8'):
+    print("Reading %s%s... " % (logfile, (" from pos %s" % seek_pos) if
+                                seek_pos else ''))
+    f = open(logfile, encoding='utf-8')
+    f.seek(seek_pos)
+    for line in f:
         lines += 1
-        # skip up to the first unprocessed line
-        if lines <= processed_lines:
-            continue
         # skip blank lines
         if not line:
             continue
         if handle_line(line, src):
             new_games += 1
     # Save the new number of lines processed in the database
-    model.save_logfile_pos(logfile, lines)
+    model.save_logfile_pos(logfile, f.tell())
     end = time.time()
     msg = "Finished reading {f} ({l} new lines, {g} new games) in {s} secs"
     print(msg.format(f=logfile,
-                     l=lines - processed_lines,
+                     l=lines,
                      g=new_games,
                      s=round(end - start, 2)))
 
