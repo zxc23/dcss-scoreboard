@@ -23,6 +23,12 @@ class DatabaseError(Exception):
     pass
 
 
+class DuplicateKeyError(Exception):
+    """Generic error for issues with the model."""
+
+    pass
+
+
 def sqlite_performance_over_safety(dbapi_con, con_record):
     """Significantly speeds up inserts but will break on crash."""
     dbapi_con.execute('PRAGMA journal_mode = MEMORY')
@@ -68,7 +74,7 @@ def setup_database(backend):
         auth = '' if 'DB_USER' not in os.environ else '%s:%s@' % (
             os.environ.get('DB_USER'), os.environ.get('DB_PASS'))
         DB_URI = 'mysql://%slocalhost/dcss_scoreboard' % auth
-        ENGINE_OPTS = {'pool_size': 1, 'max_overflow': -1, 'pool_recycle': 60}
+        ENGINE_OPTS = {'poolclass': sqlalchemy.pool.NullPool}
     else:
         raise RuntimeError("Unknown database backend %s" % backend)
     print("Using database %s" % DB_URI)
@@ -235,7 +241,11 @@ def add_game(gid, raw_data):
             raw_data=raw_data)
     except sqlalchemy.exc.IntegrityError as e:
         if e.orig.args[0] == 1062:  # duplicate entry for private key
-            raise DatabaseError("Gid %s already exists in the database." % gid)
+            raise DuplicateKeyError("%s already exists in the database." % gid) from e
+        else:
+            raise
+    except sqlalchemy.exc.OperationalError as e:
+        raise DatabaseError("Couldn't import %s (%s)" % (gid, e))
 
 
 def logfile_pos(logfile):
@@ -243,7 +253,11 @@ def logfile_pos(logfile):
     conn = _engine.connect()
     s = _logfile_progress.select().where(_logfile_progress.c.logfile ==
                                          logfile)
-    row = conn.execute(s).fetchone()
+
+    try:
+        row = conn.execute(s).fetchone()
+    except sqlalchemy.exc.OperationalError as e:
+        raise DatabaseError("Couldn't load logfile pos for %s (%s)" % (logfile, e)) from e
     if row:
         return row.lines_parsed
     else:

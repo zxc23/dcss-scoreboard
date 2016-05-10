@@ -3,11 +3,12 @@
 import os
 import re
 import time
+import multiprocessing
 
 from . import model
 
 # Logfile format escapes : as ::, so we use re.split
-# instead of the näive line.split(':')
+# instead of the naive line.split(':')
 LINE_SPLIT_PATTERN = re.compile('(?<!:):(?!:)')
 LOGFILE_REGEX = re.compile('(logfile|allgames)')
 MILESTONE_REGEX = re.compile('milestone')
@@ -26,7 +27,7 @@ def load_logfiles(logdir):
     """
     print("Loading all logfiles")
     start = time.time()
-    count = 0
+    candidates = []
     for d in os.scandir(logdir):
         if not d.is_dir():
             continue
@@ -41,56 +42,94 @@ def load_logfiles(logdir):
                 # XXX to be handled later
                 continue
             elif re.search(LOGFILE_REGEX, f.name):
-                count += load_logfile(f_path, src)
+                candidates.append((f_path, src))
+                # count += load_logfile(f_path, src)
             else:
                 print("Skipping unknown file {}".format(f.name))
+    p = multiprocessing.Pool(8)
+    jobs = []
+    for candidate in candidates:
+        jobs.append(p.apply_async(load_logfile, candidate))
+        time.sleep(1)  # Stagger start time
+    for job in jobs:
+        job.get()
     end = time.time()
-    print("Loaded logfiles with %s new games in %s secs" %
-          (count, round(end - start, 2)))
+    print("Loaded logfiles in %s secs" % round(end - start, 2))
 
 
 def load_logfile(logfile, src):
-    """Load a single logfile into the database.
-
-    Returns the number of new games loaded.
-    """
+    """Load a single logfile into the database."""
     if os.stat(logfile).st_size == 0:
         return 0
     start = time.time()
     lines = 0
+    new_games = 0
     # How many lines have we already processed?
-    processed_lines = model.logfile_pos(logfile)
+    try:
+        processed_lines = model.logfile_pos(logfile)
+    except model.DatabaseError as e:
+        print(e)
+        return
+
     print("Reading %s%s... " % (logfile, (" from line %s" % processed_lines) if
                                 processed_lines else ''))
     for line in open(logfile, encoding='utf-8'):
         lines += 1
-        if lines == processed_lines + 10:
-            break
         # skip up to the first unprocessed line
         if lines <= processed_lines:
             continue
         # skip blank lines
         if not line:
             continue
-        try:
-            game = parse_line(line, src)
-        except Exception as e:
-            print("Couldn't parse line (%s): %s" % (e, line))
-            continue
-        # Check we got a game back
-        if game is None:
-            continue
-        # Store the game in the database
-        try:
-            model.add_game(game['gid'], game)
-        except model.DatabaseError as e:
-            print(e)
+        if handle_line(line, src):
+            new_games += 1
     # Save the new number of lines processed in the database
     model.save_logfile_pos(logfile, lines)
     end = time.time()
-    print("Finished reading %s (%s new lines) in %s secs" %
-          (logfile, lines - processed_lines, round(end - start, 2)))
-    return lines - processed_lines
+    msg = "Finished reading {f} ({l} new lines, {g} new games) in {s} secs"
+    print(msg.format(f=logfile,
+                     l=lines - processed_lines,
+                     g=new_games,
+                     s=round(end - start, 2)))
+
+
+def handle_line(line, src):
+    """Given a line, parse it and save it into the database.
+
+    Returns True if the line was successfully parsed and added to the database.
+    """
+    try:
+        game = parse_line(line, src)
+    except Exception as e:
+        print("Couldn't parse line (%s): %s" % (e, line))
+        return False
+    # Check we got a game back
+    if game is None:
+        return False
+    # Store the game in the database
+    try:
+        model.add_game(game['gid'], game)
+    except model.DatabaseError as e:
+        print(e)
+    except model.DuplicateKeyError:
+        return False
+    return True
+
+
+def parse_field(k, v):
+    """Convert field data into the correct data type.
+
+    Integer fields are stored as ints, everything else string.
+    """
+    # Name field is sometimes parseable as an int
+    if k != 'name':
+        try:
+            v = int(v)
+        except ValueError:
+            pass
+    if isinstance(v, str):
+        v = v.replace("::", ":")  # Undo logfile escaping
+    return k, v
 
 
 def parse_line(line, src):
@@ -104,29 +143,20 @@ def parse_line(line, src):
 
     # Parse the log's raw field data
     for field in re.split(LINE_SPLIT_PATTERN, line):
-        # skip blank fields
         if not field:
             continue
         fields = field.split('=', 1)
         if len(fields) != 2:
             raise ValueError("Couldn't parse line (bad field %s), skipping: %s"
                              % (field, line))
-        k, v = fields[0], fields[1]
-        # Store numbers as int, not str
-        # Name field is sometimes parseable as an int
-        if k != 'name':
-            try:
-                v = int(v)
-            except ValueError:
-                pass
-        if isinstance(v, str):
-            v = v.replace("::", ":")  # Undo logfile escaping
+        k, v = parse_field(*fields)
         game[k] = v
 
     # Validate the data
     if 'start' not in game:
         raise ValueError("Couldn't parse this line (missing start field)" %
                          line)
+    # We should only parse vanilla dcss games
     if game['lv'] != '0.1':
         return None
     # Create some derived fields

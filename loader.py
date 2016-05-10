@@ -10,7 +10,6 @@ import scoreboard.scoring
 import scoreboard.write_website
 import scoreboard.sources
 
-
 def error(msg):
     """Print an error and exit."""
     print(msg, file=sys.stderr)
