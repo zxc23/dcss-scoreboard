@@ -82,55 +82,48 @@ def setup_database(backend):
     _metadata = MetaData()
 
     global _games
-    _games = Table('games',
-                   _metadata,
-                   Column('gid',
-                          String(50),
-                          primary_key=True,
-                          nullable=False),
-                   Column('name',
-                          String(20),
-                          nullable=False,
-                          index=True),
-                   Column('displayname',
-                          String(20),
-                          nullable=False),
-                   Column('src', String(4), nullable=False),
-                   Column('v', String(10), nullable=False),
-                   Column('char', String(4), nullable=False, index=True),
-                   Column('rc', String(2), nullable=False, index=True),
-                   Column('bg', String(2), nullable=False, index=True),
-                   Column('place', String(12), nullable=False),
-                   Column('xl', Integer, nullable=False),
-                   Column('tmsg', String(1000), nullable=False),
-                   Column('turn', Integer, nullable=False),
-                   Column('dur', Integer, nullable=False),
-                   Column('runes', Integer, nullable=False),
-                   Column('sc', Integer, nullable=False, index=True),
-                   Column('god', String(20), nullable=False, index=True),
-                   Column('start',
-                          DateTime,
-                          nullable=False,
-                          index=True),
-                   Column('end',
-                          DateTime,
-                          nullable=False,
-                          index=True),
-                   Column('ktyp',
-                          String(50),
-                          nullable=False,
-                          index=True),
+    _games = Table(
+        'games',
+        _metadata,
+        Column('gid', String(50),
+               primary_key=True,
+               nullable=False),
+        Column('name', String(20),
+               nullable=False, index=True),
+        Column('displayname', String(20),
+               nullable=False),
+        Column('src', String(4), nullable=False),
+        Column('v', String(10), nullable=False),
+        Column('char', String(4), nullable=False,
+               index=True),
+        Column('rc', String(2), nullable=False,
+               index=True),
+        Column('bg', String(2), nullable=False,
+               index=True),
+        Column('place', String(12), nullable=False),
+        Column('xl', Integer, nullable=False),
+        Column('tmsg', String(1000), nullable=False),
+        Column('turn', Integer, nullable=False),
+        Column('dur', Integer, nullable=False),
+        Column('runes', Integer, nullable=False),
+        Column('sc', Integer, nullable=False,
+               index=True),
+        Column('god', String(20), nullable=False,
+               index=True),
+        Column('start', DateTime, nullable=False,
+               index=True),
+        Column('end', DateTime, nullable=False,
+               index=True),
+        Column('ktyp', String(50),
+               nullable=False, index=True),
 
-                   # These are columns not storing game data
-                   Column('raw_data',
-                          _JsonEncodedDict(10000),
-                          nullable=False),
-                   Column('scored',
-                          Boolean,
-                          default=False,
-                          index=True),
-                   mysql_engine='InnoDB',
-                   mysql_charset='utf8')
+        # These are columns not storing game data
+        Column('raw_data', _JsonEncodedDict(10000),
+               nullable=False),
+        Column('scored', Boolean, default=False,
+               index=True),
+        mysql_engine='InnoDB',
+        mysql_charset='utf8')
 
     Index('ix_games_rc_sc', _games.c.rc, _games.c.sc)
     Index('ix_games_bg_sc', _games.c.bg, _games.c.sc)
@@ -215,9 +208,8 @@ def add_game(gid, raw_data):
     raw_data['original_race'] = raw_data['race']
     raw_data['race'] = const.RACE_NAME_FIXUPS.get(raw_data['race'],
                                                   raw_data['race'])
-    conn = _engine.connect()
     try:
-        conn.execute(
+        _engine.execute(
             _games.insert(),
             gid=gid,
             name=raw_data['name'].lower(),
@@ -225,23 +217,17 @@ def add_game(gid, raw_data):
             src=raw_data['src'],
             v=raw_data['v'],
             char=raw_data['char'],
-            rc=raw_data['char'][:2],
-            bg=raw_data['char'][2:],
-            god=raw_data['god'],
-            place=raw_data['place'],
-            xl=raw_data['xl'],
-            tmsg=raw_data['tmsg'],
-            turn=raw_data['turn'],
-            dur=raw_data['dur'],
-            runes=raw_data.get('urune', 0),
-            sc=raw_data['sc'],
+            rc=raw_data['char'][:2], bg=raw_data['char'][2:],
+            god=raw_data['god'], place=raw_data['place'], xl=raw_data['xl'],
+            tmsg=raw_data['tmsg'], turn=raw_data['turn'], dur=raw_data['dur'],
+            runes=raw_data.get('urune', 0), sc=raw_data['sc'],
             start=modelutils.crawl_date_to_datetime(raw_data['start']),
             end=modelutils.crawl_date_to_datetime(raw_data['end']),
-            ktyp=raw_data['ktyp'],
-            raw_data=raw_data)
+            ktyp=raw_data['ktyp'], raw_data=raw_data)
     except sqlalchemy.exc.IntegrityError as e:
         if e.orig.args[0] == 1062:  # duplicate entry for private key
-            raise DuplicateKeyError("%s already exists in the database." % gid) from e
+            raise DuplicateKeyError("%s already exists in the database." %
+                                    gid) from e
         else:
             raise
     except sqlalchemy.exc.OperationalError as e:
@@ -250,14 +236,14 @@ def add_game(gid, raw_data):
 
 def logfile_pos(logfile):
     """Get the number of lines we've already processed."""
-    conn = _engine.connect()
     s = _logfile_progress.select().where(_logfile_progress.c.logfile ==
                                          logfile)
 
     try:
-        row = conn.execute(s).fetchone()
+        row = _engine.execute(s).fetchone()
     except sqlalchemy.exc.OperationalError as e:
-        raise DatabaseError("Couldn't load logfile pos for %s (%s)" % (logfile, e)) from e
+        raise DatabaseError("Couldn't load logfile pos for %s (%s)" %
+                            (logfile, e)) from e
     if row:
         return row.lines_parsed
     else:
@@ -271,13 +257,12 @@ def save_logfile_pos(logfile, pos):
     # prefixes="OR REPLACE" works
     # http://docs.sqlalchemy.org/en/rel_1_0/core/dml.html#
     #                                       sqlalchemy.sql.expression.insert
-    conn = _engine.connect()
     try:
-        conn.execute(_logfile_progress.insert(),
-                     logfile=logfile,
-                     lines_parsed=pos)
+        _engine.execute(_logfile_progress.insert(),
+                        logfile=logfile,
+                        lines_parsed=pos)
     except sqlalchemy.exc.IntegrityError:
-        conn.execute(_logfile_progress.update().where(
+        _engine.execute(_logfile_progress.update().where(
             _logfile_progress.c.logfile == logfile).values(lines_parsed=pos))
 
 
@@ -296,21 +281,18 @@ def get_all_player_stats():
     XXX should be at least memoised if not outright replaced with something
     saner.
     """
-    conn = _engine.connect()
     s = _player_stats.select()
-    return conn.execute(s).fetchall()
+    return _engine.execute(s).fetchall()
 
 
 def delete_all_player_stats():
     """Delete all player stats."""
-    conn = _engine.connect()
-    conn.execute(_player_stats.delete())
+    _engine.execute(_player_stats.delete())
 
 
 def delete_player_stats(name):
     """Delete a player's stats."""
-    conn = _engine.connect()
-    conn.execute(_player_stats.delete().where(_player_stats.c.name == name))
+    _engine.execute(_player_stats.delete().where(_player_stats.c.name == name))
 
 
 def get_player_stats(name):
@@ -318,9 +300,8 @@ def get_player_stats(name):
 
     If the player doesn't exist, None is returned.
     """
-    conn = _engine.connect()
     s = _player_stats.select().where(_player_stats.c.name == name)
-    result = conn.execute(s).fetchone()
+    result = _engine.execute(s).fetchone()
     if result:
         score = result[1]
     else:
@@ -333,23 +314,21 @@ def set_player_stats(name, stats):
 
     XXX this function is the slowest part of scoring.py.
     """
-    conn = _engine.connect()
     # print("Saving scoring data for", player)
     try:
-        conn.execute(_player_stats.insert(), name=name, stats=stats)
+        _engine.execute(_player_stats.insert(), name=name, stats=stats)
     except sqlalchemy.exc.IntegrityError:
-        conn.execute(_player_stats.update().where(_player_stats.c.name ==
-                                                  name).values(stats=stats))
+        _engine.execute(_player_stats.update().where(_player_stats.c.name ==
+                                                     name).values(stats=stats))
 
 
 def first_game(name, src=None):
     """Return the first game of a player."""
-    conn = _engine.connect()
     s = _games.select().where(_games.c.name == name).order_by(asc(
         'start')).limit(1)
     if src is not None:
         s = s.where(_games.c.src == src)
-    return conn.execute(s).fetchone()
+    return _engine.execute(s).fetchone()
 
 
 def all_games(scored=None, limit=0):
@@ -359,50 +338,44 @@ def all_games(scored=None, limit=0):
     Return (up to) limit rows (0 = all rows).
     Games are ordered by end datetime.
     """
-    conn = _engine.connect()
     s = _games.select()
     if scored is not None:
         s = s.where(_games.c.scored == bool(scored)).order_by(asc('end'))
     if limit:
         s = s.limit(limit)
-    return conn.execute(s).fetchall()
+    return _engine.execute(s).fetchall()
 
 
 def mark_game_scored(gid):
     """Mark a game as being scored."""
-    conn = _engine.connect()
     s = _games.update().where(_games.c.gid == gid).values(scored=True)
-    conn.execute(s)
+    _engine.execute(s)
 
 
 def unscore_all_games():
     """Mark all games as being unscored."""
-    conn = _engine.connect()
-    conn.execute(_games.update().values(scored=False))
+    _engine.execute(_games.update().values(scored=False))
 
 
 def unscore_all_games_of_player(name):
     """Mark all games by a player as being unscored."""
-    conn = _engine.connect()
     q = _games.update().where(_games.c.name == name).values(scored=False)
-    conn.execute(q)
+    _engine.execute(q)
 
 
 def set_global_stat(key, data):
     """Set global stat data."""
-    conn = _engine.connect()
     try:
-        conn.execute(_global_stats.insert(), key=key, data=data)
+        _engine.execute(_global_stats.insert(), key=key, data=data)
     except sqlalchemy.exc.IntegrityError:
-        conn.execute(_global_stats.update().where(_global_stats.c.key ==
-                                                  key).values(data=data))
+        _engine.execute(_global_stats.update().where(_global_stats.c.key ==
+                                                     key).values(data=data))
 
 
 def global_stat(key):
     """Get global score data."""
-    conn = _engine.connect()
     s = _global_stats.select().where(_global_stats.c.key == key)
-    val = conn.execute(s).fetchone()
+    val = _engine.execute(s).fetchone()
     if val is not None:
         return val[1]
     else:
@@ -411,18 +384,16 @@ def global_stat(key):
 
 def global_stats():
     """Get all global score data."""
-    conn = _engine.connect()
     scores = {}
     s = _global_stats.select()
-    for row in conn.execute(s).fetchall():
+    for row in _engine.execute(s).fetchall():
         scores[row[0]] = row[1]
     return scores
 
 
 def delete_all_global_stats():
     """Delete all global stats."""
-    conn = _engine.connect()
-    conn.execute(_global_stats.delete())
+    _engine.execute(_global_stats.delete())
 
 
 def game(gid):
@@ -432,8 +403,8 @@ def game(gid):
                         (repr(gid), type(gid)))
     if gid in GAME_CACHE:
         return GAME_CACHE[gid]
-    conn = _engine.connect()
-    game = conn.execute(_games.select().where(_games.c.gid == gid)).fetchone()
+    game = _engine.execute(_games.select().where(_games.c.gid ==
+                                                 gid)).fetchone()
     GAME_CACHE[gid] = game
     return game
 
@@ -454,7 +425,6 @@ def recent_games(wins=False,
     """
     if player is not None:
         player = player.lower()
-    conn = _engine.connect()
     query = _games.select()
     if wins:
         query = query.where(_games.c.ktyp == 'winning')
@@ -464,7 +434,7 @@ def recent_games(wins=False,
         query = query.limit(num)
     query = query.order_by(desc("end"))
 
-    rows = conn.execute(query).fetchall()
+    rows = _engine.execute(query).fetchall()
     if reverse:
         rows = rows[::-1]
     return rows
@@ -481,7 +451,6 @@ def games_by_type(player, col, eligible, winning=True):
 
     Returns: list of games.
     """
-    conn = _engine.connect()
     count = sqlalchemy.sql.functions.count()
     query = select([column(col), count]).group_by(col)
     query = query.where(_games.c.name == player)
@@ -489,62 +458,54 @@ def games_by_type(player, col, eligible, winning=True):
         query = query.where(_games.c.ktyp == 'winning')
     query = query.group_by(col)
     return {i[0]: i[1]
-            for i in conn.execute(query).fetchall() if i[0] in eligible}
+            for i in _engine.execute(query).fetchall() if i[0] in eligible}
 
 
 def add_player_to_blacklist(name, src):
     """Add a player to the blacklist."""
-    conn = _engine.connect()
-    conn.execute(_blacklisted_players.insert(), name=name, src=src)
+    _engine.execute(_blacklisted_players.insert(), name=name, src=src)
 
 
 def remove_player_from_blacklist(name, src):
     """Remove a player from the blacklist."""
-    conn = _engine.connect()
     table = _blacklisted_players
     s = table.delete().where(table.c.name == name).where(table.c.src == src)
-    conn.execute(s)
+    _engine.execute(s)
 
 
 def player_in_blacklist(name, src):
     """Return True if a player is on the blacklist."""
-    conn = _engine.connect()
     table = _blacklisted_players
     s = table.select().where(table.c.name == name).where(table.c.src == src)
-    return conn.execute(s).fetchone() is True
+    return _engine.execute(s).fetchone() is True
 
 
 def all_blacklisted_players():
     """Return all blacklisted player-src combinations."""
-    conn = _engine.connect()
-    return conn.execute(_blacklisted_players.select()).fetchall()
+    return _engine.execute(_blacklisted_players.select()).fetchall()
 
 
 def shortest_wins(n=const.GLOBAL_TABLE_LENGTH):
     """Return the n shortest wins by turncount."""
-    conn = _engine.connect()
     s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
         'turn')).limit(n)
-    return conn.execute(s).fetchall()
+    return _engine.execute(s).fetchall()
 
 
 def fastest_wins(n=const.GLOBAL_TABLE_LENGTH):
     """Return the n fastest wins by duration."""
-    conn = _engine.connect()
     s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
         'dur')).limit(n)
-    return conn.execute(s).fetchall()
+    return _engine.execute(s).fetchall()
 
 
 def highscores(n=const.GLOBAL_TABLE_LENGTH):
     """Return the n highest scoring games."""
-    conn = _engine.connect()
     s = _games.select().order_by(desc('sc')).limit(n)
-    return conn.execute(s).fetchall()
+    return _engine.execute(s).fetchall()
 
 
 def _highscores(col, values):
-    conn = _engine.connect()
     cols = [_games.c.gid, _games.c.sc]
     # For info on this mysql 5.7+ workaround, see:
     # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
@@ -556,7 +517,7 @@ def _highscores(col, values):
     result = []
     for val in values:
         q = s.where(col == val)
-        g = conn.execute(q).fetchone()
+        g = _engine.execute(q).fetchone()
         if g:
             result.append(game(g[0]))
 
@@ -585,8 +546,7 @@ def combo_highscores():
 
 def last_active(player):
     """Return the date of most recent activity for player."""
-    conn = _engine.connect()
     s = select([_games.c.end]).order_by(desc('end')).limit(1)
-    result = conn.execute(s).fetchone()
+    result = _engine.execute(s).fetchone()
     if result:
         return result[0]

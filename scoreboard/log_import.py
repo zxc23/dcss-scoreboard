@@ -46,7 +46,7 @@ def load_logfiles(logdir):
                 # count += load_logfile(f_path, src)
             else:
                 print("Skipping unknown file {}".format(f.name))
-    p = multiprocessing.Pool(8)
+    p = multiprocessing.Pool()
     jobs = []
     for candidate in candidates:
         jobs.append(p.apply_async(load_logfile, candidate))
