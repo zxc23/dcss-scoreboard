@@ -155,8 +155,7 @@ def parse_line(line, src):
 
     # Validate the data
     if 'start' not in game:
-        raise ValueError("Couldn't parse this line (missing start field)" %
-                         line)
+        return None
     # We should only parse vanilla dcss games
     if game['lv'] != '0.1':
         return None
