@@ -122,6 +122,9 @@ def parse_field(k, v):
 
     Integer fields are stored as ints, everything else string.
     """
+    # A few games have junk surrounding a field, like \n or \x00. Trim it.
+    k = k.strip()
+    v = v.strip()
     # Name field is sometimes parseable as an int
     if k != 'name':
         try:
