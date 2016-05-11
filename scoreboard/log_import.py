@@ -79,7 +79,7 @@ def load_logfile(logfile, src):
     for line in f:
         lines += 1
         # skip blank lines
-        if not line:
+        if not line.strip():
             continue
         if handle_line(line, src):
             new_games += 1
