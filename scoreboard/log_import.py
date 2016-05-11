@@ -19,15 +19,7 @@ def calculate_game_gid(game):
     return "%s:%s:%s" % (game['name'], game['src'], game['start'])
 
 
-def load_logfiles(logdir):
-    """Read logfiles and parse their data.
-
-    Logfiles are kept in a directory with structure:
-    logdir/{src}/{log or milestone file}.
-    """
-    print("Loading all logfiles")
-    start = time.time()
-    candidates = []
+def candidate_logfiles(logdir):
     for d in os.scandir(logdir):
         if not d.is_dir():
             continue
@@ -42,13 +34,22 @@ def load_logfiles(logdir):
                 # XXX to be handled later
                 continue
             elif re.search(const.LOGFILE_REGEX, f.name):
-                candidates.append((f_path, src))
-                # count += load_logfile(f_path, src)
+                yield (f_path, src)
             else:
                 print("Skipping unknown file {}".format(f.name))
+
+
+def load_logfiles(logdir):
+    """Read logfiles and parse their data.
+
+    Logfiles are kept in a directory with structure:
+    logdir/{src}/{log or milestone file}.
+    """
+    print("Loading all logfiles")
+    start = time.time()
     p = multiprocessing.Pool()
     jobs = []
-    for candidate in candidates:
+    for candidate in candidate_logfiles(logdir):
         jobs.append(p.apply_async(load_logfile, candidate))
         time.sleep(1)  # Stagger start time
     for job in jobs:
@@ -138,9 +139,15 @@ def parse_field(k, v):
 def parse_line(line, src):
     """Read a single logfile line and insert it into the database.
 
-    If the game is not a vanilla crawl game (eg sprint or zotdef), None is
-    returned.
+    If the game is not valid, None is returned. Invalid games could be:
+        * a non-vanilla crawl game (eg sprint or zotdef)
+        * Corrupt data
+
     """
+    # Early warning of corruption
+    if '\x00' in line:
+        return None
+
     game = {}
     game['src'] = src
 

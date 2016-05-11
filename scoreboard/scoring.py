@@ -239,7 +239,7 @@ def score_game_vs_streaks(game, won):
     """Extend active streaks if a game was won and finalise streak stats."""
 
     # Player might have different capitalisation between servers
-    cname = game.name.lower()
+    cname = game.players_name.lower()
 
     # Retrieve active streak
     active_streaks = load_global_stat('active_streaks', {})
@@ -252,12 +252,12 @@ def score_game_vs_streaks(game, won):
     if won:
         # Extend or start a streak
         if streak:
-            streak['wins'].append(game.gid)
-            streak['end'] = game.end
+            streak['wins'].append(game.games_gid)
+            streak['end'] = game.games_end
         else:
             streak = {'cname': cname,
-                      'wins': [game.gid],
-                      'start': game.end}
+                      'wins': [game.games_gid],
+                      'start': game.games_end}
         # Update the active streak dict
         active_streaks[cname] = streak
     else:
@@ -269,7 +269,7 @@ def score_game_vs_streaks(game, won):
                 return
 
             completed_streaks = load_global_stat('completed_streaks', [])
-            streak['streak_breaker'] = game.gid
+            streak['streak_breaker'] = game.games_gid
             completed_streaks.append(streak)
             set_global_stat('completed_streaks', completed_streaks)
 
@@ -284,9 +284,9 @@ def score_game_vs_streaks(game, won):
 
 def score_game(game_row):
     """Score a single game."""
-    gid = game_row.gid
-    name = game_row.name
-    src = game_row.src
+    gid = game_row.games_gid
+    name = game_row.players_name
+    src = game_row.servers_server_name
 
     # Skip if player blacklisted
     if is_blacklisted(name, src):
@@ -294,11 +294,11 @@ def score_game(game_row):
         return
 
     # Log vars
-    god = game_row.god
-    score = game_row.sc
-    race = game_row.rc
-    role = game_row.bg
-    won = game_row.ktyp == 'winning'
+    god = game_row.games_god
+    score = game_row.games_sc
+    race = game_row.games_rc
+    role = game_row.games_bg
+    won = game_row.games_ktyp == 'winning'
 
     # Player vars
     stats = load_player_stats(name)
@@ -307,23 +307,23 @@ def score_game(game_row):
 
     # Start updating stats
     stats['games'] += 1
-    stats['last_active'] = game_row.end
-    stats['total_playtime'] += game_row.dur
+    stats['last_active'] = game_row.games_end
+    stats['total_playtime'] += game_row.games_dur
 
     # Increment wins
     if won:
-        stats['wins'].append(game_row.gid)
+        stats['wins'].append(game_row.games_gid)
         wins += 1
 
         # Adjust fastest_realtime win
-        if 'fastest_realtime' not in stats or game_row.dur < get_game(stats[
+        if 'fastest_realtime' not in stats or game_row.games_dur < get_game(stats[
                 'fastest_realtime']).dur:
-            stats['fastest_realtime'] = game_row.gid
+            stats['fastest_realtime'] = game_row.games_gid
 
         # Adjust fastest_turncount win
-        if 'fastest_turncount' not in stats or game_row.turn < get_game(stats[
+        if 'fastest_turncount' not in stats or game_row.games_turn < get_game(stats[
                 'fastest_turncount']).turn:
-            stats['fastest_turncount'] = game_row.gid
+            stats['fastest_turncount'] = game_row.games_gid
 
         # Increment god_wins and check polytheist
         if god in stats['god_wins']:
@@ -390,12 +390,12 @@ def score_game(game_row):
 
     else:  # !won
         # Increment boring_games
-        if game_row.ktyp in ('leaving', 'quitting'):
+        if game_row.games_ktyp in ('leaving', 'quitting'):
             stats['boring_games'] += 1
 
     # Update other player stats
     if 'highscore' not in stats or score > get_game(stats['highscore'])['sc']:
-        stats['highscore'] = game_row.gid
+        stats['highscore'] = game_row.games_gid
     stats['winrate'] = wins / stats['games']
     stats['total_score'] += score
     stats['avg_score'] = stats['total_score'] / stats['games']
@@ -432,7 +432,7 @@ def score_games(rebuild=False):
             break
         for game in games:
             score_game(game)
-            scored_players.add(game.name)
+            scored_players.add(game.players_name)
             scored += 1
             if scored % 10000 == 0 and scored > 0:
                 print(scored)

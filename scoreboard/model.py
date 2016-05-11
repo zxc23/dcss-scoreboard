@@ -8,7 +8,8 @@ import os
 import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, \
-                       Integer, Boolean, DateTime, LargeBinary, Index
+                       Integer, Boolean, DateTime, LargeBinary, Index, \
+                       ForeignKey
 from sqlalchemy import desc, asc, select, func, column
 
 from . import modelutils
@@ -81,6 +82,23 @@ def setup_database(backend):
 
     _metadata = MetaData()
 
+    global _servers
+    _servers = Table(
+        'servers',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('name', String(4), nullable=False, index=True, unique=True),
+    )
+
+    global _players
+    _players = Table(
+        'players',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('name', String(20), nullable=False, index=True),
+        Column('server_id', None, ForeignKey('servers.id'), nullable=False),
+    )
+
     global _games
     _games = Table(
         'games',
@@ -88,11 +106,9 @@ def setup_database(backend):
         Column('gid', String(50),
                primary_key=True,
                nullable=False),
-        Column('name', String(20),
-               nullable=False, index=True),
+        Column('player_id', None, ForeignKey('players.id'), nullable=False),
         Column('displayname', String(20),
                nullable=False),
-        Column('src', String(4), nullable=False),
         Column('v', String(10), nullable=False),
         Column('char', String(4), nullable=False,
                index=True),
@@ -199,8 +215,36 @@ def setup_database(backend):
     _metadata.create_all(_engine)
 
 
+def get_src_id(src):
+    """Get the src_id for a src, creating it if needed."""
+    result = _engine.execute(_servers.select().where(
+        _servers.c.name == src)).fetchone()
+    if result:
+        server_id = result.id
+    else:
+        result = _engine.execute(_servers.insert(), name=src)
+        server_id = result.inserted_primary_key[0]
+    return server_id
+
+
+def get_player_id(name, src):
+    """Get the id for a player, creating it if needed."""
+    server_id = get_src_id(src)
+    result = _engine.execute(_players.select().where(
+        _players.c.name == name).where(
+        _players.c.id == server_id)).fetchone()
+    if result:
+        player_id = result.id
+    else:
+        result = _engine.execute(_players.insert(), name=name,
+                                 server_id=server_id)
+        player_id = result.inserted_primary_key[0]
+    return player_id
+
+
 def add_game(gid, raw_data):
     """Normalise and add a game to the database."""
+    # print("Adding game: %s %s" % (gid, raw_data))
     if 'end' not in raw_data:
         raise DatabaseError("No end field in this log: %s" % raw_data)
     raw_data['god'] = const.GOD_NAME_FIXUPS.get(raw_data['god'],
@@ -208,11 +252,13 @@ def add_game(gid, raw_data):
     raw_data['original_race'] = raw_data['race']
     raw_data['race'] = const.RACE_NAME_FIXUPS.get(raw_data['race'],
                                                   raw_data['race'])
+
+    player_id = get_player_id(raw_data['name'], raw_data['src'])
     try:
         _engine.execute(
             _games.insert(),
             gid=gid,
-            name=raw_data['name'].lower(),
+            player_id=player_id,
             displayname=raw_data['name'],
             src=raw_data['src'],
             v=raw_data['v'],
@@ -338,7 +384,7 @@ def all_games(scored=None, limit=0):
     Return (up to) limit rows (0 = all rows).
     Games are ordered by end datetime.
     """
-    s = _games.select()
+    s = _games.join(_players).join(_servers).select(use_labels=True)
     if scored is not None:
         s = s.where(_games.c.scored == bool(scored)).order_by(asc('end'))
     if limit:
