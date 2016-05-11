@@ -4,6 +4,7 @@ import os
 import re
 import time
 import multiprocessing
+import traceback
 
 from . import model
 
@@ -100,7 +101,8 @@ def handle_line(line, src):
     try:
         game = parse_line(line, src)
     except Exception as e:
-        print("Couldn't parse line (%s): %s" % (e, line))
+        print(traceback.format_exc())
+        print("Couldn't parse line: %r" % line)
         return False
     # Check we got a game back
     if game is None:
