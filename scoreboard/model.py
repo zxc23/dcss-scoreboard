@@ -8,8 +8,8 @@ import os
 import pylru
 import sqlalchemy.ext.mutable
 from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, \
-                       Integer, Boolean, DateTime, LargeBinary, Index, \
-                       ForeignKey
+                       Integer, Boolean, DateTime, LargeBinary, \
+                       ForeignKey, UniqueConstraint
 from sqlalchemy import desc, asc, select, func, column
 
 from . import modelutils
@@ -84,7 +84,7 @@ def setup_database(backend):
 
     global _servers
     _servers = Table(
-        'servers',
+        'server',
         _metadata,
         Column('id', Integer, primary_key=True, nullable=False),
         Column('name', String(4), nullable=False, index=True, unique=True),
@@ -92,11 +92,64 @@ def setup_database(backend):
 
     global _players
     _players = Table(
-        'players',
+        'player',
         _metadata,
         Column('id', Integer, primary_key=True, nullable=False),
         Column('name', String(20), nullable=False, index=True),
-        Column('server_id', None, ForeignKey('servers.id'), nullable=False),
+        Column('server_id', None, ForeignKey('server.id'), nullable=False),
+        UniqueConstraint('name', 'server_id', name='name-server_id'),
+    )
+
+    global _species
+    _species = Table(
+        'species',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('short', String(2), nullable=False, index=True, unique=True),
+    )
+
+    global _backgrounds
+    _backgrounds = Table(
+        'background',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('short', String(2), nullable=False, index=True, unique=True),
+        Column('full', String(20), nullable=False, index=True, unique=True),
+    )
+
+    global _gods
+    _gods = Table(
+        'god',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('name', String(20), nullable=False, index=True, unique=True),
+    )
+
+    global _versions
+    _versions = Table(
+        'version',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('v', String(10), nullable=False, index=True, unique=True),
+    )
+
+    global _branches
+    _branches = Table(
+        'branch',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('short', String(10), nullable=False, index=True, unique=True),
+        Column('full', String(20), nullable=False, index=True, unique=True),
+    )
+
+    global _places
+    _places = Table(
+        'place',
+        _metadata,
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('branch_id', None, ForeignKey('branch.id')),
+        Column('level', Integer, nullable=False, index=True),
+        UniqueConstraint('branch_id', 'level', name='branch_id-level'),
     )
 
     global _games
@@ -106,45 +159,30 @@ def setup_database(backend):
         Column('gid', String(50),
                primary_key=True,
                nullable=False),
-        Column('player_id', None, ForeignKey('players.id'), nullable=False),
+        Column('player_id', None, ForeignKey('player.id'), nullable=False),
         Column('displayname', String(20),
                nullable=False),
-        Column('v', String(10), nullable=False),
-        Column('char', String(4), nullable=False,
-               index=True),
-        Column('rc', String(2), nullable=False,
-               index=True),
-        Column('bg', String(2), nullable=False,
-               index=True),
-        Column('place', String(12), nullable=False),
+        Column('v', None, ForeignKey('version.id')),
+        Column('species_id', None, ForeignKey('species.id')),
+        Column('background_id', None, ForeignKey('background.id')),
+        Column('place_id', None, ForeignKey('place.id')),
+        Column('god_id', None, ForeignKey('god.id')),
+
         Column('xl', Integer, nullable=False),
         Column('tmsg', String(1000), nullable=False),
         Column('turn', Integer, nullable=False),
         Column('dur', Integer, nullable=False),
         Column('runes', Integer, nullable=False),
-        Column('sc', Integer, nullable=False,
-               index=True),
-        Column('god', String(20), nullable=False,
-               index=True),
-        Column('start', DateTime, nullable=False,
-               index=True),
-        Column('end', DateTime, nullable=False,
-               index=True),
-        Column('ktyp', String(50),
-               nullable=False, index=True),
+        Column('sc', Integer, nullable=False, index=True),
+        Column('start', DateTime, nullable=False, index=True),
+        Column('end', DateTime, nullable=False, index=True),
+        Column('ktyp', String(50), nullable=False, index=True),
 
         # These are columns not storing game data
-        Column('raw_data', _JsonEncodedDict(10000),
-               nullable=False),
-        Column('scored', Boolean, default=False,
-               index=True),
+        Column('scored', Boolean, default=False, index=True),
+
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-
-    Index('ix_games_rc_sc', _games.c.rc, _games.c.sc)
-    Index('ix_games_bg_sc', _games.c.bg, _games.c.sc)
-    Index('ix_games_char_sc', _games.c.char, _games.c.sc)
-    Index('ix_games_god_sc', _games.c.god, _games.c.sc)
 
     global _logfile_progress
     _logfile_progress = Table('logfile_progress',
@@ -216,7 +254,7 @@ def setup_database(backend):
 
 
 def get_src_id(src):
-    """Get the src_id for a src, creating it if needed."""
+    """Get the id for a src, creating it if needed."""
     result = _engine.execute(_servers.select().where(
         _servers.c.name == src)).fetchone()
     if result:
@@ -228,11 +266,16 @@ def get_src_id(src):
 
 
 def get_player_id(name, src):
-    """Get the id for a player, creating it if needed."""
+    """Get the id for a player, creating it if needed.
+
+    Note that player names are not case sensitive, so names are stored with
+    their canonical capitalisation but we always compare the lowercase version.
+    """
     server_id = get_src_id(src)
-    result = _engine.execute(_players.select().where(
-        _players.c.name == name).where(
-        _players.c.id == server_id)).fetchone()
+    s = _players.select().where(
+        func.lower(_players.c.name) == name.lower()).where(
+        _players.c.server_id == server_id)
+    result = _engine.execute(s).fetchone()
     if result:
         player_id = result.id
     else:
@@ -242,34 +285,155 @@ def get_player_id(name, src):
     return player_id
 
 
+def species_by_sp(sp):
+    """Return species definition based on their short race code."""
+    return [i for i in const.SPECIES if i.short == sp][0]
+
+
+def get_species_id(sp):
+    """Get the id for a species, creating it if needed.
+
+    Expects a short species code as input, eg 'Dg', 'Tr', etc.
+    """
+    result = _engine.execute(_species.select().where(
+        _species.c.short == sp)).fetchone()
+    if result:
+        species_id = result.id
+    else:
+        result = _engine.execute(_species.insert(), short=sp)
+        species_id = result.inserted_primary_key[0]
+    return species_id
+
+
+def background_by_bg(bg):
+    """Return background definition based on their short role code."""
+    results = [i for i in const.BACKGROUNDS if i.short == bg]
+    if not results:
+        raise ValueError("Unknown background %s" % bg)
+    assert(len(results) == 1)
+    return results[0]
+
+
+def get_background_id(bg):
+    """Get the id for a background, creating it if needed.
+
+    Expects a short species code as input, eg 'Be', 'FE', etc.
+    """
+    background = background_by_bg(bg)
+    result = _engine.execute(_backgrounds.select().where(
+        _backgrounds.c.short == bg)).fetchone()
+    if result:
+        background_id = result.id
+    else:
+        result = _engine.execute(_backgrounds.insert(),
+                                 short=bg,
+                                 full=background.full)
+        background_id = result.inserted_primary_key[0]
+    return background_id
+
+
+def get_god_id(god):
+    """Get the id for a background, creating it if needed.
+
+    Expects a short species code as input, eg 'Be', 'FE', etc.
+    """
+    result = _engine.execute(_gods.select().where(
+        _gods.c.name == god)).fetchone()
+    if result:
+        god_id = result.id
+    else:
+        result = _engine.execute(_gods.insert(), name=god)
+        god_id = result.inserted_primary_key[0]
+    return god_id
+
+
+def get_version_id(v):
+    """Get the id for a version, creating it if needed.
+
+    Expects 'v' data as input, eg '0.18-a0', etc.
+    """
+    result = _engine.execute(_versions.select().where(
+        _versions.c.v == v)).fetchone()
+    if result:
+        v_id = result.id
+    else:
+        result = _engine.execute(_versions.insert(), v=v)
+        v_id = result.inserted_primary_key[0]
+    return v_id
+
+
+def branch_by_br(br):
+    """Return branch definition based on its short name."""
+    return [i for i in const.BRANCHES if i.short == br][0]
+
+
+def get_branch_id(br):
+    """Get the id for a src, creating it if needed."""
+    branch = branch_by_br(br)
+    result = _engine.execute(_branches.select().where(
+        _branches.c.short == br)).fetchone()
+    if result:
+        branch_id = result.id
+    else:
+        result = _engine.execute(_branches.insert(),
+                                 short=br,
+                                 full=branch.full)
+        branch_id = result.inserted_primary_key[0]
+    return branch_id
+
+
+def get_place_id(place, lvl):
+    """Get the id for a place, creating it if needed."""
+    branch_id = get_branch_id(place.split(':', 1)[0])
+    s = _places.select().where(
+        _places.c.branch_id == branch_id).where(
+        _places.c.level == lvl)
+    result = _engine.execute(s).fetchone()
+    if result:
+        place_id = result.id
+    else:
+        result = _engine.execute(_places.insert(), branch_id=branch_id,
+                                 level=lvl)
+        place_id = result.inserted_primary_key[0]
+    return place_id
+
+
 def add_game(gid, raw_data):
     """Normalise and add a game to the database."""
-    # print("Adding game: %s %s" % (gid, raw_data))
-    if 'end' not in raw_data:
-        raise DatabaseError("No end field in this log: %s" % raw_data)
+    # Normalise some data
     raw_data['god'] = const.GOD_NAME_FIXUPS.get(raw_data['god'],
                                                 raw_data['god'])
-    raw_data['original_race'] = raw_data['race']
     raw_data['race'] = const.RACE_NAME_FIXUPS.get(raw_data['race'],
                                                   raw_data['race'])
 
     player_id = get_player_id(raw_data['name'], raw_data['src'])
+    species_id = get_species_id(raw_data['char'][:2])
+    background_id = get_background_id(raw_data['char'][2:])
+    god_id = get_god_id(raw_data['god'])
+    v_id = get_version_id(raw_data['v'])
+    place_id = get_place_id(raw_data['place'], raw_data['lvl'])
+
     try:
-        _engine.execute(
-            _games.insert(),
+        i = _games.insert().values(
             gid=gid,
             player_id=player_id,
             displayname=raw_data['name'],
-            src=raw_data['src'],
-            v=raw_data['v'],
-            char=raw_data['char'],
-            rc=raw_data['char'][:2], bg=raw_data['char'][2:],
-            god=raw_data['god'], place=raw_data['place'], xl=raw_data['xl'],
-            tmsg=raw_data['tmsg'], turn=raw_data['turn'], dur=raw_data['dur'],
-            runes=raw_data.get('urune', 0), sc=raw_data['sc'],
+            v=v_id,
+            species_id=species_id,
+            background_id=background_id,
+            god_id=god_id,
+            place_id=place_id,
+
+            xl=raw_data['xl'],
+            tmsg=raw_data['tmsg'],
+            turn=raw_data['turn'],
+            dur=raw_data['dur'],
+            runes=raw_data.get('urune', 0),
+            sc=raw_data['sc'],
             start=modelutils.crawl_date_to_datetime(raw_data['start']),
             end=modelutils.crawl_date_to_datetime(raw_data['end']),
-            ktyp=raw_data['ktyp'], raw_data=raw_data)
+            ktyp=raw_data['ktyp'],)
+        _engine.execute(i)
     except sqlalchemy.exc.IntegrityError as e:
         if e.orig.args[0] == 1062:  # duplicate entry for private key
             raise DuplicateKeyError("%s already exists in the database." %
