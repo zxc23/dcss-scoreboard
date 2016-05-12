@@ -23,7 +23,10 @@ GOD_NAME_FIXUPS = {
     # ugly since the capitalisation is wrong.
     'the Shining One': 'The Shining One',
     # Old name
-    'Dithmengos': "Dithmenos"
+    'Dithmengos': "Dithmenos",
+    # Nostalgia names
+    'Lugafu': 'Trog',
+    'Lucy': 'Lugonu',
 }
 RACE_NAME_FIXUPS = {
     'Yellow Draconian': 'Draconian',
