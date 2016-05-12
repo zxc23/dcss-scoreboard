@@ -1,13 +1,87 @@
 """Defines useful constants."""
 
 import re
+from collections import namedtuple
 
-PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Dr', 'Ds', 'Fe', 'Fo', 'Gh', 'Gr',
-                  'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu', 'Na', 'Op',
-                  'Og', 'Sp', 'Te', 'Tr', 'VS', 'Vp'}
-PLAYABLE_ROLES = {'AE', 'AK', 'AM', 'Ar', 'As', 'Be', 'CK', 'Cj', 'EE', 'En',
-                  'FE', 'Fi', 'Gl', 'Hu', 'IE', 'Mo', 'Ne', 'Sk', 'Su', 'Tm',
-                  'VM', 'Wn', 'Wr', 'Wz'}
+Race = namedtuple('Race', ['short', 'full', 'playable'])
+Background = namedtuple('Background', ['short', 'full', 'playable'])
+Branch = namedtuple('Branch', ['short', 'full', 'playable'])
+
+SPECIES = {Race('Ce', 'Centaur', True),
+           Race('DD', 'Deep Dwarf', True),
+           Race('DE', 'Deep Elf', True),
+           Race('Dg', 'Demigod', True),
+           Race('Dr', 'Draconian', True),
+           Race('Ds', 'Demonspawn', True),
+           Race('Fe', 'Felid', True),
+           Race('Fo', 'Formicid', True),
+           Race('Gh', 'Ghoul', True),
+           Race('Gr', 'Gargoyle', True),
+           Race('HE', 'High Elf', True),
+           Race('HO', 'Hill Orc', True),
+           Race('Ha', 'Halfling', True),
+           Race('Hu', 'Hunter', True),
+           Race('Ko', 'Kobold', True),
+           Race('Mf', 'Merfolk', True),
+           Race('Mi', 'Minotaur', True),
+           Race('Mu', 'Mummy', True),
+           Race('Na', 'Naga', True),
+           Race('Op', 'Octopode', True),
+           Race('Og', 'Ogre', True),
+           Race('Sp', 'Spriggan', True),
+           Race('Te', 'Tengu', True),
+           Race('Tr', 'Troll', True),
+           Race('VS', 'Vine Stalkers', True),
+           Race('Vp', 'Vampire', True),
+           # Non-playable races
+           Race('El', 'Elf', False),
+           Race('Gn', 'Gnome', False),
+           Race('OM', 'Ogre-Mage', False),
+           Race('HD', 'Hill Dwarf', False),
+           Race('MD', 'Mountain Dwarf', False),
+           Race('GE', 'Grey Elf', False),
+           Race('SE', 'Sludge Elf', False),
+           Race('LO', 'Lava Orc', False),
+           Race('Dj', 'Djinni', False),
+           Race('Pl', 'Plutonian', False), }
+
+BACKGROUNDS = {Background('AE', 'Air Elementalist', True),
+               Background('AK', 'Abyssal Knight', True),
+               Background('AM', 'Arcane Marksman', True),
+               Background('Ar', 'Artificer', True),
+               Background('As', 'Assassin', True),
+               Background('Be', 'Berserker', True),
+               Background('CK', 'Chaos Knight', True),
+               Background('Cj', 'Conjuror', True),
+               Background('EE', 'Earth Elementalist', True),
+               Background('En', 'Enchanter', True),
+               Background('FE', 'Fire Elementalist', True),
+               Background('Fi', 'Fighter', True),
+               Background('Gl', 'Gladiator', True),
+               Background('Hu', 'Hunter', True),
+               Background('IE', 'Ice Elementalist', True),
+               Background('Mo', 'Monk', True),
+               Background('Ne', 'Necromancer', True),
+               Background('Sk', 'Skald', True),
+               Background('Su', 'Summoner', True),
+               Background('Tm', 'Transmuter', True),
+               Background('VM', 'Venom Mage', True),
+               Background('Wn', 'Wanderer', True),
+               Background('Wr', 'Warper', True),
+               Background('Wz', 'Wizard', True),
+               # Non-playable backgrounds
+               Background('Cr', 'Crusader', False),
+               Background('DK', 'Death Knight', False),
+               Background('He', 'Healer', False),
+               Background('He', 'Healer', False),
+               Background('Pa', 'Paladin', False),
+               Background('Re', 'Reaver', False),
+               Background('St', 'Stalker', False),
+               Background('Th', 'Thief', False),
+               Background('Jr', 'Jester', False), }
+
+PLAYABLE_SPECIES = {r for r in SPECIES if r.playable}
+PLAYABLE_BACKGROUNDS = {r for r in BACKGROUNDS if r.playable}
 PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos',
                  'Elyvilon', 'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha',
                  'Lugonu', 'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas',
@@ -15,8 +89,8 @@ PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos',
                  'Vehumet', 'Xom', 'Yredelemnul', 'Zin'}
 NONPLAYABLE_COMBOS = ['FeGl', 'FeAs', 'FeHu', 'FeAM', 'DgBe', 'DgCK', 'DgAK',
                       'GhTm', 'MuTm']
-PLAYABLE_COMBOS = ('%s%s' % (rc, bg)
-                   for rc in PLAYABLE_RACES for bg in PLAYABLE_ROLES
+PLAYABLE_COMBOS = ('%s%s' % (rc.short, bg.short)
+                   for rc in PLAYABLE_SPECIES for bg in PLAYABLE_BACKGROUNDS
                    if '%s%s' % (rc, bg) not in NONPLAYABLE_COMBOS)
 GOD_NAME_FIXUPS = {
     # Actually, the ingame name is 'the Shining One', but that looks
@@ -24,6 +98,7 @@ GOD_NAME_FIXUPS = {
     'the Shining One': 'The Shining One',
     # Old name
     'Dithmengos': "Dithmenos",
+    'Iashol': 'Ru',
     # Nostalgia names
     'Lugafu': 'Trog',
     'Lucy': 'Lugonu',
@@ -38,6 +113,12 @@ RACE_NAME_FIXUPS = {
     'Black Draconian': 'Draconian',
     'Red Draconian': 'Draconian',
     'Pale Draconian': 'Draconian',
+    'Grotesk': 'Gargoyle',
+    'Kenku': 'Tengu',
+}
+BRANCH_NAME_FIXUPS = {
+    # April fool's one year
+    'Nor': 'Coc',
 }
 RACE_TO_GREAT_RACE = {'Ce': 'greatcentaur',
                       'DD': 'greatdeepdwarf',
@@ -91,6 +172,47 @@ ROLE_TO_GREAT_ROLE = {'AE': 'greatairelementalist',
                       'Wn': 'greatwanderer',
                       'Wr': 'greatwarper',
                       'Wz': 'greatwizard', }
+
+
+BRANCHES = {
+    Branch('D', 'Dungeon', True),
+    Branch('Lair', 'Lair of the Beasts', True),
+    Branch('Temple', 'Ecumenical Temple', True),
+    Branch('Orc', 'Orcish Mines', True),
+    Branch('Vaults', 'Vaults', True),
+    Branch('Snake', 'Snake Pit', True),
+    Branch('Swamp', 'Swamp', True),
+    Branch('Shoals', 'Shoals', True),
+    Branch('Spider', 'Spider Nest', True),
+    Branch('Elf', 'Elven Halls', True),
+    Branch('Zig', 'Ziggurat', True),
+    Branch('Depths', 'Depths', True),
+    Branch('Abyss', 'Abyss', True),
+    Branch('Sewer', 'Sewer', True),
+    Branch('Pan', 'Pandemonium', True),
+    Branch('Crypt', 'Crypt', True),
+    Branch('Slime', 'Slime Pits', True),
+    Branch('Zot', 'Realm of Zot', True),
+    Branch('Ossuary', 'Ossuary', True),
+    Branch('IceCv', 'Ice Cave', True),
+    Branch('Hell', 'Vestibule of Hell', True),
+    Branch('Lab', 'Labyrinth', True),
+    Branch('Bailey', 'Bailey', True),
+    Branch('Volcano', 'Volcano', True),
+    Branch('Tomb', 'Tomb of the Ancients', True),
+    Branch('Dis', 'Iron City of Dis', True),
+    Branch('Tar', 'Tartarus', True),
+    Branch('Geh', 'Gehenna', True),
+    Branch('Coc', 'Cocytus', True),
+    Branch('Bazaar', 'Bazaar', True),
+    Branch('WizLab', "Wizard\'s Laboratory", True),
+    Branch('Trove', 'Treasure Trove', True),
+    # Non-playable branches
+    Branch('Hive', 'Hive', False),
+    Branch('Blade', 'Hall of Blades', False),
+    Branch('Forest', 'Enchanted Forest', False),
+
+}
 MANUAL_ACHIEVEMENTS = {
     'comborobin': {
         'greatestplayer': True
