@@ -7,12 +7,11 @@ import multiprocessing
 import traceback
 
 from . import model
+from . import constants as const
 
 # Logfile format escapes : as ::, so we use re.split
 # instead of the naive line.split(':')
 LINE_SPLIT_PATTERN = re.compile('(?<!:):(?!:)')
-LOGFILE_REGEX = re.compile('(logfile|allgames)')
-MILESTONE_REGEX = re.compile('milestone')
 
 
 def calculate_game_gid(game):
@@ -39,10 +38,10 @@ def load_logfiles(logdir):
             f_path = os.path.join(src_path, f.name)
             if not f.is_file() or f.stat().st_size == 0:
                 continue
-            elif re.search(MILESTONE_REGEX, f.name):
+            elif re.search(const.MILESTONE_REGEX, f.name):
                 # XXX to be handled later
                 continue
-            elif re.search(LOGFILE_REGEX, f.name):
+            elif re.search(const.LOGFILE_REGEX, f.name):
                 candidates.append((f_path, src))
                 # count += load_logfile(f_path, src)
             else:

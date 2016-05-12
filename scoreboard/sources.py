@@ -9,6 +9,8 @@ import re
 import yaml
 from braceexpand import braceexpand
 
+from . import constants as const
+
 SIMULTANEOUS_DOWNLOADS = 10
 WGET_SOURCE_CMDLINE = ("wget --timeout 10 --no-verbose -c --tries 5 "
                        "-O '{outfile}' '{url}'")
@@ -38,7 +40,8 @@ def sources(src):
         entry = "{}{}".format(src['base'], line)
         if re.search(IGNORED_FILES_REGEX, entry):
             continue
-        yield entry
+        if re.search(const.LOGFILE_REGEX, entry):
+            yield entry
 
 
 def source_data():

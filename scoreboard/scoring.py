@@ -46,7 +46,9 @@ def is_grief(game):
         return False
 
     # Were consumables used?
-    if game.raw_data['potionsused'] > 0 or game.raw_data['scrollsused'] > 0:
+    if ('potionsused' in game.raw_data and
+            (game.raw_data['potionsused'] > 0 or
+             game.raw_data['scrollsused'] > 0)):
         # Tighter thresholds for grief detection
         if game['dur'] < 600 or game['turn'] < 1000:
             blacklist_player(name, src)

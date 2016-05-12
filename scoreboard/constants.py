@@ -1,5 +1,7 @@
 """Defines useful constants."""
 
+import re
+
 PLAYABLE_RACES = {'Ce', 'DD', 'DE', 'Dg', 'Dr', 'Ds', 'Fe', 'Fo', 'Gh', 'Gr',
                   'HE', 'HO', 'Ha', 'Hu', 'Ko', 'Mf', 'Mi', 'Mu', 'Na', 'Op',
                   'Og', 'Sp', 'Te', 'Tr', 'VS', 'Vp'}
@@ -134,3 +136,5 @@ BLACKLISTS = {'griefers': {},
                'cojitobot', 'paulcdejean', 'otabotab', 'nakatomy', 'testingqw',
                'beemell', 'beem', 'drasked', 'phybot'}}
 TABLE_CLASSES = "table table-hover table-striped"
+LOGFILE_REGEX = re.compile('(logfile|allgames)')
+MILESTONE_REGEX = re.compile('milestone')
