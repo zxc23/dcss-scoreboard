@@ -49,6 +49,16 @@ h3 {
     min-width: 10rem;
 }
 
+.games-accordion {
+    text-align: center;
+    display: block;
+}
+
+.games-accordion:focus {
+    color: #0275d8;
+    text-decoration: none;
+}
+
 .nav-tabs .nav-link:hover {
     color: #E7A937;
 }

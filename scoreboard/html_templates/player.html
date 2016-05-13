@@ -79,9 +79,9 @@
       <div class="collapse" id="lessrecentwins">
         {{ all_wins[10:]|gamestotable(winning_games=True, skip_header=True) }}
       </div>
-      <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
-        Show remaining {{ all_wins[10:]|length }} wins...
-      </button>
+      <a href="#" class="games-accordion" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
+        Show/hide remaining {{ all_wins|length - 10 }} wins...
+      </a>
     {% else %}
       {{ all_wins|gamestotable(winning_games=True) }}
     {% endif %}
