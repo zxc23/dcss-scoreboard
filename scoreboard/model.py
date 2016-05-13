@@ -295,6 +295,25 @@ def delete_player_stats(name):
     _engine.execute(_player_stats.delete().where(_player_stats.c.name == name))
 
 
+def delete_player_streaks(name):
+    """Delete a player's streaks."""
+    cname = name.lower()
+    active_streaks = global_stat('active_streaks')
+    completed_streaks = global_stat('completed_streaks')
+
+    if cname in active_streaks:
+        del active_streaks[cname]
+        set_global_stat('active_streaks', active_streaks)
+
+    removed = False
+    for streak in completed_streaks:
+        if streak.cname == cname:
+            completed_streaks.remove(streak)
+            removed = True
+    if removed:
+        set_global_stat('completed_streaks', completed_streaks)
+
+
 def get_player_stats(name):
     """Return a dict of the player's current stats.
 

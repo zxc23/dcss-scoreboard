@@ -153,6 +153,7 @@ def set_global_stat(key, data):
 def rescore_player(player):
     """Rescore all of player's games and stats."""
     try:
+        model.delete_player_streaks(player)
         model.delete_player_stats(player)
         model.unscore_all_games_of_player(player)
     except model.DatabaseError as e:
