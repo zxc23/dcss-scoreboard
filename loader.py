@@ -67,6 +67,7 @@ def main(player=None):
 
     scoreboard.model.setup_database(args.database)
 
+    players = None
     if not args.skip_download:
         scoreboard.sources.download_sources(args.logdir)
     if not args.skip_import:
