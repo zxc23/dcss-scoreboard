@@ -6,3 +6,4 @@ python-dateutil
 jsmin
 braceexpand
 characteristic
+pyyaml
