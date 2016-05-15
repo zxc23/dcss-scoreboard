@@ -202,8 +202,7 @@ def write_website(players=set(), urlbase=None):
     print("Writing index")
     with open(
             os.path.join(WEBSITE_DIR, 'index.html'),
-            'w',
-            encoding='utf8') as f:
+            'w', encoding='utf8') as f:
         template = env.get_template('index.html')
         f.write(template.render(recent_wins=recent_wins,
                                 active_streaks=sorted_active_streaks,

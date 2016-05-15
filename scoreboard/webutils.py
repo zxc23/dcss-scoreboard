@@ -12,6 +12,7 @@ from . import constants as const
 PRETTY_TIME_FORMAT = '%-d %B %Y'
 TIME_FORMAT = '<time class="timeago" datetime="{ts}Z">{t}</time>'
 
+
 def prettyint(value):
     """Jinja filter to prettify ints.
 
@@ -49,13 +50,13 @@ def prettycounter(counter):
 
     eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
-    return ", ".join("{open}{k}&nbsp;({v}){close}".format(
-        k=k,
-        v=v,
-        open="" if v > 0 else '<span class="text-muted">',
-        close="" if v > 0 else '</span>')
-                          for k, v in sorted(counter.items(),
-                                             key=lambda i: i[0]))
+    return ", ".join(
+        "{open}{k}&nbsp;({v}){close}".format(
+            k=k,
+            v=v,
+            open="" if v > 0 else '<span class="text-muted">',
+            close="" if v > 0 else '</span>')
+        for k, v in sorted(counter.items(), key=lambda i: i[0]))
 
 
 def prettycrawldate(d):
@@ -73,8 +74,7 @@ def prettydate(d):
 def link_player(player, urlbase):
     """Convert a player name into a link."""
     return "<a href='{base}/players/{name}.html'>{name}</a>".format(
-        base=urlbase,
-        name=player)
+        base=urlbase, name=player)
 
 
 @jinja2.environmentfilter

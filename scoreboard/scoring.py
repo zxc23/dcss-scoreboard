@@ -46,9 +46,8 @@ def is_grief(game):
         return False
 
     # Were consumables used?
-    if ('potionsused' in game.raw_data and
-            (game.raw_data['potionsused'] > 0 or
-             game.raw_data['scrollsused'] > 0)):
+    if ('potionsused' in game.raw_data and (game.raw_data['potionsused'] > 0 or
+                                            game.raw_data['scrollsused'] > 0)):
         # Tighter thresholds for grief detection
         if game['dur'] < 600 or game['turn'] < 1000:
             blacklist_player(name, src)
@@ -316,13 +315,15 @@ def score_game(game_row):
         wins += 1
 
         # Adjust fastest_realtime win
-        if 'fastest_realtime' not in stats or game_row.games_dur < get_game(stats[
-                'fastest_realtime']).dur:
+        if 'fastest_realtime' not in stats or game_row.games_dur < get_game(
+                stats[
+                    'fastest_realtime']).dur:
             stats['fastest_realtime'] = game_row.games_gid
 
         # Adjust fastest_turncount win
-        if 'fastest_turncount' not in stats or game_row.games_turn < get_game(stats[
-                'fastest_turncount']).turn:
+        if 'fastest_turncount' not in stats or game_row.games_turn < get_game(
+                stats[
+                    'fastest_turncount']).turn:
             stats['fastest_turncount'] = game_row.games_gid
 
         # Increment god_wins and check polytheist
