@@ -4,11 +4,11 @@
 import argparse
 import sys
 
-import scoreboard.model
 import scoreboard.log_import
-import scoreboard.scoring
-import scoreboard.write_website
+# import scoreboard.scoring
+# import scoreboard.write_website
 import scoreboard.sources
+
 
 def error(msg):
     """Print an error and exit."""

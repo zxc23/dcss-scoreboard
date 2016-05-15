@@ -6,6 +6,7 @@ from collections import namedtuple
 Race = namedtuple('Race', ['short', 'full', 'playable'])
 Background = namedtuple('Background', ['short', 'full', 'playable'])
 Branch = namedtuple('Branch', ['short', 'full', 'playable'])
+God = namedtuple('God', ['name', 'playable'])
 
 SPECIES = {Race('Ce', 'Centaur', True),
            Race('DD', 'Deep Dwarf', True),
@@ -43,7 +44,8 @@ SPECIES = {Race('Ce', 'Centaur', True),
            Race('SE', 'Sludge Elf', False),
            Race('LO', 'Lava Orc', False),
            Race('Dj', 'Djinni', False),
-           Race('Pl', 'Plutonian', False), }
+           Race('Pl', 'Plutonian', False),
+           Race('??', 'Unknown', False), }
 
 BACKGROUNDS = {Background('AE', 'Air Elementalist', True),
                Background('AK', 'Abyssal Knight', True),
@@ -78,15 +80,41 @@ BACKGROUNDS = {Background('AE', 'Air Elementalist', True),
                Background('Re', 'Reaver', False),
                Background('St', 'Stalker', False),
                Background('Th', 'Thief', False),
-               Background('Jr', 'Jester', False), }
+               Background('Jr', 'Jester', False),
+               Background('??', 'Unknown', False), }
 
-PLAYABLE_SPECIES = {r for r in SPECIES if r.playable}
-PLAYABLE_BACKGROUNDS = {r for r in BACKGROUNDS if r.playable}
-PLAYABLE_GODS = {'Ashenzari', 'Atheist', 'Beogh', 'Cheibriados', 'Dithmenos',
-                 'Elyvilon', 'Fedhas', 'Gozag', 'Jiyva', 'Kikubaaqudgha',
-                 'Lugonu', 'Makhleb', 'Nemelex Xobeh', 'Okawaru', 'Pakellas',
-                 'Qazlal', 'Ru', 'Sif Muna', 'The Shining One', 'Trog',
-                 'Vehumet', 'Xom', 'Yredelemnul', 'Zin'}
+GODS = {God('Ashenzari', True),
+        God('Atheist', True),
+        God('Beogh', True),
+        God('Cheibriados', True),
+        God('Dithmenos', True),
+        God('Elyvilon', True),
+        God('Fedhas', True),
+        God('Gozag', True),
+        God('Jiyva', True),
+        God('Kikubaaqudgha', True),
+        God('Lugonu', True),
+        God('Makhleb', True),
+        God('Nemelex Xobeh', True),
+        God('Okawaru', True),
+        God('Pakellas', True),
+        God('Qazlal', True),
+        God('Ru', True),
+        God('Sif Muna', True),
+        God('The Shining One', True),
+        God('Trog', True),
+        God('Vehumet', True),
+        God('Xom', True),
+        God('Yredelemnul', True),
+        God('Zin', True),
+        # Non-playable gods
+        God('Hepliaklqana', False),
+        God('Ukayaw', False),
+        God('Unknown', False), }
+
+PLAYABLE_SPECIES = {s for s in SPECIES if s.playable}
+PLAYABLE_BACKGROUNDS = {b for b in BACKGROUNDS if b.playable}
+PLAYABLE_GODS = {g for g in GODS if g.playable}
 NONPLAYABLE_COMBOS = ['FeGl', 'FeAs', 'FeHu', 'FeAM', 'DgBe', 'DgCK', 'DgAK',
                       'GhTm', 'MuTm']
 PLAYABLE_COMBOS = ('%s%s' % (rc.short, bg.short)
@@ -173,7 +201,6 @@ ROLE_TO_GREAT_ROLE = {'AE': 'greatairelementalist',
                       'Wr': 'greatwarper',
                       'Wz': 'greatwizard', }
 
-
 BRANCHES = {
     Branch('D', 'Dungeon', True),
     Branch('Lair', 'Lair of the Beasts', True),
@@ -211,7 +238,6 @@ BRANCHES = {
     Branch('Hive', 'Hive', False),
     Branch('Blade', 'Hall of Blades', False),
     Branch('Forest', 'Enchanted Forest', False),
-
 }
 MANUAL_ACHIEVEMENTS = {
     'comborobin': {

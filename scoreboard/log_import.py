@@ -6,8 +6,8 @@ import time
 import multiprocessing
 import traceback
 
-from . import model
 from . import constants as const
+from . import model
 
 # Logfile format escapes : as ::, so we use re.split
 # instead of the naive line.split(':')
@@ -20,6 +20,7 @@ def calculate_game_gid(game):
 
 
 def candidate_logfiles(logdir):
+    """Yield (logfile, src) tuples from logdir."""
     for d in os.scandir(logdir):
         if not d.is_dir():
             continue
@@ -47,11 +48,11 @@ def load_logfiles(logdir):
     """
     print("Loading all logfiles")
     start = time.time()
-    p = multiprocessing.Pool()
+    p = multiprocessing.Pool(1)
     jobs = []
     for candidate in candidate_logfiles(logdir):
         jobs.append(p.apply_async(load_logfile, candidate))
-        time.sleep(1)  # Stagger start time
+        # load_logfile(*candidate)
     for job in jobs:
         job.get()
     end = time.time()
@@ -65,15 +66,14 @@ def load_logfile(logfile, src):
     start = time.time()
     lines = 0
     new_games = 0
+    s = model.get_session()
     # How many lines have we already processed?
-    try:
-        seek_pos = model.logfile_pos(logfile)
-    except model.DatabaseError as e:
-        print(e)
-        return
+    # We store the data as bytes rather than lines since file.seek is fast
+    seek_pos = model.get_logfile_progress(s, logfile).bytes_parsed
 
-    print("Reading %s%s... " % (logfile, (" from pos %s" % seek_pos) if
+    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos) if
                                 seek_pos else ''))
+    s = model.get_session()
     f = open(logfile, encoding='utf-8')
     f.seek(seek_pos)
     for line in f:
@@ -81,19 +81,17 @@ def load_logfile(logfile, src):
         # skip blank lines
         if not line.strip():
             continue
-        if handle_line(line, src):
+        if handle_line(s, line, src):
             new_games += 1
+    s.commit()
     # Save the new number of lines processed in the database
-    model.save_logfile_pos(logfile, f.tell())
+    model.save_logfile_progress(s, logfile, f.tell())
     end = time.time()
     msg = "Finished reading {f} ({l} new lines, {g} new games) in {s} secs"
-    print(msg.format(f=logfile,
-                     l=lines,
-                     g=new_games,
-                     s=round(end - start, 2)))
+    print(msg.format(f=logfile, l=lines, g=new_games, s=round(end - start, 2)))
 
 
-def handle_line(line, src):
+def handle_line(s, line, src):
     """Given a line, parse it and save it into the database.
 
     Returns True if the line was successfully parsed and added to the database.
@@ -109,11 +107,11 @@ def handle_line(line, src):
         return False
     # Store the game in the database
     try:
-        model.add_game(game['gid'], game)
-    except model.DatabaseError as e:
-        print(e)
-    except model.DuplicateKeyError:
-        return False
+        model.add_game(s, game)
+    except model.DBError as e:
+        print(traceback.format_exc())
+        print("Error adding game, rolling back (%s): %s" % (e, game))
+        s.rollback()
     return True
 
 
