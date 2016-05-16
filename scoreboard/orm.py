@@ -2,11 +2,14 @@
 
 import characteristic
 
-from sqlalchemy import Column, String, \
-                       Integer, Boolean, DateTime, \
+import sqlalchemy
+from sqlalchemy import Table, Column, String, Integer, Boolean, DateTime, \
                        ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+from . import model
 
 Base = declarative_base()
 
@@ -22,21 +25,54 @@ class Server(Base):
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
-@characteristic.with_repr(["name", "server"])
-class Player(Base):
-    """A player -- a single account on a server."""
+AwardedAchievements = Table(
+    'awarded_achievements',
+    Base.metadata,
+    Column('player_id', Integer, ForeignKey('players.id')),
+    Column('achievement_id', Integer, ForeignKey('achievements.id')), )
 
-    __tablename__ = 'players'
+
+@characteristic.with_repr(["name", "server"])
+class Account(Base):
+    """An account -- a single username on a single server."""
+
+    __tablename__ = 'accounts'
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(20), nullable=False, index=True)
     server_id = Column(Integer, ForeignKey('servers.id'))
     server = relationship("Server")
     blacklisted = Column(Boolean, nullable=False, default=False)
+    player_id = Column(Integer, ForeignKey('players.id'))
+    player = relationship("Player")
+
+    @property
+    def canonical_name(self):
+        """Canonical name.
+
+        Crawl names are case-insensitive, we preserve the account's
+        preferred capitalisation, but store them uniquely using the canonical
+        name.
+        """
+        return self.name.lower()
 
     __table_args__ = (UniqueConstraint(
         'name', 'server_id', name='name-server_id'),
                       {'mysql_engine': 'InnoDB',
                        'mysql_charset': 'utf8'}, )
+
+
+@characteristic.with_repr(["id"])
+class Player(Base):
+    """A player -- a collection of accounts with shared metadata."""
+
+    __tablename__ = 'players'
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String(20), unique=True, nullable=False)
+    achievements = relationship("Achievement",
+                                secondary=AwardedAchievements,
+                                back_populates="players")
+    __table_args__ = ({'mysql_engine': 'InnoDB',
+                       'mysql_charset': 'utf8'})
 
 
 @characteristic.with_repr(["short"])
@@ -126,8 +162,9 @@ class Game(Base):
 
     __tablename__ = 'games'
     gid = Column(String(50), primary_key=True, nullable=False)
-    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
-    player = relationship("Player")
+
+    account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)
+    account = relationship("Account")
 
     version_id = Column(Integer, ForeignKey('versions.id'))
     version = relationship("Version")
@@ -141,8 +178,8 @@ class Game(Base):
     place_id = Column(Integer, ForeignKey('places.id'))
     place = relationship("Place")
 
-    # god_id = Column(Integer, ForeignKey('gods.id'))
-    # god = relationship("God")
+    god_id = Column(Integer, ForeignKey('gods.id'))
+    god = relationship("God")
 
     xl = Column(Integer, nullable=False)
     tmsg = Column(String(1000), nullable=False)
@@ -168,3 +205,50 @@ class LogfileProgress(Base):
     bytes_parsed = Column(Integer, nullable=False, default=0)
 
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
+
+
+@characteristic.with_repr(["id"])
+class Achievement(Base):
+    """Achievements."""
+
+    __tablename__ = 'achievements'
+    id = Column(Integer, primary_key=True)
+    key = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False)
+    description = Column(String(200), nullable=False)
+    players = relationship("Player",
+                           secondary=AwardedAchievements,
+                           back_populates="achievements")
+
+    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
+
+
+def setup_database(database):
+    """Set up the database and create the master sessionmaker."""
+    if database == 'mysql':
+        DB_URI = 'mysql://localhost/dcss_scoreboard'
+    elif database == 'sqlite':
+        DB_URI = 'sqlite://'
+    else:
+        raise ValueError("Unknown database type!")
+    ENGINE_OPTS = {}
+    engine = sqlalchemy.create_engine(DB_URI, **ENGINE_OPTS)
+    Base.metadata.create_all(engine)
+
+    # Create the global session manager
+    global Session
+    Session = sessionmaker(bind=engine)
+
+    sess = Session()
+
+    model.setup_servers(sess)
+    model.setup_species(sess)
+    model.setup_backgrounds(sess)
+    model.setup_gods(sess)
+    model.setup_branches(sess)
+    model.setup_achievements(sess)
+
+
+def get_session():
+    """Create a new database session."""
+    return Session()

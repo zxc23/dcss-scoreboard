@@ -4,10 +4,11 @@
 import argparse
 import sys
 
-import scoreboard.log_import
-# import scoreboard.scoring
-# import scoreboard.write_website
 import scoreboard.sources
+import scoreboard.log_import
+import scoreboard.orm
+import scoreboard.scoring
+# import scoreboard.write_website
 
 
 def error(msg):
@@ -65,7 +66,7 @@ def main(player=None):
     """Run CLI."""
     args = read_commandline()
 
-    scoreboard.model.setup_database(args.database)
+    scoreboard.orm.setup_database(args.database)
 
     if not args.skip_download:
         scoreboard.sources.download_sources(args.logdir)

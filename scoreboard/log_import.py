@@ -7,7 +7,7 @@ import multiprocessing
 import traceback
 
 from . import constants as const
-from . import model
+from . import model, orm
 
 # Logfile format escapes : as ::, so we use re.split
 # instead of the naive line.split(':')
@@ -66,14 +66,14 @@ def load_logfile(logfile, src):
     start = time.time()
     lines = 0
     new_games = 0
-    s = model.get_session()
+    s = orm.get_session()
     # How many lines have we already processed?
     # We store the data as bytes rather than lines since file.seek is fast
     seek_pos = model.get_logfile_progress(s, logfile).bytes_parsed
 
     print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos) if
                                 seek_pos else ''))
-    s = model.get_session()
+    s = orm.get_session()
     f = open(logfile, encoding='utf-8')
     f.seek(seek_pos)
     for line in f:
@@ -107,6 +107,8 @@ def handle_line(s, line, src):
         return False
     # Store the game in the database
     try:
+        # XXX should use model.add_games
+        # Probably via an internal function that batches
         model.add_game(s, game)
     except model.DBError as e:
         print(traceback.format_exc())
