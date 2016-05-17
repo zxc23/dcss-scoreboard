@@ -8,7 +8,7 @@ import scoreboard.sources
 import scoreboard.log_import
 import scoreboard.orm
 import scoreboard.scoring
-# import scoreboard.write_website
+import scoreboard.write_website
 
 
 def error(msg):

@@ -6,8 +6,9 @@ import time
 import multiprocessing
 import traceback
 
-from . import constants as const
-from . import model, orm
+import scoreboard.constants as const
+import scoreboard.model as model
+import scoreboard.orm as orm
 
 # Logfile format escapes : as ::, so we use re.split
 # instead of the naive line.split(':')

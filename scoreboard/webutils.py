@@ -5,9 +5,9 @@ import datetime
 import dateutil.parser
 import jinja2
 
-from . import model
-from . import modelutils
-from . import constants as const
+import scoreboard.model as model
+import scoreboard.modelutils as modelutils
+import scoreboard.constants as const
 
 PRETTY_TIME_FORMAT = '%-d %B %Y'
 TIME_FORMAT = '<time class="timeago" datetime="{ts}Z">{t}</time>'

@@ -5,8 +5,9 @@ import datetime
 
 import dateutil.parser
 
-from . import model, orm
-from . import constants as const
+import scoreboard.model as model
+import scoreboard.orm as orm
+import scoreboard.constants as const
 
 
 def get_game(gid):

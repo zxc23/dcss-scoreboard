@@ -3,12 +3,14 @@
 import os
 import json
 
+from typing import Union
+
 from sqlalchemy import func
 
-from . import constants as const
-from .orm import Server, Player, Species, Background, God, Version, \
+import scoreboard.constants as const
+from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account
-from . import modelutils
+import scoreboard.modelutils as modelutils
 
 
 class DBError(BaseException):
@@ -277,7 +279,7 @@ def create_game_mapping(s, data):
     game['turn'] = data['turn']
     game['dur'] = data['dur']
     game['runes'] = data.get('urune', 0)
-    game['sc'] = data['sc']
+    game['score'] = data['sc']
     game['start'] = modelutils.crawl_date_to_datetime(data['start'])
     game['end'] = modelutils.crawl_date_to_datetime(data['end'])
     game['ktyp'] = data['ktyp']
@@ -307,9 +309,9 @@ def save_logfile_progress(s, logfile, pos):
 
 
 def list_accounts(s, *, blacklisted=None):
-    """Get a list of all players.
+    """Get a list of all accounts.
 
-    If blacklisted is specified, only return players with that blacklisted
+    If blacklisted is specified, only return accounts with that blacklisted
     value.
     """
     q = s.query(Account)
@@ -319,8 +321,18 @@ def list_accounts(s, *, blacklisted=None):
     return results
 
 
-def list_games(s, *, scored=None, limit=None):
-    """Get a lit of all games.
+def list_players(s):
+    """Get a list of all players."""
+    q = s.query(Player)
+    return q.all()
+
+
+def list_games(s, *,
+               scored: Union[bool, None]=None,
+               limit: Union[int, None]=None,
+               gid: Union[str, None]=None,
+               winning: Union[bool, None]=None) -> list:
+    """Get a list of all games that match a specified condition.
 
     If scored is specified, only return games with that scored value.
     If limit is specified, return up to limit games.
@@ -328,12 +340,94 @@ def list_games(s, *, scored=None, limit=None):
     q = s.query(Game)
     if scored is not None:
         q = q.filter(Game.scored == scored)
+    if gid is not None:
+        q = q.filter(Game.gid == gid)
     if limit is not None:
         q = q.limit(limit)
-    results = q.all()
-    return results
+    if winning is not None:
+        if winning:
+            q = q.filter(Game.ktyp == 'winning')
+        else:
+            q = q.filter(Game.ktyp != 'winning')
+    return q.all()
+
+
+def get_game(s, **kwargs) -> Game:
+    """Get a single game."""
+    kwargs.setdefault('limit', 1)
+    result = list_games(s, **kwargs)
+    if not result:
+        return None
+    else:
+        return result[0]
 
 
 def get_achievement(s, key):
     """Get an achievement."""
     return s.query(Achievement).filter(Achievement.key == key).first()
+
+
+def highscores(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return up to limit high scores.
+
+    Fewer games may be returned if there is not enough matching data.
+    """
+    q = s.query(Game).order_by(Game.score).limit(limit)
+    return q.all()
+
+
+def _highscores_helper(s, mapped_class, game_column):
+    results = []
+    q = s.query(Game)
+    for i in s.query(mapped_class).filter(mapped_class.playable == True).all():
+        result = q.filter(game_column == i).order_by(
+            Game.score).limit(1).first()
+        if result:
+            results.append(result)
+    return results
+
+
+def species_highscores(s):
+    """Return the top score for each playable species.
+
+    Not every species may have a game in the database.
+    """
+    return _highscores_helper(s, Species, Game.species)
+
+def background_highscores(s):
+    """Return the top score for each playable background.
+
+    Not every background may have a game in the database.
+    """
+    return _highscores_helper(s, Background, Game.background)
+
+def god_highscores(s):
+    """Return the top score for each playable god.
+
+    Not every god may have a game in the database.
+    """
+    return _highscores_helper(s, God, Game.god)
+
+def combo_highscores(s):
+    """Return the top score for each playable combo.
+
+    Not every combo may have a game in the database.
+    """
+    results = []
+    q = s.query(Game)
+    for sp in s.query(Species).filter(Species.playable == True).all():
+        for bg in s.query(Background).filter(Background.playable == True).all():
+            result = q.filter(Game.species == sp, Game.background == bg).order_by(Game.score).limit(1).first()
+            if result:
+                results.append(result)
+    return results
+
+
+def fastest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return up to limit fastest wins."""
+    return s.query(Game).filter(Game.ktyp == 'winning').order_by('dur').limit(limit).all()
+
+
+def shortest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return up to limit shortest wins."""
+    return s.query(Game).filter(Game.ktyp == 'winning').order_by('turn').limit(limit).all()

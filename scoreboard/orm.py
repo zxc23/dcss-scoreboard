@@ -186,12 +186,17 @@ class Game(Base):
     turn = Column(Integer, nullable=False)
     dur = Column(Integer, nullable=False)
     runes = Column(Integer, nullable=False)
-    sc = Column(Integer, nullable=False, index=True)
+    score = Column(Integer, nullable=False, index=True)
     start = Column(DateTime, nullable=False, index=True)
     end = Column(DateTime, nullable=False, index=True)
     ktyp = Column(String(50), nullable=False, index=True)
 
     scored = Column(Boolean, default=False, index=True)
+
+    @property
+    def won(self):
+        """Was this game won?"""
+        return self.ktyp == 'winning'
 
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 

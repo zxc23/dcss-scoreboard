@@ -9,11 +9,12 @@ import datetime
 import jsmin
 import jinja2
 
-from . import model, webutils
-from . import constants as const
+from . import model
+from . import webutils
+import scoreboard.constants as const
+from . import orm
 
 WEBSITE_DIR = 'website'
-
 
 def jinja_env():
     """Create the Jinja template environment."""
@@ -26,7 +27,6 @@ def jinja_env():
     env.filters['gamestotable'] = webutils.gamestotable
     env.filters['streakstotable'] = webutils.streakstotable
     env.filters['prettydate'] = webutils.prettydate
-    env.filters['gidtogame'] = model.game
     env.filters['link_player'] = webutils.link_player
     env.filters['morgue_link'] = webutils.morgue_link
     env.filters['mosthighscorestotable'] = webutils.mosthighscorestotable
@@ -126,7 +126,8 @@ def write_website(players=set(), urlbase=None):
     else:
         env.globals['urlbase'] = os.path.join(os.getcwd(), WEBSITE_DIR)
 
-    all_players = sorted(model.all_player_names())
+    s = orm.get_session()
+    all_players = sorted(model.list_players(s), key=lambda p: p.name)
     if players is None:
         players = all_players
     elif not players:
@@ -144,20 +145,19 @@ def write_website(players=set(), urlbase=None):
 
     print("Generating player list")
     with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
-        f.write(json.dumps(all_players))
+        f.write(json.dumps([p.name for p in all_players]))
 
     print("Loading scoring data")
     start2 = time.time()
     # Get stats
-    stats = model.global_stats()
-    overall_highscores = model.highscores()
-    race_highscores = model.race_highscores()
-    role_highscores = model.role_highscores()
-    god_highscores = model.god_highscores()
-    combo_highscores = model.combo_highscores()
-    fastest_wins = model.fastest_wins()
-    shortest_wins = model.shortest_wins()
-    recent_wins = model.recent_games(wins=True, num=5)
+    overall_highscores = model.highscores(s)
+    race_highscores = model.species_highscores(s)
+    role_highscores = model.background_highscores(s)
+    god_highscores = model.god_highscores(s)
+    combo_highscores = model.combo_highscores(s)
+    fastest_wins = model.fastest_wins(s)
+    shortest_wins = model.shortest_wins(s)
+    recent_wins = model.list_games(s, winning=True, limit=const.GLOBAL_TABLE_LENGTH)
 
     # I'm not proud of this block of code, but it works
     # Create a list of [(name, [highscoregame]), ...] for the index

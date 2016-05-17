@@ -9,7 +9,7 @@ import re
 import yaml
 from braceexpand import braceexpand
 
-from . import constants as const
+import scoreboard.constants as const
 
 SIMULTANEOUS_DOWNLOADS = 10
 WGET_SOURCE_CMDLINE = ("wget --timeout 10 --no-verbose -c --tries 5 "
