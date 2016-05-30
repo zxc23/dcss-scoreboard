@@ -29,17 +29,11 @@ def read_commandline():
                         help="Override website base URL. Default: file:///CWD")
     parser.add_argument('--database',
                         choices=('mysql', 'sqlite'),
-                        default='sqlite',
-                        help="Specify the database backend  (default: sqlite)")
-    parser.add_argument('--rebuild',
+                        default='mysql',
+                        help="Specify the database backend  (default: mysql)")
+    parser.add_argument('--download-logfiles',
                         action='store_true',
-                        help="Rebuild the entire database.")
-    parser.add_argument('--player',
-                        default='',
-                        help="Rebuild just this player's scores.")
-    parser.add_argument('--skip-download',
-                        action='store_true',
-                        help="Skip log download.")
+                        help="Download logfiles first.")
     parser.add_argument('--skip-import',
                         action='store_true',
                         help="Skip log import.")
@@ -53,12 +47,6 @@ def read_commandline():
                         action='store_true',
                         help="Re-write all player pages for the website.")
     args = parser.parse_args()
-    if args.rebuild and args.player:
-        error("You can't specify --rebuild and --player together.")
-    if args.rebuild and args.skip_scoring:
-        error("You can't specify --rebuild and --skip-scoring together.")
-    if args.player and args.skip_scoring:
-        error("You can't specify --player and --skip-scoring together.")
     return args
 
 
@@ -68,14 +56,17 @@ def main(player=None):
 
     scoreboard.orm.setup_database(args.database)
 
-    if not args.skip_download:
+    if args.download_logfiles:
         scoreboard.sources.download_sources(args.logdir)
+
     if not args.skip_import:
         scoreboard.log_import.load_logfiles(logdir=args.logdir)
+
     if not args.skip_scoring:
-        if args.player:
-            scoreboard.scoring.rescore_player(args.player)
-        players = scoreboard.scoring.score_games(rebuild=args.rebuild)
+        players = scoreboard.scoring.score_games()
+    else:
+        players = None
+
     if not args.skip_website:
         if args.rebuild_player_pages:
             players = None
