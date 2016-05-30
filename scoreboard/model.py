@@ -342,13 +342,14 @@ def list_games(s, *,
         q = q.filter(Game.scored == scored)
     if gid is not None:
         q = q.filter(Game.gid == gid)
-    if limit is not None:
-        q = q.limit(limit)
     if winning is not None:
         if winning:
             q = q.filter(Game.ktyp == 'winning')
         else:
             q = q.filter(Game.ktyp != 'winning')
+    q = q.order_by(Game.end.desc())
+    if limit is not None:
+        q = q.limit(limit)
     return q.all()
 
 
@@ -372,11 +373,20 @@ def highscores(s, *, limit=const.GLOBAL_TABLE_LENGTH):
 
     Fewer games may be returned if there is not enough matching data.
     """
-    q = s.query(Game).order_by(Game.score).limit(limit)
+    q = s.query(Game).order_by(Game.score.desc()).limit(limit)
     return q.all()
 
 
 def _highscores_helper(s, mapped_class, game_column):
+    """Generic function to find highscores against arbitrary foreign keys.
+
+    Parameters:
+        mapped_class: the foreign key table's class
+        game_column: the foreign key's column in Games table
+
+    Returns:
+        Array of results
+    """
     results = []
     q = s.query(Game)
     for i in s.query(mapped_class).filter(mapped_class.playable == True).all():
@@ -408,6 +418,26 @@ def god_highscores(s):
     """
     return _highscores_helper(s, God, Game.god)
 
+
+def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return the players with the most combo highscores.
+
+    May return fewer than limit names.
+
+    Returns a list of (player, games) tuples.
+    """
+    results = combo_highscores(s)
+    all = {}
+    for game in results:
+        player = game.account.player.name
+        if player not in all:
+            all[player] = [game]
+        else:
+            all[player].append(game)
+
+    return sorted(all.items(), key=lambda i: len(i[1]), reverse=True)[:limit]
+
+
 def combo_highscores(s):
     """Return the top score for each playable combo.
 
@@ -420,6 +450,7 @@ def combo_highscores(s):
             result = q.filter(Game.species == sp, Game.background == bg).order_by(Game.score).limit(1).first()
             if result:
                 results.append(result)
+
     return results
 
 

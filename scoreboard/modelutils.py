@@ -19,40 +19,42 @@ def crawl_date_to_datetime(d):
                              second=int(d[12:14]))
 
 
+def _morgue_prefix(src, version):
+    if src == "cao":
+        prefix = "http://crawl.akrasiac.org/rawdata"
+    elif src == "cdo":
+        prefix = "http://crawl.develz.org/morgues"
+        prefix += "/" + version_url(version)
+    elif src == "cszo":
+        prefix = "http://dobrazupa.org/morgue"
+    elif src == "cue" or src == "clan":
+        prefix = "http://underhound.eu:81/crawl/morgue"
+    elif src == "cbro":
+        prefix = "http://crawl.berotato.org/crawl/morgue"
+    elif src == "cxc":
+        prefix = "http://crawl.xtahua.com/crawl/morgue"
+    elif src == "lld":
+        prefix = "http://lazy-life.ddo.jp:8080/morgue"
+        prefix += "/" + version_url(version)
+    elif src == "cpo":
+        prefix = "https://crawl.project357.org/morgue"
+    elif src == "cjr":
+        prefix = "http://www.jorgrun.rocks/morgue"
+    elif src == "cwz":
+        prefix = "http://webzook.net/soup/morgue/"
+        prefix += "/" + version_url(version)
+    else:
+        raise ValueError("No prefix for %s" % src)
+    return prefix
+
 def morgue_url(game):
     """Generates a morgue URL from a game."""
-    if game.src == "cao":
-        prefix = "http://crawl.akrasiac.org/rawdata"
-    elif game.src == "cdo":
-        prefix = "http://crawl.develz.org/morgues"
-        prefix += "/" + version_url(game.v)
-    elif game.src == "cszo":
-        prefix = "http://dobrazupa.org/morgue"
-    elif game.src == "cue" or game.src == "clan":
-        prefix = "http://underhound.eu:81/crawl/morgue"
-    elif game.src == "cbro":
-        prefix = "http://crawl.berotato.org/crawl/morgue"
-    elif game.src == "cxc":
-        prefix = "http://crawl.xtahua.com/crawl/morgue"
-    elif game.src == "lld":
-        prefix = "http://lazy-life.ddo.jp:8080/morgue"
-        prefix += "/" + version_url(game.v)
-    elif game.src == "cpo":
-        prefix = "https://crawl.project357.org/morgue"
-    elif game.src == "cjr":
-        prefix = "http://www.jorgrun.rocks/morgue"
-    elif game.src == "cwz":
-        prefix = "http://webzook.net/soup/morgue/"
-        prefix += "/" + version_url(game.v)
-    else:
-        raise ValueError("No prefix for %s" % game.src)
-    date = game.raw_data['end'][:4] \
-        + "%02d" % (int(game.raw_data['end'][4:6]) + 1) \
-        + game.raw_data['end'][6:8]
-    time = game.raw_data['end'][8:14]
-    result = "%s/%s/morgue-%s-%s-%s.txt" % (prefix, game.name, game.name, date,
-                                            time)
-    return result
+    src = game.account.server.name
+    prefix = _morgue_prefix(src, game.version.v)
+
+    name = game.account.player.name
+    timestamp = game.end.strftime("%Y%m%d-%H%M%S")
+    return "%s/%s/morgue-%s-%s.txt" % (prefix, name, name, timestamp)
 
 
 def version_url(version):

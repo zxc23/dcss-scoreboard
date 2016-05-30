@@ -198,6 +198,11 @@ class Game(Base):
         """Was this game won?"""
         return self.ktyp == 'winning'
 
+    @property
+    def char(self):
+        """Was this game won?"""
+        return '{}{}'.format(self.species.short, self.background.short)
+
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 

@@ -16,7 +16,7 @@ from . import orm
 
 WEBSITE_DIR = 'website'
 
-def jinja_env():
+def jinja_env(urlbase):
     """Create the Jinja template environment."""
     template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
@@ -33,6 +33,12 @@ def jinja_env():
     env.filters['recordsformatted'] = webutils.recordsformatted
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
+
+    if urlbase:
+        env.globals['urlbase'] = urlbase
+    else:
+        env.globals['urlbase'] = os.path.join(os.getcwd(), WEBSITE_DIR)
+
     return env
 
 
@@ -68,6 +74,29 @@ def player_records(player, race_highscores, role_highscores, combo_highscores,
             records['god'].append(game)
 
     return records
+
+
+def setup_website_dir(env, path, all_players):
+    print("Writing HTML to %s" % path)
+    if not os.path.exists(path):
+        print("mkdir %s/" % path)
+        os.mkdir(path)
+
+    print("Copying static assets")
+    src = os.path.join(os.path.dirname(__file__), 'html_static')
+    dst = os.path.join(path, 'static')
+    subprocess.run(['rsync', '-a', src + '/', dst + '/'])
+
+    print("Generating player list")
+    with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
+        f.write(json.dumps([p.name for p in all_players]))
+
+
+    print("Writing minified local JS")
+    scoreboard_path = os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js')
+    with open(scoreboard_path, 'w') as f:
+        template = env.get_template('dcss-scoreboard.js')
+        f.write(jsmin.jsmin(template.render()))
 
 
 def write_player_stats(*, player, stats, outfile, achievements, streaks,
@@ -109,6 +138,19 @@ def write_player_stats(*, player, stats, outfile, achievements, streaks,
                                 recent_games=recent_games))
 
 
+def write_index(s, env):
+    print("Writing index")
+    with open(
+            os.path.join(WEBSITE_DIR, 'index.html'),
+            'w', encoding='utf8') as f:
+        template = env.get_template('index.html')
+        f.write(template.render(recent_wins=model.list_games(s, winning=True,
+                                                             limit=const.GLOBAL_TABLE_LENGTH),
+                                active_streaks=[],
+                                overall_highscores=model.highscores(s),
+                                combo_high_scores=model.combo_highscore_holders(s)))
+
+
 def write_website(players=set(), urlbase=None):
     """Write all website files.
 
@@ -120,100 +162,20 @@ def write_website(players=set(), urlbase=None):
     """
     start = time.time()
 
-    env = jinja_env()
-    if urlbase:
-        env.globals['urlbase'] = urlbase
-    else:
-        env.globals['urlbase'] = os.path.join(os.getcwd(), WEBSITE_DIR)
+    env = jinja_env(urlbase)
 
     s = orm.get_session()
+
     all_players = sorted(model.list_players(s), key=lambda p: p.name)
     if players is None:
         players = all_players
     elif not players:
         players = []
 
-    print("Writing HTML to %s" % WEBSITE_DIR)
-    if not os.path.exists(WEBSITE_DIR):
-        print("mkdir %s/" % WEBSITE_DIR)
-        os.mkdir(WEBSITE_DIR)
 
-    print("Copying static assets")
-    src = os.path.join(os.path.dirname(__file__), 'html_static')
-    dst = os.path.join(WEBSITE_DIR, 'static')
-    subprocess.run(['rsync', '-a', src + '/', dst + '/'])
+    setup_website_dir(env, WEBSITE_DIR, all_players)
 
-    print("Generating player list")
-    with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
-        f.write(json.dumps([p.name for p in all_players]))
-
-    print("Loading scoring data")
-    start2 = time.time()
-    # Get stats
-    overall_highscores = model.highscores(s)
-    race_highscores = model.species_highscores(s)
-    role_highscores = model.background_highscores(s)
-    god_highscores = model.god_highscores(s)
-    combo_highscores = model.combo_highscores(s)
-    fastest_wins = model.fastest_wins(s)
-    shortest_wins = model.shortest_wins(s)
-    recent_wins = model.list_games(s, winning=True, limit=const.GLOBAL_TABLE_LENGTH)
-
-    # I'm not proud of this block of code, but it works
-    # Create a list of [(name, [highscoregame]), ...] for the index
-    # It's sorted by number of highscores length
-    inverted_combo_highscores = {}
-    for entry in combo_highscores:
-        if entry.name not in inverted_combo_highscores:
-            inverted_combo_highscores[entry.name] = [entry]
-        else:
-            inverted_combo_highscores[entry.name].append(entry)
-    temp = []
-    for k, v in inverted_combo_highscores.items():
-        temp.append((k, v))
-    inverted_combo_highscores = temp
-    inverted_combo_highscores = sorted(inverted_combo_highscores,
-                                       reverse=True,
-                                       key=lambda i: len(i[1]))[:5]
-
-    # Merge active streaks into streaks
-    streaks = stats.get('completed_streaks', [])
-    active_streaks = stats.get('active_streaks', {})
-    sorted_active_streaks = []
-
-    for streak in active_streaks.values():
-        if len(streak['wins']) > 1:
-            streaks.append(streak)
-            sorted_active_streaks.append(streak)
-
-    # Sort streaks
-    sorted_streaks = sorted(streaks, key=lambda s: (-len(s['wins']), s['end']))
-    sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
-
-    # Get streaks by player
-    player_streaks = {}
-    for streak in sorted_streaks:
-        if streak['cname'] not in player_streaks:
-            player_streaks[streak['cname']] = [streak]
-        else:
-            player_streaks[streak['cname']].append(streak)
-
-    print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
-    print("Writing index")
-    with open(
-            os.path.join(WEBSITE_DIR, 'index.html'),
-            'w', encoding='utf8') as f:
-        template = env.get_template('index.html')
-        f.write(template.render(recent_wins=recent_wins,
-                                active_streaks=sorted_active_streaks,
-                                overall_highscores=overall_highscores,
-                                combo_high_scores=inverted_combo_highscores))
-
-    print("Writing minified local JS")
-    scoreboard_path = os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js')
-    with open(scoreboard_path, 'w') as f:
-        template = env.get_template('dcss-scoreboard.js')
-        f.write(jsmin.jsmin(template.render()))
+    write_index(s, env)
 
     print("Writing streaks")
     with open(

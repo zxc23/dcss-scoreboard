@@ -109,13 +109,13 @@ def gamestotable(env,
     def format_trow(game):
         """Convert a game to a table row."""
         return trow.format(
-            win='table-success' if game.ktyp == 'winning' else '',
+            win='table-success' if game.won else '',
             prefix_col='' if not prefix_col else "<td>%s</td>" %
             game.raw_data.get(prefix_col),
             player_row='' if not show_player else "<td>%s</td>" % link_player(
-                game.name, env.globals['urlbase']),
-            score=prettyint(game.sc),
-            character=game.char,
+                game.account.player.name, env.globals['urlbase']),
+            score=prettyint(game.score),
+            character="{}{}".format(game.species.short, game.background.short),
             god=game.god,
             place="" if winning_games else "<td>%s</td>" % game.place,
             end="" if winning_games else "<td>%s</td>" % game.raw_data.get(
@@ -123,7 +123,7 @@ def gamestotable(env,
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
             date=prettydate(game.end),
-            version=game.v,
+            version=game.version.v,
             morgue=morgue_link(game))
 
     t = """<table class="{classes}">
@@ -269,15 +269,18 @@ def mosthighscorestotable(highscores):
         </table>"""
 
     tbody = ""
+
     for entry in highscores:
-        combos = ', '.join([morgue_link(game, game.char) for game in entry[1]])
+        player = entry[0]
+        games = entry[1]
+        combos = ', '.join([morgue_link(game, game.char) for game in games])
         tbody += ("""<tr>
                        <td>%s</td>
                        <td class="text-xs-right">%s</td>
                        <td>%s</td>
                      </tr>""" %
                   ("<a href='players/{player}.html'>{player}<a>".format(
-                      player=entry[0]), len(entry[1]), combos))
+                      player=player), len(games), combos))
 
     return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
 
@@ -321,13 +324,4 @@ def morgue_link(game, text="Morgue"):
 
     Game can be either a gid string or a game object.
     """
-    if type(game) is str:
-        # Treat as gid
-        game = model.game(game)
-    elif 'raw_data' not in game:
-        # Treat as raw_data
-        game = model.game(game['gid'])
-    if not game:
-        return "Not Found"
-    result = "<a href='" + modelutils.morgue_url(game) + "'>" + text + "</a>"
-    return result
+    return "<a href='" + modelutils.morgue_url(game) + "'>" + text + "</a>"
