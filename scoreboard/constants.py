@@ -277,7 +277,7 @@ MANUAL_ACHIEVEMENTS = {
         '0.17_winner': True
     },
 }
-GLOBAL_TABLE_LENGTH = 20
+GLOBAL_TABLE_LENGTH = 10
 PLAYER_TABLE_LENGTH = 10
 BLACKLISTS = {'griefers': {},
               'bots':
