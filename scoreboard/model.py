@@ -103,7 +103,7 @@ def setup_species(s):
         if not s.query(Species).filter(Species.short == sp.short).first():
             print("Adding species '%s'" % sp.full)
             new.append({'short': sp.short,
-                        'full': sp.full,
+                        'name': sp.full,
                         'playable': sp.playable})
     s.bulk_insert_mappings(Species, new)
     s.commit()
@@ -117,7 +117,7 @@ def setup_backgrounds(s):
         ):
             print("Adding background '%s'" % bg.full)
             new.append({'short': bg.short,
-                        'full': bg.full,
+                        'name': bg.full,
                         'playable': bg.playable})
     s.bulk_insert_mappings(Background, new)
     s.commit()
@@ -168,7 +168,7 @@ def setup_branches(s):
         if not s.query(Branch).filter(Branch.short == br.short).first():
             print("Adding branch '%s'" % br.full)
             new.append({'short': br.short,
-                        'full': br.full,
+                        'name': br.full,
                         'playable': br.playable})
     s.bulk_insert_mappings(Branch, new)
     s.commit()
@@ -193,7 +193,7 @@ def get_species(s, sp):
     if species:
         return species
     else:
-        species = Species(short=sp, full=sp, playable=False)
+        species = Species(short=sp, name=sp, playable=False)
         s.add(species)
         s.commit()
         print("Warning: Found new species %s, please add me to constants.py"
@@ -207,7 +207,7 @@ def get_background(s, bg):
     if background:
         return background
     else:
-        background = Background(short=bg, full=bg, playable=False)
+        background = Background(short=bg, name=bg, playable=False)
         s.add(background)
         s.commit()
         print("Warning: Found new background %s, please add me to constants.py"
@@ -235,7 +235,7 @@ def get_branch(s, br):
     if branch:
         return branch
     else:
-        branch = Branch(short=br, full=br, playable=False)
+        branch = Branch(short=br, name=br, playable=False)
         s.add(branch)
         s.commit()
         print("Warning: Found new branch %s, please add me to constants.py"
@@ -389,7 +389,7 @@ def _highscores_helper(s, mapped_class, game_column):
     """
     results = []
     q = s.query(Game)
-    for i in s.query(mapped_class).filter(mapped_class.playable == True).all():
+    for i in s.query(mapped_class).filter(mapped_class.playable == True).order_by(mapped_class.name).all():
         result = q.filter(game_column == i).order_by(
             Game.score).limit(1).first()
         if result:
@@ -419,25 +419,6 @@ def god_highscores(s):
     return _highscores_helper(s, God, Game.god)
 
 
-def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
-    """Return the players with the most combo highscores.
-
-    May return fewer than limit names.
-
-    Returns a list of (player, games) tuples.
-    """
-    results = combo_highscores(s)
-    all = {}
-    for game in results:
-        player = game.account.player.name
-        if player not in all:
-            all[player] = [game]
-        else:
-            all[player].append(game)
-
-    return sorted(all.items(), key=lambda i: len(i[1]), reverse=True)[:limit]
-
-
 def combo_highscores(s):
     """Return the top score for each playable combo.
 
@@ -462,3 +443,32 @@ def fastest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
 def shortest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
     """Return up to limit shortest wins."""
     return s.query(Game).filter(Game.ktyp == 'winning').order_by('turn').limit(limit).all()
+
+
+def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return the players with the most combo highscores.
+
+    May return fewer than limit names.
+
+    Returns a list of (player, games) tuples.
+    """
+    results = combo_highscores(s)
+    all = {}
+    for game in results:
+        player = game.account.player.name
+        if player not in all:
+            all[player] = [game]
+        else:
+            all[player].append(game)
+
+    return sorted(all.items(), key=lambda i: len(i[1]), reverse=True)[:limit]
+
+
+def get_gobal_records(s):
+    out = {}
+    out['combo'] = combo_highscores(s)
+    out['species'] = species_highscores(s)
+    out['background'] = background_highscores(s)
+    out['god'] = god_highscores(s)
+    out['shortest'] = shortest_wins(s)
+    out['fastest'] = fastest_wins(s)

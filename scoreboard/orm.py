@@ -82,7 +82,7 @@ class Species(Base):
     __tablename__ = 'species'
     id = Column(Integer, primary_key=True, nullable=False)
     short = Column(String(2), nullable=False, index=True, unique=True)
-    full = Column(String(15), nullable=False, unique=True)
+    name = Column(String(15), nullable=False, unique=True)
     playable = Column(Boolean, nullable=False)
 
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
@@ -95,7 +95,7 @@ class Background(Base):
     __tablename__ = 'backgrounds'
     id = Column(Integer, primary_key=True, nullable=False)
     short = Column(String(2), nullable=False, index=True, unique=True)
-    full = Column(String(20), nullable=False, index=True, unique=True)
+    name = Column(String(20), nullable=False, index=True, unique=True)
     playable = Column(Boolean, nullable=False)
 
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
@@ -131,7 +131,7 @@ class Branch(Base):
     __tablename__ = 'branches'
     id = Column(Integer, primary_key=True, nullable=False)
     short = Column(String(10), nullable=False, index=True, unique=True)
-    full = Column(String(20), nullable=False, index=True, unique=True)
+    name = Column(String(20), nullable=False, index=True, unique=True)
     playable = Column(Boolean, nullable=False)
 
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
@@ -192,6 +192,11 @@ class Game(Base):
     ktyp = Column(String(50), nullable=False, index=True)
 
     scored = Column(Boolean, default=False, index=True)
+
+    @property
+    def player(self):
+        """Convenience shortcut to access player"""
+        return self.account.player
 
     @property
     def won(self):

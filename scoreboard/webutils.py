@@ -77,30 +77,23 @@ def link_player(player, urlbase):
         base=urlbase, name=player)
 
 
-@jinja2.environmentfilter
-def gamestotable(env,
+def _games_to_table(env,
                  games,
                  *,
                  prefix_col=None,
                  prefix_col_title=None,
                  show_player=False,
                  winning_games=False,
-                 sort_col=None,
-                 limit=None,
                  skip_header=False):
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
         env: Environment -- passed in automatically
-        prefix_col (str): Add an extra column at the start with data from
-                          game.raw_data.
-                          The table will also be sorted by this column.
+        prefix_col (func): Function to return prefix column's value. Passed each game.
         prefix_col_title (str): Title for the prefix_col column
-        sort_col (str): Sort the table by this column from game.raw_data.
         show_player (bool): Show the player name column
         winning_games (bool): The table has only winning games, so don't show
                               place or end columns, and do show runes.
-        limit (int): The table won't display more games than this.
         skip_header (bool): Skip the header?
 
     Returns: (string) '<table>contents</table>'.
@@ -110,16 +103,14 @@ def gamestotable(env,
         """Convert a game to a table row."""
         return trow.format(
             win='table-success' if game.won else '',
-            prefix_col='' if not prefix_col else "<td>%s</td>" %
-            game.raw_data.get(prefix_col),
+            prefix_col='' if not prefix_col else "<td>%s</td>" % prefix_col(game),
             player_row='' if not show_player else "<td>%s</td>" % link_player(
                 game.account.player.name, env.globals['urlbase']),
             score=prettyint(game.score),
             character="{}{}".format(game.species.short, game.background.short),
-            god=game.god,
+            god=game.god.name,
             place="" if winning_games else "<td>%s</td>" % game.place,
-            end="" if winning_games else "<td>%s</td>" % game.raw_data.get(
-                'tmsg'),
+            end="" if winning_games else "<td>%s</td>" % game.tmsg,
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
             date=prettydate(game.end),
@@ -169,17 +160,11 @@ def gamestotable(env,
       <td>{morgue}</td>
     </tr>"""
 
-    if limit:
-        games = games[:limit]
-
-    if sort_col:
-        games = sorted(games, key=lambda g: g['raw_data'][sort_col])
-    elif prefix_col:
-        games = sorted(games, key=lambda g: g['raw_data'][prefix_col])
+    tbody = "\n".join(format_trow(game) for game in games)
 
     return t.format(classes=const.TABLE_CLASSES,
                     thead=thead if not skip_header else '',
-                    tbody="\n".join(format_trow(game) for game in games))
+                    tbody=tbody)
 
 
 def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
@@ -324,4 +309,32 @@ def morgue_link(game, text="Morgue"):
 
     Game can be either a gid string or a game object.
     """
-    return "<a href='" + modelutils.morgue_url(game) + "'>" + text + "</a>"
+    return "<a href='" + modelutils.morgue_url(game) + "'>" + str(text )+ "</a>"
+
+
+@jinja2.environmentfilter
+def generic_games_to_table(env, data):
+    return _games_to_table(env, data, show_player=False, winning_games=False)
+
+
+@jinja2.environmentfilter
+def generic_highscores_to_table(env, data):
+    return _games_to_table(env, data, show_player=True, winning_games=True)
+
+
+@jinja2.environmentfilter
+def species_highscores_to_table(env, data):
+    return _games_to_table(env, data,
+                           show_player=True,
+                           prefix_col=lambda g: g.species.name,
+                           prefix_col_title='Species',
+                           winning_games=True)
+
+
+@jinja2.environmentfilter
+def background_highscores_to_table(env, data):
+    return _games_to_table(env, data,
+                           show_player=True,
+                           prefix_col=lambda g: g.background.name,
+                           prefix_col_title='Background',
+                           winning_games=True)

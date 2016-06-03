@@ -32,37 +32,25 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div class="tab-pane active" id="overall" role="tabpanel">
-        {{ overall_highscores|gamestotable(show_player=True, winning_games=True) }}
+        {{ overall_highscores|generic_highscores_to_table }}
       </div>
       <div class="tab-pane" id="race" role="tabpanel">
-        {{ race_highscores|gamestotable(show_player=True,
-                                        prefix_col='race',
-                                        prefix_col_title='Species',
-                                        winning_games=True) }}
+        {{ species_highscores|species_highscores_to_table }}
       </div>
       <div class="tab-pane" id="background" role="tabpanel">
-        {{ role_highscores|gamestotable(show_player=True,
-                                        prefix_col='cls',
-                                        prefix_col_title='Background',
-                                        winning_games=True) }}
+        {{ role_highscores|background_highscores_to_table }}
       </div>
       <div class="tab-pane" id="char" role="tabpanel">
-        {{ combo_highscores|gamestotable(show_player=True,
-                                         winning_games=True,
-                                         sort_col='char') }}
+        {{ combo_highscores|generic_highscores_to_table }}
       </div>
       <div class="tab-pane" id="god" role="tabpanel">
-        {{ god_highscores|gamestotable(show_player=True,
-                                       winning_games=True,
-                                       sort_col='god') }}
+        {{ god_highscores|generic_highscores_to_table }}
       </div>
       <div class="tab-pane" id="fastest" role="tabpanel">
-        {{ fastest_wins|gamestotable(show_player=True,
-                                     winning_games=True) }}
+        {{ fastest_wins|generic_highscores_to_table }}
       </div>
       <div class="tab-pane" id="shortest" role="tabpanel">
-        {{ shortest_wins|gamestotable(show_player=True,
-                                      winning_games=True) }}
+        {{ shortest_wins|generic_highscores_to_table }}
       </div>
     </div>
   </div>

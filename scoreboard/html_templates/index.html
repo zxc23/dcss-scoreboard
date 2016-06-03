@@ -5,19 +5,19 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Recent Wins</h3>
-    {{ recent_wins|gamestotable(show_player=True, winning_games=True) }}
+    {{ recent_wins|generic_highscores_to_table }}
   </div>
 </div>
 <div class="row">
   <div class="col-sm-12">
     <h3>Overall Highscores</h3>
-    {{ overall_highscores|gamestotable(show_player=True, winning_games=True, limit=5) }}
+    {{ overall_highscores|generic_highscores_to_table }}
   </div>
 </div>
 <div class="row">
   <div class="col-sm-12">
     <h3>Active Win Streaks</h3>
-    {{ active_streaks|streakstotable(show_loss=False, limit=5) }}
+    {{ active_streaks|streakstotable(show_loss=False) }}
   </div>
 </div>
 <div class="row">

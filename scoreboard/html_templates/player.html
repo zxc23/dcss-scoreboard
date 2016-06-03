@@ -9,17 +9,17 @@
 </div>
 <div class="row">
   <div class="col-sm-3">
-    <p><strong>Last Active:</strong> {{ last_active|prettydate }}</p>
-    <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
-    <p><strong>Wins:</strong> {{ all_wins|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
-    <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
+    <p><strong>Last Active:</strong> {{ games[-1]|attr('end')|prettydate }}</p>
+    <p><strong>Games Played:</strong> {{ games|length|prettyint }}</p>
+    <p><strong>Wins:</strong> {{ games|selectattr("ktyp", "equalto", "winning")|list|length }} (XXX%)</p>
+    <p><strong>Quits:</strong> {{ games|selectattr("ktyp", "equalto", "quitting")|list|length }} (XXX%)</p>
   </div>
   <div class="col-sm-3">
-    <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur(hours=True) }} hours</p>
-    <p><strong>Highest Score:</strong> {{ stats['highscore']|morgue_link(stats['highscore']|gidtogame|attr("sc")|prettyint) }}</p>
-    {% if stats['wins']|length > 0 %}
-      <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']|morgue_link(stats['fastest_turncount']|gidtogame|attr("turn")|default(0)|prettyint + ' turns') }}</p>
-      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']|morgue_link(stats['fastest_realtime']|gidtogame|attr("dur")|default(0)|prettydur + ' hours') }}</p>
+    <p><strong>Total Playtime (XXX):</strong> {{ 1|prettydur(hours=True) }} hours</p>
+    <p><strong>Highest Score (XXX):</strong> {{ games[0]|morgue_link(games[0].score) }}</p>
+    {% if games|selectattr("ktyp", "equalto", "winning")|list|length > 0 %}
+      <p><strong>Shortest Win:</strong> {{ games[0]|morgue_link(games[0].turn|prettyint + ' turns') }}</p>
+      <p><strong>Fastest Win:</strong> {{ games[0]|morgue_link(games[0].dur|prettydur + ' hours') }}</p>
     {% endif %}
   </div>
   <div class="col-sm-3">
@@ -35,7 +35,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Recent Games</h3>
-    {{ recent_games|gamestotable }}
+    {{ recent_games|generic_games_to_table }}
   </div>
 </div>
 {# if player has a race/role highscore, they also have a combo highscore by definition #}
@@ -75,15 +75,15 @@
       <p class="counter">{{ god_wins|prettycounter|safe }}</p>
     </div>
     {% if all_wins|length > 10 %}
-      {{ all_wins[:10]|gamestotable(winning_games=True) }}
+      {{ all_wins[:10]|generic_highscores_to_table }}
       <div class="collapse" id="lessrecentwins">
-        {{ all_wins[10:]|gamestotable(winning_games=True, skip_header=True) }}
+        {{ all_wins[10:]|generic_highscores_to_table }}
       </div>
       <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
         Show remaining {{ all_wins[10:]|length }} wins...
       </button>
     {% else %}
-      {{ all_wins|gamestotable(winning_games=True) }}
+      {{ all_wins|generic_highscores_to_table }}
     {% endif %}
   </div>
 </div>
