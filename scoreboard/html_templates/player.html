@@ -9,17 +9,19 @@
 </div>
 <div class="row">
   <div class="col-sm-3">
-    <p><strong>Last Active:</strong> {{ games[-1]|attr('end')|prettydate }}</p>
+    <p><strong>Last Active:</strong> {{ games[0]|attr('end')|prettydate }}</p>
     <p><strong>Games Played:</strong> {{ games|length|prettyint }}</p>
-    <p><strong>Wins:</strong> {{ games|selectattr("ktyp", "equalto", "winning")|list|length }} (XXX%)</p>
-    <p><strong>Quits:</strong> {{ games|selectattr("ktyp", "equalto", "quitting")|list|length }} (XXX%)</p>
+    {% set wins = games|selectattr("ktyp", "equalto", "winning")|list %}
+    <p><strong>Wins:</strong> {{ wins|length }} ({{ (wins|length / games|length)|percentage }}%)</p>
+    {% set quits = games|selectattr("ktyp", "equalto", "quitting")|list %}
+    <p><strong>Quits:</strong> {{ quits|length }} ({{  (quits|length / games|length)|percentage }}%)</p>
   </div>
   <div class="col-sm-3">
-    <p><strong>Total Playtime (XXX):</strong> {{ 1|prettydur(hours=True) }} hours</p>
-    <p><strong>Highest Score (XXX):</strong> {{ games[0]|morgue_link(games[0].score) }}</p>
-    {% if games|selectattr("ktyp", "equalto", "winning")|list|length > 0 %}
-      <p><strong>Shortest Win:</strong> {{ games[0]|morgue_link(games[0].turn|prettyint + ' turns') }}</p>
-      <p><strong>Fastest Win:</strong> {{ games[0]|morgue_link(games[0].dur|prettydur + ' hours') }}</p>
+    <p><strong>Total Playtime:</strong> {{ games|map(attribute="dur")|sum|prettydur(hours=True) }} hours</p>
+    <p><strong>Highest Score (XXX):</strong> {{ games[0]|morgue_link(games[0].score) }}</p>{# This is wrong #}
+    {% if wins %}
+      <p><strong>Shortest Win:</strong> {{ games[0]|morgue_link(games[0].turn|prettyint + ' turns') }}</p>{# This is wrong #}
+      <p><strong>Fastest Win:</strong> {{ games[0]|morgue_link(games[0].dur|prettydur + ' hours') }}</p>{# This is wrong #}
     {% endif %}
   </div>
   <div class="col-sm-3">
@@ -35,7 +37,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Recent Games</h3>
-    {{ recent_games|generic_games_to_table }}
+    {{ games[:10]|generic_games_to_table }}
   </div>
 </div>
 {# if player has a race/role highscore, they also have a combo highscore by definition #}
