@@ -132,7 +132,7 @@ def _get_player_records(global_records, player):
 
 
 def write_player_page(s, player, player_html_path, template, global_records):
-    games = model.list_games(s)
+    games = model.list_games(s, player=player.name)
     records = _get_player_records(global_records, player)
     # Don't make pages for players with no games played
     if len(games) == 0:
