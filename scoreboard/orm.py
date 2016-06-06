@@ -132,6 +132,7 @@ class Branch(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     short = Column(String(10), nullable=False, index=True, unique=True)
     name = Column(String(20), nullable=False, index=True, unique=True)
+    multilevel = Column(Boolean, nullable=False)
     playable = Column(Boolean, nullable=False)
 
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
@@ -149,6 +150,14 @@ class Place(Base):
     branch_id = Column(Integer, ForeignKey('branches.id'))
     branch = relationship("Branch")
     level = Column(Integer, nullable=False, index=True)
+
+    @property
+    def as_string(self):
+        # TODO: should specify name in 'normal' form eg 'Gehenna' etc
+        if self.branch.multilevel:
+            return "%s:%s" % (self.branch.short, self.level)
+        else:
+            return "%s" % self.branch.short
 
     __table_args__ = (UniqueConstraint(
         'branch_id', 'level', name='branch_id-level'),

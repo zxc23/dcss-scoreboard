@@ -169,6 +169,7 @@ def setup_branches(s):
             print("Adding branch '%s'" % br.full)
             new.append({'short': br.short,
                         'name': br.full,
+                        'multilevel': br.multilevel,
                         'playable': br.playable})
     s.bulk_insert_mappings(Branch, new)
     s.commit()
