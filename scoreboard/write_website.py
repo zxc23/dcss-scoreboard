@@ -196,7 +196,7 @@ def write_website(players=set(), urlbase=None):
 
     write_player_pages(s, env, players)
 
-    print("Wrote website in %s seconds" % round(end - start, 2))
+    print("Wrote website in %s seconds" % round(time.time() - start, 2))
 
 
 if __name__ == "__main__":
