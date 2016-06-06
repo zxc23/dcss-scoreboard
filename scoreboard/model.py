@@ -475,3 +475,4 @@ def get_gobal_records(s):
     out['god'] = god_highscores(s)
     out['shortest'] = shortest_wins(s)
     out['fastest'] = fastest_wins(s)
+    return out
