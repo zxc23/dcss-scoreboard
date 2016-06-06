@@ -328,6 +328,7 @@ def list_players(s):
 
 
 def list_games(s, *,
+               player: Union[bool, None]=None,
                scored: Union[bool, None]=None,
                limit: Union[int, None]=None,
                gid: Union[str, None]=None,
@@ -338,6 +339,8 @@ def list_games(s, *,
     If limit is specified, return up to limit games.
     """
     q = s.query(Game)
+    if player is not None:
+        q = q.join(Game.account).join(Account.player).filter(Player.name == player)
     if scored is not None:
         q = q.filter(Game.scored == scored)
     if gid is not None:
