@@ -28,6 +28,7 @@ def jinja_env(urlbase):
     env.filters['prettydate'] = webutils.prettydate
     env.filters['link_player'] = webutils.link_player
     env.filters['morgue_link'] = webutils.morgue_link
+    env.filters['percentage'] = webutils.percentage
     env.filters['mosthighscorestotable'] = webutils.mosthighscorestotable
     env.filters['recordsformatted'] = webutils.recordsformatted
 

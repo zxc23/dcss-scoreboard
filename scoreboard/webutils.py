@@ -312,6 +312,11 @@ def morgue_link(game, text="Morgue"):
     return "<a href='" + modelutils.morgue_url(game) + "'>" + str(text )+ "</a>"
 
 
+def percentage(n, digits=2):
+    """Convert a number from 0-1 to a percentage."""
+    return "%s" % round(n, digits)
+
+
 @jinja2.environmentfilter
 def generic_games_to_table(env, data):
     return _games_to_table(env, data, show_player=False, winning_games=False)
