@@ -168,7 +168,7 @@ def write_player_pages(s, env, players):
     for player in players:
         write_player_page(s, player, player_html_path, template, global_records)
         n += 1
-        if not n % 10000:
+        if not n % 100:
             print(n)
     end = time.time()
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
@@ -194,8 +194,6 @@ def write_website(players=set(), urlbase=None):
         players = all_players
     elif not players:
         players = []
-    players = [i for i in players if i.name == 'edsrzf']
-
 
     setup_website_dir(env, WEBSITE_DIR, all_players)
 
