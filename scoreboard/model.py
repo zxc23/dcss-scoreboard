@@ -395,7 +395,7 @@ def _highscores_helper(s, mapped_class, game_column):
     q = s.query(Game)
     for i in s.query(mapped_class).filter(mapped_class.playable == True).order_by(mapped_class.name).all():
         result = q.filter(game_column == i).order_by(
-            Game.score).limit(1).first()
+            Game.score.desc()).limit(1).first()
         if result:
             results.append(result)
     return results
@@ -429,10 +429,11 @@ def combo_highscores(s):
     Not every combo may have a game in the database.
     """
     results = []
-    q = s.query(Game)
-    for sp in s.query(Species).filter(Species.playable == True).all():
-        for bg in s.query(Background).filter(Background.playable == True).all():
-            result = q.filter(Game.species == sp, Game.background == bg).order_by(Game.score).limit(1).first()
+    q = s.query(Game).order_by(Game.score.desc())
+    for sp in s.query(Species).filter(Species.playable == True).order_by('name').all():
+        for bg in s.query(Background).filter(Background.playable == True).order_by('name').all():
+            query = q.filter(Game.species == sp, Game.background == bg)
+            result = query.first()
             if result:
                 results.append(result)
 

@@ -113,13 +113,20 @@ def write_highscores(s, env):
             'w',
             encoding='utf8') as f:
         template = env.get_template('highscores.html')
-        f.write(template.render(overall_highscores=model.highscores(s),
-                                species_highscores=model.species_highscores(s),
-                                background_highscores=model.background_highscores(s),
-                                god_highscores=model.god_highscores(s),
-                                combo_highscores=model.combo_highscores(s),
-                                fastest_wins=model.fastest_wins(s),
-                                shortest_wins=model.shortest_wins(s)))
+        overall_highscores=model.highscores(s)
+        species_highscores=model.species_highscores(s)
+        background_highscores=model.background_highscores(s)
+        god_highscores=model.god_highscores(s)
+        combo_highscores=model.combo_highscores(s)
+        fastest_wins=model.fastest_wins(s)
+        shortest_wins=model.shortest_wins(s)
+        f.write(template.render(overall_highscores=overall_highscores,
+                                species_highscores=species_highscores,
+                                background_highscores=background_highscores,
+                                god_highscores=god_highscores,
+                                combo_highscores=combo_highscores,
+                                fastest_wins=fastest_wins,
+                                shortest_wins=shortest_wins))
 
 
 def _get_player_records(global_records, player):
@@ -187,6 +194,7 @@ def write_website(players=set(), urlbase=None):
         players = all_players
     elif not players:
         players = []
+    players = [i for i in players if i.name == 'edsrzf']
 
 
     setup_website_dir(env, WEBSITE_DIR, all_players)

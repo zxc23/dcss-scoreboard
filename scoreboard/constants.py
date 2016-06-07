@@ -31,7 +31,7 @@ SPECIES = {Race('Ce', 'Centaur', True),
            Race('Sp', 'Spriggan', True),
            Race('Te', 'Tengu', True),
            Race('Tr', 'Troll', True),
-           Race('VS', 'Vine Stalkers', True),
+           Race('VS', 'Vine Stalker', True),
            Race('Vp', 'Vampire', True),
            # Non-playable races
            Race('El', 'Elf', False),
