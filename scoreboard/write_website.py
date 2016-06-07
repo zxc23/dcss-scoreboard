@@ -31,6 +31,9 @@ def jinja_env(urlbase):
     env.filters['percentage'] = webutils.percentage
     env.filters['mosthighscorestotable'] = webutils.mosthighscorestotable
     env.filters['recordsformatted'] = webutils.recordsformatted
+    env.filters['shortest_win'] = webutils.shortest_win
+    env.filters['fastest_win'] = webutils.fastest_win
+    env.filters['highscore'] = webutils.highscore
 
     env.filters['generic_games_to_table'] = webutils.generic_games_to_table
     env.filters['generic_highscores_to_table'] = webutils.generic_highscores_to_table

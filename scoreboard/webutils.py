@@ -317,6 +317,23 @@ def percentage(n, digits=2):
     return "%s" % round(n, digits)
 
 
+def shortest_win(games):
+    """Given a list of games, return the win which is the shortest."""
+    wins = filter(lambda g: g.won, games)
+    return max(wins, key=lambda g:g.dur)
+
+
+def fastest_win(games):
+    """Given a list of games, return the win which is the fastest."""
+    wins = filter(lambda g: g.won, games)
+    return min(wins, key=lambda g:g.turn)
+
+
+def highscore(games):
+    """Given a list of games, return the highest scoring game."""
+    return max(games, key=lambda g: g.score)
+
+
 @jinja2.environmentfilter
 def generic_games_to_table(env, data):
     return _games_to_table(env, data, show_player=False, winning_games=False)

@@ -18,10 +18,13 @@
   </div>
   <div class="col-sm-3">
     <p><strong>Total Playtime:</strong> {{ games|map(attribute="dur")|sum|prettydur(hours=True) }} hours</p>
-    <p><strong>Highest Score (XXX):</strong> {{ games[0]|morgue_link(games[0].score) }}</p>{# This is wrong #}
+    {% set highest = games|highscore %}
+    <p><strong>Highest Score:</strong> {{ highest|morgue_link(highest.score|prettyint + ' points') }}</p>
     {% if wins %}
-      <p><strong>Shortest Win:</strong> {{ games[0]|morgue_link(games[0].turn|prettyint + ' turns') }}</p>{# This is wrong #}
-      <p><strong>Fastest Win:</strong> {{ games[0]|morgue_link(games[0].dur|prettydur + ' hours') }}</p>{# This is wrong #}
+      {% set shortest = games|shortest_win %}
+      <p><strong>Shortest Win:</strong> {{ shortest|morgue_link(shortest.turn|prettyint + ' turns') }}</p>
+      {% set fastest = games|fastest_win %}
+      <p><strong>Fastest Win:</strong> {{ fastest|morgue_link(fastest.dur|prettydur + ' hours') }}</p>
     {% endif %}
   </div>
   <div class="col-sm-3">
