@@ -213,8 +213,13 @@ class Game(Base):
         return self.ktyp == 'winning'
 
     @property
+    def quit(self):
+        """Was this game quit?"""
+        return self.ktyp == 'quitting'
+
+    @property
     def char(self):
-        """Was this game won?"""
+        """Four letter character code eg 'MiFi'."""
         return '{}{}'.format(self.species.short, self.background.short)
 
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )

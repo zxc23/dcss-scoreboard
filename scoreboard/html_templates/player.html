@@ -11,9 +11,9 @@
   <div class="col-sm-3">
     <p><strong>Last Active:</strong> {{ games[0]|attr('end')|prettydate }}</p>
     <p><strong>Games Played:</strong> {{ games|length|prettyint }}</p>
-    {% set wins = games|selectattr("ktyp", "equalto", "winning")|list %}
+    {% set wins = games|selectattr("won", "equalto", True)|list %}
     <p><strong>Wins:</strong> {{ wins|length }} ({{ (wins|length / games|length)|percentage }}%)</p>
-    {% set quits = games|selectattr("ktyp", "equalto", "quitting")|list %}
+    {% set quits = games|selectattr("quit", "equalto", True)|list %}
     <p><strong>Quits:</strong> {{ quits|length }} ({{  (quits|length / games|length)|percentage }}%)</p>
   </div>
   <div class="col-sm-3">
