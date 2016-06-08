@@ -63,14 +63,16 @@
   </div>
 {% endif %}
 <hr/>
-{% if all_wins|length %}
+{% if wins|length %}
 <div class="row">
   <div class="col-sm-12">
     <h3>Wins</h3>
     <div class="col-sm-4">
-      <p><strong>By Species ({{ race_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong></p>
-      <p class="counter">{{ race_wins|prettycounter|safe }}</p>
+      <p><strong>By Species ({{ species_wins.values()|reject("equalto", 0)|list|length }}/{{ playable_species|length }})</strong></p>
+      {{ species_wins|prettycounter }}
     </div>
+      {# <p><strong>By Species ({{ race_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong></p>
+      <p class="counter">{{ race_wins|prettycounter|safe }}</p>
     <div class="col-sm-4">
       <p><strong>By Background ({{ background_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong></p>
       <p class="counter">{{ background_wins|prettycounter|safe }}</p>
@@ -78,17 +80,17 @@
     <div class="col-sm-4">
       <p><strong>By God ({{ god_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong></p>
       <p class="counter">{{ god_wins|prettycounter|safe }}</p>
-    </div>
-    {% if all_wins|length > 10 %}
-      {{ all_wins[:10]|generic_highscores_to_table }}
+    </div> #}
+    {% if wins|length > 10 %}
+      {{ wins[:10]|generic_highscores_to_table(show_player=False) }}
       <div class="collapse" id="lessrecentwins">
-        {{ all_wins[10:]|generic_highscores_to_table }}
+        {{ wins[10:]|generic_highscores_to_table(show_player=False) }}
       </div>
-      <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
-        Show remaining {{ all_wins[10:]|length }} wins...
-      </button>
+      <a href="#" class="games-accordion" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
+        Show/hide remaining {{ all_wins|length - 10 }} wins...
+      </a>
     {% else %}
-      {{ all_wins|generic_highscores_to_table }}
+      {{ wins|generic_highscores_to_table(show_player=False) }}
     {% endif %}
   </div>
 </div>

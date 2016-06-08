@@ -43,20 +43,17 @@ def prettydur(duration, hours=False):
         return str(delta)
 
 
-def prettycounter(counter):
-    """Jinja filter to convert a counter dict to pretty text.
-
-    Sorts by lexical order of keys.
-
+def prettycounter(d):
+    """Jinja filter to convert an ordered dict to pretty text.
     eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
     return ", ".join(
         "{open}{k}&nbsp;({v}){close}".format(
-            k=k,
-            v=v,
-            open="" if v > 0 else '<span class="text-muted">',
-            close="" if v > 0 else '</span>')
-        for k, v in sorted(counter.items(), key=lambda i: i[0]))
+            k=k.short,
+            v=len(v),
+            open="" if len(v) > 0 else '<span class="text-muted">',
+            close="" if len(v) > 0 else '</span>')
+        for k, v in d.items())
 
 
 def prettycrawldate(d):
@@ -340,8 +337,8 @@ def generic_games_to_table(env, data):
 
 
 @jinja2.environmentfilter
-def generic_highscores_to_table(env, data):
-    return _games_to_table(env, data, show_player=True, winning_games=True)
+def generic_highscores_to_table(env, data, show_player=True):
+    return _games_to_table(env, data, show_player=show_player, winning_games=True)
 
 
 @jinja2.environmentfilter

@@ -4,7 +4,9 @@ import os
 import json
 import time
 import subprocess
-import datetime
+import collections
+
+from typing import Iterable
 
 import jsmin
 import jinja2
@@ -16,7 +18,7 @@ from . import orm
 
 WEBSITE_DIR = 'website'
 
-def jinja_env(urlbase):
+def jinja_env(urlbase, s):
     """Create the Jinja template environment."""
     template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
@@ -41,6 +43,9 @@ def jinja_env(urlbase):
     env.filters['background_highscores_to_table'] = webutils.background_highscores_to_table
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
+    env.globals['playable_species'] = model.list_species(s, playable=True)
+    env.globals['playable_backgrounds'] = model.list_backgrounds(s, playable=True)
+    env.globals['playable_gods'] = model.list_gods(s, playable=True)
 
     if urlbase:
         env.globals['urlbase'] = urlbase
@@ -141,19 +146,50 @@ def _get_player_records(global_records, player):
     return out
 
 
+def _wins_per_species(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+    """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
+    out = collections.OrderedDict()
+    for sp in model.list_species(s, playable=True):
+        out[sp] = [g for g in games if g.won and g.species == sp]
+    return out
+
+
+def _wins_per_background(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+    """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
+    out = collections.OrderedDict()
+    for bg in model.list_backgrounds(s, playable=True):
+        out[bg] = [g for g in games if g.won and g.background == bg]
+    return out
+
+
+def _wins_per_god(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+    """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
+    out = collections.OrderedDict()
+    for god in model.list_gods(s, playable=True):
+        out[god] = [g for g in games if g.won and g.god == god]
+    return out
+
+
 def write_player_page(s, player, player_html_path, template, global_records):
     games = model.list_games(s, player=player.name)
-    records = _get_player_records(global_records, player)
     # Don't make pages for players with no games played
     if len(games) == 0:
         return
+
+    records = _get_player_records(global_records, player)
+    species_wins = _wins_per_species(s, games)
+    background_wins = _wins_per_background(s, games)
+    god_wins = _wins_per_god(s, games)
 
     outfile = os.path.join(player_html_path, player.name + '.html')
 
     with open(outfile, 'w', encoding='utf8') as f:
         f.write(template.render(player=player,
                                 games=games,
-                                records=records))
+                                records=records,
+                                species_wins=species_wins,
+                                background_wins=background_wins,
+                                god_wins=god_wins))
 
 def write_player_pages(s, env, players):
     print("Writing %s player pages... " % len(players))
@@ -185,9 +221,9 @@ def write_website(players=set(), urlbase=None):
     """
     start = time.time()
 
-    env = jinja_env(urlbase)
-
     s = orm.get_session()
+
+    env = jinja_env(urlbase, s)
 
     all_players = sorted(model.list_players(s), key=lambda p: p.name)
     if players is None:

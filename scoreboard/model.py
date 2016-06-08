@@ -3,7 +3,7 @@
 import os
 import json
 
-from typing import Union
+from typing import Optional
 
 from sqlalchemy import func
 
@@ -328,12 +328,43 @@ def list_players(s):
     return q.all()
 
 
+def _generic_char_type_lister(s, *, cls, playable: Optional[bool]):
+    q = s.query(cls)
+    if playable is not None:
+        q = q.filter(cls.playable == playable)
+    return q.order_by(getattr(cls, 'name')).all()
+
+
+def list_species(s, *, playable: Optional[bool]=None):
+    """Return a list of species.
+
+    If playable is specified, only return species that have a matching playable attribute.
+    """
+    return _generic_char_type_lister(s, cls=Species, playable=playable)
+
+
+def list_backgrounds(s, *, playable: Optional[bool]=None):
+    """Return a list of backgrounds.
+
+    If playable is specified, only return species that have a matching playable attribute.
+    """
+    return _generic_char_type_lister(s, cls=Background, playable=playable)
+
+
+def list_gods(s, *, playable: Optional[bool]=None):
+    """Return a list of gods.
+
+    If playable is specified, only return species that have a matching playable attribute.
+    """
+    return _generic_char_type_lister(s, cls=God, playable=playable)
+
+
 def list_games(s, *,
-               player: Union[bool, None]=None,
-               scored: Union[bool, None]=None,
-               limit: Union[int, None]=None,
-               gid: Union[str, None]=None,
-               winning: Union[bool, None]=None) -> list:
+               player: Optional[bool]=None,
+               scored: Optional[bool]=None,
+               limit: Optional[int]=None,
+               gid: Optional[str]=None,
+               winning: Optional[bool]=None) -> list:
     """Get a list of all games that match a specified condition.
 
     If scored is specified, only return games with that scored value.
