@@ -29,8 +29,9 @@ class Server(Base):
 AwardedAchievements = Table(
     'awarded_achievements',
     Base.metadata,
-    Column('player_id', Integer, ForeignKey('players.id')),
-    Column('achievement_id', Integer, ForeignKey('achievements.id')), )
+    Column('player_id', Integer, ForeignKey('players.id'), nullable=False),
+    Column('achievement_id', Integer, ForeignKey('achievements.id'), nullable=False),
+    )
 
 
 @characteristic.with_repr(["name", "server"])
@@ -40,10 +41,10 @@ class Account(Base):
     __tablename__ = 'accounts'
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(20), nullable=False, index=True)
-    server_id = Column(Integer, ForeignKey('servers.id'))
+    server_id = Column(Integer, ForeignKey('servers.id'), nullable=False)
     server = relationship("Server")
     blacklisted = Column(Boolean, nullable=False, default=False)
-    player_id = Column(Integer, ForeignKey('players.id'))
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
     player = relationship("Player")
 
     @property
@@ -148,7 +149,7 @@ class Place(Base):
 
     __tablename__ = 'places'
     id = Column('id', Integer, primary_key=True, nullable=False)
-    branch_id = Column(Integer, ForeignKey('branches.id'))
+    branch_id = Column(Integer, ForeignKey('branches.id'), nullable=False)
     branch = relationship("Branch")
     level = Column(Integer, nullable=False, index=True)
 
@@ -187,19 +188,19 @@ class Game(Base):
     account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)
     account = relationship("Account")
 
-    version_id = Column(Integer, ForeignKey('versions.id'))
+    version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)
     version = relationship("Version")
 
-    species_id = Column(Integer, ForeignKey('species.id'))
+    species_id = Column(Integer, ForeignKey('species.id'), nullable=False)
     species = relationship("Species")
 
-    background_id = Column(Integer, ForeignKey('backgrounds.id'))
+    background_id = Column(Integer, ForeignKey('backgrounds.id'), nullable=False)
     background = relationship("Background")
 
-    place_id = Column(Integer, ForeignKey('places.id'))
+    place_id = Column(Integer, ForeignKey('places.id'), nullable=False)
     place = relationship("Place")
 
-    god_id = Column(Integer, ForeignKey('gods.id'))
+    god_id = Column(Integer, ForeignKey('gods.id'), nullable=False)
     god = relationship("God")
 
     xl = Column(Integer, nullable=False)
@@ -211,7 +212,7 @@ class Game(Base):
     start = Column(DateTime, nullable=False, index=True)
     end = Column(DateTime, nullable=False, index=True)
 
-    ktyp_id = Column(Integer, ForeignKey('ktyps.id'))
+    ktyp_id = Column(Integer, ForeignKey('ktyps.id'), nullable=False)
     ktyp = relationship("Ktyp")
 
     scored = Column(Boolean, default=False, index=True)
