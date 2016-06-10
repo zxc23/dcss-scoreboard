@@ -316,7 +316,7 @@ def create_game_mapping(s, data):
     game['start'] = modelutils.crawl_date_to_datetime(data['start'])
     game['end'] = modelutils.crawl_date_to_datetime(data['end'])
 
-    game['ktyp'] = get_ktyp(s, data['ktyp'])
+    game['ktyp_id'] = get_ktyp(s, data['ktyp']).id
 
     return game
 
