@@ -9,7 +9,7 @@ from sqlalchemy import func
 
 import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
-    Branch, Place, Game, LogfileProgress, Achievement, Account
+    Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp
 import scoreboard.modelutils as modelutils
 
 
@@ -149,6 +149,18 @@ def setup_gods(s):
     s.commit()
 
 
+def setup_ktyps(s):
+    """Load ktyp data into the database."""
+    new = []
+    for ktyp in const.KTYPS:
+        if not s.query(Ktyp).filter(Ktyp.name == ktyp).first():
+            print("Adding ktyp '%s'" % ktyp)
+            new.append({'name': ktyp})
+    s.bulk_insert_mappings(Ktyp, new)
+    s.commit()
+
+
+
 def get_version(s, v):
     """Get a version, creating it if needed."""
     version = s.query(Version).filter(Version.v == v).first()
@@ -230,6 +242,19 @@ def get_god(s, name):
         return god
 
 
+def get_ktyp(s, name):
+    """Get a ktyp, creating it if needed."""
+    ktyp = s.query(Ktyp).filter(Ktyp.name == name).first()
+    if ktyp:
+        return ktyp
+    else:
+        ktyp = Ktyp(name=name)
+        s.add(ktyp)
+        s.commit()
+        print("Warning: Found new ktyp %s, please add me to constants.py" % name)
+        return ktyp
+
+
 def get_branch(s, br):
     """Get a branch, creating it if needed."""
     branch = s.query(Branch).filter(Branch.short == br).first()
@@ -270,6 +295,7 @@ def create_game_mapping(s, data):
         newrace = const.RACE_SHORTNAME_FIXUPS[oldrace]
         data['char'] = newrace + data['char'][2:]
     data['br'] = const.BRANCH_NAME_FIXUPS.get(data['br'], data['br'])
+    data['ktyp'] = const.KTYP_FIXUPS.get(data['ktyp'], data['ktyp'])
 
     game = {}
     game['gid'] = data['gid']
@@ -289,7 +315,8 @@ def create_game_mapping(s, data):
     game['score'] = data['sc']
     game['start'] = modelutils.crawl_date_to_datetime(data['start'])
     game['end'] = modelutils.crawl_date_to_datetime(data['end'])
-    game['ktyp'] = data['ktyp']
+
+    game['ktyp'] = get_ktyp(s, data['ktyp'])
 
     return game
 

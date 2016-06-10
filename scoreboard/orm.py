@@ -165,6 +165,17 @@ class Place(Base):
                        'mysql_charset': 'utf8'}, )
 
 
+@characteristic.with_repr(["name"])
+class Ktyp(Base):
+    """A DCSS ktyp (mon, beam, etc)."""
+
+    __tablename__ = 'ktyps'
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String(20), nullable=False, index=True, unique=True)
+
+    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
+
+
 @characteristic.with_repr(["gid"])
 class Game(Base):
     """A single DCSS game."""
@@ -198,7 +209,9 @@ class Game(Base):
     score = Column(Integer, nullable=False, index=True)
     start = Column(DateTime, nullable=False, index=True)
     end = Column(DateTime, nullable=False, index=True)
-    ktyp = Column(String(50), nullable=False, index=True)
+
+    ktyp_id = Column(Integer, ForeignKey('ktyps.id'))
+    ktyp = relationship("Ktyp")
 
     scored = Column(Boolean, default=False, index=True)
 
@@ -276,6 +289,7 @@ def setup_database(database):
     model.setup_gods(sess)
     model.setup_branches(sess)
     model.setup_achievements(sess)
+    model.setup_ktyps(sess)
 
 
 def get_session():
