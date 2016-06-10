@@ -76,6 +76,8 @@ BACKGROUNDS = {Background('AE', 'Air Elementalist', True),
                Background('He', 'Healer', False),
                Background('He', 'Healer', False),
                Background('Pa', 'Paladin', False),
+               Background('Pa', 'Paladin', False),
+               Background('Pr', 'Priest', False),
                Background('Re', 'Reaver', False),
                Background('St', 'Stalker', False),
                Background('Th', 'Thief', False),
@@ -131,6 +133,9 @@ GOD_NAME_FIXUPS = {
     'Lugafu': 'Trog',
     'Lucy': 'Lugonu',
 }
+RACE_SHORTNAME_FIXUPS = {
+    'Ke': 'Te',
+}
 RACE_NAME_FIXUPS = {
     'Yellow Draconian': 'Draconian',
     'Grey Draconian': 'Draconian',
@@ -147,6 +152,8 @@ RACE_NAME_FIXUPS = {
 BRANCH_NAME_FIXUPS = {
     # April fool's one year
     'Nor': 'Coc',
+    # Rename
+    'Vault': 'Vaults'
 }
 RACE_TO_GREAT_RACE = {'Ce': 'greatcentaur',
                       'DD': 'greatdeepdwarf',

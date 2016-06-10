@@ -236,7 +236,7 @@ def get_branch(s, br):
     if branch:
         return branch
     else:
-        branch = Branch(short=br, name=br, playable=False)
+        branch = Branch(short=br, name=br, multilevel=True, playable=False)
         s.add(branch)
         s.commit()
         print("Warning: Found new branch %s, please add me to constants.py"
@@ -261,9 +261,15 @@ def add_games(s, games_data):
 
 def create_game_mapping(s, data):
     """Convert raw log dict into a game object."""
+
     # Normalise some data
     data['god'] = const.GOD_NAME_FIXUPS.get(data['god'], data['god'])
     data['race'] = const.RACE_NAME_FIXUPS.get(data['race'], data['race'])
+    if data['char'][:2] in const.RACE_SHORTNAME_FIXUPS:
+        oldrace = data['char'][:2]
+        newrace = const.RACE_SHORTNAME_FIXUPS[oldrace]
+        data['char'] = newrace + data['char'][2:]
+    data['br'] = const.BRANCH_NAME_FIXUPS.get(data['br'], data['br'])
 
     game = {}
     game['gid'] = data['gid']
