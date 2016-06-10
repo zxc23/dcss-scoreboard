@@ -6,6 +6,9 @@ import time
 import multiprocessing
 import traceback
 
+import sqlalchemy.exc
+import _mysql_exceptions
+
 import scoreboard.constants as const
 import scoreboard.model as model
 import scoreboard.orm as orm
@@ -112,6 +115,11 @@ def handle_line(s, line, src):
         # Probably via an internal function that batches
         model.add_game(s, game)
     except model.DBError as e:
+        # If it's a duplicate key error, ignore
+        if isinstance(e.__cause__, sqlalchemy.exc.IntegrityError):
+            if isinstance(e.__cause__.orig, _mysql_exceptions.IntegrityError):
+                if e.__cause__.orig.args[0] == 1062:
+                    pass
         print(traceback.format_exc())
         print("Error adding game, rolling back (%s): %s" % (e, game))
         s.rollback()
