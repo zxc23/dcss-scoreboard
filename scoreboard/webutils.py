@@ -49,7 +49,7 @@ def prettycounter(d):
     """
     return ", ".join(
         "{open}{k}&nbsp;({v}){close}".format(
-            k=k.short,
+            k=k.name.replace(' ', '&nbsp;'),
             v=len(v),
             open="" if len(v) > 0 else '<span class="text-muted">',
             close="" if len(v) > 0 else '</span>')
