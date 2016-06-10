@@ -8,6 +8,7 @@ from sqlalchemy import Table, Column, String, Integer, Boolean, DateTime, \
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import sqlalchemy.pool
 
 from . import model
 
@@ -273,7 +274,7 @@ def setup_database(database):
         DB_URI = 'sqlite://'
     else:
         raise ValueError("Unknown database type!")
-    ENGINE_OPTS = {}
+    ENGINE_OPTS = {'poolclass': sqlalchemy.pool.NullPool}
     engine = sqlalchemy.create_engine(DB_URI, **ENGINE_OPTS)
     Base.metadata.create_all(engine)
 

@@ -52,7 +52,7 @@ def load_logfiles(logdir):
     """
     print("Loading all logfiles")
     start = time.time()
-    p = multiprocessing.Pool(1)
+    p = multiprocessing.Pool()
     jobs = []
     for candidate in candidate_logfiles(logdir):
         jobs.append(p.apply_async(load_logfile, candidate))
