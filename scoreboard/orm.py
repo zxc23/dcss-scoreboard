@@ -215,7 +215,7 @@ class Game(Base):
     ktyp_id = Column(Integer, ForeignKey('ktyps.id'), nullable=False)
     ktyp = relationship("Ktyp")
 
-    scored = Column(Boolean, default=False, index=True)
+    scored = Column(Boolean, default=False, nullable=False, index=True)
 
     @property
     def player(self):
