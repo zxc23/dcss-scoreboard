@@ -464,7 +464,8 @@ def _highscores_helper(s, mapped_class, game_column):
     results = []
     q = s.query(Game)
     for i in s.query(mapped_class).filter(
-            mapped_class.playable == sqlalchemy.true()).order_by(mapped_class.name).all():
+            mapped_class.playable ==
+            sqlalchemy.true()).order_by(mapped_class.name).all():
         result = q.filter(
             game_column == i).order_by(Game.score.desc()).limit(1).first()
         if result:
@@ -506,7 +507,8 @@ def combo_highscores(s):
     for sp in s.query(Species).filter(
             Species.playable == sqlalchemy.true()).order_by('name').all():
         for bg in s.query(Background).filter(
-                Background.playable == sqlalchemy.true()).order_by('name').all():
+                Background.playable ==
+                sqlalchemy.true()).order_by('name').all():
             query = q.filter(Game.species == sp, Game.background == bg)
             result = query.first()
             if result:
@@ -542,7 +544,9 @@ def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
         player = game.account.player.name
         results.setdefault(player, []).append(game)
 
-    return sorted(results.items(), key=lambda i: len(i[1]), reverse=True)[:limit]
+    return sorted(results.items(),
+                  key=lambda i: len(i[1]),
+                  reverse=True)[:limit]
 
 
 def get_gobal_records(s):
