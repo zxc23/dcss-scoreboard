@@ -416,10 +416,11 @@ def list_games(s,
     if gid is not None:
         q = q.filter(Game.gid == gid)
     if winning is not None:
+        ktyp = get_ktyp(s, 'winning')
         if winning:
-            q = q.filter(Game.ktyp == 'winning')
+            q = q.filter(Game.ktyp == ktyp)
         else:
-            q = q.filter(Game.ktyp != 'winning')
+            q = q.filter(Game.ktyp != ktyp)
     q = q.order_by(Game.end.desc())
     if limit is not None:
         q = q.limit(limit)
@@ -516,14 +517,16 @@ def combo_highscores(s):
 
 def fastest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
     """Return up to limit fastest wins."""
+    ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
-        Game.ktyp == 'winning').order_by('dur').limit(limit).all()
+        Game.ktyp == ktyp).order_by('dur').limit(limit).all()
 
 
 def shortest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
     """Return up to limit shortest wins."""
+    ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
-        Game.ktyp == 'winning').order_by('turn').limit(limit).all()
+        Game.ktyp == ktyp).order_by('turn').limit(limit).all()
 
 
 def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
