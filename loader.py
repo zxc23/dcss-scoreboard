@@ -50,7 +50,7 @@ def read_commandline():
     return args
 
 
-def main(player=None):
+def main():
     """Run CLI."""
     args = read_commandline()
 

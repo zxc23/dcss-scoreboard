@@ -18,6 +18,7 @@ from . import orm
 
 WEBSITE_DIR = 'website'
 
+
 def jinja_env(urlbase, s):
     """Create the Jinja template environment."""
     template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
@@ -38,13 +39,17 @@ def jinja_env(urlbase, s):
     env.filters['highscore'] = webutils.highscore
 
     env.filters['generic_games_to_table'] = webutils.generic_games_to_table
-    env.filters['generic_highscores_to_table'] = webutils.generic_highscores_to_table
-    env.filters['species_highscores_to_table'] = webutils.species_highscores_to_table
-    env.filters['background_highscores_to_table'] = webutils.background_highscores_to_table
+    env.filters[
+        'generic_highscores_to_table'] = webutils.generic_highscores_to_table
+    env.filters[
+        'species_highscores_to_table'] = webutils.species_highscores_to_table
+    env.filters[
+        'background_highscores_to_table'] = webutils.background_highscores_to_table
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
     env.globals['playable_species'] = model.list_species(s, playable=True)
-    env.globals['playable_backgrounds'] = model.list_backgrounds(s, playable=True)
+    env.globals['playable_backgrounds'] = model.list_backgrounds(s,
+                                                                 playable=True)
     env.globals['playable_gods'] = model.list_gods(s, playable=True)
 
     if urlbase:
@@ -55,7 +60,7 @@ def jinja_env(urlbase, s):
     return env
 
 
-def achievement_data(ordered=False):
+def achievement_data():
     """Load achievement data.
 
     If ordered is True, the achievements are returned as a list in display
@@ -80,7 +85,6 @@ def setup_website_dir(env, path, all_players):
     with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
         f.write(json.dumps([p.name for p in all_players]))
 
-
     print("Writing minified local JS")
     scoreboard_path = os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js')
     with open(scoreboard_path, 'w') as f:
@@ -94,11 +98,14 @@ def write_index(s, env):
             os.path.join(WEBSITE_DIR, 'index.html'),
             'w', encoding='utf8') as f:
         template = env.get_template('index.html')
-        f.write(template.render(recent_wins=model.list_games(s, winning=True,
-                                                             limit=const.GLOBAL_TABLE_LENGTH),
-                                active_streaks=[],
-                                overall_highscores=model.highscores(s),
-                                combo_high_scores=model.combo_highscore_holders(s)))
+        f.write(template.render(
+            recent_wins=model.list_games(s,
+                                         winning=True,
+                                         limit=const.GLOBAL_TABLE_LENGTH),
+            active_streaks=[],
+            overall_highscores=model.highscores(s),
+            combo_high_scores=model.combo_highscore_holders(s)))
+
 
 def write_streaks(env):
     print("Writing streaks")
@@ -107,8 +114,8 @@ def write_streaks(env):
             'w',
             encoding='utf8') as f:
         template = env.get_template('streaks.html')
-        f.write(template.render(streaks=sorted_streaks,
-                                active_streaks=sorted_active_streaks))
+        f.write(template.render(streaks=[],
+                                active_streaks=[]))
 
 
 def write_highscores(s, env):
@@ -118,13 +125,13 @@ def write_highscores(s, env):
             'w',
             encoding='utf8') as f:
         template = env.get_template('highscores.html')
-        overall_highscores=model.highscores(s)
-        species_highscores=model.species_highscores(s)
-        background_highscores=model.background_highscores(s)
-        god_highscores=model.god_highscores(s)
-        combo_highscores=model.combo_highscores(s)
-        fastest_wins=model.fastest_wins(s)
-        shortest_wins=model.shortest_wins(s)
+        overall_highscores = model.highscores(s)
+        species_highscores = model.species_highscores(s)
+        background_highscores = model.background_highscores(s)
+        god_highscores = model.god_highscores(s)
+        combo_highscores = model.combo_highscores(s)
+        fastest_wins = model.fastest_wins(s)
+        shortest_wins = model.shortest_wins(s)
         f.write(template.render(overall_highscores=overall_highscores,
                                 species_highscores=species_highscores,
                                 background_highscores=background_highscores,
@@ -136,13 +143,13 @@ def write_highscores(s, env):
 
 def _get_player_records(global_records, player):
     out = {}
-    for type, games in global_records.items():
+    for typ, games in global_records.items():
         for game in games:
             if game.player.name == player:
-                if type not in out:
-                    out[type] = [game]
+                if typ not in out:
+                    out[typ] = [game]
                 else:
-                    out[type].append(game)
+                    out[typ].append(game)
     return out
 
 
@@ -191,6 +198,7 @@ def write_player_page(s, player, player_html_path, template, global_records):
                                 background_wins=background_wins,
                                 god_wins=god_wins))
 
+
 def write_player_pages(s, env, players):
     print("Writing %s player pages... " % len(players))
     start2 = time.time()
@@ -202,7 +210,8 @@ def write_player_pages(s, env, players):
 
     n = 0
     for player in players:
-        write_player_page(s, player, player_html_path, template, global_records)
+        write_player_page(s, player, player_html_path, template,
+                          global_records)
         n += 1
         if not n % 100:
             print(n)

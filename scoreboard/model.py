@@ -5,6 +5,7 @@ import json
 
 from typing import Optional
 
+import sqlalchemy
 from sqlalchemy import func
 
 import scoreboard.constants as const
@@ -19,7 +20,7 @@ class DBError(BaseException):
     pass
 
 
-def _reraise_dberror(func):
+def _reraise_dberror(function):
     """Re-raise errors from decorated function as DBError.
 
     Doesn't re-wrap DBError exceptions.
@@ -28,7 +29,7 @@ def _reraise_dberror(func):
     def f(*args, **kwargs):
         """Re-raise exceptions as GaiaError."""
         try:
-            return func(*args, **kwargs)
+            return function(*args, **kwargs)
         except BaseException as e:
             if isinstance(e, DBError):
                 raise
@@ -113,8 +114,8 @@ def setup_backgrounds(s):
     """Load background data into the database."""
     new = []
     for bg in const.BACKGROUNDS:
-        if not s.query(Background).filter(Background.short == bg.short).first(
-        ):
+        if not s.query(Background).filter(
+                Background.short == bg.short).first():
             print("Adding background '%s'" % bg.full)
             new.append({'short': bg.short,
                         'name': bg.full,
@@ -130,10 +131,12 @@ def setup_achievements(s):
     with open(path) as f:
         achievements = json.load(f)
     for a in achievements:
-        if not s.query(Achievement).filter(Achievement.name == a[
-                'name']).first():
+        if not s.query(Achievement).filter(
+                Achievement.name == a['name']).first():
             print("Adding achievement '%s'" % a['name'])
-            new.append({'name': a['name'], 'key': a['id'], 'description': a['description']})
+            new.append({'name': a['name'],
+                        'key': a['id'],
+                        'description': a['description']})
     s.bulk_insert_mappings(Achievement, new)
     s.commit()
 
@@ -158,7 +161,6 @@ def setup_ktyps(s):
             new.append({'name': ktyp})
     s.bulk_insert_mappings(Ktyp, new)
     s.commit()
-
 
 
 def get_version(s, v):
@@ -251,7 +253,8 @@ def get_ktyp(s, name):
         ktyp = Ktyp(name=name)
         s.add(ktyp)
         s.commit()
-        print("Warning: Found new ktyp %s, please add me to constants.py" % name)
+        print("Warning: Found new ktyp %s, please add me to constants.py" %
+              name)
         return ktyp
 
 
@@ -297,34 +300,34 @@ def create_game_mapping(s, data):
     data['br'] = const.BRANCH_NAME_FIXUPS.get(data['br'], data['br'])
     data['ktyp'] = const.KTYP_FIXUPS.get(data['ktyp'], data['ktyp'])
 
-    game = {}
-    game['gid'] = data['gid']
-    server = get_server(s, data['src'])
-    game['account_id'] = get_account(s, data['name'], server).id
-    game['species_id'] = get_species(s, data['char'][:2]).id
-    game['background_id'] = get_background(s, data['char'][2:]).id
-    game['god_id'] = get_god(s, data['god']).id
-    game['version_id'] = get_version(s, data['v']).id
     branch = get_branch(s, data['br'])
-    game['place_id'] = get_place(s, branch, data['lvl']).id
-    game['xl'] = data['xl']
-    game['tmsg'] = data['tmsg']
-    game['turn'] = data['turn']
-    game['dur'] = data['dur']
-    game['runes'] = data.get('urune', 0)
-    game['score'] = data['sc']
-    game['start'] = modelutils.crawl_date_to_datetime(data['start'])
-    game['end'] = modelutils.crawl_date_to_datetime(data['end'])
-
-    game['ktyp_id'] = get_ktyp(s, data['ktyp']).id
+    server = get_server(s, data['src'])
+    game = {
+        'gid': data['gid'],
+        'account_id': get_account(s, data['name'], server).id,
+        'species_id': get_species(s, data['char'][:2]).id,
+        'background_id': get_background(s, data['char'][2:]).id,
+        'god_id': get_god(s, data['god']).id,
+        'version_id': get_version(s, data['v']).id,
+        'place_id': get_place(s, branch, data['lvl']).id,
+        'xl': data['xl'],
+        'tmsg': data['tmsg'],
+        'turn': data['turn'],
+        'dur': data['dur'],
+        'runes': data.get('urune', 0),
+        'score': data['sc'],
+        'start': modelutils.crawl_date_to_datetime(data['start']),
+        'end': modelutils.crawl_date_to_datetime(data['end']),
+        'ktyp_id': get_ktyp(s, data['ktyp']).id,
+    }
 
     return game
 
 
 def get_logfile_progress(s, logfile):
     """Get a logfile progress records, creating it if needed."""
-    log = s.query(LogfileProgress).filter(LogfileProgress.name ==
-                                          logfile).first()
+    log = s.query(LogfileProgress).filter(
+        LogfileProgress.name == logfile).first()
     if log:
         return log
     else:
@@ -392,7 +395,8 @@ def list_gods(s, *, playable: Optional[bool]=None):
     return _generic_char_type_lister(s, cls=God, playable=playable)
 
 
-def list_games(s, *,
+def list_games(s,
+               *,
                player: Optional[bool]=None,
                scored: Optional[bool]=None,
                limit: Optional[int]=None,
@@ -405,7 +409,8 @@ def list_games(s, *,
     """
     q = s.query(Game)
     if player is not None:
-        q = q.join(Game.account).join(Account.player).filter(Player.name == player)
+        q = q.join(Game.account).join(Account.player).filter(
+            Player.name == player)
     if scored is not None:
         q = q.filter(Game.scored == scored)
     if gid is not None:
@@ -457,9 +462,10 @@ def _highscores_helper(s, mapped_class, game_column):
     """
     results = []
     q = s.query(Game)
-    for i in s.query(mapped_class).filter(mapped_class.playable == True).order_by(mapped_class.name).all():
-        result = q.filter(game_column == i).order_by(
-            Game.score.desc()).limit(1).first()
+    for i in s.query(mapped_class).filter(
+            mapped_class.playable == sqlalchemy.true()).order_by(mapped_class.name).all():
+        result = q.filter(
+            game_column == i).order_by(Game.score.desc()).limit(1).first()
         if result:
             results.append(result)
     return results
@@ -472,12 +478,14 @@ def species_highscores(s):
     """
     return _highscores_helper(s, Species, Game.species)
 
+
 def background_highscores(s):
     """Return the top score for each playable background.
 
     Not every background may have a game in the database.
     """
     return _highscores_helper(s, Background, Game.background)
+
 
 def god_highscores(s):
     """Return the top score for each playable god.
@@ -494,8 +502,10 @@ def combo_highscores(s):
     """
     results = []
     q = s.query(Game).order_by(Game.score.desc())
-    for sp in s.query(Species).filter(Species.playable == True).order_by('name').all():
-        for bg in s.query(Background).filter(Background.playable == True).order_by('name').all():
+    for sp in s.query(Species).filter(
+            Species.playable == sqlalchemy.true()).order_by('name').all():
+        for bg in s.query(Background).filter(
+                Background.playable == sqlalchemy.true()).order_by('name').all():
             query = q.filter(Game.species == sp, Game.background == bg)
             result = query.first()
             if result:
@@ -506,12 +516,14 @@ def combo_highscores(s):
 
 def fastest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
     """Return up to limit fastest wins."""
-    return s.query(Game).filter(Game.ktyp == 'winning').order_by('dur').limit(limit).all()
+    return s.query(Game).filter(
+        Game.ktyp == 'winning').order_by('dur').limit(limit).all()
 
 
 def shortest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
     """Return up to limit shortest wins."""
-    return s.query(Game).filter(Game.ktyp == 'winning').order_by('turn').limit(limit).all()
+    return s.query(Game).filter(
+        Game.ktyp == 'winning').order_by('turn').limit(limit).all()
 
 
 def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
@@ -521,24 +533,22 @@ def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
 
     Returns a list of (player, games) tuples.
     """
-    results = combo_highscores(s)
-    all = {}
-    for game in results:
+    highscore_games = combo_highscores(s)
+    results = {}
+    for game in highscore_games:
         player = game.account.player.name
-        if player not in all:
-            all[player] = [game]
-        else:
-            all[player].append(game)
+        results.setdefault(player, []).append(game)
 
-    return sorted(all.items(), key=lambda i: len(i[1]), reverse=True)[:limit]
+    return sorted(results.items(), key=lambda i: len(i[1]), reverse=True)[:limit]
 
 
 def get_gobal_records(s):
-    out = {}
-    out['combo'] = combo_highscores(s)
-    out['species'] = species_highscores(s)
-    out['background'] = background_highscores(s)
-    out['god'] = god_highscores(s)
-    out['shortest'] = shortest_wins(s)
-    out['fastest'] = fastest_wins(s)
+    out = {
+        'combo': combo_highscores(s),
+        'species': species_highscores(s),
+        'background': background_highscores(s),
+        'god': god_highscores(s),
+        'shortest': shortest_wins(s),
+        'fastest': fastest_wins(s),
+    }
     return out

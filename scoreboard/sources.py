@@ -25,7 +25,7 @@ def sources(src):
     Expands bash style '{a,b}{1,2}' strings into all their permutations.
     Excludes URLs that match IGNORED_FILES_REGEX.
     """
-    sources = []
+    expanded_sources = []
     if not src['base'].endswith('/'):
         src['base'] += '/'
     for line in src['logs']:
@@ -35,8 +35,8 @@ def sources(src):
         if not isinstance(line, str):
             continue
         line = line.replace('*', '')
-        sources.extend(braceexpand(line))
-    for line in sources:
+        expanded_sources.extend(braceexpand(line))
+    for line in expanded_sources:
         entry = "{}{}".format(src['base'], line)
         if re.search(IGNORED_FILES_REGEX, entry):
             continue
@@ -92,10 +92,10 @@ def download_sources(dest):
     print("Downloading source files to {}".format(dest))
     if not os.path.exists(dest):
         os.mkdir(dest)
-    sources = source_data()
+    all_sources = source_data()
     p = multiprocessing.Pool(10)
     jobs = []
-    for src, urls in sources.items():
+    for src, urls in all_sources.items():
         destdir = os.path.join(dest, src)
         if not os.path.exists(destdir):
             os.mkdir(destdir)

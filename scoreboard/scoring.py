@@ -154,8 +154,7 @@ def great_race(race, player_stats, achievements):
     if player_stats['race_wins'][race] < len(const.PLAYABLE_ROLES):
         return False
     # Check for completion
-    roles_won = set(get_game(gid)['char'][2:]
-                    for gid in player_stats['wins']
+    roles_won = set(get_game(gid)['char'][2:] for gid in player_stats['wins']
                     if race == get_game(gid).rc)
     if not const.PLAYABLE_ROLES - roles_won:
         achievements[achievement] = True
@@ -182,8 +181,7 @@ def great_role(role, player_stats, achievements):
     if player_stats['role_wins'][role] < len(const.PLAYABLE_RACES):
         return False
     # Check for completion
-    races_won = set(get_game(gid)['char'][:2]
-                    for gid in player_stats['wins']
+    races_won = set(get_game(gid)['char'][:2] for gid in player_stats['wins']
                     if role == get_game(gid)['char'][2:])
     if not const.PLAYABLE_RACES - races_won:
         achievements[achievement] = True
@@ -248,10 +246,10 @@ def score_game(game):
         # Check for great race completion
         # Check for great role completion
 
-    # Check streaks
-    # score_game_vs_streaks(game)
+        # Check streaks
+        # score_game_vs_streaks(game)
 
-    # Finalise the changes to stats
+        # Finalise the changes to stats
     game.scored = True
     return game
 

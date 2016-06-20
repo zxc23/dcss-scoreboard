@@ -14,6 +14,8 @@ from . import model
 
 Base = declarative_base()
 
+Session = None
+
 
 @characteristic.with_repr(["name"])
 class Server(Base):
@@ -26,12 +28,16 @@ class Server(Base):
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
-AwardedAchievements = Table(
-    'awarded_achievements',
-    Base.metadata,
-    Column('player_id', Integer, ForeignKey('players.id'), nullable=False),
-    Column('achievement_id', Integer, ForeignKey('achievements.id'), nullable=False),
-    )
+AwardedAchievements = Table('awarded_achievements',
+                            Base.metadata,
+                            Column('player_id',
+                                   Integer,
+                                   ForeignKey('players.id'),
+                                   nullable=False),
+                            Column('achievement_id',
+                                   Integer,
+                                   ForeignKey('achievements.id'),
+                                   nullable=False), )
 
 
 @characteristic.with_repr(["name", "server"])
@@ -57,8 +63,9 @@ class Account(Base):
         """
         return self.name.lower()
 
-    __table_args__ = (UniqueConstraint(
-        'name', 'server_id', name='name-server_id'),
+    __table_args__ = (UniqueConstraint('name',
+                                       'server_id',
+                                       name='name-server_id'),
                       {'mysql_engine': 'InnoDB',
                        'mysql_charset': 'utf8'}, )
 
@@ -73,8 +80,7 @@ class Player(Base):
     achievements = relationship("Achievement",
                                 secondary=AwardedAchievements,
                                 back_populates="players")
-    __table_args__ = ({'mysql_engine': 'InnoDB',
-                       'mysql_charset': 'utf8'})
+    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'})
 
 
 @characteristic.with_repr(["short"])
@@ -161,8 +167,9 @@ class Place(Base):
         else:
             return "%s" % self.branch.short
 
-    __table_args__ = (UniqueConstraint(
-        'branch_id', 'level', name='branch_id-level'),
+    __table_args__ = (UniqueConstraint('branch_id',
+                                       'level',
+                                       name='branch_id-level'),
                       {'mysql_engine': 'InnoDB',
                        'mysql_charset': 'utf8'}, )
 
@@ -194,7 +201,9 @@ class Game(Base):
     species_id = Column(Integer, ForeignKey('species.id'), nullable=False)
     species = relationship("Species")
 
-    background_id = Column(Integer, ForeignKey('backgrounds.id'), nullable=False)
+    background_id = Column(Integer,
+                           ForeignKey('backgrounds.id'),
+                           nullable=False)
     background = relationship("Background")
 
     place_id = Column(Integer, ForeignKey('places.id'), nullable=False)
@@ -270,13 +279,13 @@ class Achievement(Base):
 def setup_database(database):
     """Set up the database and create the master sessionmaker."""
     if database == 'mysql':
-        DB_URI = 'mysql://localhost/dcss_scoreboard'
+        db_uri = 'mysql://localhost/dcss_scoreboard'
     elif database == 'sqlite':
-        DB_URI = 'sqlite://'
+        db_uri = 'sqlite://'
     else:
         raise ValueError("Unknown database type!")
-    ENGINE_OPTS = {'poolclass': sqlalchemy.pool.NullPool}
-    engine = sqlalchemy.create_engine(DB_URI, **ENGINE_OPTS)
+    engine_opts = {'poolclass': sqlalchemy.pool.NullPool}
+    engine = sqlalchemy.create_engine(db_uri, **engine_opts)
     Base.metadata.create_all(engine)
 
     # Create the global session manager
@@ -296,4 +305,6 @@ def setup_database(database):
 
 def get_session():
     """Create a new database session."""
+    if Session is None:
+        raise Exception("Database hasn't been initialised, run setup_database() first!")
     return Session()

@@ -47,6 +47,7 @@ def _morgue_prefix(src, version):
         raise ValueError("No prefix for %s" % src)
     return prefix
 
+
 def morgue_url(game):
     """Generates a morgue URL from a game."""
     src = game.account.server.name

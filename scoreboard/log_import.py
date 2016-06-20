@@ -75,8 +75,8 @@ def load_logfile(logfile, src):
     # We store the data as bytes rather than lines since file.seek is fast
     seek_pos = model.get_logfile_progress(s, logfile).bytes_parsed
 
-    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos) if
-                                seek_pos else ''))
+    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos)
+                                if seek_pos else ''))
     s = orm.get_session()
     f = open(logfile, encoding='utf-8')
     f.seek(seek_pos)
@@ -103,6 +103,7 @@ def handle_line(s, line, src):
     try:
         game = parse_line(line, src)
     except Exception as e:
+        # XXX: tighten this exception
         print(traceback.format_exc())
         print("Couldn't parse line: %r" % line)
         return False
@@ -121,7 +122,7 @@ def handle_line(s, line, src):
             if isinstance(e.__cause__.orig, _mysql_exceptions.IntegrityError):
                 if e.__cause__.orig.args[0] == 1062:
                     problem = False
-                    # TODO the error here may not just be duplicate uid
+                    # TODO the error here may not just be duplicate uid, it could be an unhandled exception from deeper
                     # TODO model.add_game should handle errors from child calls that may fail with duplicate keys
                     # TODO eg adding a new account
         if problem:
@@ -162,8 +163,7 @@ def parse_line(line, src):
     if '\x00' in line:
         return None
 
-    game = {}
-    game['src'] = src
+    game = {'src': src}
 
     # Parse the log's raw field data
     for field in re.split(LINE_SPLIT_PATTERN, line):
@@ -193,7 +193,3 @@ def parse_line(line, src):
     if 'god' not in game:
         game['god'] = 'Atheist'
     return game
-
-
-if __name__ == "__main__":
-    load_logfiles()
