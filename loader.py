@@ -34,6 +34,8 @@ def read_commandline():
     parser.add_argument('--download-logfiles',
                         action='store_true',
                         help="Download logfiles first.")
+    parser.add_argument('--download-servers', nargs=1, metavar="SRC",
+                        help="Only download logfiles from these servers.")
     parser.add_argument('--skip-import',
                         action='store_true',
                         help="Skip log import.")
@@ -57,7 +59,8 @@ def main():
     scoreboard.orm.setup_database(args.database)
 
     if args.download_logfiles:
-        scoreboard.sources.download_sources(args.logdir)
+        scoreboard.sources.download_sources(args.logdir,
+                                            servers=args.download_servers)
 
     if not args.skip_import:
         scoreboard.log_import.load_logfiles(logdir=args.logdir)
