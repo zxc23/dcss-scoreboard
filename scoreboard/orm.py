@@ -276,16 +276,27 @@ class Achievement(Base):
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
+def sqlite_performance_over_safety(dbapi_con, con_record):
+    """Significantly speeds up inserts but will break on crash."""
+    dbapi_con.execute('PRAGMA journal_mode = MEMORY')
+    dbapi_con.execute('PRAGMA synchronous = OFF')
+
+
 def setup_database(database):
     """Set up the database and create the master sessionmaker."""
     if database == 'mysql':
         db_uri = 'mysql://localhost/dcss_scoreboard'
     elif database == 'sqlite':
-        db_uri = 'sqlite://'
+        db_uri = 'sqlite:///database.db3'
     else:
         raise ValueError("Unknown database type!")
     engine_opts = {'poolclass': sqlalchemy.pool.NullPool}
     engine = sqlalchemy.create_engine(db_uri, **engine_opts)
+
+    if db_uri.startswith('sqlite'):
+        sqlalchemy.event.listen(engine, 'connect',
+                                sqlite_performance_over_safety)
+
     Base.metadata.create_all(engine)
 
     # Create the global session manager
