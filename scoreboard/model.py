@@ -75,7 +75,8 @@ def get_player(s, name):
     Note that player names are not case sensitive, so names are stored with
     their canonical capitalisation but we always compare the lowercase version.
     """
-    player = s.query(Player).filter(Player.name == name.lower()).first()
+    player = s.query(Player).filter(
+        func.lower(Player.name) == name.lower()).first()
     if player:
         return player
     else:
