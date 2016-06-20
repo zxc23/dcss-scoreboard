@@ -2,7 +2,6 @@
 
 import os
 import json
-
 from typing import Optional
 
 import sqlalchemy

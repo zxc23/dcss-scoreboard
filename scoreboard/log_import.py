@@ -75,8 +75,8 @@ def load_logfile(logfile, src):
     # We store the data as bytes rather than lines since file.seek is fast
     seek_pos = model.get_logfile_progress(s, logfile).bytes_parsed
 
-    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos)
-                                if seek_pos else ''))
+    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos) if
+                                seek_pos else ''))
     s = orm.get_session()
     f = open(logfile, encoding='utf-8')
     f.seek(seek_pos)
@@ -112,19 +112,22 @@ def handle_line(s, line, src):
         return False
     # Store the game in the database
     try:
-        # XXX should use model.add_games
+        # TODO should use model.add_games
         # Probably via an internal function that batches
         model.add_game(s, game)
     except model.DBError as e:
         problem = True
         # If it's a duplicate key error, ignore
-        if isinstance(e.__cause__, sqlalchemy.exc.IntegrityError):
-            if isinstance(e.__cause__.orig, _mysql_exceptions.IntegrityError):
-                if e.__cause__.orig.args[0] == 1062:
-                    problem = False
-                    # TODO the error here may not just be duplicate uid, it could be an unhandled exception from deeper
-                    # TODO model.add_game should handle errors from child calls that may fail with duplicate keys
-                    # TODO eg adding a new account
+        # TODO the error here may not just be duplicate uid,
+        # it could be an unhandled exception from deeper.
+        # model.add_game should handle errors from child calls that
+        # may fail with duplicate keys, eg adding a new account
+        cause = e.__cause__
+        if isinstance(cause, sqlalchemy.exc.IntegrityError) and isinstance(
+                cause.orig,
+                _mysql_exceptions.IntegrityError) and e.cause.orig.args[
+                    0] == 1062:
+            problem = False
         if problem:
             print(traceback.format_exc())
         print("Error adding game, rolling back (%s): %s" % (e, game))
