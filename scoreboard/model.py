@@ -9,7 +9,7 @@ from sqlalchemy import func
 
 import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
-    Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp
+    Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
 import scoreboard.modelutils as modelutils
 
 
@@ -272,6 +272,15 @@ def get_branch(s, br):
         return branch
 
 
+
+def create_streak(s, player):
+    """Create a new streak for a given player."""
+    streak = Streak(player_id=player.id, active=True)
+    s.add(streak)
+    s.commit()
+    return streak
+
+
 @_reraise_dberror
 def add_game(s, game_data):
     """Normalise and add a game to the database."""
@@ -397,20 +406,36 @@ def list_gods(s, *, playable: Optional[bool]=None):
 
 def list_games(s,
                *,
-               player: Optional[bool]=None,
+               player: Optional[str]=None,
+               account: Optional[Account]=None,
                scored: Optional[bool]=None,
                limit: Optional[int]=None,
                gid: Optional[str]=None,
-               winning: Optional[bool]=None) -> list:
+               winning: Optional[bool]=None,
+               reverse_order: bool=False) -> list:
     """Get a list of all games that match a specified condition.
 
-    If scored is specified, only return games with that scored value.
-    If limit is specified, return up to limit games.
+    Return data is ordered most recent -> least recent, unless
+    reverse_order=True.
+
+    Parameters:
+        player: If specified, only return games with a matching player name
+        account: If specified, only return games with a matching account
+        scored: If specified, only return games with a matching scored
+        limit: If specified, return up to limit games
+        gid: If specified, only return game with matching gid
+        winning: If specified, only return games where ktyp==/!='winning'
+        reverse_order: If True, return games least->most recent
+
+    Return:
+        list of Game objects
     """
     q = s.query(Game)
     if player is not None:
         q = q.join(Game.account).join(Account.player).filter(
             Player.name == player)
+    if account is not None:
+        q = q.join(Game.account).filter(Account == account)
     if scored is not None:
         q = q.filter(Game.scored == scored)
     if gid is not None:
@@ -421,7 +446,7 @@ def list_games(s,
             q = q.filter(Game.ktyp == ktyp)
         else:
             q = q.filter(Game.ktyp != ktyp)
-    q = q.order_by(Game.end.desc())
+    q = q.order_by(Game.end.desc() if not reverse_order else Game.end.asc())
     if limit is not None:
         q = q.limit(limit)
     return q.all()
@@ -559,3 +584,9 @@ def get_gobal_records(s):
         'fastest': fastest_wins(s),
     }
     return out
+
+
+def get_player_streak(s, player):
+    q = s.query(Streak).filter(Streak.player == player,
+                               Streak.active == sqlalchemy.true())
+    return q.one_or_none()

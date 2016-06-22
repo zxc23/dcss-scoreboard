@@ -15,43 +15,37 @@ def get_game(gid):
     return model.game(gid)
 
 
-def is_valid_streak_addition(game, streak):
+def is_valid_streak_addition(game, current_streak):
     """Check if the game is a valid addition to the streak."""
     # Valid if no streak to begin with
-    if not streak:
+    if not current_streak:
         return True
-    # Valid if the game started after the start of the streak
-    if isinstance(streak['start'], datetime.datetime):
-        start = streak['start']
-    else:
-        start = dateutil.parser.parse(streak['start'])
-    return game.start > start
+    # TODO Valid if the game started after the start of the streak
+    return True
 
 
-def is_grief(game):
+def is_grief(s, game):
     """Check if the game is a streak-breaking grief.
 
     This involves experimental anti-griefing heuristics.
     """
-    name = game['name']
 
-    # Not a grief if not the player's first game on a server
-    src = game['src']
-    first_game = model.first_game(name, src)
-    if game['gid'] != first_game['gid']:
+    # Only an account's first game can be auto-detected as a grief
+    first_game = model.list_games(s, account=game.account, reverse_order=True,
+                                  limit=1)
+    if first_game != game:
         return False
 
     # Were consumables used?
-    if ('potionsused' in game.raw_data and (game.raw_data['potionsused'] > 0 or
-                                            game.raw_data['scrollsused'] > 0)):
+    if game.potions_used > 0 or games.scrolls_used > 0:
         # Tighter thresholds for grief detection
-        if game['dur'] < 600 or game['turn'] < 1000:
-            blacklist_player(name, src)
+        if game.dur < 600 or game.turn < 1000:
+            # TODO: blacklist_account(game.account)
             return True
     else:
         # Very loose thresholds for grief detection
-        if game['dur'] < 1200 or game['turn'] < 5000:
-            blacklist_player(name, src)
+        if game.dur < 1200 or game.turn < 5000:
+            # TODO: blacklist_account(game.account)
             return True
     return False
 
@@ -189,52 +183,53 @@ def great_role(role, player_stats, achievements):
     return False
 
 
-def score_game_vs_streaks(game):
-    """Extend active streaks if a game was won and finalise streak stats."""
+def handle_player_streak(s, game: orm.Game):
+    """Figure out what a game means for the player's streak.
 
-    # Retrieve active streaks
-    active_streaks = model.get_active_streaks(s, player=game.player)
-    streak = active_streaks.get(cname)
+    A first win will start a streak.
+    A subsequent win (if it started after the last win) will extend the streak.
+    A loss will end any active streak.
+    """
+    current_streak = model.get_player_streak(s, game.player)
 
-    # Ignore game if not a valid streak addition
-    if not is_valid_streak_addition(game, streak):
-        return
-
-    if game.ktyp == 'winning':
-        # Extend or start a streak
-        if streak:
-            streak['wins'].append(game.gid)
-            streak['end'] = game.end
+    if game.won:
+        # Start or extend a streak
+        if not current_streak:
+            print("Creating streak for %s" % game.player)
+            current_streak = model.create_streak(s, game.player)
         else:
-            streak = {'cname': game.player.name.lower(),
-                      'wins': [game.gid],
-                      'start': game.end}
-        # Update the active streak dict
-        active_streaks[cname] = streak
-    else:
-        # Finalise 2+ win streaks
-        if streak and len(streak['wins']) > 1:
-
-            # Ignore game if griefing detected
-            if is_grief(game):
+            # Ignore game if not a valid streak addition
+            if not is_valid_streak_addition(game, current_streak):
                 return
+            print("Extending streak for %s" % game.player)
+        game.streak = current_streak
+        s.add(game)
+        s.commit()
 
-            completed_streaks = load_global_stat('completed_streaks', [])
-            streak['streak_breaker'] = game.games_gid
-            completed_streaks.append(streak)
-            set_global_stat('completed_streaks', completed_streaks)
-
-        if cname in active_streaks:
-            del active_streaks[cname]
-        else:
-            # No need to adjust active_streaks
+    else: # Game wasn't won
+        # If there was no active streak, we're done
+        if not current_streak:
             return
-    # Update global stat with new active streak dict
-    set_global_stat('active_streaks', active_streaks)
+        print("Closing streak for %s" % game.player)
+        # Ignore game if griefing detected
+        if is_grief(s, game):
+            return
+        # Close any active streak
+        current_streak.active = False
+        s.add(current_streak)
+        s.commit()
 
 
-def score_game(game):
-    """Score a single game."""
+def score_game(s, game: orm.Game):
+    """Score a single game.
+
+    Parameters:
+        s: db session
+        game: game to score.
+
+    Returns: Nothing
+    """
+    handle_player_streak(s, game)
     # Increment wins
     if game.ktyp == 'winning':
         pass
@@ -243,12 +238,7 @@ def score_game(game):
         # Check for great race completion
         # Check for great role completion
 
-        # Check streaks
-        score_game_vs_streaks(game)
-
         # Finalise the changes to stats
-    game.scored = True
-    return game
 
 
 def game_is_blacklisted(game, blacklist):
@@ -258,11 +248,8 @@ def game_is_blacklisted(game, blacklist):
     return False
 
 
-def score_games(rebuild=False):
-    """Update stats with all unscored game.
-
-    If rebuild == True, rebuilds the database as well.
-    """
+def score_games():
+    """Score all unscored games."""
     print("Scoring all games...")
     start = time.time()
     scored = 0
@@ -271,24 +258,19 @@ def score_games(rebuild=False):
 
     s = orm.get_session()
 
-    # Load blacklisted players into cache
-    blacklisted_players = model.list_accounts(s, blacklisted=True)
-
-    if rebuild:
-        rebuild_database()
-
     while True:
-        games = model.list_games(s, scored=False, limit=5000)
+        games = model.list_games(s, scored=False, limit=100)
         if not games:
             break
         for game in games:
-            if game_is_blacklisted(game, blacklisted_players):
+            if game.account.blacklisted:
                 continue
-            game = score_game(game)
+            score_game(s, game)
+            game.scored = True
             s.add(game)
-            scored_players.add(game.account.player.name)
+            scored_players.add(game.player)
             scored += 1
-            if scored % 10000 == 0 and scored > 0:
+            if scored and scored % 10000 == 0:
                 print(scored)
         s.commit()
 
