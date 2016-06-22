@@ -265,12 +265,12 @@ class Game(Base):
     @property
     def won(self):
         """Was this game won?"""
-        return self.ktyp == 'winning'
+        return self.ktyp.name == 'winning'
 
     @property
     def quit(self):
         """Was this game quit?"""
-        return self.ktyp == 'quitting'
+        return self.ktyp.name == 'quitting'
 
     @property
     def char(self):
