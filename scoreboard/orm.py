@@ -294,7 +294,7 @@ def setup_database(database, credentials=None):
     if database == 'sqlite':
         db_uri = 'sqlite:///database.db3'
     elif database == 'postgres':
-        db_uri = 'postgresql+psycopg2://{creds}localhost/dcss_scoreboard'
+        db_uri = 'postgresql+psycopg2://{creds}localhost/scoreboard'
         if credentials:
             db_uri = db_uri.format(creds='%s@' % credentials)
         else:
