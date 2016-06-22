@@ -18,6 +18,10 @@ import scoreboard.orm as orm
 LINE_SPLIT_PATTERN = re.compile('(?<!:):(?!:)')
 
 
+class LogImportError(Exception):
+    pass
+
+
 def calculate_game_gid(game):
     """Calculate GID for a game. Sequell compatible."""
     return "%s:%s:%s" % (game['name'], game['src'], game['start'])
@@ -85,7 +89,12 @@ def load_logfile(logfile, src):
         # skip blank lines
         if not line.strip():
             continue
-        if handle_line(s, line, src):
+        try:
+            handle_line(s, line, src)
+        except LogImportError:
+            print("Couldn't import %s. Exception follows:" % line)
+            print(traceback.format_exc())
+        else:
             new_games += 1
     s.commit()
     # Save the new number of lines processed in the database
@@ -100,39 +109,28 @@ def handle_line(s, line, src):
 
     Returns True if the line was successfully parsed and added to the database.
     """
-    try:
-        game = parse_line(line, src)
-    except Exception as e:
-        # XXX: tighten this exception
-        print(traceback.format_exc())
-        print("Couldn't parse line: %r" % line)
-        return False
+    game = parse_line(line, src)
     # Check we got a game back
     if game is None:
         return False
     # Store the game in the database
-    try:
-        # TODO should use model.add_games
-        # Probably via an internal function that batches
-        model.add_game(s, game)
-    except model.DBError as e:
-        problem = True
-        # If it's a duplicate key error, ignore
-        # TODO the error here may not just be duplicate uid,
-        # it could be an unhandled exception from deeper.
-        # model.add_game should handle errors from child calls that
-        # may fail with duplicate keys, eg adding a new account
-        cause = e.__cause__
-        if isinstance(cause, sqlalchemy.exc.IntegrityError) and isinstance(
-                cause.orig,
-                _mysql_exceptions.IntegrityError) and e.cause.orig.args[
-                    0] == 1062:
-            problem = False
-        if problem:
-            print(traceback.format_exc())
-        print("Error adding game, rolling back (%s): %s" % (e, game))
-        s.rollback()
-    return True
+    tries = 0
+    success = False
+    while not success:
+        try:
+            # TODO should use model.add_games
+            # Probably via an internal function that batches
+            model.add_game(s, game)
+        except model.DBError as e:
+            problem = True
+            # print("Error adding game, rolling back (%s): %s" % (e.__cause__, game))
+            s.rollback()
+            tries += 1
+            if tries == 3:
+                raise LogImportError from e
+        else:
+            success = True
+    return success
 
 
 def parse_field(k, v):
