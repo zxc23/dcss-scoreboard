@@ -16,17 +16,11 @@ A bundle of scripts to create a scoreboard website for DCSS.
 
 ## How to use
 
-Python 3.5 is required. Install pre-requisites with `pip install -r requirements.txt`.
+Python 3.5+ is required. Install pre-requisites with `pip install -r requirements.txt`.
 
-For testing purposes, you can download lots of logfiles with `download-logs.sh`.
+You can use sqlite or postgres as your database baackend.
 
-Once you have some logfiles, you can run `loader.py`, which is a simple test script that:
-
-1. Loads all these log files into the database
-2. Runs scoring on every log line in the database
-3. Writes website pages out based on this data
-
-The sqlite database is `scoredata.db` and the website is written to `dcss-scoreboard-html/`.
+To use the code, run `loader.py --help`.
 
 ## Windows users
 
@@ -38,10 +32,6 @@ The sqlite database is `scoredata.db` and the website is written to `dcss-scoreb
 6. Open scoreboard/constants.py and change the line `WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)` to point to a 'website' folder in your current directory, e.g. `WEBSITE_URLBASE = 'D:\David\Documents\DCSS Scoreboard\website'`.
 7. `cd /vagrant` and `python loader.py` will start the scripts.
 8. Ctrl-D will exit out of the VM's terminal. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
-
-## Logfile locations
-
-You can find current logfile locations in Sequell's source files: https://github.com/crawl/sequell/blob/master/config/sources.yml
 
 ## Development
 
