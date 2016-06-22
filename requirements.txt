@@ -4,7 +4,6 @@ pylru
 python-dateutil
 jsmin
 braceexpand
-pyyaml
 characteristic
 pyyaml
 psycopg2
