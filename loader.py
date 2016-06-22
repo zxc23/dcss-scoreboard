@@ -48,6 +48,8 @@ def read_commandline():
     parser.add_argument('--rebuild-player-pages',
                         action='store_true',
                         help="Re-write all player pages for the website.")
+    parser.add_argument('--db-credentials', metavar="user:passwd",
+                        help="Database credentials")
     args = parser.parse_args()
     return args
 
@@ -56,7 +58,7 @@ def main():
     """Run CLI."""
     args = read_commandline()
 
-    scoreboard.orm.setup_database(args.database)
+    scoreboard.orm.setup_database(args.database, args.db_credentials)
 
     if args.download_logfiles:
         scoreboard.sources.download_sources(args.logdir,

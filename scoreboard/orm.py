@@ -289,12 +289,16 @@ def sqlite_performance_over_safety(dbapi_con, con_record):
     dbapi_con.execute('PRAGMA synchronous = OFF')
 
 
-def setup_database(database):
+def setup_database(database, credentials=None):
     """Set up the database and create the master sessionmaker."""
     if database == 'sqlite':
         db_uri = 'sqlite:///database.db3'
     elif database == 'postgres':
-        db_uri = 'postgresql+psycopg2://localhost/dcss_scoreboard'
+        db_uri = 'postgresql+psycopg2://{creds}localhost/dcss_scoreboard'
+        if credentials:
+            db_uri = db_uri.format(creds='%s@' % credentials)
+        else:
+            db_uri = db_uri.format(creds='')
     else:
         raise ValueError("Unknown database type!")
     engine_opts = {'poolclass': sqlalchemy.pool.NullPool}
