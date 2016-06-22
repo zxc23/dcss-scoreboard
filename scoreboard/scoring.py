@@ -300,7 +300,3 @@ def score_games(rebuild=False):
           (scored, len(scored_players), round(end - start, 2)))
 
     return scored_players
-
-
-if __name__ == "__main__":
-    score_games()
