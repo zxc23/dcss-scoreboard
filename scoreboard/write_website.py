@@ -4,18 +4,22 @@ import os
 import json
 import time
 import subprocess
-import datetime
+import collections
+
+from typing import Iterable
 
 import jsmin
 import jinja2
 
-from . import model, webutils
-from . import constants as const
+from . import model
+from . import webutils
+import scoreboard.constants as const
+from . import orm
 
 WEBSITE_DIR = 'website'
 
 
-def jinja_env():
+def jinja_env(urlbase, s):
     """Create the Jinja template environment."""
     template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
@@ -23,20 +27,40 @@ def jinja_env():
     env.filters['prettydur'] = webutils.prettydur
     env.filters['prettycounter'] = webutils.prettycounter
     env.filters['prettycrawldate'] = webutils.prettycrawldate
-    env.filters['gamestotable'] = webutils.gamestotable
     env.filters['streakstotable'] = webutils.streakstotable
     env.filters['prettydate'] = webutils.prettydate
-    env.filters['gidtogame'] = model.game
     env.filters['link_player'] = webutils.link_player
     env.filters['morgue_link'] = webutils.morgue_link
+    env.filters['percentage'] = webutils.percentage
     env.filters['mosthighscorestotable'] = webutils.mosthighscorestotable
     env.filters['recordsformatted'] = webutils.recordsformatted
+    env.filters['shortest_win'] = webutils.shortest_win
+    env.filters['fastest_win'] = webutils.fastest_win
+    env.filters['highscore'] = webutils.highscore
+
+    env.filters['generic_games_to_table'] = webutils.generic_games_to_table
+    env.filters[
+        'generic_highscores_to_table'] = webutils.generic_highscores_to_table
+    env.filters[
+        'species_highscores_to_table'] = webutils.species_highscores_to_table
+    env.filters[
+        'background_highscores_to_table'] = webutils.background_highscores_to_table
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
+    env.globals['playable_species'] = model.list_species(s, playable=True)
+    env.globals['playable_backgrounds'] = model.list_backgrounds(s,
+                                                                 playable=True)
+    env.globals['playable_gods'] = model.list_gods(s, playable=True)
+
+    if urlbase:
+        env.globals['urlbase'] = urlbase
+    else:
+        env.globals['urlbase'] = os.path.join(os.getcwd(), WEBSITE_DIR)
+
     return env
 
 
-def achievement_data(ordered=False):
+def achievement_data():
     """Load achievement data.
 
     If ordered is True, the achievements are returned as a list in display
@@ -46,67 +70,153 @@ def achievement_data(ordered=False):
     return json.load(open(path))
 
 
-def player_records(player, race_highscores, role_highscores, combo_highscores,
-                   god_highscores):
-    """Return a dictionary of player records.
+def setup_website_dir(env, path, all_players):
+    print("Writing HTML to %s" % path)
+    if not os.path.exists(path):
+        print("mkdir %s/" % path)
+        os.mkdir(path)
 
-    Dict is of the form { 'race': [('Ce', gid), ('Vp', gid)], 'role': [],
-        'combo': [...], 'god': [...] }.
-    """
-    records = {'race': [], 'role': [], 'combo': [], 'god': []}
-    for game in race_highscores:
-        if game.name == player:
-            records['race'].append(game)
-    for game in role_highscores:
-        if game.name == player:
-            records['role'].append(game)
-    for game in combo_highscores:
-        if game.name == player:
-            records['combo'].append(game)
-    for game in god_highscores:
-        if game.name == player:
-            records['god'].append(game)
+    print("Copying static assets")
+    src = os.path.join(os.path.dirname(__file__), 'html_static')
+    dst = os.path.join(path, 'static')
+    subprocess.run(['rsync', '-a', src + '/', dst + '/'])
 
-    return records
+    print("Generating player list")
+    with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
+        f.write(json.dumps([p.name for p in all_players]))
+
+    print("Writing minified local JS")
+    scoreboard_path = os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js')
+    with open(scoreboard_path, 'w') as f:
+        template = env.get_template('dcss-scoreboard.js')
+        f.write(jsmin.jsmin(template.render()))
 
 
-def write_player_stats(*, player, stats, outfile, achievements, streaks,
-                       active_streak, template, records):
-    """Write stats page for an individual player.
+def write_index(s, env):
+    print("Writing index")
+    with open(
+            os.path.join(WEBSITE_DIR, 'index.html'),
+            'w', encoding='utf8') as f:
+        template = env.get_template('index.html')
+        f.write(template.render(
+            recent_wins=model.list_games(s,
+                                         winning=True,
+                                         limit=const.GLOBAL_TABLE_LENGTH),
+            active_streaks=[],
+            overall_highscores=model.highscores(s),
+            combo_high_scores=model.combo_highscore_holders(s)))
 
-    Parameters:
-        player (str) Player Name
-        stats (dict) Player's stats dict from model.player_stats
-        outfile (str) Output filename
-        achievements (dict) Player's achievements
-        streaks (list) Player's streaks or []
-        active_streak (dict) Player's active streak or {}
-        template (Jinja template) Template to render with.
-        records (dict) Player's global highscores
 
-    Returns: None.
-    """
-    recent_games = model.recent_games(player=player)
-    all_wins = model.recent_games(wins=True, player=player, num=None)
-    race_wins = model.games_by_type(player, 'rc', const.PLAYABLE_RACES)
-    background_wins = model.games_by_type(player, 'bg', const.PLAYABLE_ROLES)
-    god_wins = model.games_by_type(player, 'god', const.PLAYABLE_GODS)
-    last_active = model.last_active(player)
+def write_streaks(env):
+    print("Writing streaks")
+    with open(
+            os.path.join(WEBSITE_DIR, 'streaks.html'),
+            'w',
+            encoding='utf8') as f:
+        template = env.get_template('streaks.html')
+        f.write(template.render(streaks=[],
+                                active_streaks=[]))
+
+
+def write_highscores(s, env):
+    print("Writing highscores")
+    with open(
+            os.path.join(WEBSITE_DIR, 'highscores.html'),
+            'w',
+            encoding='utf8') as f:
+        template = env.get_template('highscores.html')
+        overall_highscores = model.highscores(s)
+        species_highscores = model.species_highscores(s)
+        background_highscores = model.background_highscores(s)
+        god_highscores = model.god_highscores(s)
+        combo_highscores = model.combo_highscores(s)
+        fastest_wins = model.fastest_wins(s)
+        shortest_wins = model.shortest_wins(s)
+        f.write(template.render(overall_highscores=overall_highscores,
+                                species_highscores=species_highscores,
+                                background_highscores=background_highscores,
+                                god_highscores=god_highscores,
+                                combo_highscores=combo_highscores,
+                                fastest_wins=fastest_wins,
+                                shortest_wins=shortest_wins))
+
+
+def _get_player_records(global_records, player):
+    out = {}
+    for typ, games in global_records.items():
+        for game in games:
+            if game.player.name == player:
+                if typ not in out:
+                    out[typ] = [game]
+                else:
+                    out[typ].append(game)
+    return out
+
+
+def _wins_per_species(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+    """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
+    out = collections.OrderedDict()
+    for sp in model.list_species(s, playable=True):
+        out[sp] = [g for g in games if g.won and g.species == sp]
+    return out
+
+
+def _wins_per_background(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+    """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
+    out = collections.OrderedDict()
+    for bg in model.list_backgrounds(s, playable=True):
+        out[bg] = [g for g in games if g.won and g.background == bg]
+    return out
+
+
+def _wins_per_god(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+    """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
+    out = collections.OrderedDict()
+    for god in model.list_gods(s, playable=True):
+        out[god] = [g for g in games if g.won and g.god == god]
+    return out
+
+
+def write_player_page(s, player, player_html_path, template, global_records):
+    games = model.list_games(s, player=player.name)
+    # Don't make pages for players with no games played
+    if len(games) == 0:
+        return
+
+    records = _get_player_records(global_records, player)
+    species_wins = _wins_per_species(s, games)
+    background_wins = _wins_per_background(s, games)
+    god_wins = _wins_per_god(s, games)
+
+    outfile = os.path.join(player_html_path, player.name + '.html')
 
     with open(outfile, 'w', encoding='utf8') as f:
         f.write(template.render(player=player,
-                                stats=stats,
-                                last_active=last_active,
-                                all_wins=all_wins,
-                                race_wins=race_wins,
-                                background_wins=background_wins,
-                                god_wins=god_wins,
-                                achievement_data=achievements,
-                                const=const,
+                                games=games,
                                 records=records,
-                                streaks=streaks,
-                                active_streak=active_streak,
-                                recent_games=recent_games))
+                                species_wins=species_wins,
+                                background_wins=background_wins,
+                                god_wins=god_wins))
+
+
+def write_player_pages(s, env, players):
+    print("Writing %s player pages... " % len(players))
+    start2 = time.time()
+    player_html_path = os.path.join(WEBSITE_DIR, 'players')
+    if not os.path.exists(player_html_path):
+        os.mkdir(player_html_path)
+    global_records = model.get_gobal_records(s)
+    template = env.get_template('player.html')
+
+    n = 0
+    for player in players:
+        write_player_page(s, player, player_html_path, template,
+                          global_records)
+        n += 1
+        if not n % 100:
+            print(n)
+    end = time.time()
+    print("Wrote player pages in %s seconds" % round(end - start2, 2))
 
 
 def write_website(players=set(), urlbase=None):
@@ -120,164 +230,27 @@ def write_website(players=set(), urlbase=None):
     """
     start = time.time()
 
-    env = jinja_env()
-    if urlbase:
-        env.globals['urlbase'] = urlbase
-    else:
-        env.globals['urlbase'] = os.path.join(os.getcwd(), WEBSITE_DIR)
+    s = orm.get_session()
 
-    all_players = sorted(model.all_player_names())
+    env = jinja_env(urlbase, s)
+
+    all_players = sorted(model.list_players(s), key=lambda p: p.name)
     if players is None:
         players = all_players
     elif not players:
         players = []
 
-    print("Writing HTML to %s" % WEBSITE_DIR)
-    if not os.path.exists(WEBSITE_DIR):
-        print("mkdir %s/" % WEBSITE_DIR)
-        os.mkdir(WEBSITE_DIR)
+    setup_website_dir(env, WEBSITE_DIR, all_players)
 
-    print("Copying static assets")
-    src = os.path.join(os.path.dirname(__file__), 'html_static')
-    dst = os.path.join(WEBSITE_DIR, 'static')
-    subprocess.run(['rsync', '-a', src + '/', dst + '/'])
+    write_index(s, env)
 
-    print("Generating player list")
-    with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
-        f.write(json.dumps(all_players))
+    # write_streaks(env)
 
-    print("Loading scoring data")
-    start2 = time.time()
-    # Get stats
-    stats = model.global_stats()
-    overall_highscores = model.highscores()
-    race_highscores = model.race_highscores()
-    role_highscores = model.role_highscores()
-    god_highscores = model.god_highscores()
-    combo_highscores = model.combo_highscores()
-    fastest_wins = model.fastest_wins()
-    shortest_wins = model.shortest_wins()
-    recent_wins = model.recent_games(wins=True, num=5)
+    write_highscores(s, env)
 
-    # I'm not proud of this block of code, but it works
-    # Create a list of [(name, [highscoregame]), ...] for the index
-    # It's sorted by number of highscores length
-    inverted_combo_highscores = {}
-    for entry in combo_highscores:
-        if entry.name not in inverted_combo_highscores:
-            inverted_combo_highscores[entry.name] = [entry]
-        else:
-            inverted_combo_highscores[entry.name].append(entry)
-    temp = []
-    for k, v in inverted_combo_highscores.items():
-        temp.append((k, v))
-    inverted_combo_highscores = temp
-    inverted_combo_highscores = sorted(inverted_combo_highscores,
-                                       reverse=True,
-                                       key=lambda i: len(i[1]))[:5]
+    write_player_pages(s, env, players)
 
-    # Merge active streaks into streaks
-    streaks = stats.get('completed_streaks', [])
-    active_streaks = stats.get('active_streaks', {})
-    sorted_active_streaks = []
-
-    for streak in active_streaks.values():
-        if len(streak['wins']) > 1:
-            streaks.append(streak)
-            sorted_active_streaks.append(streak)
-
-    # Sort streaks
-    sorted_streaks = sorted(streaks, key=lambda s: (-len(s['wins']), s['end']))
-    sorted_active_streaks.sort(key=lambda s: (-len(s['wins']), s['end']))
-
-    # Get streaks by player
-    player_streaks = {}
-    for streak in sorted_streaks:
-        if streak['cname'] not in player_streaks:
-            player_streaks[streak['cname']] = [streak]
-        else:
-            player_streaks[streak['cname']].append(streak)
-
-    print("Loaded scoring data in %s seconds" % round(time.time() - start, 2))
-    print("Writing index")
-    with open(
-            os.path.join(WEBSITE_DIR, 'index.html'),
-            'w',
-            encoding='utf8') as f:
-        template = env.get_template('index.html')
-        f.write(template.render(recent_wins=recent_wins,
-                                active_streaks=sorted_active_streaks,
-                                overall_highscores=overall_highscores,
-                                combo_high_scores=inverted_combo_highscores))
-
-    print("Writing minified local JS")
-    scoreboard_path = os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js')
-    with open(scoreboard_path, 'w') as f:
-        template = env.get_template('dcss-scoreboard.js')
-        f.write(jsmin.jsmin(template.render()))
-
-    print("Writing streaks")
-    with open(
-            os.path.join(WEBSITE_DIR, 'streaks.html'),
-            'w',
-            encoding='utf8') as f:
-        template = env.get_template('streaks.html')
-        f.write(template.render(streaks=sorted_streaks,
-                                active_streaks=sorted_active_streaks))
-
-    print("Writing highscores")
-    with open(
-            os.path.join(WEBSITE_DIR, 'highscores.html'),
-            'w',
-            encoding='utf8') as f:
-        template = env.get_template('highscores.html')
-        f.write(template.render(overall_highscores=overall_highscores,
-                                race_highscores=race_highscores,
-                                role_highscores=role_highscores,
-                                god_highscores=god_highscores,
-                                combo_highscores=combo_highscores,
-                                fastest_wins=fastest_wins,
-                                shortest_wins=shortest_wins))
-
-    print("Writing %s player pages... " % len(players))
-    start2 = time.time()
-    player_html_path = os.path.join(WEBSITE_DIR, 'players')
-    if not os.path.exists(player_html_path):
-        os.mkdir(player_html_path)
-    achievements = achievement_data()
-    template = env.get_template('player.html')
-
-    n = 0
-    for player in players:
-        stats = model.get_player_stats(player)
-        streaks = player_streaks.get(player.lower(), [])
-        active_streak = active_streaks.get(player.lower(), {})
-        records = player_records(player, race_highscores, role_highscores,
-                                 combo_highscores, god_highscores)
-        # Don't make pages for players with no stats
-        # This can happen for players that are blacklisted, eg bots
-        # and griefers.
-        if stats is None:
-            continue
-        # Don't make pages for players with no games played
-        if stats['games'] == 0:
-            continue
-
-        outfile = os.path.join(player_html_path, player + '.html')
-        write_player_stats(player=player,
-                           stats=stats,
-                           outfile=outfile,
-                           achievements=achievements,
-                           streaks=streaks,
-                           active_streak=active_streak,
-                           template=template,
-                           records=records)
-        n += 1
-        if not n % 10000:
-            print(n)
-    end = time.time()
-    print("Wrote player pages in %s seconds" % round(end - start2, 2))
-    print("Wrote website in %s seconds" % round(end - start, 2))
+    print("Wrote website in %s seconds" % round(time.time() - start, 2))
 
 
 if __name__ == "__main__":

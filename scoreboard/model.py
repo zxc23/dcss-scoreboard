@@ -1,571 +1,594 @@
 """Defines the database models for this module."""
 
-import json
-import collections
-import datetime
 import os
+import json
+from typing import Optional
 
-import pylru
-import sqlalchemy.ext.mutable
-from sqlalchemy import TypeDecorator, MetaData, Table, Column, String, \
-                       Integer, Boolean, DateTime, LargeBinary, Index
-from sqlalchemy import desc, asc, select, func, column
+import sqlalchemy
+from sqlalchemy import func
 
-from . import modelutils
-from . import constants as const
-
-GAME_CACHE = pylru.lrucache(1000)
-
-
-class DatabaseError(Exception):
-    """Generic error for issues with the model."""
-
-    pass
+import scoreboard.constants as const
+from scoreboard.orm import Server, Player, Species, Background, God, Version, \
+    Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
+import scoreboard.modelutils as modelutils
 
 
-class DuplicateKeyError(Exception):
-    """Generic error for issues with the model."""
+class DBError(BaseException):
+    """Generic wrapper for sqlalchemy errors passed out of this module."""
 
     pass
 
 
-def sqlite_performance_over_safety(dbapi_con, con_record):
-    """Significantly speeds up inserts but will break on crash."""
-    dbapi_con.execute('PRAGMA journal_mode = MEMORY')
-    dbapi_con.execute('PRAGMA synchronous = OFF')
+def _reraise_dberror(function):
+    """Re-raise errors from decorated function as DBError.
 
-
-def json_serialise(obj):
-    """Convert deques to lists.
-
-    Used to persist deque data into JSON.
+    Doesn't re-wrap DBError exceptions.
     """
-    if isinstance(obj, collections.deque):
-        return list(obj)
-    elif isinstance(obj, datetime.datetime):
-        return obj.isoformat()
-    raise TypeError
+
+    def f(*args, **kwargs):
+        """Re-raise exceptions as GaiaError."""
+        try:
+            return function(*args, **kwargs)
+        except BaseException as e:
+            if isinstance(e, DBError):
+                raise
+            else:
+                raise DBError from e
+
+    return f
 
 
-class _JsonEncodedDict(TypeDecorator):
-    """Enables JSON storage by encoding and decoding on the fly."""
-
-    impl = LargeBinary
-
-    def process_bind_param(self, value, dialect):
-        """Dict -> JSON String."""
-        return json.dumps(value, default=json_serialise).encode()
-
-    def process_result_value(self, value, dialect):
-        """JSON String -> Dict."""
-        return json.loads(value.decode())
-
-
-sqlalchemy.ext.mutable.MutableDict.associate_with(_JsonEncodedDict)
-
-
-def setup_database(backend):
-    """Set up and initialise the database."""
-    global DB_URI
-    if backend == 'sqlite':
-        DB_URI = 'sqlite:///database.db'
-        ENGINE_OPTS = {}
-    elif backend == 'mysql':
-        auth = '' if 'DB_USER' not in os.environ else '%s:%s@' % (
-            os.environ.get('DB_USER'), os.environ.get('DB_PASS'))
-        DB_URI = 'mysql://%slocalhost/dcss_scoreboard' % auth
-        ENGINE_OPTS = {'poolclass': sqlalchemy.pool.NullPool}
+def get_server(s, name):
+    """Get a server, creating it if needed."""
+    server = s.query(Server).filter(Server.name == name).first()
+    if server:
+        return server
     else:
-        raise RuntimeError("Unknown database backend %s" % backend)
-    print("Using database %s" % DB_URI)
-
-    _metadata = MetaData()
-
-    global _games
-    _games = Table(
-        'games',
-        _metadata,
-        Column('gid', String(50),
-               primary_key=True,
-               nullable=False),
-        Column('name', String(20),
-               nullable=False, index=True),
-        Column('displayname', String(20),
-               nullable=False),
-        Column('src', String(4), nullable=False),
-        Column('v', String(10), nullable=False),
-        Column('char', String(4), nullable=False,
-               index=True),
-        Column('rc', String(2), nullable=False,
-               index=True),
-        Column('bg', String(2), nullable=False,
-               index=True),
-        Column('place', String(12), nullable=False),
-        Column('xl', Integer, nullable=False),
-        Column('tmsg', String(1000), nullable=False),
-        Column('turn', Integer, nullable=False),
-        Column('dur', Integer, nullable=False),
-        Column('runes', Integer, nullable=False),
-        Column('sc', Integer, nullable=False,
-               index=True),
-        Column('god', String(20), nullable=False,
-               index=True),
-        Column('start', DateTime, nullable=False,
-               index=True),
-        Column('end', DateTime, nullable=False,
-               index=True),
-        Column('ktyp', String(50),
-               nullable=False, index=True),
-
-        # These are columns not storing game data
-        Column('raw_data', _JsonEncodedDict(10000),
-               nullable=False),
-        Column('scored', Boolean, default=False,
-               index=True),
-        mysql_engine='InnoDB',
-        mysql_charset='utf8')
-
-    Index('ix_games_rc_sc', _games.c.rc, _games.c.sc)
-    Index('ix_games_bg_sc', _games.c.bg, _games.c.sc)
-    Index('ix_games_char_sc', _games.c.char, _games.c.sc)
-    Index('ix_games_god_sc', _games.c.god, _games.c.sc)
-
-    global _logfile_progress
-    _logfile_progress = Table('logfile_progress',
-                              _metadata,
-                              Column('logfile',
-                                     String(100),
-                                     primary_key=True),
-                              Column('lines_parsed',
-                                     Integer,
-                                     nullable=False),
-                              mysql_engine='InnoDB',
-                              mysql_charset='utf8')
-
-    global _blacklisted_players
-    _blacklisted_players = Table('blacklisted_players',
-                                 _metadata,
-                                 Column('name',
-                                        String(50),
-                                        primary_key=True,
-                                        nullable=False),
-                                 Column('src',
-                                        String(4),
-                                        primary_key=True,
-                                        nullable=False),
-                                 mysql_engine='InnoDB',
-                                 mysql_charset='utf8')
-
-    global _player_stats
-    _player_stats = Table('player_stats',
-                          _metadata,
-                          Column('name',
-                                 String(50),  # XXX: is this long enough?
-                                 primary_key=True,
-                                 nullable=False),
-                          Column('stats',
-                                 _JsonEncodedDict(100000),
-                                 nullable=False),
-                          mysql_engine='InnoDB',
-                          mysql_charset='utf8')
-
-    global _global_stats
-    _global_stats = Table('global_stats',
-                          _metadata,
-                          Column('key',
-                                 String(100),
-                                 primary_key=True,
-                                 nullable=False),
-                          Column('data',
-                                 _JsonEncodedDict(100000),
-                                 nullable=False),
-                          mysql_engine='InnoDB',
-                          mysql_charset='utf8')
-
-    global _engine
-    _engine = sqlalchemy.create_engine(DB_URI, **ENGINE_OPTS)
-
-    if DB_URI.startswith('sqlite'):
-        sqlalchemy.event.listen(_engine, 'connect',
-                                sqlite_performance_over_safety)
-    elif DB_URI.startswith('mysql'):
-        version = _engine.execute('select VERSION()').fetchone()[0]
-        # We split on '-' to get rid of OS-specific junk like:
-        # 5.5.49-0ubuntu0.14.04.1
-        _engine.MYSQL_VERSION = [int(v)
-                                 for v in version.split('-')[0].split('.')]
-        assert (_engine.MYSQL_VERSION[0] == 5)
-
-    _metadata.create_all(_engine)
+        server = Server(name=name)
+        s.add(server)
+        s.commit()
+        return server
 
 
-def add_game(gid, raw_data):
+def get_account(s, name, server):
+    """Get a player's object, creating them if needed.
+
+    Note that player names are not case sensitive, so names are stored with
+    their canonical capitalisation but we always compare the lowercase version.
+    """
+    player = get_player(s, name)
+    acc = s.query(Account).filter(
+        func.lower(Account.name) == name.lower(),
+        Account.server == server).first()
+    if acc:
+        return acc
+    else:
+        acc = Account(name=name, server=server, player=player)
+        s.add(acc)
+        s.commit()
+        return acc
+
+
+def get_player(s, name):
+    """Get a player's object, creating them if needed.
+
+    Note that player names are not case sensitive, so names are stored with
+    their canonical capitalisation but we always compare the lowercase version.
+    """
+    player = s.query(Player).filter(
+        func.lower(Player.name) == name.lower()).first()
+    if player:
+        return player
+    else:
+        player = Player(name=name)
+        s.add(player)
+        s.commit()
+        return player
+
+
+def setup_servers(s):
+    """Set up basic source data.
+
+    Right now this just adds the 'unknown' source.
+    """
+    if not s.query(Server).filter(Server.name == '???').first():
+        print("Adding server '???'")
+        s.add(Server(name='???'))
+        s.commit()
+
+
+def setup_species(s):
+    """Load species data into the database."""
+    new = []
+    for sp in const.SPECIES:
+        if not s.query(Species).filter(Species.short == sp.short).first():
+            print("Adding species '%s'" % sp.full)
+            new.append({'short': sp.short,
+                        'name': sp.full,
+                        'playable': sp.playable})
+    s.bulk_insert_mappings(Species, new)
+    s.commit()
+
+
+def setup_backgrounds(s):
+    """Load background data into the database."""
+    new = []
+    for bg in const.BACKGROUNDS:
+        if not s.query(Background).filter(
+                Background.short == bg.short).first():
+            print("Adding background '%s'" % bg.full)
+            new.append({'short': bg.short,
+                        'name': bg.full,
+                        'playable': bg.playable})
+    s.bulk_insert_mappings(Background, new)
+    s.commit()
+
+
+def setup_achievements(s):
+    """Load manual achievements into the database."""
+    new = []
+    path = os.path.join(os.path.dirname(__file__), 'achievements.json')
+    with open(path) as f:
+        achievements = json.load(f)
+    for a in achievements:
+        if not s.query(Achievement).filter(
+                Achievement.name == a['name']).first():
+            print("Adding achievement '%s'" % a['name'])
+            new.append({'name': a['name'],
+                        'key': a['id'],
+                        'description': a['description']})
+    s.bulk_insert_mappings(Achievement, new)
+    s.commit()
+
+
+def setup_gods(s):
+    """Load god data into the database."""
+    new = []
+    for god in const.GODS:
+        if not s.query(God).filter(God.name == god.name).first():
+            print("Adding god '%s'" % god.name)
+            new.append({'name': god.name, 'playable': god.playable})
+    s.bulk_insert_mappings(God, new)
+    s.commit()
+
+
+def setup_ktyps(s):
+    """Load ktyp data into the database."""
+    new = []
+    for ktyp in const.KTYPS:
+        if not s.query(Ktyp).filter(Ktyp.name == ktyp).first():
+            print("Adding ktyp '%s'" % ktyp)
+            new.append({'name': ktyp})
+    s.bulk_insert_mappings(Ktyp, new)
+    s.commit()
+
+
+def get_version(s, v):
+    """Get a version, creating it if needed."""
+    version = s.query(Version).filter(Version.v == v).first()
+    if version:
+        return version
+    else:
+        version = Version(v=v)
+        s.add(version)
+        s.commit()
+        return version
+
+
+def setup_branches(s):
+    """Load branch data into the database."""
+    new = []
+    for br in const.BRANCHES:
+        if not s.query(Branch).filter(Branch.short == br.short).first():
+            print("Adding branch '%s'" % br.full)
+            new.append({'short': br.short,
+                        'name': br.full,
+                        'multilevel': br.multilevel,
+                        'playable': br.playable})
+    s.bulk_insert_mappings(Branch, new)
+    s.commit()
+
+
+def get_place(s, branch, lvl):
+    """Get a place, creating it if needed."""
+    place = s.query(Place).filter(Place.branch == branch,
+                                  Place.level == lvl).first()
+    if place:
+        return place
+    else:
+        place = Place(branch=branch, level=lvl)
+        s.add(place)
+        s.commit()
+        return place
+
+
+def get_species(s, sp):
+    """Get a species, creating it if needed."""
+    species = s.query(Species).filter(Species.short == sp).first()
+    if species:
+        return species
+    else:
+        species = Species(short=sp, name=sp, playable=False)
+        s.add(species)
+        s.commit()
+        print("Warning: Found new species %s, please add me to constants.py"
+              " and update the database." % sp)
+        return species
+
+
+def get_background(s, bg):
+    """Get a background, creating it if needed."""
+    background = s.query(Background).filter(Background.short == bg).first()
+    if background:
+        return background
+    else:
+        background = Background(short=bg, name=bg, playable=False)
+        s.add(background)
+        s.commit()
+        print("Warning: Found new background %s, please add me to constants.py"
+              " and update the database." % bg)
+        return background
+
+
+def get_god(s, name):
+    """Get a god, creating it if needed."""
+    god = s.query(God).filter(God.name == name).first()
+    if god:
+        return god
+    else:
+        god = God(name=name, playable=False)
+        s.add(god)
+        s.commit()
+        print("Warning: Found new god %s, please add me to constants.py"
+              " and update the database." % name)
+        return god
+
+
+def get_ktyp(s, name):
+    """Get a ktyp, creating it if needed."""
+    ktyp = s.query(Ktyp).filter(Ktyp.name == name).first()
+    if ktyp:
+        return ktyp
+    else:
+        ktyp = Ktyp(name=name)
+        s.add(ktyp)
+        s.commit()
+        print("Warning: Found new ktyp %s, please add me to constants.py" %
+              name)
+        return ktyp
+
+
+def get_branch(s, br):
+    """Get a branch, creating it if needed."""
+    branch = s.query(Branch).filter(Branch.short == br).first()
+    if branch:
+        return branch
+    else:
+        branch = Branch(short=br, name=br, multilevel=True, playable=False)
+        s.add(branch)
+        s.commit()
+        print("Warning: Found new branch %s, please add me to constants.py"
+              " and update the database." % br)
+        return branch
+
+
+
+def create_streak(s, player):
+    """Create a new streak for a given player."""
+    streak = Streak(player_id=player.id, active=True)
+    s.add(streak)
+    s.commit()
+    return streak
+
+
+@_reraise_dberror
+def add_game(s, game_data):
     """Normalise and add a game to the database."""
-    if 'end' not in raw_data:
-        raise DatabaseError("No end field in this log: %s" % raw_data)
-    raw_data['god'] = const.GOD_NAME_FIXUPS.get(raw_data['god'],
-                                                raw_data['god'])
-    raw_data['original_race'] = raw_data['race']
-    raw_data['race'] = const.RACE_NAME_FIXUPS.get(raw_data['race'],
-                                                  raw_data['race'])
-    try:
-        _engine.execute(
-            _games.insert(),
-            gid=gid,
-            name=raw_data['name'].lower(),
-            displayname=raw_data['name'],
-            src=raw_data['src'],
-            v=raw_data['v'],
-            char=raw_data['char'],
-            rc=raw_data['char'][:2], bg=raw_data['char'][2:],
-            god=raw_data['god'], place=raw_data['place'], xl=raw_data['xl'],
-            tmsg=raw_data['tmsg'], turn=raw_data['turn'], dur=raw_data['dur'],
-            runes=raw_data.get('urune', 0), sc=raw_data['sc'],
-            start=modelutils.crawl_date_to_datetime(raw_data['start']),
-            end=modelutils.crawl_date_to_datetime(raw_data['end']),
-            ktyp=raw_data['ktyp'], raw_data=raw_data)
-    except sqlalchemy.exc.IntegrityError as e:
-        if e.orig.args[0] == 1062:  # duplicate entry for private key
-            raise DuplicateKeyError("%s already exists in the database." %
-                                    gid) from e
-        else:
-            raise
-    except sqlalchemy.exc.OperationalError as e:
-        raise DatabaseError("Couldn't import %s (%s)" % (gid, e))
+    add_games(s, [game_data])
 
 
-def logfile_pos(logfile):
-    """Get the number of lines we've already processed."""
-    s = _logfile_progress.select().where(_logfile_progress.c.logfile ==
-                                         logfile)
-
-    try:
-        row = _engine.execute(s).fetchone()
-    except sqlalchemy.exc.OperationalError as e:
-        raise DatabaseError("Couldn't load logfile pos for %s (%s)" %
-                            (logfile, e)) from e
-    if row:
-        return row.lines_parsed
-    else:
-        return 0
+@_reraise_dberror
+def add_games(s, games_data):
+    """Normalise and add multiple games to the database."""
+    games = []
+    for game in games_data:
+        games.append(create_game_mapping(s, game))
+    s.bulk_insert_mappings(Game, games)
 
 
-def save_logfile_pos(logfile, pos):
-    """Save the number of lines we've processed."""
-    # print("Saving log pos for", logfile, "as", pos)
-    # XXX instead of this try: except:, see if
-    # prefixes="OR REPLACE" works
-    # http://docs.sqlalchemy.org/en/rel_1_0/core/dml.html#
-    #                                       sqlalchemy.sql.expression.insert
-    try:
-        _engine.execute(_logfile_progress.insert(),
-                        logfile=logfile,
-                        lines_parsed=pos)
-    except sqlalchemy.exc.IntegrityError:
-        _engine.execute(_logfile_progress.update().where(
-            _logfile_progress.c.logfile == logfile).values(lines_parsed=pos))
+def create_game_mapping(s, data):
+    """Convert raw log dict into a game object."""
 
+    # Normalise some data
+    data['god'] = const.GOD_NAME_FIXUPS.get(data['god'], data['god'])
+    data['race'] = const.RACE_NAME_FIXUPS.get(data['race'], data['race'])
+    if data['char'][:2] in const.RACE_SHORTNAME_FIXUPS:
+        oldrace = data['char'][:2]
+        newrace = const.RACE_SHORTNAME_FIXUPS[oldrace]
+        data['char'] = newrace + data['char'][2:]
+    data['br'] = const.BRANCH_NAME_FIXUPS.get(data['br'], data['br'])
+    data['ktyp'] = const.KTYP_FIXUPS.get(data['ktyp'], data['ktyp'])
 
-def all_player_names():
-    """Return list of all player names.
+    branch = get_branch(s, data['br'])
+    server = get_server(s, data['src'])
+    game = {
+        'gid': data['gid'],
+        'account_id': get_account(s, data['name'], server).id,
+        'species_id': get_species(s, data['char'][:2]).id,
+        'background_id': get_background(s, data['char'][2:]).id,
+        'god_id': get_god(s, data['god']).id,
+        'version_id': get_version(s, data['v']).id,
+        'place_id': get_place(s, branch, data['lvl']).id,
+        'xl': data['xl'],
+        'tmsg': data['tmsg'],
+        'turn': data['turn'],
+        'dur': data['dur'],
+        'runes': data.get('urune', 0),
+        'score': data['sc'],
+        'start': modelutils.crawl_date_to_datetime(data['start']),
+        'end': modelutils.crawl_date_to_datetime(data['end']),
+        'ktyp_id': get_ktyp(s, data['ktyp']).id,
+        'potions_used': data.get('potionsused', -1),
+        'scrolls_used': data.get('scrollsused', -1),
+    }
 
-    XXX should be at least memoised if not outright replaced with something
-    saner.
-    """
-    return [p.name for p in get_all_player_stats()]
-
-
-def get_all_player_stats():
-    """Return all rows in player_stats table.
-
-    XXX should be at least memoised if not outright replaced with something
-    saner.
-    """
-    s = _player_stats.select()
-    return _engine.execute(s).fetchall()
-
-
-def delete_all_player_stats():
-    """Delete all player stats."""
-    _engine.execute(_player_stats.delete())
-
-
-def delete_player_stats(name):
-    """Delete a player's stats."""
-    _engine.execute(_player_stats.delete().where(_player_stats.c.name == name))
-
-
-def delete_player_streaks(name):
-    """Delete a player's streaks."""
-    cname = name.lower()
-    active_streaks = global_stat('active_streaks')
-    completed_streaks = global_stat('completed_streaks')
-
-    if cname in active_streaks:
-        del active_streaks[cname]
-        set_global_stat('active_streaks', active_streaks)
-
-    removed = False
-    for streak in completed_streaks:
-        if streak.cname == cname:
-            completed_streaks.remove(streak)
-            removed = True
-    if removed:
-        set_global_stat('completed_streaks', completed_streaks)
-
-
-def get_player_stats(name):
-    """Return a dict of the player's current stats.
-
-    If the player doesn't exist, None is returned.
-    """
-    s = _player_stats.select().where(_player_stats.c.name == name)
-    result = _engine.execute(s).fetchone()
-    if result:
-        score = result[1]
-    else:
-        score = None
-    return score
-
-
-def set_player_stats(name, stats):
-    """Write player's stats to the database.
-
-    XXX this function is the slowest part of scoring.py.
-    """
-    # print("Saving scoring data for", player)
-    try:
-        _engine.execute(_player_stats.insert(), name=name, stats=stats)
-    except sqlalchemy.exc.IntegrityError:
-        _engine.execute(_player_stats.update().where(_player_stats.c.name ==
-                                                     name).values(stats=stats))
-
-
-def first_game(name, src=None):
-    """Return the first game of a player."""
-    s = _games.select().where(_games.c.name == name).order_by(asc(
-        'start')).limit(1)
-    if src is not None:
-        s = s.where(_games.c.src == src)
-    return _engine.execute(s).fetchone()
-
-
-def all_games(scored=None, limit=0):
-    """Return all games.
-
-    If scored is not none, only return games who match bool(scored).
-    Return (up to) limit rows (0 = all rows).
-    Games are ordered by end datetime.
-    """
-    s = _games.select()
-    if scored is not None:
-        s = s.where(_games.c.scored == bool(scored)).order_by(asc('end'))
-    if limit:
-        s = s.limit(limit)
-    return _engine.execute(s).fetchall()
-
-
-def mark_game_scored(gid):
-    """Mark a game as being scored."""
-    s = _games.update().where(_games.c.gid == gid).values(scored=True)
-    _engine.execute(s)
-
-
-def unscore_all_games():
-    """Mark all games as being unscored."""
-    _engine.execute(_games.update().values(scored=False))
-
-
-def unscore_all_games_of_player(name):
-    """Mark all games by a player as being unscored."""
-    q = _games.update().where(_games.c.name == name).values(scored=False)
-    _engine.execute(q)
-
-
-def set_global_stat(key, data):
-    """Set global stat data."""
-    try:
-        _engine.execute(_global_stats.insert(), key=key, data=data)
-    except sqlalchemy.exc.IntegrityError:
-        _engine.execute(_global_stats.update().where(_global_stats.c.key ==
-                                                     key).values(data=data))
-
-
-def global_stat(key):
-    """Get global score data."""
-    s = _global_stats.select().where(_global_stats.c.key == key)
-    val = _engine.execute(s).fetchone()
-    if val is not None:
-        return val[1]
-    else:
-        return None
-
-
-def global_stats():
-    """Get all global score data."""
-    scores = {}
-    s = _global_stats.select()
-    for row in _engine.execute(s).fetchall():
-        scores[row[0]] = row[1]
-    return scores
-
-
-def delete_all_global_stats():
-    """Delete all global stats."""
-    _engine.execute(_global_stats.delete())
-
-
-def game(gid):
-    """Return game with matching gid."""
-    if not isinstance(gid, str):
-        raise TypeError("Must pass in string, `%s` is type %s" %
-                        (repr(gid), type(gid)))
-    if gid in GAME_CACHE:
-        return GAME_CACHE[gid]
-    game = _engine.execute(_games.select().where(_games.c.gid ==
-                                                 gid)).fetchone()
-    GAME_CACHE[gid] = game
     return game
 
 
-def recent_games(wins=False,
-                 player=None,
-                 num=const.PLAYER_TABLE_LENGTH,
-                 reverse=False):
-    """Return recent games.
+def get_logfile_progress(s, logfile):
+    """Get a logfile progress records, creating it if needed."""
+    log = s.query(LogfileProgress).filter(
+        LogfileProgress.name == logfile).first()
+    if log:
+        return log
+    else:
+        log = LogfileProgress(name=logfile)
+        s.add(log)
+        s.commit()
+        return log
+
+
+def save_logfile_progress(s, logfile, pos):
+    """Save the position for a logfile."""
+    log = get_logfile_progress(s, logfile)
+    log.bytes_parsed = pos
+    s.add(log)
+    s.commit()
+
+
+def list_accounts(s, *, blacklisted=None):
+    """Get a list of all accounts.
+
+    If blacklisted is specified, only return accounts with that blacklisted
+    value.
+    """
+    q = s.query(Account)
+    if blacklisted is not None:
+        q = q.filter(Account.blacklisted == blacklisted)
+    results = q.all()
+    return results
+
+
+def list_players(s):
+    """Get a list of all players."""
+    q = s.query(Player)
+    return q.all()
+
+
+def _generic_char_type_lister(s, *, cls, playable: Optional[bool]):
+    q = s.query(cls)
+    if playable is not None:
+        q = q.filter(cls.playable == playable)
+    return q.order_by(getattr(cls, 'name')).all()
+
+
+def list_species(s, *, playable: Optional[bool]=None):
+    """Return a list of species.
+
+    If playable is specified, only return species that have a matching playable attribute.
+    """
+    return _generic_char_type_lister(s, cls=Species, playable=playable)
+
+
+def list_backgrounds(s, *, playable: Optional[bool]=None):
+    """Return a list of backgrounds.
+
+    If playable is specified, only return species that have a matching playable attribute.
+    """
+    return _generic_char_type_lister(s, cls=Background, playable=playable)
+
+
+def list_gods(s, *, playable: Optional[bool]=None):
+    """Return a list of gods.
+
+    If playable is specified, only return species that have a matching playable attribute.
+    """
+    return _generic_char_type_lister(s, cls=God, playable=playable)
+
+
+def list_games(s,
+               *,
+               player: Optional[str]=None,
+               account: Optional[Account]=None,
+               scored: Optional[bool]=None,
+               limit: Optional[int]=None,
+               gid: Optional[str]=None,
+               winning: Optional[bool]=None,
+               reverse_order: bool=False) -> list:
+    """Get a list of all games that match a specified condition.
+
+    Return data is ordered most recent -> least recent, unless
+    reverse_order=True.
 
     Parameters:
-        wins (bool) Only return wins
-        player (str) Only for this player, None for all
-        num (int) Number of rows to return, None for all
-        reverse (bool) Order in least -> most recent if True
+        player: If specified, only return games with a matching player name
+        account: If specified, only return games with a matching account
+        scored: If specified, only return games with a matching scored
+        limit: If specified, return up to limit games
+        gid: If specified, only return game with matching gid
+        winning: If specified, only return games where ktyp==/!='winning'
+        reverse_order: If True, return games least->most recent
 
-    Returns recent games as a list of Games.
+    Return:
+        list of Game objects
     """
+    q = s.query(Game)
     if player is not None:
-        player = player.lower()
-    query = _games.select()
-    if wins:
-        query = query.where(_games.c.ktyp == 'winning')
-    if player is not None:
-        query = query.where(_games.c.name == player)
-    if num is not None:
-        query = query.limit(num)
-    query = query.order_by(desc("end"))
-
-    rows = _engine.execute(query).fetchall()
-    if reverse:
-        rows = rows[::-1]
-    return rows
-
-
-def games_by_type(player, col, eligible, winning=True):
-    """Find the count of games for a player grouped by values of col.
-
-    Parameters:
-        player (str) Player's name
-        col (str)   Name of the colum to search
-        eligible (iterable) List of eligible column values
-        winning (bool) Only winning games?
-
-    Returns: list of games.
-    """
-    count = sqlalchemy.sql.functions.count()
-    query = select([column(col), count]).group_by(col)
-    query = query.where(_games.c.name == player)
-    if winning:
-        query = query.where(_games.c.ktyp == 'winning')
-    query = query.group_by(col)
-    return {i[0]: i[1]
-            for i in _engine.execute(query).fetchall() if i[0] in eligible}
+        q = q.join(Game.account).join(Account.player).filter(
+            Player.name == player)
+    if account is not None:
+        q = q.join(Game.account).filter(Account == account)
+    if scored is not None:
+        q = q.filter(Game.scored == scored)
+    if gid is not None:
+        q = q.filter(Game.gid == gid)
+    if winning is not None:
+        ktyp = get_ktyp(s, 'winning')
+        if winning:
+            q = q.filter(Game.ktyp == ktyp)
+        else:
+            q = q.filter(Game.ktyp != ktyp)
+    q = q.order_by(Game.end.desc() if not reverse_order else Game.end.asc())
+    if limit is not None:
+        q = q.limit(limit)
+    return q.all()
 
 
-def add_player_to_blacklist(name, src):
-    """Add a player to the blacklist."""
-    _engine.execute(_blacklisted_players.insert(), name=name, src=src)
-
-
-def remove_player_from_blacklist(name, src):
-    """Remove a player from the blacklist."""
-    table = _blacklisted_players
-    s = table.delete().where(table.c.name == name).where(table.c.src == src)
-    _engine.execute(s)
-
-
-def player_in_blacklist(name, src):
-    """Return True if a player is on the blacklist."""
-    table = _blacklisted_players
-    s = table.select().where(table.c.name == name).where(table.c.src == src)
-    return _engine.execute(s).fetchone() is True
-
-
-def all_blacklisted_players():
-    """Return all blacklisted player-src combinations."""
-    return _engine.execute(_blacklisted_players.select()).fetchall()
-
-
-def shortest_wins(n=const.GLOBAL_TABLE_LENGTH):
-    """Return the n shortest wins by turncount."""
-    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
-        'turn')).limit(n)
-    return _engine.execute(s).fetchall()
-
-
-def fastest_wins(n=const.GLOBAL_TABLE_LENGTH):
-    """Return the n fastest wins by duration."""
-    s = _games.select().where(_games.c.ktyp == 'winning').order_by(asc(
-        'dur')).limit(n)
-    return _engine.execute(s).fetchall()
-
-
-def highscores(n=const.GLOBAL_TABLE_LENGTH):
-    """Return the n highest scoring games."""
-    s = _games.select().order_by(desc('sc')).limit(n)
-    return _engine.execute(s).fetchall()
-
-
-def _highscores(col, values):
-    cols = [_games.c.gid, _games.c.sc]
-    # For info on this mysql 5.7+ workaround, see:
-    # https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html
-    # XXX should rewrite the query so it doesn't require this workaround.
-    if DB_URI.startswith('mysql') and _engine.MYSQL_VERSION[1] >= 7:
-        cols[0] = func.ANY_VALUE(cols[0])
-    s = select(cols).order_by(desc(_games.c.sc)).limit(1)
-
-    result = []
-    for val in values:
-        q = s.where(col == val)
-        g = _engine.execute(q).fetchone()
-        if g:
-            result.append(game(g[0]))
-
-    return result
-
-
-def race_highscores():
-    """Return the highest scoring game for each race."""
-    return _highscores(_games.c.rc, const.PLAYABLE_RACES)
-
-
-def role_highscores():
-    """Return the highest scoring game for each role."""
-    return _highscores(_games.c.bg, const.PLAYABLE_ROLES)
-
-
-def god_highscores():
-    """Return the highest scoring game for each god."""
-    return _highscores(_games.c.god, const.PLAYABLE_GODS)
-
-
-def combo_highscores():
-    """Return the highest scoring game for each combo."""
-    return _highscores(_games.c.char, const.PLAYABLE_COMBOS)
-
-
-def last_active(player):
-    """Return the date of most recent activity for player."""
-    s = select([_games.c.end]).order_by(desc('end')).limit(1)
-    result = _engine.execute(s).fetchone()
-    if result:
+def get_game(s, **kwargs) -> Game:
+    """Get a single game."""
+    kwargs.setdefault('limit', 1)
+    result = list_games(s, **kwargs)
+    if not result:
+        return None
+    else:
         return result[0]
+
+
+def get_achievement(s, key):
+    """Get an achievement."""
+    return s.query(Achievement).filter(Achievement.key == key).first()
+
+
+def highscores(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return up to limit high scores.
+
+    Fewer games may be returned if there is not enough matching data.
+    """
+    q = s.query(Game).order_by(Game.score.desc()).limit(limit)
+    return q.all()
+
+
+def _highscores_helper(s, mapped_class, game_column):
+    """Generic function to find highscores against arbitrary foreign keys.
+
+    Parameters:
+        mapped_class: the foreign key table's class
+        game_column: the foreign key's column in Games table
+
+    Returns:
+        Array of results
+    """
+    results = []
+    q = s.query(Game)
+    for i in s.query(mapped_class).filter(
+            mapped_class.playable ==
+            sqlalchemy.true()).order_by(mapped_class.name).all():
+        result = q.filter(
+            game_column == i).order_by(Game.score.desc()).limit(1).first()
+        if result:
+            results.append(result)
+    return results
+
+
+def species_highscores(s):
+    """Return the top score for each playable species.
+
+    Not every species may have a game in the database.
+    """
+    return _highscores_helper(s, Species, Game.species)
+
+
+def background_highscores(s):
+    """Return the top score for each playable background.
+
+    Not every background may have a game in the database.
+    """
+    return _highscores_helper(s, Background, Game.background)
+
+
+def god_highscores(s):
+    """Return the top score for each playable god.
+
+    Not every god may have a game in the database.
+    """
+    return _highscores_helper(s, God, Game.god)
+
+
+def combo_highscores(s):
+    """Return the top score for each playable combo.
+
+    Not every combo may have a game in the database.
+    """
+    results = []
+    q = s.query(Game).order_by(Game.score.desc())
+    for sp in s.query(Species).filter(
+            Species.playable == sqlalchemy.true()).order_by('name').all():
+        for bg in s.query(Background).filter(
+                Background.playable ==
+                sqlalchemy.true()).order_by('name').all():
+            query = q.filter(Game.species == sp, Game.background == bg)
+            result = query.first()
+            if result:
+                results.append(result)
+
+    return results
+
+
+def fastest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return up to limit fastest wins."""
+    ktyp = get_ktyp(s, 'winning')
+    return s.query(Game).filter(
+        Game.ktyp == ktyp).order_by('dur').limit(limit).all()
+
+
+def shortest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return up to limit shortest wins."""
+    ktyp = get_ktyp(s, 'winning')
+    return s.query(Game).filter(
+        Game.ktyp == ktyp).order_by('turn').limit(limit).all()
+
+
+def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
+    """Return the players with the most combo highscores.
+
+    May return fewer than limit names.
+
+    Returns a list of (player, games) tuples.
+    """
+    highscore_games = combo_highscores(s)
+    results = {}
+    for game in highscore_games:
+        player = game.account.player.name
+        results.setdefault(player, []).append(game)
+
+    return sorted(results.items(),
+                  key=lambda i: len(i[1]),
+                  reverse=True)[:limit]
+
+
+def get_gobal_records(s):
+    out = {
+        'combo': combo_highscores(s),
+        'species': species_highscores(s),
+        'background': background_highscores(s),
+        'god': god_highscores(s),
+        'shortest': shortest_wins(s),
+        'fastest': fastest_wins(s),
+    }
+    return out
+
+
+def get_player_streak(s, player):
+    q = s.query(Streak).filter(Streak.player == player,
+                               Streak.active == sqlalchemy.true())
+    return q.one_or_none()

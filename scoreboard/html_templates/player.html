@@ -1,25 +1,30 @@
 {% extends "base.html" %}
-{% block title %}{{ player }}{% endblock %}
+{% block title %}{{ player.name }}{% endblock %}
 {% block content %}
 <div class="row">
   <div class="col-sm-12">
-    <h2>{{ player }}</h2>
+    <h2>{{ player.name }}</h2>
     <hr>
   </div>
 </div>
 <div class="row">
   <div class="col-sm-3">
-    <p><strong>Last Active:</strong> {{ last_active|prettydate }}</p>
-    <p><strong>Games Played:</strong> {{ stats['games']|prettyint }}</p>
-    <p><strong>Wins:</strong> {{ all_wins|length }} ({{ (stats['winrate'] * 100)|round(2) }}%)</p>
-    <p><strong>Quits:</strong> {{ stats['boring_games']|prettyint }} ({{ (stats['boring_rate'] * 100)|round(2) }}%)</p>
+    <p><strong>Last Active:</strong> {{ games[0]|attr('end')|prettydate }}</p>
+    <p><strong>Games Played:</strong> {{ games|length|prettyint }}</p>
+    {% set wins = games|selectattr("won", "equalto", True)|list %}
+    <p><strong>Wins:</strong> {{ wins|length }} ({{ (wins|length / games|length)|percentage }}%)</p>
+    {% set quits = games|selectattr("quit", "equalto", True)|list %}
+    <p><strong>Quits:</strong> {{ quits|length }} ({{  (quits|length / games|length)|percentage }}%)</p>
   </div>
   <div class="col-sm-3">
-    <p><strong>Total Playtime:</strong> {{ stats['total_playtime']|prettydur(hours=True) }} hours</p>
-    <p><strong>Highest Score:</strong> {{ stats['highscore']|morgue_link(stats['highscore']|gidtogame|attr("sc")|prettyint) }}</p>
-    {% if stats['wins']|length > 0 %}
-      <p><strong>Shortest Win:</strong> {{ stats['fastest_turncount']|morgue_link(stats['fastest_turncount']|gidtogame|attr("turn")|default(0)|prettyint + ' turns') }}</p>
-      <p><strong>Fastest Win:</strong> {{ stats['fastest_realtime']|morgue_link(stats['fastest_realtime']|gidtogame|attr("dur")|default(0)|prettydur + ' hours') }}</p>
+    <p><strong>Total Playtime:</strong> {{ games|map(attribute="dur")|sum|prettydur(hours=True) }} hours</p>
+    {% set highest = games|highscore %}
+    <p><strong>Highest Score:</strong> {{ highest|morgue_link(highest.score|prettyint + ' points') }}</p>
+    {% if wins %}
+      {% set shortest = games|shortest_win %}
+      <p><strong>Shortest Win:</strong> {{ shortest|morgue_link(shortest.turn|prettyint + ' turns') }}</p>
+      {% set fastest = games|fastest_win %}
+      <p><strong>Fastest Win:</strong> {{ fastest|morgue_link(fastest.dur|prettydur + ' hours') }}</p>
     {% endif %}
   </div>
   <div class="col-sm-3">
@@ -35,7 +40,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Recent Games</h3>
-    {{ recent_games|gamestotable }}
+    {{ games[:10]|generic_games_to_table }}
   </div>
 </div>
 {# if player has a race/role highscore, they also have a combo highscore by definition #}
@@ -58,32 +63,35 @@
   </div>
 {% endif %}
 <hr/>
-{% if all_wins|length %}
+{% if wins|length %}
+<h3>Wins</h3>
+<div class="row">
+  <div class="col-sm-4">
+    <p><strong>By Species ({{ species_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_species|length }})</strong></p
+    {{ species_wins|prettycounter }}
+  </div>
+  <div class="col-sm-4">
+    <p><strong>By Background ({{ background_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_backgrounds|length }})</strong></p
+    {{ background_wins|prettycounter }}
+  </div>
+  <div class="col-sm-4">
+    <p><strong>By God ({{ god_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_gods|length }})</strong></p
+    {{ god_wins|prettycounter }}
+  </div>
+</div>
+
 <div class="row">
   <div class="col-sm-12">
-    <h3>Wins</h3>
-    <div class="col-sm-4">
-      <p><strong>By Species ({{ race_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_RACES|length }}):</strong></p>
-      <p class="counter">{{ race_wins|prettycounter|safe }}</p>
-    </div>
-    <div class="col-sm-4">
-      <p><strong>By Background ({{ background_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_ROLES|length }}):</strong></p>
-      <p class="counter">{{ background_wins|prettycounter|safe }}</p>
-    </div>
-    <div class="col-sm-4">
-      <p><strong>By God ({{ god_wins.values()|reject("equalto", 0)|list|length }}/{{ const.PLAYABLE_GODS|length }}):</strong></p>
-      <p class="counter">{{ god_wins|prettycounter|safe }}</p>
-    </div>
-    {% if all_wins|length > 10 %}
-      {{ all_wins[:10]|gamestotable(winning_games=True) }}
+    {% if wins|length > 10 %}
+      {{ wins[:10]|generic_highscores_to_table(show_player=False) }}
       <div class="collapse" id="lessrecentwins">
-        {{ all_wins[10:]|gamestotable(winning_games=True, skip_header=True) }}
+        {{ wins[10:]|generic_highscores_to_table(show_player=False) }}
       </div>
       <a href="#" class="games-accordion" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
-        Show/hide remaining {{ all_wins|length - 10 }} wins...
+        Show remaining {{ wins|length - 10 }} wins...
       </a>
     {% else %}
-      {{ all_wins|gamestotable(winning_games=True) }}
+      {{ wins|generic_highscores_to_table(show_player=False) }}
     {% endif %}
   </div>
 </div>

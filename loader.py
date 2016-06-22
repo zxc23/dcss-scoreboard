@@ -4,11 +4,12 @@
 import argparse
 import sys
 
-import scoreboard.model
+import scoreboard.sources
 import scoreboard.log_import
+import scoreboard.orm
 import scoreboard.scoring
 import scoreboard.write_website
-import scoreboard.sources
+
 
 def error(msg):
     """Print an error and exit."""
@@ -27,18 +28,14 @@ def read_commandline():
     parser.add_argument('--urlbase',
                         help="Override website base URL. Default: file:///CWD")
     parser.add_argument('--database',
-                        choices=('mysql', 'sqlite'),
-                        default='sqlite',
-                        help="Specify the database backend  (default: sqlite)")
-    parser.add_argument('--rebuild',
+                        choices=('mysql', 'sqlite', 'postgres'),
+                        default='mysql',
+                        help="Specify the database backend  (default: mysql)")
+    parser.add_argument('--download-logfiles',
                         action='store_true',
-                        help="Rebuild the entire database.")
-    parser.add_argument('--player',
-                        default='',
-                        help="Rebuild just this player's scores.")
-    parser.add_argument('--skip-download',
-                        action='store_true',
-                        help="Skip log download.")
+                        help="Download logfiles first.")
+    parser.add_argument('--download-servers', nargs=1, metavar="SRC",
+                        help="Only download logfiles from these servers.")
     parser.add_argument('--skip-import',
                         action='store_true',
                         help="Skip log import.")
@@ -52,30 +49,27 @@ def read_commandline():
                         action='store_true',
                         help="Re-write all player pages for the website.")
     args = parser.parse_args()
-    if args.rebuild and args.player:
-        error("You can't specify --rebuild and --player together.")
-    if args.rebuild and args.skip_scoring:
-        error("You can't specify --rebuild and --skip-scoring together.")
-    if args.player and args.skip_scoring:
-        error("You can't specify --player and --skip-scoring together.")
     return args
 
 
-def main(player=None):
+def main():
     """Run CLI."""
     args = read_commandline()
 
-    scoreboard.model.setup_database(args.database)
+    scoreboard.orm.setup_database(args.database)
 
-    players = None
-    if not args.skip_download:
-        scoreboard.sources.download_sources(args.logdir)
+    if args.download_logfiles:
+        scoreboard.sources.download_sources(args.logdir,
+                                            servers=args.download_servers)
+
     if not args.skip_import:
         scoreboard.log_import.load_logfiles(logdir=args.logdir)
+
     if not args.skip_scoring:
-        if args.player:
-            scoreboard.scoring.rescore_player(args.player)
-        players = scoreboard.scoring.score_games(rebuild=args.rebuild)
+        players = scoreboard.scoring.score_games()
+    else:
+        players = None
+
     if not args.skip_website:
         if args.rebuild_player_pages:
             players = None

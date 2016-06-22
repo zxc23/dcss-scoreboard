@@ -5,12 +5,13 @@ import datetime
 import dateutil.parser
 import jinja2
 
-from . import model
-from . import modelutils
-from . import constants as const
+import scoreboard.model as model
+import scoreboard.modelutils as modelutils
+import scoreboard.constants as const
 
 PRETTY_TIME_FORMAT = '%-d %B %Y'
 TIME_FORMAT = '<time class="timeago" datetime="{ts}Z">{t}</time>'
+
 
 def prettyint(value):
     """Jinja filter to prettify ints.
@@ -21,9 +22,10 @@ def prettyint(value):
 
 
 def prettydur(duration, hours=False):
-    """Jinja filter to convert seconds to a pretty duration "HH:MM:SS".
+    """Jinja filter to convert duration in seconds to a pretty "HH:MM:SS".
 
     Parameters:
+        duration: (int) duration in seconds
         hours (bool) Convert to only hours (with a minimum of 1 -- for player
             'hours played' metric).
 
@@ -42,20 +44,15 @@ def prettydur(duration, hours=False):
         return str(delta)
 
 
-def prettycounter(counter):
-    """Jinja filter to convert a counter dict to pretty text.
-
-    Sorts by lexical order of keys.
-
+def prettycounter(d):
+    """Jinja filter to convert an ordered dict to pretty text.
     eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
     return ", ".join("{open}{k}&nbsp;({v}){close}".format(
-        k=k,
-        v=v,
-        open="" if v > 0 else '<span class="text-muted">',
-        close="" if v > 0 else '</span>')
-                          for k, v in sorted(counter.items(),
-                                             key=lambda i: i[0]))
+        k=k.name.replace(' ', '&nbsp;'),
+        v=len(v),
+        open="" if len(v) > 0 else '<span class="text-muted">',
+        close="" if len(v) > 0 else '</span>') for k, v in d.items())
 
 
 def prettycrawldate(d):
@@ -73,34 +70,26 @@ def prettydate(d):
 def link_player(player, urlbase):
     """Convert a player name into a link."""
     return "<a href='{base}/players/{name}.html'>{name}</a>".format(
-        base=urlbase,
-        name=player)
+        base=urlbase, name=player)
 
 
-@jinja2.environmentfilter
-def gamestotable(env,
-                 games,
-                 *,
-                 prefix_col=None,
-                 prefix_col_title=None,
-                 show_player=False,
-                 winning_games=False,
-                 sort_col=None,
-                 limit=None,
-                 skip_header=False):
+def _games_to_table(env,
+                    games,
+                    *,
+                    prefix_col=None,
+                    prefix_col_title=None,
+                    show_player=False,
+                    winning_games=False,
+                    skip_header=False):
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
         env: Environment -- passed in automatically
-        prefix_col (str): Add an extra column at the start with data from
-                          game.raw_data.
-                          The table will also be sorted by this column.
+        prefix_col (func): Function to return prefix column's value. Passed each game.
         prefix_col_title (str): Title for the prefix_col column
-        sort_col (str): Sort the table by this column from game.raw_data.
         show_player (bool): Show the player name column
         winning_games (bool): The table has only winning games, so don't show
                               place or end columns, and do show runes.
-        limit (int): The table won't display more games than this.
         skip_header (bool): Skip the header?
 
     Returns: (string) '<table>contents</table>'.
@@ -109,21 +98,21 @@ def gamestotable(env,
     def format_trow(game):
         """Convert a game to a table row."""
         return trow.format(
-            win='table-success' if game.ktyp == 'winning' else '',
-            prefix_col='' if not prefix_col else "<td>%s</td>" %
-            game.raw_data.get(prefix_col),
-            player_row='' if not show_player else "<td>%s</td>" % link_player(
-                game.name, env.globals['urlbase']),
-            score=prettyint(game.sc),
-            character=game.char,
-            god=game.god,
-            place="" if winning_games else "<td>%s</td>" % game.place,
-            end="" if winning_games else "<td>%s</td>" % game.raw_data.get(
-                'tmsg'),
+            win='table-success' if game.won else '',
+            prefix_col=''
+            if not prefix_col else "<td>%s</td>" % prefix_col(game),
+            player_row='' if not show_player else "<td>%s</td>" %
+            link_player(game.account.player.name, env.globals['urlbase']),
+            score=prettyint(game.score),
+            character="{}{}".format(game.species.short, game.background.short),
+            god=game.god.name,
+            place=""
+            if winning_games else "<td>%s</td>" % game.place.as_string,
+            end="" if winning_games else "<td>%s</td>" % game.tmsg,
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
             date=prettydate(game.end),
-            version=game.v,
+            version=game.version.v,
             morgue=morgue_link(game))
 
     t = """<table class="{classes}">
@@ -169,23 +158,18 @@ def gamestotable(env,
       <td>{morgue}</td>
     </tr>"""
 
-    if limit:
-        games = games[:limit]
-
-    if sort_col:
-        games = sorted(games, key=lambda g: g['raw_data'][sort_col])
-    elif prefix_col:
-        games = sorted(games, key=lambda g: g['raw_data'][prefix_col])
+    tbody = "\n".join(format_trow(game) for game in games)
 
     return t.format(classes=const.TABLE_CLASSES,
                     thead=thead if not skip_header else '',
-                    tbody="\n".join(format_trow(game) for game in games))
+                    tbody=tbody)
 
 
 def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
     """Jinja filter to convert a list of streaks into a standard table.
 
     Parameters:
+        streaks: list of streaks
         show_player (bool): Show the player name column.
         show_loss (bool): Show the losing game column.
         limit (int): The table won't display more games than this.
@@ -199,18 +183,18 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
         loss = ""
         if show_player:
             player = "<td><a href='players/{player}.html'>{player}<a></td>".format(
-                player=model.game(streak['wins'][-1]).name)
+                player=model.get_game(streak['wins'][-1]).name)
         if show_loss:
             loss = "<td>%s</td>" % (morgue_link(
-                model.game(streak['streak_breaker']),
-                model.game(streak['streak_breaker']).char) if
-                                    'streak_breaker' in streak else '')
+                model.get_game(streak['streak_breaker']),
+                model.get_game(streak['streak_breaker']).char)
+                                    if 'streak_breaker' in streak else '')
 
         return trow.format(
             wins=len(streak['wins']),
             player=player,
             games=', '.join(morgue_link(
-                model.game(g), model.game(g).char) for g in streak['wins']),
+                model.get_game(g), model.get_game(g).char) for g in streak['wins']),
             start=prettydate(dateutil.parser.parse(streak['start'])),
             end=prettydate(dateutil.parser.parse(streak['end'])),
             streak_breaker=loss)
@@ -231,9 +215,9 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
                <th>Games</th>
                <th class="date-table-col text-xs-right">First Win</th>
                <th class="date-table-col text-xs-right">Last Win</th>
-               {loss}""".format(
-        player='' if not show_player else '<th>Player</th>',
-        loss='' if not show_loss else '<th>Loss</th>')
+               {loss}""".format(player=''
+                                if not show_player else '<th>Player</th>',
+                                loss='' if not show_loss else '<th>Loss</th>')
 
     trow = """<tr>
         <td class="text-xs-right">{wins}</td>
@@ -269,15 +253,18 @@ def mosthighscorestotable(highscores):
         </table>"""
 
     tbody = ""
+
     for entry in highscores:
-        combos = ', '.join([morgue_link(game, game.char) for game in entry[1]])
+        player = entry[0]
+        games = entry[1]
+        combos = ', '.join([morgue_link(game, game.char) for game in games])
         tbody += ("""<tr>
                        <td>%s</td>
                        <td class="text-xs-right">%s</td>
                        <td>%s</td>
                      </tr>""" %
                   ("<a href='players/{player}.html'>{player}<a>".format(
-                      player=entry[0]), len(entry[1]), combos))
+                      player=player), len(games), combos))
 
     return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
 
@@ -321,13 +308,59 @@ def morgue_link(game, text="Morgue"):
 
     Game can be either a gid string or a game object.
     """
-    if type(game) is str:
-        # Treat as gid
-        game = model.game(game)
-    elif 'raw_data' not in game:
-        # Treat as raw_data
-        game = model.game(game['gid'])
-    if not game:
-        return "Not Found"
-    result = "<a href='" + modelutils.morgue_url(game) + "'>" + text + "</a>"
-    return result
+    return "<a href='" + modelutils.morgue_url(game) + "'>" + str(
+        text) + "</a>"
+
+
+def percentage(n, digits=2):
+    """Convert a number from 0-1 to a percentage."""
+    return "%s" % round(n, digits)
+
+
+def shortest_win(games):
+    """Given a list of games, return the win which is the shortest."""
+    wins = filter(lambda g: g.won, games)
+    return max(wins, key=lambda g: g.dur)
+
+
+def fastest_win(games):
+    """Given a list of games, return the win which is the fastest."""
+    wins = filter(lambda g: g.won, games)
+    return min(wins, key=lambda g: g.turn)
+
+
+def highscore(games):
+    """Given a list of games, return the highest scoring game."""
+    return max(games, key=lambda g: g.score)
+
+
+@jinja2.environmentfilter
+def generic_games_to_table(env, data):
+    return _games_to_table(env, data, show_player=False, winning_games=False)
+
+
+@jinja2.environmentfilter
+def generic_highscores_to_table(env, data, show_player=True):
+    return _games_to_table(
+        env, data, show_player=show_player,
+        winning_games=True)
+
+
+@jinja2.environmentfilter
+def species_highscores_to_table(env, data):
+    return _games_to_table(env,
+                           data,
+                           show_player=True,
+                           prefix_col=lambda g: g.species.name,
+                           prefix_col_title='Species',
+                           winning_games=True)
+
+
+@jinja2.environmentfilter
+def background_highscores_to_table(env, data):
+    return _games_to_table(env,
+                           data,
+                           show_player=True,
+                           prefix_col=lambda g: g.background.name,
+                           prefix_col_title='Background',
+                           winning_games=True)

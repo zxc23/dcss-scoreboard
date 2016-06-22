@@ -5,9 +5,12 @@ import os
 import subprocess
 import urllib.parse
 import re
+from typing import Optional
 
 import yaml
 from braceexpand import braceexpand
+
+import scoreboard.constants as const
 
 SIMULTANEOUS_DOWNLOADS = 10
 WGET_SOURCE_CMDLINE = ("wget --timeout 10 --no-verbose -c --tries 5 "
@@ -23,7 +26,7 @@ def sources(src):
     Expands bash style '{a,b}{1,2}' strings into all their permutations.
     Excludes URLs that match IGNORED_FILES_REGEX.
     """
-    sources = []
+    expanded_sources = []
     if not src['base'].endswith('/'):
         src['base'] += '/'
     for line in src['logs']:
@@ -33,12 +36,13 @@ def sources(src):
         if not isinstance(line, str):
             continue
         line = line.replace('*', '')
-        sources.extend(braceexpand(line))
-    for line in sources:
+        expanded_sources.extend(braceexpand(line))
+    for line in expanded_sources:
         entry = "{}{}".format(src['base'], line)
         if re.search(IGNORED_FILES_REGEX, entry):
             continue
-        yield entry
+        if re.search(const.LOGFILE_REGEX, entry):
+            yield entry
 
 
 def source_data():
@@ -84,15 +88,32 @@ def download_source_files(urls, dest):
             print("Finished downloading {}.".format(url))
 
 
-def download_sources(dest):
-    """Download all logfile/milestone files."""
+def download_sources(dest: str, servers: Optional[str]=None):
+    """Download all logfile/milestone files.
+
+    Parameters:
+        dest: path to download destination directory
+        server: if specified, the server to download from
+
+    Returns:
+        Nothing
+    """
     print("Downloading source files to {}".format(dest))
     if not os.path.exists(dest):
         os.mkdir(dest)
-    sources = source_data()
+    all_sources = source_data()
+    if servers:
+        temp = {}
+        for server in servers:
+            if server in all_sources:
+                temp[server] = all_sources[server]
+                print("Downloading from whitelisted server '%s'." % server)
+            else:
+                print("Invalid server '%s' specified, skipping." % server)
+        all_sources = temp
     p = multiprocessing.Pool(10)
     jobs = []
-    for src, urls in sources.items():
+    for src, urls in all_sources.items():
         destdir = os.path.join(dest, src)
         if not os.path.exists(destdir):
             os.mkdir(destdir)
