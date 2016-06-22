@@ -33,6 +33,15 @@ To use the code, run `loader.py --help`.
 7. `cd /vagrant` and `python loader.py` will start the scripts.
 8. Ctrl-D will exit out of the VM's terminal. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
 
+## Postgresql Management
+
+To create a user & database in Postgres, try the following commands:
+
+```bash
+sudo -u postgres createuser -D -A -P scoreboard
+sudo -u postgres createdb -O scoreboard scoreboard
+```
+
 ## Development
 
 You can see development status here: https://trello.com/b/9Nija4jC/dcss-scoreboard
