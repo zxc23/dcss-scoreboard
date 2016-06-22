@@ -313,6 +313,8 @@ def setup_database(database):
         db_uri = 'mysql://localhost/dcss_scoreboard'
     elif database == 'sqlite':
         db_uri = 'sqlite:///database.db3'
+    elif database == 'postgres':
+        db_uri = 'postgresql+psycopg2://localhost/dcss_scoreboard'
     else:
         raise ValueError("Unknown database type!")
     engine_opts = {'poolclass': sqlalchemy.pool.NullPool}
