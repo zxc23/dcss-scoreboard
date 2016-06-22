@@ -247,6 +247,8 @@ class Game(Base):
     score = Column(Integer, nullable=False, index=True)
     start = Column(DateTime, nullable=False, index=True)
     end = Column(DateTime, nullable=False, index=True)
+    potions_used = Column(Integer, nullable=False)
+    scrolls_used = Column(Integer, nullable=False)
 
     ktyp_id = Column(Integer, ForeignKey('ktyps.id'), nullable=False)
     ktyp = relationship("Ktyp")

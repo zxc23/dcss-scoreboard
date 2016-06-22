@@ -328,6 +328,8 @@ def create_game_mapping(s, data):
         'start': modelutils.crawl_date_to_datetime(data['start']),
         'end': modelutils.crawl_date_to_datetime(data['end']),
         'ktyp_id': get_ktyp(s, data['ktyp']).id,
+        'potions_used': data.get('potionsused', -1),
+        'scrolls_used': data.get('scrollsused', -1),
     }
 
     return game
