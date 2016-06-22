@@ -185,6 +185,18 @@ class Ktyp(Base):
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
+@characteristic.with_repr(["id"])
+class Streak(Base):
+    """A DCSS ktyp (mon, beam, etc)."""
+
+    __tablename__ = 'streaks'
+    id = Column(Integer, primary_key=True, nullable=False)
+    active = Column(Boolean, nullable=False, index=True)
+    games = relationship("Game")
+
+    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
+
+
 @characteristic.with_repr(["gid"])
 class Game(Base):
     """A single DCSS game."""
@@ -225,6 +237,8 @@ class Game(Base):
     ktyp = relationship("Ktyp")
 
     scored = Column(Boolean, default=False, nullable=False, index=True)
+
+    streak_id = Column(Integer, ForeignKey('streaks.id'))
 
     @property
     def player(self):
