@@ -190,13 +190,17 @@ class Ktyp(Base):
 
 @characteristic.with_repr(["id"])
 class Streak(Base):
-    """A DCSS ktyp (mon, beam, etc)."""
+    """A streak of wins.
+
+    Each player can have one active streak at a time, this is enforced with a
+    Postgres partial index (so there's no enforcement in mysql/sqlite).
+    """
 
     __tablename__ = 'streaks'
     id = Column(Integer, primary_key=True, nullable=False)
     active = Column(Boolean, nullable=False, index=True)
 
-    player_id = Column(Integer, ForeignKey('player.id'))
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
     player = relationship("Player", back_populates="streak")
     games = relationship("Game")
 
