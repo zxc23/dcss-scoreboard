@@ -196,13 +196,11 @@ def handle_player_streak(s, game: orm.Game):
     if game.won:
         # Start or extend a streak
         if not current_streak:
-            print("Creating streak for %s" % game.player)
             current_streak = model.create_streak(s, game.player)
         else:
             # Ignore game if not a valid streak addition
             if not is_valid_streak_addition(game, current_streak):
                 return
-            print("Extending streak for %s" % game.player)
         game.streak = current_streak
         s.add(game)
         s.commit()
@@ -211,7 +209,6 @@ def handle_player_streak(s, game: orm.Game):
         # If there was no active streak, we're done
         if not current_streak:
             return
-        print("Closing streak for %s" % game.player)
         # Ignore game if griefing detected
         if is_grief(s, game):
             return
