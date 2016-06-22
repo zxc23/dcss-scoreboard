@@ -192,11 +192,8 @@ def great_role(role, player_stats, achievements):
 def score_game_vs_streaks(game):
     """Extend active streaks if a game was won and finalise streak stats."""
 
-    # Player might have different capitalisation between servers
-    cname = game.players_name.lower()
-
-    # Retrieve active streak
-    active_streaks = load_global_stat('active_streaks', {})
+    # Retrieve active streaks
+    active_streaks = model.get_active_streaks(s, player=game.player)
     streak = active_streaks.get(cname)
 
     # Ignore game if not a valid streak addition
@@ -247,7 +244,7 @@ def score_game(game):
         # Check for great role completion
 
         # Check streaks
-        # score_game_vs_streaks(game)
+        score_game_vs_streaks(game)
 
         # Finalise the changes to stats
     game.scored = True

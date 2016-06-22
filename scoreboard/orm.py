@@ -4,7 +4,7 @@ import characteristic
 
 import sqlalchemy
 from sqlalchemy import Table, Column, String, Integer, Boolean, DateTime, \
-                       ForeignKey, UniqueConstraint
+                       ForeignKey, UniqueConstraint, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -80,6 +80,9 @@ class Player(Base):
     achievements = relationship("Achievement",
                                 secondary=AwardedAchievements,
                                 back_populates="players")
+
+    streak = relationship("Streak", uselist=False, back_populates="player")
+
     __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'})
 
 
@@ -192,9 +195,17 @@ class Streak(Base):
     __tablename__ = 'streaks'
     id = Column(Integer, primary_key=True, nullable=False)
     active = Column(Boolean, nullable=False, index=True)
+
+    player_id = Column(Integer, ForeignKey('player.id'))
+    player = relationship("Player", back_populates="streak")
     games = relationship("Game")
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
+    __table_args__ = (
+        Index('one_active_streak_per_player',
+              player_id,
+              postgresql_where=active == True),
+        {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'},
+        )
 
 
 @characteristic.with_repr(["gid"])
