@@ -92,6 +92,7 @@ GODS = {God('Ashenzari', True),
         God('Elyvilon', True),
         God('Fedhas', True),
         God('Gozag', True),
+        God('Hepliaklqana', True),
         God('Jiyva', True),
         God('Kikubaaqudgha', True),
         God('Lugonu', True),
@@ -104,13 +105,12 @@ GODS = {God('Ashenzari', True),
         God('Sif Muna', True),
         God('The Shining One', True),
         God('Trog', True),
+        God('Uskayaw', True),
         God('Vehumet', True),
         God('Xom', True),
         God('Yredelemnul', True),
         God('Zin', True),
         # Non-playable gods
-        God('Hepliaklqana', False),
-        God('Ukayaw', False),
         God('Unknown', False), }
 
 PLAYABLE_SPECIES = {s for s in SPECIES if s.playable}
