@@ -1,7 +1,6 @@
 jinja2
 sqlalchemy
 pylru
-mysqlclient
 python-dateutil
 jsmin
 braceexpand

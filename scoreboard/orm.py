@@ -25,8 +25,6 @@ class Server(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(4), nullable=False, index=True, unique=True)
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
-
 
 AwardedAchievements = Table('awarded_achievements',
                             Base.metadata,
@@ -66,8 +64,7 @@ class Account(Base):
     __table_args__ = (UniqueConstraint('name',
                                        'server_id',
                                        name='name-server_id'),
-                      {'mysql_engine': 'InnoDB',
-                       'mysql_charset': 'utf8'}, )
+                      )
 
 
 @characteristic.with_repr(["id"])
@@ -83,8 +80,6 @@ class Player(Base):
 
     streak = relationship("Streak", uselist=False, back_populates="player")
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'})
-
 
 @characteristic.with_repr(["short"])
 class Species(Base):
@@ -95,8 +90,6 @@ class Species(Base):
     short = Column(String(2), nullable=False, index=True, unique=True)
     name = Column(String(15), nullable=False, unique=True)
     playable = Column(Boolean, nullable=False)
-
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
 @characteristic.with_repr(["short"])
@@ -109,8 +102,6 @@ class Background(Base):
     name = Column(String(20), nullable=False, index=True, unique=True)
     playable = Column(Boolean, nullable=False)
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
-
 
 @characteristic.with_repr(["name"])
 class God(Base):
@@ -121,8 +112,6 @@ class God(Base):
     name = Column(String(20), nullable=False, index=True, unique=True)
     playable = Column(Boolean, nullable=False)
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
-
 
 @characteristic.with_repr(["v"])
 class Version(Base):
@@ -131,8 +120,6 @@ class Version(Base):
     __tablename__ = 'versions'
     id = Column(Integer, primary_key=True, nullable=False)
     v = Column(String(10), nullable=False, index=True, unique=True)
-
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
 @characteristic.with_repr(["short"])
@@ -146,7 +133,6 @@ class Branch(Base):
     multilevel = Column(Boolean, nullable=False)
     playable = Column(Boolean, nullable=False)
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
 @characteristic.with_repr(["branch", "level"])
@@ -173,8 +159,7 @@ class Place(Base):
     __table_args__ = (UniqueConstraint('branch_id',
                                        'level',
                                        name='branch_id-level'),
-                      {'mysql_engine': 'InnoDB',
-                       'mysql_charset': 'utf8'}, )
+                      )
 
 
 @characteristic.with_repr(["name"])
@@ -185,15 +170,13 @@ class Ktyp(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(20), nullable=False, index=True, unique=True)
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
-
 
 @characteristic.with_repr(["id"])
 class Streak(Base):
     """A streak of wins.
 
     Each player can have one active streak at a time, this is enforced with a
-    Postgres partial index (so there's no enforcement in mysql/sqlite).
+    partial index (note: not supported in MySQL).
     """
 
     __tablename__ = 'streaks'
@@ -208,7 +191,6 @@ class Streak(Base):
         Index('one_active_streak_per_player',
               player_id,
               postgresql_where=active == True),
-        {'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'},
         )
 
 
@@ -277,8 +259,6 @@ class Game(Base):
         """Four letter character code eg 'MiFi'."""
         return '{}{}'.format(self.species.short, self.background.short)
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
-
 
 @characteristic.with_repr(["logfile"])
 class LogfileProgress(Base):
@@ -287,8 +267,6 @@ class LogfileProgress(Base):
     __tablename__ = 'logfile_progress'
     name = Column(String(100), primary_key=True)
     bytes_parsed = Column(Integer, nullable=False, default=0)
-
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
 
 
 @characteristic.with_repr(["id"])
@@ -304,8 +282,6 @@ class Achievement(Base):
                            secondary=AwardedAchievements,
                            back_populates="achievements")
 
-    __table_args__ = ({'mysql_engine': 'InnoDB', 'mysql_charset': 'utf8'}, )
-
 
 def sqlite_performance_over_safety(dbapi_con, con_record):
     """Significantly speeds up inserts but will break on crash."""
@@ -315,9 +291,7 @@ def sqlite_performance_over_safety(dbapi_con, con_record):
 
 def setup_database(database):
     """Set up the database and create the master sessionmaker."""
-    if database == 'mysql':
-        db_uri = 'mysql://localhost/dcss_scoreboard'
-    elif database == 'sqlite':
+    if database == 'sqlite':
         db_uri = 'sqlite:///database.db3'
     elif database == 'postgres':
         db_uri = 'postgresql+psycopg2://localhost/dcss_scoreboard'

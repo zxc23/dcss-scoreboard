@@ -7,7 +7,6 @@ import multiprocessing
 import traceback
 
 import sqlalchemy.exc
-import _mysql_exceptions
 
 import scoreboard.constants as const
 import scoreboard.model as model

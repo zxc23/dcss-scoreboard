@@ -28,9 +28,9 @@ def read_commandline():
     parser.add_argument('--urlbase',
                         help="Override website base URL. Default: file:///CWD")
     parser.add_argument('--database',
-                        choices=('mysql', 'sqlite', 'postgres'),
-                        default='mysql',
-                        help="Specify the database backend  (default: mysql)")
+                        choices=('sqlite', 'postgres'),
+                        default='sqlite',
+                        help="Specify the database backend  (default: sqlite)")
     parser.add_argument('--download-logfiles',
                         action='store_true',
                         help="Download logfiles first.")
