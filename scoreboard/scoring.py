@@ -202,8 +202,6 @@ def handle_player_streak(s, game: orm.Game):
             if not is_valid_streak_addition(game, current_streak):
                 return
         game.streak = current_streak
-        s.add(game)
-        s.commit()
 
     else: # Game wasn't won
         # If there was no active streak, we're done
@@ -215,7 +213,6 @@ def handle_player_streak(s, game: orm.Game):
         # Close any active streak
         current_streak.active = False
         s.add(current_streak)
-        s.commit()
 
 
 def score_game(s, game: orm.Game):
