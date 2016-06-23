@@ -67,15 +67,15 @@
 <h3>Wins</h3>
 <div class="row">
   <div class="col-sm-4">
-    <p><strong>By Species ({{ species_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_species|length }})</strong></p
+    <p><strong>By Species ({{ species_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_species|length }})</strong></p>
     {{ species_wins|prettycounter }}
   </div>
   <div class="col-sm-4">
-    <p><strong>By Background ({{ background_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_backgrounds|length }})</strong></p
+    <p><strong>By Background ({{ background_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_backgrounds|length }})</strong></p>
     {{ background_wins|prettycounter }}
   </div>
   <div class="col-sm-4">
-    <p><strong>By God ({{ god_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_gods|length }})</strong></p
+    <p><strong>By God ({{ god_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_gods|length }})</strong></p>
     {{ god_wins|prettycounter }}
   </div>
 </div>
