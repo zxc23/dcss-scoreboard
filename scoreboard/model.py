@@ -445,9 +445,9 @@ def list_games(s,
     if winning is not None:
         ktyp = get_ktyp(s, 'winning')
         if winning:
-            q = q.filter(Game.ktyp.id == ktyp.id)
+            q = q.filter(Game.ktyp_id == ktyp.id)
         else:
-            q = q.filter(Game.ktyp.id != ktyp.id)
+            q = q.filter(Game.ktyp_id != ktyp.id)
     q = q.order_by(Game.end.desc() if not reverse_order else Game.end.asc())
     if limit is not None:
         q = q.limit(limit)
