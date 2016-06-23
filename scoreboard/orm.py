@@ -1,5 +1,7 @@
 """Basic data model."""
 
+from typing import Optional
+
 import characteristic
 
 import sqlalchemy
@@ -138,7 +140,6 @@ class Branch(Base):
     name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
     multilevel = Column(Boolean, nullable=False)  # type: bool
     playable = Column(Boolean, nullable=False)  # type: bool
-
 
 
 @characteristic.with_repr(["branch", "level"])
