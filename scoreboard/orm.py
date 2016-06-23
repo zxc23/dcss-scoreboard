@@ -22,8 +22,9 @@ class Server(Base):
     """A DCSS server -- a source of logfiles/milestones."""
 
     __tablename__ = 'servers'
-    id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String(4), nullable=False, index=True, unique=True)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    name = Column(String(4), nullable=False, index=True,
+                  unique=True)  # type: str
 
 
 AwardedAchievements = Table('awarded_achievements',
@@ -43,16 +44,18 @@ class Account(Base):
     """An account -- a single username on a single server."""
 
     __tablename__ = 'accounts'
-    id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String(20), nullable=False, index=True)
-    server_id = Column(Integer, ForeignKey('servers.id'), nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    name = Column(String(20), nullable=False, index=True)  # type: str
+    server_id = Column(Integer, ForeignKey('servers.id'),
+                       nullable=False)  # type: int
     server = relationship("Server")
-    blacklisted = Column(Boolean, nullable=False, default=False)
-    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    blacklisted = Column(Boolean, nullable=False, default=False)  # type: bool
+    player_id = Column(Integer, ForeignKey('players.id'),
+                       nullable=False)  # type: int
     player = relationship("Player")
 
     @property
-    def canonical_name(self):
+    def canonical_name(self) -> str:
         """Canonical name.
 
         Crawl names are case-insensitive, we preserve the account's
@@ -72,8 +75,8 @@ class Player(Base):
     """A player -- a collection of accounts with shared metadata."""
 
     __tablename__ = 'players'
-    id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String(20), unique=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    name = Column(String(20), unique=True, nullable=False)  # type: str
     achievements = relationship("Achievement",
                                 secondary=AwardedAchievements,
                                 back_populates="players")
@@ -86,10 +89,11 @@ class Species(Base):
     """A DCSS player species."""
 
     __tablename__ = 'species'
-    id = Column(Integer, primary_key=True, nullable=False)
-    short = Column(String(2), nullable=False, index=True, unique=True)
-    name = Column(String(15), nullable=False, unique=True)
-    playable = Column(Boolean, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    short = Column(String(2), nullable=False, index=True,
+                   unique=True)  # type: str
+    name = Column(String(15), nullable=False, unique=True)  # type: str
+    playable = Column(Boolean, nullable=False)  # type: bool
 
 
 @characteristic.with_repr(["short"])
@@ -97,10 +101,12 @@ class Background(Base):
     """A DCSS player background."""
 
     __tablename__ = 'backgrounds'
-    id = Column(Integer, primary_key=True, nullable=False)
-    short = Column(String(2), nullable=False, index=True, unique=True)
-    name = Column(String(20), nullable=False, index=True, unique=True)
-    playable = Column(Boolean, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    short = Column(String(2), nullable=False, index=True,
+                   unique=True)  # type: str
+    name = Column(String(20), nullable=False, index=True,
+                  unique=True)  # type: str
+    playable = Column(Boolean, nullable=False)  # type: bool
 
 
 @characteristic.with_repr(["name"])
@@ -108,9 +114,9 @@ class God(Base):
     """A DCSS god."""
 
     __tablename__ = 'gods'
-    id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String(20), nullable=False, index=True, unique=True)
-    playable = Column(Boolean, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
+    playable = Column(Boolean, nullable=False)  # type: bool
 
 
 @characteristic.with_repr(["v"])
@@ -118,8 +124,8 @@ class Version(Base):
     """A DCSS version."""
 
     __tablename__ = 'versions'
-    id = Column(Integer, primary_key=True, nullable=False)
-    v = Column(String(10), nullable=False, index=True, unique=True)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    v = Column(String(10), nullable=False, index=True, unique=True)  # type: str
 
 
 @characteristic.with_repr(["short"])
@@ -127,11 +133,11 @@ class Branch(Base):
     """A DCSS Branch (Dungeon, Lair, etc)."""
 
     __tablename__ = 'branches'
-    id = Column(Integer, primary_key=True, nullable=False)
-    short = Column(String(10), nullable=False, index=True, unique=True)
-    name = Column(String(20), nullable=False, index=True, unique=True)
-    multilevel = Column(Boolean, nullable=False)
-    playable = Column(Boolean, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    short = Column(String(10), nullable=False, index=True, unique=True)  # type: str
+    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
+    multilevel = Column(Boolean, nullable=False)  # type: bool
+    playable = Column(Boolean, nullable=False)  # type: bool
 
 
 
@@ -143,13 +149,14 @@ class Place(Base):
     """
 
     __tablename__ = 'places'
-    id = Column('id', Integer, primary_key=True, nullable=False)
-    branch_id = Column(Integer, ForeignKey('branches.id'), nullable=False)
+    id = Column('id', Integer, primary_key=True, nullable=False)  # type: int
+    branch_id = Column(Integer, ForeignKey('branches.id'), nullable=False)  # type: int
     branch = relationship("Branch")
-    level = Column(Integer, nullable=False, index=True)
+    level = Column(Integer, nullable=False, index=True)  # type: int
 
     @property
-    def as_string(self):
+    def as_string(self) -> str:
+        """Return the Place with a pretty name, like D:15 or Temple."""
         # TODO: should specify name in 'normal' form eg 'Gehenna' etc
         if self.branch.multilevel:
             return "%s:%s" % (self.branch.short, self.level)
@@ -167,8 +174,8 @@ class Ktyp(Base):
     """A DCSS ktyp (mon, beam, etc)."""
 
     __tablename__ = 'ktyps'
-    id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String(20), nullable=False, index=True, unique=True)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
 
 
 @characteristic.with_repr(["player", "id"])
@@ -180,10 +187,10 @@ class Streak(Base):
     """
 
     __tablename__ = 'streaks'
-    id = Column(Integer, primary_key=True, nullable=False)
-    active = Column(Boolean, nullable=False, index=True)
+    id = Column(Integer, primary_key=True, nullable=False)  # type: int
+    active = Column(Boolean, nullable=False, index=True)  # type: bool
 
-    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
+    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)  # type: int
     player = relationship("Player", back_populates="streak")
 
     games = relationship("Game")
@@ -200,64 +207,64 @@ class Game(Base):
     """A single DCSS game."""
 
     __tablename__ = 'games'
-    gid = Column(String(50), primary_key=True, nullable=False)
+    gid = Column(String(50), primary_key=True, nullable=False)  # type: str
 
-    account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)
+    account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)  # type: int
     account = relationship("Account")
 
-    version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)
+    version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)  # type: int
     version = relationship("Version")
 
-    species_id = Column(Integer, ForeignKey('species.id'), nullable=False)
+    species_id = Column(Integer, ForeignKey('species.id'), nullable=False)  # type: int
     species = relationship("Species")
 
     background_id = Column(Integer,
                            ForeignKey('backgrounds.id'),
-                           nullable=False)
+                           nullable=False)  # type: int
     background = relationship("Background")
 
-    place_id = Column(Integer, ForeignKey('places.id'), nullable=False)
+    place_id = Column(Integer, ForeignKey('places.id'), nullable=False)  # type: int
     place = relationship("Place")
 
-    god_id = Column(Integer, ForeignKey('gods.id'), nullable=False)
+    god_id = Column(Integer, ForeignKey('gods.id'), nullable=False)  # type: int
     god = relationship("God")
 
-    xl = Column(Integer, nullable=False)
-    tmsg = Column(String(1000), nullable=False)
-    turn = Column(Integer, nullable=False)
-    dur = Column(Integer, nullable=False)
-    runes = Column(Integer, nullable=False)
-    score = Column(Integer, nullable=False, index=True)
-    start = Column(DateTime, nullable=False, index=True)
-    end = Column(DateTime, nullable=False, index=True)
-    potions_used = Column(Integer, nullable=False)
-    scrolls_used = Column(Integer, nullable=False)
+    xl = Column(Integer, nullable=False)  # type: int
+    tmsg = Column(String(1000), nullable=False)  # type: str
+    turn = Column(Integer, nullable=False)  # type: int
+    dur = Column(Integer, nullable=False)  # type: int
+    runes = Column(Integer, nullable=False)  # type: int
+    score = Column(Integer, nullable=False, index=True)  # type: int
+    start = Column(DateTime, nullable=False, index=True)  # type: datetime.datetime
+    end = Column(DateTime, nullable=False, index=True)  # type: datetime.datetime
+    potions_used = Column(Integer, nullable=False)  # type: int
+    scrolls_used = Column(Integer, nullable=False)  # type: int
 
-    ktyp_id = Column(Integer, ForeignKey('ktyps.id'), nullable=False)
+    ktyp_id = Column(Integer, ForeignKey('ktyps.id'), nullable=False)  # type: int
     ktyp = relationship("Ktyp")
 
-    scored = Column(Boolean, default=False, nullable=False, index=True)
+    scored = Column(Boolean, default=False, nullable=False, index=True)  # type: bool
 
-    streak_id = Column(Integer, ForeignKey('streaks.id'))
+    streak_id = Column(Integer, ForeignKey('streaks.id'))  # type: int
     streak = relationship("Streak")
 
     @property
-    def player(self):
+    def player(self) -> Player:
         """Convenience shortcut to access player"""
         return self.account.player
 
     @property
-    def won(self):
+    def won(self) -> bool:
         """Was this game won?"""
         return self.ktyp.name == 'winning'
 
     @property
-    def quit(self):
+    def quit(self) -> bool:
         """Was this game quit?"""
         return self.ktyp.name == 'quitting'
 
     @property
-    def char(self):
+    def char(self) -> str:
         """Four letter character code eg 'MiFi'."""
         return '{}{}'.format(self.species.short, self.background.short)
 
@@ -267,8 +274,8 @@ class LogfileProgress(Base):
     """Logfile import progress."""
 
     __tablename__ = 'logfile_progress'
-    name = Column(String(100), primary_key=True)
-    bytes_parsed = Column(Integer, nullable=False, default=0)
+    name = Column(String(100), primary_key=True)  # type: str
+    bytes_parsed = Column(Integer, nullable=False, default=0)  # type: int
 
 
 @characteristic.with_repr(["id"])
@@ -276,22 +283,22 @@ class Achievement(Base):
     """Achievements."""
 
     __tablename__ = 'achievements'
-    id = Column(Integer, primary_key=True)
-    key = Column(String(50), nullable=False)
-    name = Column(String(50), nullable=False)
-    description = Column(String(200), nullable=False)
+    id = Column(Integer, primary_key=True)  # type: int
+    key = Column(String(50), nullable=False)  # type: str
+    name = Column(String(50), nullable=False)  # type: str
+    description = Column(String(200), nullable=False)  # type: str
     players = relationship("Player",
                            secondary=AwardedAchievements,
                            back_populates="achievements")
 
 
-def sqlite_performance_over_safety(dbapi_con, con_record):
+def sqlite_performance_over_safety(dbapi_con, con_record) -> None:
     """Significantly speeds up inserts but will break on crash."""
     dbapi_con.execute('PRAGMA journal_mode = MEMORY')
     dbapi_con.execute('PRAGMA synchronous = OFF')
 
 
-def setup_database(database, credentials=None):
+def setup_database(database: str, credentials: Optional[str]=None) -> None:
     """Set up the database and create the master sessionmaker."""
     if database == 'sqlite':
         db_uri = 'sqlite:///database.db3'
