@@ -19,6 +19,12 @@ from . import orm
 WEBSITE_DIR = 'website'
 
 
+def _write_file(*, path: str, data: str) -> None:
+    """Write a file."""
+    with open(path, 'w', encoding='utf8') as f:
+        f.write(data)
+
+
 def jinja_env(urlbase, s):
     """Create the Jinja template environment."""
     template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
@@ -82,14 +88,13 @@ def setup_website_dir(env, path, all_players):
     subprocess.run(['rsync', '-a', src + '/', dst + '/'])
 
     print("Generating player list")
-    with open(os.path.join(dst, 'js', 'players.json'), 'w') as f:
-        f.write(json.dumps([p.name for p in all_players]))
+    _write_file(path=os.path.join(dst, 'js', 'players.json'),
+                data=json.dumps([p.name for p in all_players]))
 
     print("Writing minified local JS")
-    scoreboard_path = os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js')
-    with open(scoreboard_path, 'w') as f:
-        template = env.get_template('dcss-scoreboard.js')
-        f.write(jsmin.jsmin(template.render()))
+    js_template = env.get_template('dcss-scoreboard.js')
+    _write_file(path=os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js'),
+                data=jsmin.jsmin(js_template.render()))
 
 
 def render_index(s, template):
@@ -102,45 +107,40 @@ def render_index(s, template):
 
 def write_index(s, env):
     print("Writing index")
-    with open(
-            os.path.join(WEBSITE_DIR, 'index.html'),
-            'w', encoding='utf8') as f:
-        template = env.get_template('index.html')
-        data = render_index(s, template)
-        f.write(data)
+    template = env.get_template('index.html')
+    data = render_index(s, template)
+    _write_file(path=os.path.join(WEBSITE_DIR, 'index.html'), data=data)
 
 
 def write_streaks(env):
     print("Writing streaks")
-    with open(
-            os.path.join(WEBSITE_DIR, 'streaks.html'),
-            'w',
-            encoding='utf8') as f:
-        template = env.get_template('streaks.html')
-        f.write(template.render(streaks=[], active_streaks=[]))
+    template = env.get_template('streaks.html')
+    _write_file(path=os.path.join(WEBSITE_DIR, 'streaks.html'),
+                data=template.render(streaks=[], active_streaks=[]))
+
+
+def render_highscores(s, template):
+    overall_highscores = model.highscores(s)
+    species_highscores = model.species_highscores(s)
+    background_highscores = model.background_highscores(s)
+    god_highscores = model.god_highscores(s)
+    combo_highscores = model.combo_highscores(s)
+    fastest_wins = model.fastest_wins(s)
+    shortest_wins = model.shortest_wins(s)
+    return template.render(overall_highscores=overall_highscores,
+                           species_highscores=species_highscores,
+                           background_highscores=background_highscores,
+                           god_highscores=god_highscores,
+                           combo_highscores=combo_highscores,
+                           fastest_wins=fastest_wins,
+                           shortest_wins=shortest_wins)
 
 
 def write_highscores(s, env):
     print("Writing highscores")
-    with open(
-            os.path.join(WEBSITE_DIR, 'highscores.html'),
-            'w',
-            encoding='utf8') as f:
-        template = env.get_template('highscores.html')
-        overall_highscores = model.highscores(s)
-        species_highscores = model.species_highscores(s)
-        background_highscores = model.background_highscores(s)
-        god_highscores = model.god_highscores(s)
-        combo_highscores = model.combo_highscores(s)
-        fastest_wins = model.fastest_wins(s)
-        shortest_wins = model.shortest_wins(s)
-        f.write(template.render(overall_highscores=overall_highscores,
-                                species_highscores=species_highscores,
-                                background_highscores=background_highscores,
-                                god_highscores=god_highscores,
-                                combo_highscores=combo_highscores,
-                                fastest_wins=fastest_wins,
-                                shortest_wins=shortest_wins))
+    template = env.get_template('highscores.html')
+    data = render_highscores(s, template)
+    _write_file(path=os.path.join(WEBSITE_DIR, 'highscores.html'), data=data)
 
 
 def _get_player_records(global_records, player):
@@ -204,10 +204,8 @@ def render_player_page(s, template, player: orm.Player, global_records:
 
 def write_player_page(s, player_html_path: str, name: str, data: str) -> None:
     """Write an individual player's page."""
-    outfile = os.path.join(player_html_path, name + '.html')
-
-    with open(outfile, 'w', encoding='utf8') as f:
-        f.write(data)
+    _write_file(path=os.path.join(player_html_path, name + '.html'),
+                data=data)
 
 
 def write_player_pages(s, env, players):
@@ -222,7 +220,7 @@ def write_player_pages(s, env, players):
 
     n = 0
     for player in players:
-        data = render_player_page(template, player, global_records)
+        data = render_player_page(s, template, player, global_records)
         write_player_page(s, player_html_path, player.name, data)
         n += 1
         if not n % 100:
