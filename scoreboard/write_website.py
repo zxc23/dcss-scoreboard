@@ -178,6 +178,7 @@ def _wins_per_god(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
 
 
 def write_player_page(s, player, player_html_path, template, global_records):
+    """Write an individual player's page."""
     games = model.list_games(s, player=player)
     # Don't make pages for players with no games played
     if len(games) == 0:

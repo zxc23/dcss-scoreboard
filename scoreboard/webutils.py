@@ -318,13 +318,13 @@ def percentage(n, digits=2):
 
 
 def shortest_win(games):
-    """Given a list of games, return the win which is the shortest."""
+    """Given a list of games, return the win which is the shortest (turns)."""
     wins = filter(lambda g: g.won, games)
-    return max(wins, key=lambda g: g.dur)
+    return min(wins, key=lambda g: g.dur)
 
 
 def fastest_win(games):
-    """Given a list of games, return the win which is the fastest."""
+    """Given a list of games, return the win which is the fastest (time)."""
     wins = filter(lambda g: g.won, games)
     return min(wins, key=lambda g: g.turn)
 
