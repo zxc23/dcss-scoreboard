@@ -12,7 +12,7 @@ import scoreboard.constants as const
 
 def get_game(gid):
     """Get a game from the database."""
-    return model.game(gid)
+    raise NotImplementedError("deprecated method")
 
 
 def is_valid_streak_addition(game, current_streak):
