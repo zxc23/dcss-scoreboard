@@ -14,9 +14,6 @@ from scoreboard.orm import Server, Player, Species, Background, God, Version, \
 import scoreboard.modelutils as modelutils
 
 
-SESSION = sqlalchemy.orm.session.Session # shorthand for type hinting
-
-
 class DBError(BaseException):
     """Generic wrapper for sqlalchemy errors passed out of this module."""
 
@@ -42,7 +39,7 @@ def _reraise_dberror(function):
     return f
 
 
-def get_server(s: SESSION, name: str) -> Server:
+def get_server(s: sqlalchemy.orm.session.Session, name: str) -> Server:
     """Get a server, creating it if needed."""
     server = s.query(Server).filter(Server.name == name).first()
     if server:
@@ -54,7 +51,8 @@ def get_server(s: SESSION, name: str) -> Server:
         return server
 
 
-def get_account(s: SESSION, name: str, server: Server) -> Account:
+def get_account(s: sqlalchemy.orm.session.Session, name: str, server:
+                Server) -> Account:
     """Get a player's object, creating them if needed.
 
     Note that player names are not case sensitive, so names are stored with
@@ -73,7 +71,7 @@ def get_account(s: SESSION, name: str, server: Server) -> Account:
         return acc
 
 
-def get_player(s: SESSION, name: str) -> Player:
+def get_player(s: sqlalchemy.orm.session.Session, name: str) -> Player:
     """Get a player's object, creating them if needed.
 
     Note that player names are not case sensitive, so names are stored with
@@ -90,7 +88,7 @@ def get_player(s: SESSION, name: str) -> Player:
         return player
 
 
-def setup_servers(s: SESSION) -> None:
+def setup_servers(s: sqlalchemy.orm.session.Session) -> None:
     """Set up basic source data.
 
     Right now this just adds the 'unknown' source.
@@ -101,7 +99,7 @@ def setup_servers(s: SESSION) -> None:
         s.commit()
 
 
-def setup_species(s: SESSION) -> None:
+def setup_species(s: sqlalchemy.orm.session.Session) -> None:
     """Load species data into the database."""
     new = []
     for sp in const.SPECIES:
@@ -114,7 +112,7 @@ def setup_species(s: SESSION) -> None:
     s.commit()
 
 
-def setup_backgrounds(s: SESSION) -> None:
+def setup_backgrounds(s: sqlalchemy.orm.session.Session) -> None:
     """Load background data into the database."""
     new = []
     for bg in const.BACKGROUNDS:
@@ -128,7 +126,7 @@ def setup_backgrounds(s: SESSION) -> None:
     s.commit()
 
 
-def setup_achievements(s: SESSION) -> None:
+def setup_achievements(s: sqlalchemy.orm.session.Session) -> None:
     """Load manual achievements into the database."""
     new = []
     path = os.path.join(os.path.dirname(__file__), 'achievements.json')
@@ -145,7 +143,7 @@ def setup_achievements(s: SESSION) -> None:
     s.commit()
 
 
-def setup_gods(s: SESSION) -> None:
+def setup_gods(s: sqlalchemy.orm.session.Session) -> None:
     """Load god data into the database."""
     new = []
     for god in const.GODS:
@@ -156,7 +154,7 @@ def setup_gods(s: SESSION) -> None:
     s.commit()
 
 
-def setup_ktyps(s: SESSION) -> None:
+def setup_ktyps(s: sqlalchemy.orm.session.Session) -> None:
     """Load ktyp data into the database."""
     new = []
     for ktyp in const.KTYPS:
@@ -167,7 +165,7 @@ def setup_ktyps(s: SESSION) -> None:
     s.commit()
 
 
-def get_version(s: SESSION, v: str) -> Version:
+def get_version(s: sqlalchemy.orm.session.Session, v: str) -> Version:
     """Get a version, creating it if needed."""
     version = s.query(Version).filter(Version.v == v).first()
     if version:
@@ -179,7 +177,7 @@ def get_version(s: SESSION, v: str) -> Version:
         return version
 
 
-def setup_branches(s: SESSION) -> None:
+def setup_branches(s: sqlalchemy.orm.session.Session) -> None:
     """Load branch data into the database."""
     new = []
     for br in const.BRANCHES:
@@ -193,7 +191,8 @@ def setup_branches(s: SESSION) -> None:
     s.commit()
 
 
-def get_place(s: SESSION, branch: Branch, lvl: int) -> Place:
+def get_place(s: sqlalchemy.orm.session.Session, branch: Branch, lvl:
+              int) -> Place:
     """Get a place, creating it if needed."""
     place = s.query(Place).filter(Place.branch == branch,
                                   Place.level == lvl).first()
@@ -206,7 +205,7 @@ def get_place(s: SESSION, branch: Branch, lvl: int) -> Place:
         return place
 
 
-def get_species(s: SESSION, sp: str) -> Species:
+def get_species(s: sqlalchemy.orm.session.Session, sp: str) -> Species:
     """Get a species by short code, creating it if needed."""
     species = s.query(Species).filter(Species.short == sp).first()
     if species:
@@ -220,7 +219,7 @@ def get_species(s: SESSION, sp: str) -> Species:
         return species
 
 
-def get_background(s: SESSION, bg: str) -> Background:
+def get_background(s: sqlalchemy.orm.session.Session, bg: str) -> Background:
     """Get a background by short code, creating it if needed."""
     background = s.query(Background).filter(Background.short == bg).first()
     if background:
@@ -234,7 +233,7 @@ def get_background(s: SESSION, bg: str) -> Background:
         return background
 
 
-def get_god(s: SESSION, name: str) -> God:
+def get_god(s: sqlalchemy.orm.session.Session, name: str) -> God:
     """Get a god by name, creating it if needed."""
     god = s.query(God).filter(God.name == name).first()
     if god:
@@ -248,7 +247,7 @@ def get_god(s: SESSION, name: str) -> God:
         return god
 
 
-def get_ktyp(s: SESSION, name: str) -> Ktyp:
+def get_ktyp(s: sqlalchemy.orm.session.Session, name: str) -> Ktyp:
     """Get a ktyp by name, creating it if needed."""
     ktyp = s.query(Ktyp).filter(Ktyp.name == name).first()
     if ktyp:
@@ -262,7 +261,7 @@ def get_ktyp(s: SESSION, name: str) -> Ktyp:
         return ktyp
 
 
-def get_branch(s: SESSION, br: str) -> Branch:
+def get_branch(s: sqlalchemy.orm.session.Session, br: str) -> Branch:
     """Get a branch by short name, creating it if needed."""
     branch = s.query(Branch).filter(Branch.short == br).first()
     if branch:
@@ -276,8 +275,7 @@ def get_branch(s: SESSION, br: str) -> Branch:
         return branch
 
 
-
-def create_streak(s: SESSION, player: Player):
+def create_streak(s: sqlalchemy.orm.session.Session, player: Player) -> Streak:
     """Create a new streak for a given player."""
     streak = Streak(player_id=player.id, active=True)
     s.add(streak)
@@ -286,13 +284,14 @@ def create_streak(s: SESSION, player: Player):
 
 
 @_reraise_dberror
-def add_game(s: SESSION, game_data: dict) -> None:
+def add_game(s: sqlalchemy.orm.session.Session, game_data: dict) -> None:
     """Normalise and add a game to the database."""
     add_games(s, [game_data])
 
 
 @_reraise_dberror
-def add_games(s: SESSION, games_data: Iterable[dict]) -> None:
+def add_games(s: sqlalchemy.orm.session.Session, games_data:
+              Iterable[dict]) -> None:
     """Normalise and add multiple games to the database."""
     games = []
     for game in games_data:
@@ -300,7 +299,7 @@ def add_games(s: SESSION, games_data: Iterable[dict]) -> None:
     s.bulk_insert_mappings(Game, games)
 
 
-def create_game_mapping(s: SESSION, data: dict) -> dict:
+def create_game_mapping(s: sqlalchemy.orm.session.Session, data: dict) -> dict:
     """Convert raw log dict into a game object."""
 
     # Normalise some data
@@ -339,7 +338,8 @@ def create_game_mapping(s: SESSION, data: dict) -> dict:
     return game
 
 
-def get_logfile_progress(s: SESSION, logfile: str) -> LogfileProgress:
+def get_logfile_progress(s: sqlalchemy.orm.session.Session, logfile:
+                         str) -> LogfileProgress:
     """Get a logfile progress records, creating it if needed."""
     log = s.query(LogfileProgress).filter(
         LogfileProgress.name == logfile).first()
@@ -352,7 +352,8 @@ def get_logfile_progress(s: SESSION, logfile: str) -> LogfileProgress:
         return log
 
 
-def save_logfile_progress(s: SESSION, logfile: str, pos: int) -> None:
+def save_logfile_progress(s: sqlalchemy.orm.session.Session, logfile: str, pos:
+                          int) -> None:
     """Save the position for a logfile."""
     log = get_logfile_progress(s, logfile)
     log.bytes_parsed = pos
@@ -360,8 +361,9 @@ def save_logfile_progress(s: SESSION, logfile: str, pos: int) -> None:
     s.commit()
 
 
-def list_accounts(s: SESSION, *, blacklisted: Optional[bool]=None) \
-        -> Iterable[Account]:
+def list_accounts(s: sqlalchemy.orm.session.Session,
+                  *,
+                  blacklisted: Optional[bool]=None) -> Iterable[Account]:
     """Get a list of all accounts.
 
     If blacklisted is specified, only return accounts with that blacklisted
@@ -374,24 +376,25 @@ def list_accounts(s: SESSION, *, blacklisted: Optional[bool]=None) \
     return results
 
 
-def list_players(s: SESSION) -> Iterable[Player]:
+def list_players(s: sqlalchemy.orm.session.Session) -> Iterable[Player]:
     """Get a list of all players."""
     q = s.query(Player)
     return q.all()
 
 
 # TODO Typing should specify the return iterable contains same type as cls
-def _generic_char_type_lister(s: SESSION, *,
-                              cls: Union[Species, Background, God],
-                              playable: Optional[bool]) -> Iterable:
+def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *, cls:
+                              Union[Species, Background, God], playable:
+                              Optional[bool]) -> Iterable:
     q = s.query(cls)
     if playable is not None:
         q = q.filter(cls.playable == playable)
     return q.order_by(getattr(cls, 'name')).all()
 
 
-def list_species(s: SESSION, *, playable: Optional[bool]=None) \
-        -> Iterable[Species]:
+def list_species(s: sqlalchemy.orm.session.Session,
+                 *,
+                 playable: Optional[bool]=None) -> Iterable[Species]:
     """Return a list of species.
 
     If playable is specified, only return species that have a matching playable attribute.
@@ -399,8 +402,9 @@ def list_species(s: SESSION, *, playable: Optional[bool]=None) \
     return _generic_char_type_lister(s, cls=Species, playable=playable)
 
 
-def list_backgrounds(s: SESSION, *, playable: Optional[bool]=None) -> \
-        Iterable[Background]:
+def list_backgrounds(s: sqlalchemy.orm.session.Session,
+                     *,
+                     playable: Optional[bool]=None) -> Iterable[Background]:
     """Return a list of backgrounds.
 
     If playable is specified, only return species that have a matching playable attribute.
@@ -408,7 +412,9 @@ def list_backgrounds(s: SESSION, *, playable: Optional[bool]=None) -> \
     return _generic_char_type_lister(s, cls=Background, playable=playable)
 
 
-def list_gods(s: SESSION, *, playable: Optional[bool]=None) -> Iterable[God]:
+def list_gods(s: sqlalchemy.orm.session.Session,
+              *,
+              playable: Optional[bool]=None) -> Iterable[God]:
     """Return a list of gods.
 
     If playable is specified, only return species that have a matching playable attribute.
@@ -416,7 +422,7 @@ def list_gods(s: SESSION, *, playable: Optional[bool]=None) -> Iterable[God]:
     return _generic_char_type_lister(s, cls=God, playable=playable)
 
 
-def list_games(s: Session,
+def list_games(s: sqlalchemy.orm.session.Session,
                *,
                player: Optional[str]=None,
                account: Optional[Account]=None,
@@ -464,7 +470,7 @@ def list_games(s: Session,
     return q.all()
 
 
-def get_game(s: SESSION, **kwargs) -> Game:
+def get_game(s: sqlalchemy.orm.session.Session, **kwargs: dict) -> Game:
     """Get a single game."""
     kwargs.setdefault('limit', 1)
     result = list_games(s, **kwargs)
@@ -474,13 +480,15 @@ def get_game(s: SESSION, **kwargs) -> Game:
         return result[0]
 
 
-def get_achievement(s: SESSION, key: str) -> Achievement:
+def get_achievement(s: sqlalchemy.orm.session.Session, key:
+                    str) -> Achievement:
     """Get an achievement."""
     return s.query(Achievement).filter(Achievement.key == key).first()
 
 
-def highscores(s: SESSION, *, limit: int=const.GLOBAL_TABLE_LENGTH) \
-        -> Iterable[Game]:
+def highscores(s: sqlalchemy.orm.session.Session,
+               *,
+               limit: int=const.GLOBAL_TABLE_LENGTH) -> Iterable[Game]:
     """Return up to limit high scores.
 
     Fewer games may be returned if there is not enough matching data.
@@ -490,8 +498,8 @@ def highscores(s: SESSION, *, limit: int=const.GLOBAL_TABLE_LENGTH) \
 
 
 # TODO: type game_column
-def _highscores_helper(s: SESSION,
-                       mapped_class: Union[Species, Background, God],
+def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class:
+                       Union[Species, Background, God],
                        game_column) -> Iterable[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 
@@ -514,7 +522,7 @@ def _highscores_helper(s: SESSION,
     return results
 
 
-def species_highscores(s: SESSION) -> Iterable[Game]:
+def species_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
     """Return the top score for each playable species.
 
     Not every species may have a game in the database.
@@ -522,7 +530,7 @@ def species_highscores(s: SESSION) -> Iterable[Game]:
     return _highscores_helper(s, Species, Game.species)
 
 
-def background_highscores(s: SESSION) -> Iterable[Game]:
+def background_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
     """Return the top score for each playable background.
 
     Not every background may have a game in the database.
@@ -530,7 +538,7 @@ def background_highscores(s: SESSION) -> Iterable[Game]:
     return _highscores_helper(s, Background, Game.background)
 
 
-def god_highscores(s: SESSION) -> Iterable[Game]:
+def god_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
     """Return the top score for each playable god.
 
     Not every god may have a game in the database.
@@ -538,7 +546,7 @@ def god_highscores(s: SESSION) -> Iterable[Game]:
     return _highscores_helper(s, God, Game.god)
 
 
-def combo_highscores(s: SESSION) -> Iterable[Game]:
+def combo_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
     """Return the top score for each playable combo.
 
     Not every combo may have a game in the database.
@@ -558,24 +566,27 @@ def combo_highscores(s: SESSION) -> Iterable[Game]:
     return results
 
 
-def fastest_wins(s: SESSION, *, limit: int=const.GLOBAL_TABLE_LENGTH) \
-        -> Iterable[Game]:
+def fastest_wins(s: sqlalchemy.orm.session.Session,
+                 *,
+                 limit: int=const.GLOBAL_TABLE_LENGTH) -> Iterable[Game]:
     """Return up to limit fastest wins."""
     ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
         Game.ktyp == ktyp).order_by('dur').limit(limit).all()
 
 
-def shortest_wins(s: SESSION, *, limit: int=const.GLOBAL_TABLE_LENGTH) \
-        -> Iterable[Game]:
+def shortest_wins(s: sqlalchemy.orm.session.Session,
+                  *,
+                  limit: int=const.GLOBAL_TABLE_LENGTH) -> Iterable[Game]:
     """Return up to limit shortest wins."""
     ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
         Game.ktyp == ktyp).order_by('turn').limit(limit).all()
 
 
-def combo_highscore_holders(s: SESSION, limit: int=const.GLOBAL_TABLE_LENGTH) \
-        -> Iterable[Tuple[Player,Iterable[Game]]]:
+def combo_highscore_holders(s: sqlalchemy.orm.session.Session,
+                            limit: int=const.GLOBAL_TABLE_LENGTH) \
+        -> Iterable[Tuple[Player, Iterable[Game]]]:
     """Return the players with the most combo highscores.
 
     May return fewer than limit names.
@@ -593,7 +604,7 @@ def combo_highscore_holders(s: SESSION, limit: int=const.GLOBAL_TABLE_LENGTH) \
                   reverse=True)[:limit]
 
 
-def get_gobal_records(s: SESSION) -> dict:
+def get_gobal_records(s: sqlalchemy.orm.session.Session) -> dict:
     """Convenience function to return all classes of highscores."""
     out = {
         'combo': combo_highscores(s),
@@ -606,7 +617,8 @@ def get_gobal_records(s: SESSION) -> dict:
     return out
 
 
-def get_player_streak(s: SESSION, player: Player) -> Optional[Streak]:
+def get_player_streak(s: sqlalchemy.orm.session.Session, player:
+                      Player) -> Optional[Streak]:
     """Get a player's active streak.
 
     Returns None if they don't have a currently active streak.
