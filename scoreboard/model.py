@@ -421,7 +421,7 @@ def list_games(s,
     reverse_order=True.
 
     Parameters:
-        player: If specified, only return games with a matching player name
+        player: If specified, only return games with a matching player
         account: If specified, only return games with a matching account
         scored: If specified, only return games with a matching scored
         limit: If specified, return up to limit games
@@ -435,7 +435,7 @@ def list_games(s,
     q = s.query(Game)
     if player is not None:
         q = q.join(Game.account).join(Account.player).filter(
-            Player.name == player)
+            Player == player)
     if account is not None:
         q = q.join(Game.account).filter(Account == account)
     if scored is not None:
