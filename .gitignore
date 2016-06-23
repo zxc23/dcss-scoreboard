@@ -4,7 +4,7 @@ real-logfiles/*
 !logfiles/EMPTY_DIR
 venv/
 __pycache__
-*.db
+*.db3
 .vscode/
 .vagrant/
 .idea/
