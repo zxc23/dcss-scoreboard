@@ -185,6 +185,7 @@ class Streak(Base):
 
     player_id = Column(Integer, ForeignKey('players.id'), nullable=False)
     player = relationship("Player", back_populates="streak")
+
     games = relationship("Game")
 
     __table_args__ = (
@@ -238,6 +239,7 @@ class Game(Base):
     scored = Column(Boolean, default=False, nullable=False, index=True)
 
     streak_id = Column(Integer, ForeignKey('streaks.id'))
+    streak = relationship("Streak")
 
     @property
     def player(self):
