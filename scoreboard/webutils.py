@@ -314,7 +314,7 @@ def morgue_link(game, text="Morgue"):
 
 def percentage(n, digits=2):
     """Convert a number from 0-1 to a percentage."""
-    return "%s" % round(n, digits)
+    return "%s" % round(n*100, digits)
 
 
 def shortest_win(games):
