@@ -2,7 +2,7 @@
 
 import os
 import json
-from typing import Optional, Iterable, Tuple, Union
+from typing import Optional, Iterable, Tuple, Union, Callable
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -20,7 +20,7 @@ class DBError(BaseException):
     pass
 
 
-def _reraise_dberror(function):
+def _reraise_dberror(function: Callable) -> Callable:
     """Re-raise errors from decorated function as DBError.
 
     Doesn't re-wrap DBError exceptions.
