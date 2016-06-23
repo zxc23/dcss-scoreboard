@@ -92,19 +92,22 @@ def setup_website_dir(env, path, all_players):
         f.write(jsmin.jsmin(template.render()))
 
 
+def render_index(s, template):
+    return template.render(recent_wins=model.list_games(
+        s, winning=True, limit=const.GLOBAL_TABLE_LENGTH),
+                           active_streaks=[],
+                           overall_highscores=model.highscores(s),
+                           combo_high_scores=model.combo_highscore_holders(s))
+
+
 def write_index(s, env):
     print("Writing index")
     with open(
             os.path.join(WEBSITE_DIR, 'index.html'),
             'w', encoding='utf8') as f:
         template = env.get_template('index.html')
-        f.write(template.render(
-            recent_wins=model.list_games(s,
-                                         winning=True,
-                                         limit=const.GLOBAL_TABLE_LENGTH),
-            active_streaks=[],
-            overall_highscores=model.highscores(s),
-            combo_high_scores=model.combo_highscore_holders(s)))
+        data = render_index(s, template)
+        f.write(data)
 
 
 def write_streaks(env):
