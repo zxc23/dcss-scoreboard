@@ -199,7 +199,7 @@ class Streak(Base):
     __table_args__ = (
         Index('one_active_streak_per_player',
               player_id,
-              postgresql_where=active == True),
+              postgresql_where=active == sqlalchemy.true()),
         )
 
 
