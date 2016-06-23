@@ -397,7 +397,9 @@ def list_species(s: sqlalchemy.orm.session.Session,
                  playable: Optional[bool]=None) -> Iterable[Species]:
     """Return a list of species.
 
-    If playable is specified, only return species that have a matching playable attribute.
+    Parameters:
+        Playable: if specified, only return species with matching playable
+            status.
     """
     return _generic_char_type_lister(s, cls=Species, playable=playable)
 
@@ -407,7 +409,9 @@ def list_backgrounds(s: sqlalchemy.orm.session.Session,
                      playable: Optional[bool]=None) -> Iterable[Background]:
     """Return a list of backgrounds.
 
-    If playable is specified, only return species that have a matching playable attribute.
+    Parameters:
+        Playable: if specified, only return species with matching playable
+            status.
     """
     return _generic_char_type_lister(s, cls=Background, playable=playable)
 
@@ -417,7 +421,9 @@ def list_gods(s: sqlalchemy.orm.session.Session,
               playable: Optional[bool]=None) -> Iterable[God]:
     """Return a list of gods.
 
-    If playable is specified, only return species that have a matching playable attribute.
+    Parameters:
+        Playable: if specified, only return species with matching playable
+            status.
     """
     return _generic_char_type_lister(s, cls=God, playable=playable)
 
