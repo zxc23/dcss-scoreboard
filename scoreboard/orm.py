@@ -67,7 +67,7 @@ class Account(Base):
                       )
 
 
-@characteristic.with_repr(["id"])
+@characteristic.with_repr(["name"])
 class Player(Base):
     """A player -- a collection of accounts with shared metadata."""
 
@@ -171,7 +171,7 @@ class Ktyp(Base):
     name = Column(String(20), nullable=False, index=True, unique=True)
 
 
-@characteristic.with_repr(["id"])
+@characteristic.with_repr(["player", "id"])
 class Streak(Base):
     """A streak of wins.
 
