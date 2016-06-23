@@ -114,8 +114,7 @@ def write_streaks(env):
             'w',
             encoding='utf8') as f:
         template = env.get_template('streaks.html')
-        f.write(template.render(streaks=[],
-                                active_streaks=[]))
+        f.write(template.render(streaks=[], active_streaks=[]))
 
 
 def write_highscores(s, env):
@@ -177,12 +176,13 @@ def _wins_per_god(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
     return out
 
 
-def write_player_page(s, player, player_html_path, template, global_records):
-    """Write an individual player's page."""
+def render_player_page(s, template, player: orm.Player, global_records:
+                       dict) -> str:
+    """Render an individual player's page."""
     games = model.list_games(s, player=player)
     # Don't make pages for players with no games played
     if len(games) == 0:
-        return
+        return ''
 
     records = _get_player_records(global_records, player)
     species_wins = _wins_per_species(s, games)
@@ -190,19 +190,25 @@ def write_player_page(s, player, player_html_path, template, global_records):
     god_wins = _wins_per_god(s, games)
     active_streak = model.get_player_streak(s, player)
 
-    outfile = os.path.join(player_html_path, player.name + '.html')
+    return template.render(player=player,
+                           games=games,
+                           records=records,
+                           species_wins=species_wins,
+                           background_wins=background_wins,
+                           god_wins=god_wins,
+                           active_streak=active_streak)
+
+
+def write_player_page(s, player_html_path: str, name: str, data: str) -> None:
+    """Write an individual player's page."""
+    outfile = os.path.join(player_html_path, name + '.html')
 
     with open(outfile, 'w', encoding='utf8') as f:
-        f.write(template.render(player=player,
-                                games=games,
-                                records=records,
-                                species_wins=species_wins,
-                                background_wins=background_wins,
-                                god_wins=god_wins,
-                                active_streak=active_streak))
+        f.write(data)
 
 
 def write_player_pages(s, env, players):
+    """Write all player pages."""
     print("Writing %s player pages... " % len(players))
     start2 = time.time()
     player_html_path = os.path.join(WEBSITE_DIR, 'players')
@@ -213,8 +219,8 @@ def write_player_pages(s, env, players):
 
     n = 0
     for player in players:
-        write_player_page(s, player, player_html_path, template,
-                          global_records)
+        data = render_player_page(template, player, global_records)
+        write_player_page(s, player_html_path, player.name, data)
         n += 1
         if not n % 100:
             print(n)
