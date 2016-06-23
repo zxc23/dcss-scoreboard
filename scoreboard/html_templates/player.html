@@ -28,12 +28,12 @@
     {% endif %}
   </div>
   <div class="col-sm-3">
-    {% if streaks %}
-        <p><strong>Longest Win Streak:</strong> {{ streaks[0].wins|length }} wins</p>
-      {% if active_streak and active_streak.wins|length > 1 %}
-        <p><strong>Active Win Streak:</strong> {{ active_streak.wins|length }} wins</p>
-      {% endif %}
+    {% if active_streak %}
+        <p><strong>Active Win Streak:</strong> {{ active_streak.games|length }} wins</p>
     {% endif %}
+    {#         <p><strong>Longest Win Streak:</strong> {{ streaks[0].wins|length }} wins</p>
+      {% if active_streak and active_streak.wins|length > 1 %}
+    #}
   </div>
 </div>
 <hr/>

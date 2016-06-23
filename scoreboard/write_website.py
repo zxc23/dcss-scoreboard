@@ -187,6 +187,7 @@ def write_player_page(s, player, player_html_path, template, global_records):
     species_wins = _wins_per_species(s, games)
     background_wins = _wins_per_background(s, games)
     god_wins = _wins_per_god(s, games)
+    active_streak = model.get_player_streak(s, player)
 
     outfile = os.path.join(player_html_path, player.name + '.html')
 
@@ -196,7 +197,8 @@ def write_player_page(s, player, player_html_path, template, global_records):
                                 records=records,
                                 species_wins=species_wins,
                                 background_wins=background_wins,
-                                god_wins=god_wins))
+                                god_wins=god_wins,
+                                active_streak=active_streak))
 
 
 def write_player_pages(s, env, players):
