@@ -251,17 +251,17 @@ class Game(Base):
 
     @property
     def player(self) -> Player:
-        """Convenience shortcut to access player"""
+        """Convenience shortcut to access player."""
         return self.account.player
 
     @property
     def won(self) -> bool:
-        """Was this game won?"""
+        """Boolean to represent if this game was won."""
         return self.ktyp.name == 'winning'
 
     @property
     def quit(self) -> bool:
-        """Was this game quit?"""
+        """Boolean to represent if this game was quit."""
         return self.ktyp.name == 'quitting'
 
     @property
