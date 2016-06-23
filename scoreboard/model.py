@@ -2,15 +2,19 @@
 
 import os
 import json
-from typing import Optional
+from typing import Optional, Iterable, Tuple, Union
 
 import sqlalchemy
+import sqlalchemy.orm
 from sqlalchemy import func
 
 import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
 import scoreboard.modelutils as modelutils
+
+
+SESSION = sqlalchemy.orm.session.Session # shorthand for type hinting
 
 
 class DBError(BaseException):
@@ -38,7 +42,7 @@ def _reraise_dberror(function):
     return f
 
 
-def get_server(s, name):
+def get_server(s: SESSION, name: str) -> Server:
     """Get a server, creating it if needed."""
     server = s.query(Server).filter(Server.name == name).first()
     if server:
@@ -50,7 +54,7 @@ def get_server(s, name):
         return server
 
 
-def get_account(s, name, server):
+def get_account(s: SESSION, name: str, server: Server) -> Account:
     """Get a player's object, creating them if needed.
 
     Note that player names are not case sensitive, so names are stored with
@@ -69,7 +73,7 @@ def get_account(s, name, server):
         return acc
 
 
-def get_player(s, name):
+def get_player(s: SESSION, name: str) -> Player:
     """Get a player's object, creating them if needed.
 
     Note that player names are not case sensitive, so names are stored with
@@ -86,7 +90,7 @@ def get_player(s, name):
         return player
 
 
-def setup_servers(s):
+def setup_servers(s: SESSION) -> None:
     """Set up basic source data.
 
     Right now this just adds the 'unknown' source.
@@ -97,7 +101,7 @@ def setup_servers(s):
         s.commit()
 
 
-def setup_species(s):
+def setup_species(s: SESSION) -> None:
     """Load species data into the database."""
     new = []
     for sp in const.SPECIES:
@@ -110,7 +114,7 @@ def setup_species(s):
     s.commit()
 
 
-def setup_backgrounds(s):
+def setup_backgrounds(s: SESSION) -> None:
     """Load background data into the database."""
     new = []
     for bg in const.BACKGROUNDS:
@@ -124,7 +128,7 @@ def setup_backgrounds(s):
     s.commit()
 
 
-def setup_achievements(s):
+def setup_achievements(s: SESSION) -> None:
     """Load manual achievements into the database."""
     new = []
     path = os.path.join(os.path.dirname(__file__), 'achievements.json')
@@ -141,7 +145,7 @@ def setup_achievements(s):
     s.commit()
 
 
-def setup_gods(s):
+def setup_gods(s: SESSION) -> None:
     """Load god data into the database."""
     new = []
     for god in const.GODS:
@@ -152,7 +156,7 @@ def setup_gods(s):
     s.commit()
 
 
-def setup_ktyps(s):
+def setup_ktyps(s: SESSION) -> None:
     """Load ktyp data into the database."""
     new = []
     for ktyp in const.KTYPS:
@@ -163,7 +167,7 @@ def setup_ktyps(s):
     s.commit()
 
 
-def get_version(s, v):
+def get_version(s: SESSION, v: str) -> Version:
     """Get a version, creating it if needed."""
     version = s.query(Version).filter(Version.v == v).first()
     if version:
@@ -175,7 +179,7 @@ def get_version(s, v):
         return version
 
 
-def setup_branches(s):
+def setup_branches(s: SESSION) -> None:
     """Load branch data into the database."""
     new = []
     for br in const.BRANCHES:
@@ -189,7 +193,7 @@ def setup_branches(s):
     s.commit()
 
 
-def get_place(s, branch, lvl):
+def get_place(s: SESSION, branch: Branch, lvl: int) -> Place:
     """Get a place, creating it if needed."""
     place = s.query(Place).filter(Place.branch == branch,
                                   Place.level == lvl).first()
@@ -202,8 +206,8 @@ def get_place(s, branch, lvl):
         return place
 
 
-def get_species(s, sp):
-    """Get a species, creating it if needed."""
+def get_species(s: SESSION, sp: str) -> Species:
+    """Get a species by short code, creating it if needed."""
     species = s.query(Species).filter(Species.short == sp).first()
     if species:
         return species
@@ -216,8 +220,8 @@ def get_species(s, sp):
         return species
 
 
-def get_background(s, bg):
-    """Get a background, creating it if needed."""
+def get_background(s: SESSION, bg: str) -> Background:
+    """Get a background by short code, creating it if needed."""
     background = s.query(Background).filter(Background.short == bg).first()
     if background:
         return background
@@ -230,8 +234,8 @@ def get_background(s, bg):
         return background
 
 
-def get_god(s, name):
-    """Get a god, creating it if needed."""
+def get_god(s: SESSION, name: str) -> God:
+    """Get a god by name, creating it if needed."""
     god = s.query(God).filter(God.name == name).first()
     if god:
         return god
@@ -244,8 +248,8 @@ def get_god(s, name):
         return god
 
 
-def get_ktyp(s, name):
-    """Get a ktyp, creating it if needed."""
+def get_ktyp(s: SESSION, name: str) -> Ktyp:
+    """Get a ktyp by name, creating it if needed."""
     ktyp = s.query(Ktyp).filter(Ktyp.name == name).first()
     if ktyp:
         return ktyp
@@ -258,8 +262,8 @@ def get_ktyp(s, name):
         return ktyp
 
 
-def get_branch(s, br):
-    """Get a branch, creating it if needed."""
+def get_branch(s: SESSION, br: str) -> Branch:
+    """Get a branch by short name, creating it if needed."""
     branch = s.query(Branch).filter(Branch.short == br).first()
     if branch:
         return branch
@@ -273,7 +277,7 @@ def get_branch(s, br):
 
 
 
-def create_streak(s, player):
+def create_streak(s: SESSION, player: Player):
     """Create a new streak for a given player."""
     streak = Streak(player_id=player.id, active=True)
     s.add(streak)
@@ -282,13 +286,13 @@ def create_streak(s, player):
 
 
 @_reraise_dberror
-def add_game(s, game_data):
+def add_game(s: SESSION, game_data: dict) -> None:
     """Normalise and add a game to the database."""
     add_games(s, [game_data])
 
 
 @_reraise_dberror
-def add_games(s, games_data):
+def add_games(s: SESSION, games_data: Iterable[dict]) -> None:
     """Normalise and add multiple games to the database."""
     games = []
     for game in games_data:
@@ -296,7 +300,7 @@ def add_games(s, games_data):
     s.bulk_insert_mappings(Game, games)
 
 
-def create_game_mapping(s, data):
+def create_game_mapping(s: SESSION, data: dict) -> dict:
     """Convert raw log dict into a game object."""
 
     # Normalise some data
@@ -335,7 +339,7 @@ def create_game_mapping(s, data):
     return game
 
 
-def get_logfile_progress(s, logfile):
+def get_logfile_progress(s: SESSION, logfile: str) -> LogfileProgress:
     """Get a logfile progress records, creating it if needed."""
     log = s.query(LogfileProgress).filter(
         LogfileProgress.name == logfile).first()
@@ -348,7 +352,7 @@ def get_logfile_progress(s, logfile):
         return log
 
 
-def save_logfile_progress(s, logfile, pos):
+def save_logfile_progress(s: SESSION, logfile: str, pos: int) -> None:
     """Save the position for a logfile."""
     log = get_logfile_progress(s, logfile)
     log.bytes_parsed = pos
@@ -356,7 +360,8 @@ def save_logfile_progress(s, logfile, pos):
     s.commit()
 
 
-def list_accounts(s, *, blacklisted=None):
+def list_accounts(s: SESSION, *, blacklisted: Optional[bool]=None) \
+        -> Iterable[Account]:
     """Get a list of all accounts.
 
     If blacklisted is specified, only return accounts with that blacklisted
@@ -369,20 +374,24 @@ def list_accounts(s, *, blacklisted=None):
     return results
 
 
-def list_players(s):
+def list_players(s: SESSION) -> Iterable[Player]:
     """Get a list of all players."""
     q = s.query(Player)
     return q.all()
 
 
-def _generic_char_type_lister(s, *, cls, playable: Optional[bool]):
+# TODO Typing should specify the return iterable contains same type as cls
+def _generic_char_type_lister(s: SESSION, *,
+                              cls: Union[Species, Background, God],
+                              playable: Optional[bool]) -> Iterable:
     q = s.query(cls)
     if playable is not None:
         q = q.filter(cls.playable == playable)
     return q.order_by(getattr(cls, 'name')).all()
 
 
-def list_species(s, *, playable: Optional[bool]=None):
+def list_species(s: SESSION, *, playable: Optional[bool]=None) \
+        -> Iterable[Species]:
     """Return a list of species.
 
     If playable is specified, only return species that have a matching playable attribute.
@@ -390,7 +399,8 @@ def list_species(s, *, playable: Optional[bool]=None):
     return _generic_char_type_lister(s, cls=Species, playable=playable)
 
 
-def list_backgrounds(s, *, playable: Optional[bool]=None):
+def list_backgrounds(s: SESSION, *, playable: Optional[bool]=None) -> \
+        Iterable[Background]:
     """Return a list of backgrounds.
 
     If playable is specified, only return species that have a matching playable attribute.
@@ -398,7 +408,7 @@ def list_backgrounds(s, *, playable: Optional[bool]=None):
     return _generic_char_type_lister(s, cls=Background, playable=playable)
 
 
-def list_gods(s, *, playable: Optional[bool]=None):
+def list_gods(s: SESSION, *, playable: Optional[bool]=None) -> Iterable[God]:
     """Return a list of gods.
 
     If playable is specified, only return species that have a matching playable attribute.
@@ -406,7 +416,7 @@ def list_gods(s, *, playable: Optional[bool]=None):
     return _generic_char_type_lister(s, cls=God, playable=playable)
 
 
-def list_games(s,
+def list_games(s: Session,
                *,
                player: Optional[str]=None,
                account: Optional[Account]=None,
@@ -414,7 +424,7 @@ def list_games(s,
                limit: Optional[int]=None,
                gid: Optional[str]=None,
                winning: Optional[bool]=None,
-               reverse_order: bool=False) -> list:
+               reverse_order: bool=False) -> Iterable[Game]:
     """Get a list of all games that match a specified condition.
 
     Return data is ordered most recent -> least recent, unless
@@ -454,7 +464,7 @@ def list_games(s,
     return q.all()
 
 
-def get_game(s, **kwargs) -> Game:
+def get_game(s: SESSION, **kwargs) -> Game:
     """Get a single game."""
     kwargs.setdefault('limit', 1)
     result = list_games(s, **kwargs)
@@ -464,12 +474,13 @@ def get_game(s, **kwargs) -> Game:
         return result[0]
 
 
-def get_achievement(s, key):
+def get_achievement(s: SESSION, key: str) -> Achievement:
     """Get an achievement."""
     return s.query(Achievement).filter(Achievement.key == key).first()
 
 
-def highscores(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+def highscores(s: SESSION, *, limit: int=const.GLOBAL_TABLE_LENGTH) \
+        -> Iterable[Game]:
     """Return up to limit high scores.
 
     Fewer games may be returned if there is not enough matching data.
@@ -478,7 +489,10 @@ def highscores(s, *, limit=const.GLOBAL_TABLE_LENGTH):
     return q.all()
 
 
-def _highscores_helper(s, mapped_class, game_column):
+# TODO: type game_column
+def _highscores_helper(s: SESSION,
+                       mapped_class: Union[Species, Background, God],
+                       game_column) -> Iterable[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 
     Parameters:
@@ -500,7 +514,7 @@ def _highscores_helper(s, mapped_class, game_column):
     return results
 
 
-def species_highscores(s):
+def species_highscores(s: SESSION) -> Iterable[Game]:
     """Return the top score for each playable species.
 
     Not every species may have a game in the database.
@@ -508,7 +522,7 @@ def species_highscores(s):
     return _highscores_helper(s, Species, Game.species)
 
 
-def background_highscores(s):
+def background_highscores(s: SESSION) -> Iterable[Game]:
     """Return the top score for each playable background.
 
     Not every background may have a game in the database.
@@ -516,7 +530,7 @@ def background_highscores(s):
     return _highscores_helper(s, Background, Game.background)
 
 
-def god_highscores(s):
+def god_highscores(s: SESSION) -> Iterable[Game]:
     """Return the top score for each playable god.
 
     Not every god may have a game in the database.
@@ -524,7 +538,7 @@ def god_highscores(s):
     return _highscores_helper(s, God, Game.god)
 
 
-def combo_highscores(s):
+def combo_highscores(s: SESSION) -> Iterable[Game]:
     """Return the top score for each playable combo.
 
     Not every combo may have a game in the database.
@@ -544,21 +558,24 @@ def combo_highscores(s):
     return results
 
 
-def fastest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+def fastest_wins(s: SESSION, *, limit: int=const.GLOBAL_TABLE_LENGTH) \
+        -> Iterable[Game]:
     """Return up to limit fastest wins."""
     ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
         Game.ktyp == ktyp).order_by('dur').limit(limit).all()
 
 
-def shortest_wins(s, *, limit=const.GLOBAL_TABLE_LENGTH):
+def shortest_wins(s: SESSION, *, limit: int=const.GLOBAL_TABLE_LENGTH) \
+        -> Iterable[Game]:
     """Return up to limit shortest wins."""
     ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
         Game.ktyp == ktyp).order_by('turn').limit(limit).all()
 
 
-def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
+def combo_highscore_holders(s: SESSION, limit: int=const.GLOBAL_TABLE_LENGTH) \
+        -> Iterable[Tuple[Player,Iterable[Game]]]:
     """Return the players with the most combo highscores.
 
     May return fewer than limit names.
@@ -576,7 +593,8 @@ def combo_highscore_holders(s, limit=const.GLOBAL_TABLE_LENGTH):
                   reverse=True)[:limit]
 
 
-def get_gobal_records(s):
+def get_gobal_records(s: SESSION) -> dict:
+    """Convenience function to return all classes of highscores."""
     out = {
         'combo': combo_highscores(s),
         'species': species_highscores(s),
@@ -588,7 +606,12 @@ def get_gobal_records(s):
     return out
 
 
-def get_player_streak(s, player):
+def get_player_streak(s: SESSION, player: Player) -> Optional[Streak]:
+    """Get a player's active streak.
+
+    Returns None if they don't have a currently active streak.
+    Note: a streak may be one game long.
+    """
     q = s.query(Streak).filter(Streak.player == player,
                                Streak.active == sqlalchemy.true())
     return q.one_or_none()
