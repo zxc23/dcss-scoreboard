@@ -389,7 +389,8 @@ def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *,
         -> Sequence[SBG]:
     q = s.query(cls)
     if playable is not None:
-        q = q.filter(cls.playable == playable)
+        # Type[Any] has no attribute "playable"
+        q = q.filter(cls.playable == playable)  # type: ignore
     return q.order_by(getattr(cls, 'name')).all()
 
 
@@ -520,8 +521,9 @@ def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class:
     results = []
     q = s.query(Game)
     for i in s.query(mapped_class).filter(
-            mapped_class.playable ==
-            sqlalchemy.true()).order_by(mapped_class.name).all():
+            # error: Type[Any] has no attribute "playable"
+            mapped_class.playable == sqlalchemy.true()  # type: ignore
+    ).order_by(mapped_class.name).all():  # type: ignore
         result = q.filter(
             game_column == i).order_by(Game.score.desc()).limit(1).first()
         if result:
