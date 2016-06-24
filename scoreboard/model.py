@@ -2,7 +2,7 @@
 
 import os
 import json
-from typing import Optional, Iterable, Tuple, Union, Callable
+from typing import Optional, Iterable, Tuple, Union, Callable, TypeVar
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -382,10 +382,10 @@ def list_players(s: sqlalchemy.orm.session.Session) -> Iterable[Player]:
     return q.all()
 
 
-# TODO Typing should specify the return iterable contains same type as cls
+SBG = TypeVar('SBG', Species, Background, God)
 def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *, cls:
-                              Union[Species, Background, God], playable:
-                              Optional[bool]) -> Iterable:
+                              Type[SBG], playable: Optional[bool]) \
+        -> Iterable[SBG]:
     q = s.query(cls)
     if playable is not None:
         q = q.filter(cls.playable == playable)
