@@ -11,10 +11,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import sqlalchemy.pool
+import sqlalchemy.ext.declarative.api
 
 from . import model
 
-Base = declarative_base()
+Base = declarative_base()  # type: sqlalchemy.ext.declarative.api.DeclarativeMeta
 
 Session = None
 
@@ -236,8 +237,8 @@ class Game(Base):
     dur = Column(Integer, nullable=False)  # type: int
     runes = Column(Integer, nullable=False)  # type: int
     score = Column(Integer, nullable=False, index=True)  # type: int
-    start = Column(DateTime, nullable=False, index=True)  # type: datetime.datetime
-    end = Column(DateTime, nullable=False, index=True)  # type: datetime.datetime
+    start = Column(DateTime, nullable=False, index=True)  # type: DateTime
+    end = Column(DateTime, nullable=False, index=True)  # type: DateTime
     potions_used = Column(Integer, nullable=False)  # type: int
     scrolls_used = Column(Integer, nullable=False)  # type: int
 

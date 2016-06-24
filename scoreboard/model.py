@@ -2,7 +2,7 @@
 
 import os
 import json
-from typing import Optional, Iterable, Tuple, Union, Callable, TypeVar
+from typing import Optional, Iterable, Tuple, Union, Callable, TypeVar, Type
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -12,6 +12,9 @@ import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
 import scoreboard.modelutils as modelutils
+
+
+SBG = TypeVar('SBG', Species, Background, God)
 
 
 class DBError(BaseException):
@@ -382,9 +385,8 @@ def list_players(s: sqlalchemy.orm.session.Session) -> Iterable[Player]:
     return q.all()
 
 
-SBG = TypeVar('SBG', Species, Background, God)
-def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *, cls:
-                              Type[SBG], playable: Optional[bool]) \
+def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *,
+                              cls: Type[SBG], playable: Optional[bool]) \
         -> Iterable[SBG]:
     q = s.query(cls)
     if playable is not None:
@@ -430,7 +432,7 @@ def list_gods(s: sqlalchemy.orm.session.Session,
 
 def list_games(s: sqlalchemy.orm.session.Session,
                *,
-               player: Optional[str]=None,
+               player: Optional[Player]=None,
                account: Optional[Account]=None,
                scored: Optional[bool]=None,
                limit: Optional[int]=None,
@@ -504,9 +506,8 @@ def highscores(s: sqlalchemy.orm.session.Session,
 
 
 # TODO: type game_column
-def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class:
-                       Union[Species, Background, God],
-                       game_column) -> Iterable[Game]:
+def _highscores_helper(s: sqlalchemy.orm.session.Session,
+                       mapped_class: Type[SBG], game_column) -> Iterable[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 
     Parameters:
@@ -600,7 +601,7 @@ def combo_highscore_holders(s: sqlalchemy.orm.session.Session,
     Returns a list of (player, games) tuples.
     """
     highscore_games = combo_highscores(s)
-    results = {}
+    results = {}  # type: dict
     for game in highscore_games:
         player = game.account.player.name
         results.setdefault(player, []).append(game)
