@@ -2,7 +2,7 @@
 
 import os
 import json
-from typing import Optional, Iterable, Tuple, Union, Callable, TypeVar, Type
+from typing import Optional, Tuple, Callable, TypeVar, Type, Sequence
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -12,7 +12,6 @@ import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
 import scoreboard.modelutils as modelutils
-
 
 SBG = TypeVar('SBG', Species, Background, God)
 
@@ -294,7 +293,7 @@ def add_game(s: sqlalchemy.orm.session.Session, game_data: dict) -> None:
 
 @_reraise_dberror
 def add_games(s: sqlalchemy.orm.session.Session, games_data:
-              Iterable[dict]) -> None:
+              Sequence[dict]) -> None:
     """Normalise and add multiple games to the database."""
     games = []
     for game in games_data:
@@ -366,7 +365,7 @@ def save_logfile_progress(s: sqlalchemy.orm.session.Session, logfile: str, pos:
 
 def list_accounts(s: sqlalchemy.orm.session.Session,
                   *,
-                  blacklisted: Optional[bool]=None) -> Iterable[Account]:
+                  blacklisted: Optional[bool]=None) -> Sequence[Account]:
     """Get a list of all accounts.
 
     If blacklisted is specified, only return accounts with that blacklisted
@@ -379,7 +378,7 @@ def list_accounts(s: sqlalchemy.orm.session.Session,
     return results
 
 
-def list_players(s: sqlalchemy.orm.session.Session) -> Iterable[Player]:
+def list_players(s: sqlalchemy.orm.session.Session) -> Sequence[Player]:
     """Get a list of all players."""
     q = s.query(Player)
     return q.all()
@@ -387,7 +386,7 @@ def list_players(s: sqlalchemy.orm.session.Session) -> Iterable[Player]:
 
 def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *,
                               cls: Type[SBG], playable: Optional[bool]) \
-        -> Iterable[SBG]:
+        -> Sequence[SBG]:
     q = s.query(cls)
     if playable is not None:
         q = q.filter(cls.playable == playable)
@@ -396,7 +395,7 @@ def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *,
 
 def list_species(s: sqlalchemy.orm.session.Session,
                  *,
-                 playable: Optional[bool]=None) -> Iterable[Species]:
+                 playable: Optional[bool]=None) -> Sequence[Species]:
     """Return a list of species.
 
     Parameters:
@@ -408,7 +407,7 @@ def list_species(s: sqlalchemy.orm.session.Session,
 
 def list_backgrounds(s: sqlalchemy.orm.session.Session,
                      *,
-                     playable: Optional[bool]=None) -> Iterable[Background]:
+                     playable: Optional[bool]=None) -> Sequence[Background]:
     """Return a list of backgrounds.
 
     Parameters:
@@ -420,7 +419,7 @@ def list_backgrounds(s: sqlalchemy.orm.session.Session,
 
 def list_gods(s: sqlalchemy.orm.session.Session,
               *,
-              playable: Optional[bool]=None) -> Iterable[God]:
+              playable: Optional[bool]=None) -> Sequence[God]:
     """Return a list of gods.
 
     Parameters:
@@ -438,7 +437,7 @@ def list_games(s: sqlalchemy.orm.session.Session,
                limit: Optional[int]=None,
                gid: Optional[str]=None,
                winning: Optional[bool]=None,
-               reverse_order: bool=False) -> Iterable[Game]:
+               reverse_order: bool=False) -> Sequence[Game]:
     """Get a list of all games that match a specified condition.
 
     Return data is ordered most recent -> least recent, unless
@@ -478,10 +477,11 @@ def list_games(s: sqlalchemy.orm.session.Session,
     return q.all()
 
 
+# Really, the type signature should be the same as get_games, just without limit
 def get_game(s: sqlalchemy.orm.session.Session, **kwargs: dict) -> Game:
-    """Get a single game."""
-    kwargs.setdefault('limit', 1)
-    result = list_games(s, **kwargs)
+    """Get a single game. See get_games docstring/type signature."""
+    kwargs.setdefault('limit', 1)  # type: ignore
+    result = list_games(s, **kwargs)  # type: ignore
     if not result:
         return None
     else:
@@ -496,7 +496,7 @@ def get_achievement(s: sqlalchemy.orm.session.Session, key:
 
 def highscores(s: sqlalchemy.orm.session.Session,
                *,
-               limit: int=const.GLOBAL_TABLE_LENGTH) -> Iterable[Game]:
+               limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
     """Return up to limit high scores.
 
     Fewer games may be returned if there is not enough matching data.
@@ -506,8 +506,8 @@ def highscores(s: sqlalchemy.orm.session.Session,
 
 
 # TODO: type game_column
-def _highscores_helper(s: sqlalchemy.orm.session.Session,
-                       mapped_class: Type[SBG], game_column) -> Iterable[Game]:
+def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class:
+                       Type[SBG], game_column) -> Sequence[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 
     Parameters:
@@ -529,7 +529,7 @@ def _highscores_helper(s: sqlalchemy.orm.session.Session,
     return results
 
 
-def species_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
+def species_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable species.
 
     Not every species may have a game in the database.
@@ -537,7 +537,7 @@ def species_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
     return _highscores_helper(s, Species, Game.species)
 
 
-def background_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
+def background_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable background.
 
     Not every background may have a game in the database.
@@ -545,7 +545,7 @@ def background_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
     return _highscores_helper(s, Background, Game.background)
 
 
-def god_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
+def god_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable god.
 
     Not every god may have a game in the database.
@@ -553,7 +553,7 @@ def god_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
     return _highscores_helper(s, God, Game.god)
 
 
-def combo_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
+def combo_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable combo.
 
     Not every combo may have a game in the database.
@@ -575,7 +575,7 @@ def combo_highscores(s: sqlalchemy.orm.session.Session) -> Iterable[Game]:
 
 def fastest_wins(s: sqlalchemy.orm.session.Session,
                  *,
-                 limit: int=const.GLOBAL_TABLE_LENGTH) -> Iterable[Game]:
+                 limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
     """Return up to limit fastest wins."""
     ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
@@ -584,7 +584,7 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
 
 def shortest_wins(s: sqlalchemy.orm.session.Session,
                   *,
-                  limit: int=const.GLOBAL_TABLE_LENGTH) -> Iterable[Game]:
+                  limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
     """Return up to limit shortest wins."""
     ktyp = get_ktyp(s, 'winning')
     return s.query(Game).filter(
@@ -593,7 +593,7 @@ def shortest_wins(s: sqlalchemy.orm.session.Session,
 
 def combo_highscore_holders(s: sqlalchemy.orm.session.Session,
                             limit: int=const.GLOBAL_TABLE_LENGTH) \
-        -> Iterable[Tuple[Player, Iterable[Game]]]:
+        -> Sequence[Tuple[Player, Sequence[Game]]]:
     """Return the players with the most combo highscores.
 
     May return fewer than limit names.
