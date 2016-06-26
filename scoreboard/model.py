@@ -2,7 +2,7 @@
 
 import os
 import json
-from typing import Optional, Tuple, Callable, TypeVar, Type, Sequence
+from typing import Optional, Tuple, Callable, TypeVar, Sequence
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -12,9 +12,6 @@ import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
 import scoreboard.modelutils as modelutils
-
-SBG = TypeVar('SBG', Species, Background, God)
-
 
 class DBError(BaseException):
     """Generic wrapper for sqlalchemy errors passed out of this module."""
@@ -385,8 +382,9 @@ def list_players(s: sqlalchemy.orm.session.Session) -> Sequence[Player]:
 
 
 def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *,
-                              cls: Type[SBG], playable: Optional[bool]) \
-        -> Sequence[SBG]:
+                              cls,
+                              playable: Optional[bool]) \
+        -> Sequence:
     q = s.query(cls)
     if playable is not None:
         # Type[Any] has no attribute "playable"
@@ -507,8 +505,9 @@ def highscores(s: sqlalchemy.orm.session.Session,
 
 
 # TODO: type game_column
-def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class:
-                       Type[SBG], game_column) -> Sequence[Game]:
+def _highscores_helper(s: sqlalchemy.orm.session.Session,
+                       mapped_class,
+                       game_column) -> Sequence[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 
     Parameters:
@@ -636,3 +635,31 @@ def get_player_streak(s: sqlalchemy.orm.session.Session, player:
     q = s.query(Streak).filter(Streak.player == player,
                                Streak.active == sqlalchemy.true())
     return q.one_or_none()
+
+
+def get_streaks(s:  sqlalchemy.orm.session.Session,
+                active: Optional[bool]=None,
+                sort_by_length: Optional[bool] = False,
+                ) \
+        -> Sequence[Streak]:
+    """Get streaks.
+
+    Parameters:
+        active: only return streaks with this active flag
+        sort_by_length: sort the returned streaks by length
+
+    Returns:
+        List of active streaks.
+    """
+    q = s.query(Streak)
+    if active is not None:
+        q = q.filter(Streak.active == sqlalchemy.true())
+    streaks =  q.all()
+    if sort_by_length:
+        # TODO can this be faster?
+        return sorted(streaks,
+                      lambda streak:
+                        s.query(Game).filter(
+                            Game.streak == streak).count())
+    else:
+        return streaks
