@@ -2,7 +2,6 @@
 
 import datetime
 
-import dateutil.parser
 import jinja2
 
 import scoreboard.model as model

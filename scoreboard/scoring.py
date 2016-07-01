@@ -3,8 +3,6 @@
 import time
 import datetime
 
-import dateutil.parser
-
 import scoreboard.model as model
 import scoreboard.orm as orm
 import scoreboard.constants as const
