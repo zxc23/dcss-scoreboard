@@ -656,14 +656,11 @@ def get_streaks(s:  sqlalchemy.orm.session.Session,
     q = s.query(Streak)
     if active is not None:
         q = q.filter(Streak.active == sqlalchemy.true())
-    streaks =  q.all()
     if sort_by_length:
         streaks = q.all()
         # TODO can this be faster?
-        return sorted(streaks,
-                      lambda streak:
-                        s.query(Game).filter(
-                            Game.streak == streak).count())
+        streaks.sort(
+            lambda streak: s.query(Game).filter(Game.streak == streak).count())
         # list[:None] returns list
         return sorted_streaks[:limit]
     else:
