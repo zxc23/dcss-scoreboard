@@ -663,8 +663,12 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
             key=lambda st: s.query(Game).filter(Game.streak == st).count(),
             reverse=True)
         # list[:None] returns list
+        streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
         return streaks[:limit]
     else:
         if limit is not None:
             q = q.limit(limit)
-        return q.all()
+        streaks = q.all()
+        streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
+        return streaks
+
