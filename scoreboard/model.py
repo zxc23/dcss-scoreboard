@@ -640,6 +640,7 @@ def get_player_streak(s: sqlalchemy.orm.session.Session, player:
 def get_streaks(s:  sqlalchemy.orm.session.Session,
                 active: Optional[bool]=None,
                 sort_by_length: Optional[bool] = False,
+                limit: Optional[int]=None,
                 ) \
         -> Sequence[Streak]:
     """Get streaks.
@@ -647,6 +648,7 @@ def get_streaks(s:  sqlalchemy.orm.session.Session,
     Parameters:
         active: only return streaks with this active flag
         sort_by_length: sort the returned streaks by length
+        limit: only return (up to) limit results
 
     Returns:
         List of active streaks.
@@ -656,10 +658,15 @@ def get_streaks(s:  sqlalchemy.orm.session.Session,
         q = q.filter(Streak.active == sqlalchemy.true())
     streaks =  q.all()
     if sort_by_length:
+        streaks = q.all()
         # TODO can this be faster?
         return sorted(streaks,
                       lambda streak:
                         s.query(Game).filter(
                             Game.streak == streak).count())
+        # list[:None] returns list
+        return sorted_streaks[:limit]
     else:
-        return streaks
+        if limit is not None:
+            q = q.limit(limit)
+        return q.all()
