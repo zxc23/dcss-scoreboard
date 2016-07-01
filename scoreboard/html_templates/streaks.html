@@ -18,7 +18,7 @@
     <!-- Tab panes -->
     <div class="tab-content">
       <div class="tab-pane active" id="longest" role="tabpanel">
-        {{ streaks|streakstotable(limit=20) }}
+        {{ best_streaks|streakstotable(limit=20) }}
       </div>
       <div class="tab-pane" id="active" role="tabpanel">
         {{ active_streaks|streakstotable(show_loss=False, limit=20) }}
