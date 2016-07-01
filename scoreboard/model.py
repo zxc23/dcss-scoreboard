@@ -13,6 +13,7 @@ from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
 import scoreboard.modelutils as modelutils
 
+
 class DBError(BaseException):
     """Generic wrapper for sqlalchemy errors passed out of this module."""
 
@@ -505,8 +506,7 @@ def highscores(s: sqlalchemy.orm.session.Session,
 
 
 # TODO: type game_column
-def _highscores_helper(s: sqlalchemy.orm.session.Session,
-                       mapped_class,
+def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class,
                        game_column) -> Sequence[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 

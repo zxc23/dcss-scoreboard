@@ -204,8 +204,7 @@ def render_player_page(s, template, player: orm.Player, global_records:
 
 def write_player_page(s, player_html_path: str, name: str, data: str) -> None:
     """Write an individual player's page."""
-    _write_file(path=os.path.join(player_html_path, name + '.html'),
-                data=data)
+    _write_file(path=os.path.join(player_html_path, name + '.html'), data=data)
 
 
 def write_player_pages(s, env, players):
