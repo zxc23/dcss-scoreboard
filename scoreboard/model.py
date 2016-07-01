@@ -660,7 +660,8 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
         streaks = q.all()
         # TODO can this be faster?
         streaks.sort(
-            key=lambda st: s.query(Game).filter(Game.streak == st).count())
+            key=lambda st: s.query(Game).filter(Game.streak == st).count(),
+            reverse=True)
         # list[:None] returns list
         return streaks[:limit]
     else:
