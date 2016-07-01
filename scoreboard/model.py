@@ -660,9 +660,9 @@ def get_streaks(s:  sqlalchemy.orm.session.Session,
         streaks = q.all()
         # TODO can this be faster?
         streaks.sort(
-            lambda streak: s.query(Game).filter(Game.streak == streak).count())
+            key=lambda st: s.query(Game).filter(Game.streak == st).count())
         # list[:None] returns list
-        return sorted_streaks[:limit]
+        return streaks[:limit]
     else:
         if limit is not None:
             q = q.limit(limit)
