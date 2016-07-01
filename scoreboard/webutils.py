@@ -182,20 +182,20 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
         loss = ""
         if show_player:
             player = "<td><a href='players/{player}.html'>{player}<a></td>".format(
-                player=model.get_game(streak['wins'][-1]).name)
+                player=streak.player.name)
         if show_loss:
-            loss = "<td>%s</td>" % (morgue_link(
-                model.get_game(streak['streak_breaker']),
-                model.get_game(streak['streak_breaker']).char)
-                                    if 'streak_breaker' in streak else '')
+            loss = "<td>%s</td>" % 'TODO'
+
+        games_list = ', '.join(morgue_link(g, g.char) for g in streak.games)
+        start_date = prettydate(streak.games[0].start)
+        end_date = prettydate(streak.games[-1].end)
 
         return trow.format(
-            wins=len(streak['wins']),
+            wins=len(streak.games),
             player=player,
-            games=', '.join(morgue_link(
-                model.get_game(g), model.get_game(g).char) for g in streak['wins']),
-            start=prettydate(dateutil.parser.parse(streak['start'])),
-            end=prettydate(dateutil.parser.parse(streak['end'])),
+            games=games_list,
+            start=start_date,
+            end=end_date,
             streak_breaker=loss)
 
     t = """<table class="{classes}">
