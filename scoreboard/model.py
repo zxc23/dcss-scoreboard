@@ -637,7 +637,7 @@ def get_player_streak(s: sqlalchemy.orm.session.Session, player:
     return q.one_or_none()
 
 
-def get_streaks(s:  sqlalchemy.orm.session.Session,
+def get_streaks(s: sqlalchemy.orm.session.Session,
                 active: Optional[bool]=None,
                 sort_by_length: Optional[bool] = False,
                 limit: Optional[int]=None,
