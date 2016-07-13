@@ -261,7 +261,7 @@ def score_games():
             score_game(s, game)
             game.scored = True
             s.add(game)
-            scored_players.add(game.player)
+            scored_players.add(game.player.name)
             scored += 1
             if scored and scored % 10000 == 0:
                 print(scored)
