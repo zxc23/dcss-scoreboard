@@ -2,6 +2,8 @@
 
 A bundle of scripts to create a scoreboard website for DCSS.
 
+[![Code Climate](https://codeclimate.com/github/zxc23/dcss-scoreboard/badges/gpa.svg)](https://codeclimate.com/github/zxc23/dcss-scoreboard)
+
 ## Why make another scoreboard?
 
 - The CAO scoreboard is old; |amethyst said 1.3 people understood it and fewer still had time for working on it. So we decided to start from scratch.
