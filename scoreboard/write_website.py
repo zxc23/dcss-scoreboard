@@ -231,14 +231,15 @@ def write_player_pages(s, env, players):
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
 
 
-def write_website(players=set(), urlbase=None):
+def write_website(players, urlbase=None):
     """Write all website files.
 
     Paramers:
         urlbase (str) Base URL for the website
         players (iterable of strings) Only write these player pages.
-            If you pass in False, no player pages will be rebuilt.
             If you pass in None, all player pages will be rebuilt.
+            If you pass in any other false value, no player pages will be
+              rebuilt.
     """
     start = time.time()
 
