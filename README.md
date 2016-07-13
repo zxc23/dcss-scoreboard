@@ -26,11 +26,9 @@ To use the code, run `loader.py --help`.
 
 1. First, get Vagrant at https://www.vagrantup.com/ and install it.
 2. Install the vbguest plugin with `vagrant plugin install vagrant-vbguest`.
-3. Next, open in the git folder in cmd which should contain 'Vagrantfile', and run `vagrant up`. This will set up an Ubuntu VM and might take a while.
-4. Next, `vagrant ssh` to ssh into the VM and run `bash /vagrant/setup1.sh`.
-5. Exit with ctrl-d and reopen with `vagrant ssh`. Run `bash /vagrant/setup2.sh` but be aware this can take a while.
-6. Open scoreboard/constants.py and change the line `WEBSITE_URLBASE = os.path.join(os.getcwd(), WEBSITE_DIR)` to point to a 'website' folder in your current directory, e.g. `WEBSITE_URLBASE = 'D:\David\Documents\DCSS Scoreboard\website'`.
-7. `cd /vagrant` and `python loader.py` will start the scripts.
+3. Open in the git folder in cmd which should contain 'Vagrantfile', and run `vagrant up`. This will set up an Ubuntu VM and might take a while.
+4. Once the setup is complete, you should be able to visit http://localhost:8080/ in a web browser and see your development website!.
+5. To update your development scoreboard, you can SSH into the machine with `vagrant ssh` and run `./update-scoreboard.sh`
 8. Ctrl-D will exit out of the VM's terminal. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
 
 ## Postgresql Management
