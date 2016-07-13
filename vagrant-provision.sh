@@ -63,6 +63,6 @@ if ! [[ -d venv ]] ; then
   echo ". $(pwd)/venv/bin/activate" >> ~/.bashrc
 fi
 pip3 install -r /vagrant/requirements.txt
-echo "/vagrant/loader.py --database sqlite --urlbase 'http://localhost:8080' --download-logfiles --download-servers cpo" > /home/vagrant/update-scoreboard.#!/bin/sh
+echo "/vagrant/loader.py --database sqlite --urlbase 'http://localhost:8080' --download-logfiles --download-servers cpo" > /home/vagrant/update-scoreboard
 chmod +x /home/vagrant/update-scoreboard.sh
 /home/vagrant/update-scoreboard.sh
