@@ -237,6 +237,7 @@ def write_website(players, urlbase=None):
     Paramers:
         urlbase (str) Base URL for the website
         players (iterable of strings) Only write these player pages.
+            Pass in the player's name, not the entire Player object.
             If you pass in None, all player pages will be rebuilt.
             If you pass in any other false value, no player pages will be
               rebuilt.
@@ -252,6 +253,8 @@ def write_website(players, urlbase=None):
         players = all_players
     elif not players:
         players = []
+    else:
+        players = [model.get_player(s, p) for p in players]
 
     setup_website_dir(env, WEBSITE_DIR, all_players)
 
