@@ -70,7 +70,7 @@ def main():
     if not args.skip_scoring:
         players = scoreboard.scoring.score_games()
     else:
-        players = None
+        players = False
 
     if not args.skip_website:
         if args.rebuild_player_pages:
