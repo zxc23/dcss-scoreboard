@@ -195,7 +195,7 @@ class Streak(Base):
     player_id = Column(Integer, ForeignKey('players.id'), nullable=False)  # type: int
     player = relationship("Player", back_populates="streak")
 
-    games = relationship("Game")
+    games = relationship("Game", order_by='Game.start')
 
     __table_args__ = (
         Index('one_active_streak_per_player',
