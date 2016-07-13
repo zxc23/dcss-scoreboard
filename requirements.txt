@@ -4,4 +4,3 @@ jsmin
 braceexpand
 characteristic
 pyyaml
-psycopg2

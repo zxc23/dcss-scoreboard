@@ -18,9 +18,7 @@ A bundle of scripts to create a scoreboard website for DCSS.
 
 ## How to use
 
-Python 3.5+ is required. Install pre-requisites with `pip install -r requirements.txt`.
-
-You can use sqlite or postgres as your database baackend.
+Python 3.5+ is required. Install pre-requisites with `pip install -r requirements.txt`. If you want to use Postgres as your database server, also install the `psycopg2` pip module (which requires `libpq-dev` on Ubuntu).
 
 To use the code, run `loader.py --help`.
 
