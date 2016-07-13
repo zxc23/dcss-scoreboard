@@ -63,4 +63,4 @@ if ! [[ -d venv ]] ; then
   echo ". $(pwd)/venv/bin/activate" >> ~/.bashrc
 fi
 pip3 install -r /vagrant/requirements.txt
-/vagrant/loader.py --database sqlite --urlbase '' --download-logfiles --download-servers cpo
+/vagrant/loader.py --database sqlite --urlbase 'http://localhost:8080' --download-logfiles --download-servers cpo
