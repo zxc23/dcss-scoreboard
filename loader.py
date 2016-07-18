@@ -34,7 +34,7 @@ def read_commandline():
     parser.add_argument('--download-logfiles',
                         action='store_true',
                         help="Download logfiles first.")
-    parser.add_argument('--download-servers', nargs=1, metavar="SRC",
+    parser.add_argument('--download-servers', nargs='*', metavar="SRC",
                         help="Only download logfiles from these servers.")
     parser.add_argument('--skip-import',
                         action='store_true',

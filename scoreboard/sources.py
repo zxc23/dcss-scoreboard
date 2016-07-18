@@ -93,7 +93,7 @@ def download_sources(dest: str, servers: Optional[str]=None):
 
     Parameters:
         dest: path to download destination directory
-        server: if specified, the server to download from
+        servers: if specified, the servers to download from
 
     Returns:
         Nothing
