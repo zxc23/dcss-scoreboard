@@ -184,7 +184,7 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
             player = "<td><a href='players/{player}.html'>{player}<a></td>".format(
                 player=streak.player.name)
         if show_loss:
-            loss = "<td>%s</td>" % 'TODO'
+            loss = "<td>%s</td>" % streak.breaker.char
 
         games_list = ', '.join(morgue_link(g, g.char) for g in streak.games)
         start_date = prettydate(streak.games[0].start)

@@ -210,6 +210,7 @@ def handle_player_streak(s, game: orm.Game):
             return
         # Close any active streak
         current_streak.active = False
+        current_streak.breaker = game
         s.add(current_streak)
 
 

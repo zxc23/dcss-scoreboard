@@ -197,6 +197,9 @@ class Streak(Base):
 
     games = relationship("Game", order_by='Game.start')
 
+    breaker_id = Column(Integer, ForeignKey('games.gid'))
+    breaker = relationship("Game")
+
     __table_args__ = (
         Index('one_active_streak_per_player',
               player_id,
