@@ -85,6 +85,8 @@ def load_logfile(logfile, src):
     f.seek(seek_pos)
     for line in f:
         lines += 1
+        if lines % 100 == 0:
+            print("%s: %s lines..." % (logfile, lines))
         # skip blank lines
         if not line.strip():
             continue

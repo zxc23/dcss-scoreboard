@@ -671,4 +671,3 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
         streaks = q.all()
         streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
         return streaks
-

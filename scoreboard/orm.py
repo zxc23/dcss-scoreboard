@@ -84,7 +84,8 @@ class Player(Base):
                                 secondary=AwardedAchievements,
                                 back_populates="players")
 
-    streak = relationship("Streak", uselist=False, back_populates="player")
+    # streak.id should always be ordered by time... right?
+    streaks = relationship("Streak", back_populates="player", order_by='Streak.id')
 
 
 @characteristic.with_repr(["short"])
@@ -193,7 +194,7 @@ class Streak(Base):
     active = Column(Boolean, nullable=False, index=True)  # type: bool
 
     player_id = Column(Integer, ForeignKey('players.id'), nullable=False)  # type: int
-    player = relationship("Player", back_populates="streak")
+    player = relationship("Player", back_populates="streaks")
 
     games = relationship("Game", order_by='Game.start')
 

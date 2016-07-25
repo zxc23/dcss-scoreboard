@@ -182,6 +182,8 @@ def great_role(role, player_stats, achievements):
     return False
 
 
+get_streak = 0
+total = 0
 def handle_player_streak(s, game: orm.Game):
     """Figure out what a game means for the player's streak.
 
@@ -189,7 +191,11 @@ def handle_player_streak(s, game: orm.Game):
     A subsequent win (if it started after the last win) will extend the streak.
     A loss will end any active streak.
     """
+    global get_streak
+    global total
+    start = time.time()
     current_streak = model.get_player_streak(s, game.player)
+    get_streak += (time.time() - start)
 
     if game.won:
         # Start or extend a streak
@@ -198,19 +204,24 @@ def handle_player_streak(s, game: orm.Game):
         else:
             # Ignore game if not a valid streak addition
             if not is_valid_streak_addition(game, current_streak):
+                total += (time.time() - start)
                 return
         game.streak = current_streak
 
     else: # Game wasn't won
         # If there was no active streak, we're done
         if not current_streak:
+            total += (time.time() - start)
             return
         # Ignore game if griefing detected
         if is_grief(s, game):
+            total += (time.time() - start)
             return
         # Close any active streak
         current_streak.active = False
         s.add(current_streak)
+
+    total += (time.time() - start)
 
 
 def score_game(s, game: orm.Game):
@@ -263,8 +274,15 @@ def score_games():
             s.add(game)
             scored_players.add(game.player.name)
             scored += 1
-            if scored and scored % 10000 == 0:
+            if scored and scored % 1000 == 0:
                 print(scored)
+            if scored == 1000:
+                global get_streak
+                global total
+                print(get_streak)
+                print(total)
+                import sys
+                sys.exit(1)
         s.commit()
 
     # Add manual achievements
