@@ -1,4 +1,4 @@
-## DCSS Scoreboard
+# DCSS Scoreboard
 
 A bundle of scripts to create a scoreboard website for DCSS.
 
@@ -24,12 +24,12 @@ To use the code, run `loader.py --help`.
 
 ## Windows users
 
-1. First, get Vagrant at https://www.vagrantup.com/ and install it.
-2. Install the vbguest plugin with `vagrant plugin install vagrant-vbguest`.
-3. Open in the git folder in cmd which should contain 'Vagrantfile', and run `vagrant up`. This will set up an Ubuntu VM and might take a while.
-4. Once the setup is complete, you should be able to visit http://localhost:8080/ in a web browser and see your development website!.
-5. To update your development scoreboard, you can SSH into the machine with `vagrant ssh` and run `./update-scoreboard.sh`
-8. Ctrl-D will exit out of the VM's terminal. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
+1. First, get Vagrant at <https://www.vagrantup.com/> and install it.
+1. Install the vbguest plugin with `vagrant plugin install vagrant-vbguest`.
+1. Open in the git folder in cmd which should contain 'Vagrantfile', and run `vagrant up`. This will set up an Ubuntu VM and might take a while.
+1. Once the setup is complete, you should be able to visit <http://localhost:8080/> in a web browser and see your development website!.
+1. To update your development scoreboard, you can SSH into the machine with `vagrant ssh` and run `./update-scoreboard.sh`
+1. Ctrl-D will exit out of the VM's terminal. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
 
 ## Postgresql Management
 
@@ -42,4 +42,4 @@ sudo -u postgres createdb -O scoreboard scoreboard
 
 ## Development
 
-You can see development status here: https://trello.com/b/9Nija4jC/dcss-scoreboard
+You can see development status here: <https://trello.com/b/9Nija4jC/dcss-scoreboard>.
