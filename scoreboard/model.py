@@ -12,6 +12,7 @@ import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
 import scoreboard.modelutils as modelutils
+from . import util
 
 
 class DBError(BaseException):
@@ -637,6 +638,7 @@ def get_player_streak(s: sqlalchemy.orm.session.Session, player:
     return q.one_or_none()
 
 
+@util.timer
 def get_streaks(s: sqlalchemy.orm.session.Session,
                 active: Optional[bool]=None,
                 sort_by_length: Optional[bool] = False,
@@ -671,4 +673,3 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
         streaks = q.all()
         streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
         return streaks
-
