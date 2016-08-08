@@ -669,12 +669,13 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
         q = q.filter(Streak.active == sqlalchemy.true())
     if sort_by_length:
         streaks = q.all()
+        # XXX TODO THIS FILTERING/SORTING IS SO SLOW - DO IT IN SQL
         print("Collected all streaks after %s secs" % (time.time() - start))
-        streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
-        print("Removed single-game streaks after %s secs" % (time.time() - start))
+        streaks = (i for i in streaks if len(i.games) > 1)
+        print("Removed one-game streaks after %s secs" % (time.time() - start))
         streaks.sort(
             key=lambda st: s.query(Game).filter(Game.streak == st).count(),
-            reverse=True) # TODO can this be faster?
+            reverse=True)
         print("Sorted streaks after %s secs" % (time.time() - start))
         # list[:None] returns list -- so this works even if limit=None
         return streaks[:limit]
