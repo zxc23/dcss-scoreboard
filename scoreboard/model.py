@@ -496,6 +496,7 @@ def get_achievement(s: sqlalchemy.orm.session.Session, key:
     return s.query(Achievement).filter(Achievement.key == key).first()
 
 
+@util.timer
 def highscores(s: sqlalchemy.orm.session.Session,
                *,
                limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
@@ -532,6 +533,7 @@ def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class,
     return results
 
 
+@util.timer
 def species_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable species.
 
@@ -540,6 +542,7 @@ def species_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     return _highscores_helper(s, Species, Game.species)
 
 
+@util.timer
 def background_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable background.
 
@@ -548,6 +551,7 @@ def background_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     return _highscores_helper(s, Background, Game.background)
 
 
+@util.timer
 def god_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable god.
 
@@ -556,6 +560,7 @@ def god_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     return _highscores_helper(s, God, Game.god)
 
 
+@util.timer
 def combo_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     """Return the top score for each playable combo.
 
@@ -576,6 +581,7 @@ def combo_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
     return results
 
 
+@util.timer
 def fastest_wins(s: sqlalchemy.orm.session.Session,
                  *,
                  limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
@@ -585,6 +591,7 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
         Game.ktyp == ktyp).order_by('dur').limit(limit).all()
 
 
+@util.timer
 def shortest_wins(s: sqlalchemy.orm.session.Session,
                   *,
                   limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
