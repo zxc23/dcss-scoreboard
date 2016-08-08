@@ -12,8 +12,8 @@ BASHHISTORYEOF
 if ! grep -q "${APT_REGION}.archive" /etc/apt/sources.list ; then
   sudo sed -i'.bak' -e "s/archive/${APT_REGION}.archive/" /etc/apt/sources.list
 fi
-# Only run apt-get update if we need to
-if [ "$(($(date +%s) - $(stat -c %Z /var/lib/apt/periodic/update-success-stamp)))" -ge 600000 ]; then
+# Only run apt-get update every 22hrs
+if [ "$(($(date +%s) - $(stat -c %Z /var/lib/apt/periodic/update-success-stamp)))" -ge 79200 ]; then
   sudo apt-get update
 fi
 # Remove junk installed by vagrant-vbox
