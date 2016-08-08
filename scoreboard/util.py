@@ -1,3 +1,6 @@
+import time
+
+
 def timer(func):
   def wrapper(*arg, **kw):
     t1 = time.time()

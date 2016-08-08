@@ -3,6 +3,7 @@
 import os
 import json
 from typing import Optional, Tuple, Callable, TypeVar, Sequence
+import time
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -655,17 +656,20 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     Returns:
         List of active streaks.
     """
+    start = time.time()
     q = s.query(Streak)
     if active is not None:
         q = q.filter(Streak.active == sqlalchemy.true())
     if sort_by_length:
         streaks = q.all()
-        # TODO can this be faster?
+        print("Collected all streaks after %s secs" % (time.time() - start))
+        streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
+        print("Removed single-game streaks after %s secs" % (time.time() - start))
         streaks.sort(
             key=lambda st: s.query(Game).filter(Game.streak == st).count(),
-            reverse=True)
-        # list[:None] returns list
-        streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
+            reverse=True) # TODO can this be faster?
+        print("Sorted streaks after %s secs" % (time.time() - start))
+        # list[:None] returns list -- so this works even if limit=None
         return streaks[:limit]
     else:
         if limit is not None:
