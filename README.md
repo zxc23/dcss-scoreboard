@@ -16,6 +16,19 @@ A bundle of scripts to create a scoreboard website for DCSS.
 - Per-player tracking of many stats. We hope you like stats.
 - New improvements arriving all the time. If you like, you can even [help out](https://github.com/zxc23/dcss-scoreboard).
 
+## High-level program flow
+
+1. Download logfiles using `wget --continue`
+1. Load each game (eg each line) from logfiles into the database 'games' table
+  1. Games are loaded with scored=False
+1. Score each unscored game
+  1. Handle streaks (extend/close an existing one, or start a new one)
+  1. Handle achievements (check for the game unlocking new achievements)
+  1. Return a list of players who have a newly scored game
+1. Write the website
+  1. Write all global pages (index, highscores, streaks)
+  1. Write player pages for updated players, using the list of players with a newly scored game
+
 ## How to use
 
 Python 3.5+ is required. Install pre-requisites with `pip install -r requirements.txt`. If you want to use Postgres as your database server, also install the `psycopg2` pip module (which requires `libpq-dev` on Ubuntu).
