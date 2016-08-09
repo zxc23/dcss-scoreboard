@@ -55,8 +55,8 @@ def jinja_env(urlbase, s):
 
     env.globals['tableclasses'] = const.TABLE_CLASSES
     env.globals['playable_species'] = model.list_species(s, playable=True)
-    env.globals['playable_backgrounds'] = model.list_backgrounds(s,
-                                                                 playable=True)
+    env.globals['playable_backgrounds'] = model.list_backgrounds(
+        s, playable=True)
     env.globals['playable_gods'] = model.list_gods(s, playable=True)
 
     if urlbase:
@@ -89,21 +89,24 @@ def setup_website_dir(env, path, all_players):
     subprocess.run(['rsync', '-a', src + '/', dst + '/'])
 
     print("Generating player list")
-    _write_file(path=os.path.join(dst, 'js', 'players.json'),
-                data=json.dumps([p.name for p in all_players]))
+    _write_file(
+        path=os.path.join(dst, 'js', 'players.json'),
+        data=json.dumps([p.name for p in all_players]))
 
     print("Writing minified local JS")
     js_template = env.get_template('dcss-scoreboard.js')
-    _write_file(path=os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js'),
-                data=jsmin.jsmin(js_template.render()))
+    _write_file(
+        path=os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js'),
+        data=jsmin.jsmin(js_template.render()))
 
 
 def render_index(s, template):
-    return template.render(recent_wins=model.list_games(
-        s, winning=True, limit=const.GLOBAL_TABLE_LENGTH),
-                           active_streaks=[],
-                           overall_highscores=model.highscores(s),
-                           combo_high_scores=model.combo_highscore_holders(s))
+    return template.render(
+        recent_wins=model.list_games(
+            s, winning=True, limit=const.GLOBAL_TABLE_LENGTH),
+        active_streaks=[],
+        overall_highscores=model.highscores(s),
+        combo_high_scores=model.combo_highscore_holders(s))
 
 
 def write_index(s, env):
@@ -118,9 +121,10 @@ def write_streaks(s, env):
     template = env.get_template('streaks.html')
     active_streaks = model.get_streaks(s, active=True)
     best_streaks = model.get_streaks(s, limit=10)
-    _write_file(path=os.path.join(WEBSITE_DIR, 'streaks.html'),
-                data=template.render(active_streaks=active_streaks,
-                                     best_streaks=best_streaks))
+    _write_file(
+        path=os.path.join(WEBSITE_DIR, 'streaks.html'),
+        data=template.render(
+            active_streaks=active_streaks, best_streaks=best_streaks))
 
 
 def render_highscores(s, template):
@@ -131,13 +135,14 @@ def render_highscores(s, template):
     combo_highscores = model.combo_highscores(s)
     fastest_wins = model.fastest_wins(s)
     shortest_wins = model.shortest_wins(s)
-    return template.render(overall_highscores=overall_highscores,
-                           species_highscores=species_highscores,
-                           background_highscores=background_highscores,
-                           god_highscores=god_highscores,
-                           combo_highscores=combo_highscores,
-                           fastest_wins=fastest_wins,
-                           shortest_wins=shortest_wins)
+    return template.render(
+        overall_highscores=overall_highscores,
+        species_highscores=species_highscores,
+        background_highscores=background_highscores,
+        god_highscores=god_highscores,
+        combo_highscores=combo_highscores,
+        fastest_wins=fastest_wins,
+        shortest_wins=shortest_wins)
 
 
 def write_highscores(s, env):
@@ -197,13 +202,14 @@ def render_player_page(s, template, player: orm.Player, global_records:
     god_wins = _wins_per_god(s, games)
     active_streak = model.get_player_streak(s, player)
 
-    return template.render(player=player,
-                           games=games,
-                           records=records,
-                           species_wins=species_wins,
-                           background_wins=background_wins,
-                           god_wins=god_wins,
-                           active_streak=active_streak)
+    return template.render(
+        player=player,
+        games=games,
+        records=records,
+        species_wins=species_wins,
+        background_wins=background_wins,
+        god_wins=god_wins,
+        active_streak=active_streak)
 
 
 def write_player_page(s, player_html_path: str, name: str, data: str) -> None:

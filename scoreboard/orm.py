@@ -26,20 +26,20 @@ class Server(Base):
 
     __tablename__ = 'servers'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    name = Column(String(4), nullable=False, index=True,
-                  unique=True)  # type: str
+    name = Column(
+        String(4), nullable=False, index=True, unique=True)  # type: str
 
 
-AwardedAchievements = Table('awarded_achievements',
-                            Base.metadata,
-                            Column('player_id',
-                                   Integer,
-                                   ForeignKey('players.id'),
-                                   nullable=False),
-                            Column('achievement_id',
-                                   Integer,
-                                   ForeignKey('achievements.id'),
-                                   nullable=False), )
+AwardedAchievements = Table(
+    'awarded_achievements',
+    Base.metadata,
+    Column(
+        'player_id', Integer, ForeignKey('players.id'), nullable=False),
+    Column(
+        'achievement_id',
+        Integer,
+        ForeignKey('achievements.id'),
+        nullable=False), )
 
 
 @characteristic.with_repr(["name", "server"])
@@ -49,12 +49,12 @@ class Account(Base):
     __tablename__ = 'accounts'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), nullable=False, index=True)  # type: str
-    server_id = Column(Integer, ForeignKey('servers.id'),
-                       nullable=False)  # type: int
+    server_id = Column(
+        Integer, ForeignKey('servers.id'), nullable=False)  # type: int
     server = relationship("Server")
     blacklisted = Column(Boolean, nullable=False, default=False)  # type: bool
-    player_id = Column(Integer, ForeignKey('players.id'),
-                       nullable=False)  # type: int
+    player_id = Column(
+        Integer, ForeignKey('players.id'), nullable=False)  # type: int
     player = relationship("Player")
 
     @property
@@ -67,10 +67,8 @@ class Account(Base):
         """
         return self.name.lower()
 
-    __table_args__ = (UniqueConstraint('name',
-                                       'server_id',
-                                       name='name-server_id'),
-                      )
+    __table_args__ = (UniqueConstraint(
+        'name', 'server_id', name='name-server_id'), )
 
 
 @characteristic.with_repr(["name"])
@@ -80,9 +78,8 @@ class Player(Base):
     __tablename__ = 'players'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), unique=True, nullable=False)  # type: str
-    achievements = relationship("Achievement",
-                                secondary=AwardedAchievements,
-                                back_populates="players")
+    achievements = relationship(
+        "Achievement", secondary=AwardedAchievements, back_populates="players")
 
     streak = relationship("Streak", uselist=False, back_populates="player")
 
@@ -93,8 +90,8 @@ class Species(Base):
 
     __tablename__ = 'species'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    short = Column(String(2), nullable=False, index=True,
-                   unique=True)  # type: str
+    short = Column(
+        String(2), nullable=False, index=True, unique=True)  # type: str
     name = Column(String(15), nullable=False, unique=True)  # type: str
     playable = Column(Boolean, nullable=False)  # type: bool
 
@@ -105,10 +102,10 @@ class Background(Base):
 
     __tablename__ = 'backgrounds'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    short = Column(String(2), nullable=False, index=True,
-                   unique=True)  # type: str
-    name = Column(String(20), nullable=False, index=True,
-                  unique=True)  # type: str
+    short = Column(
+        String(2), nullable=False, index=True, unique=True)  # type: str
+    name = Column(
+        String(20), nullable=False, index=True, unique=True)  # type: str
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
@@ -118,7 +115,8 @@ class God(Base):
 
     __tablename__ = 'gods'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
+    name = Column(
+        String(20), nullable=False, index=True, unique=True)  # type: str
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
@@ -128,7 +126,8 @@ class Version(Base):
 
     __tablename__ = 'versions'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    v = Column(String(10), nullable=False, index=True, unique=True)  # type: str
+    v = Column(
+        String(10), nullable=False, index=True, unique=True)  # type: str
 
 
 @characteristic.with_repr(["short"])
@@ -137,8 +136,10 @@ class Branch(Base):
 
     __tablename__ = 'branches'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    short = Column(String(10), nullable=False, index=True, unique=True)  # type: str
-    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
+    short = Column(
+        String(10), nullable=False, index=True, unique=True)  # type: str
+    name = Column(
+        String(20), nullable=False, index=True, unique=True)  # type: str
     multilevel = Column(Boolean, nullable=False)  # type: bool
     playable = Column(Boolean, nullable=False)  # type: bool
 
@@ -152,7 +153,8 @@ class Place(Base):
 
     __tablename__ = 'places'
     id = Column('id', Integer, primary_key=True, nullable=False)  # type: int
-    branch_id = Column(Integer, ForeignKey('branches.id'), nullable=False)  # type: int
+    branch_id = Column(
+        Integer, ForeignKey('branches.id'), nullable=False)  # type: int
     branch = relationship("Branch")
     level = Column(Integer, nullable=False, index=True)  # type: int
 
@@ -165,10 +167,8 @@ class Place(Base):
         else:
             return "%s" % self.branch.short
 
-    __table_args__ = (UniqueConstraint('branch_id',
-                                       'level',
-                                       name='branch_id-level'),
-                      )
+    __table_args__ = (UniqueConstraint(
+        'branch_id', 'level', name='branch_id-level'), )
 
 
 @characteristic.with_repr(["name"])
@@ -177,7 +177,8 @@ class Ktyp(Base):
 
     __tablename__ = 'ktyps'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
+    name = Column(
+        String(20), nullable=False, index=True, unique=True)  # type: str
 
 
 @characteristic.with_repr(["player", "id"])
@@ -192,16 +193,16 @@ class Streak(Base):
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     active = Column(Boolean, nullable=False, index=True)  # type: bool
 
-    player_id = Column(Integer, ForeignKey('players.id'), nullable=False)  # type: int
+    player_id = Column(
+        Integer, ForeignKey('players.id'), nullable=False)  # type: int
     player = relationship("Player", back_populates="streak")
 
     games = relationship("Game", order_by='Game.start')
 
-    __table_args__ = (
-        Index('one_active_streak_per_player',
-              player_id,
-              postgresql_where=active == sqlalchemy.true()),
-        )
+    __table_args__ = (Index(
+        'one_active_streak_per_player',
+        player_id,
+        postgresql_where=active == sqlalchemy.true()), )
 
 
 @characteristic.with_repr(["gid"])
@@ -211,24 +212,28 @@ class Game(Base):
     __tablename__ = 'games'
     gid = Column(String(50), primary_key=True, nullable=False)  # type: str
 
-    account_id = Column(Integer, ForeignKey('accounts.id'), nullable=False)  # type: int
+    account_id = Column(
+        Integer, ForeignKey('accounts.id'), nullable=False)  # type: int
     account = relationship("Account")
 
-    version_id = Column(Integer, ForeignKey('versions.id'), nullable=False)  # type: int
+    version_id = Column(
+        Integer, ForeignKey('versions.id'), nullable=False)  # type: int
     version = relationship("Version")
 
-    species_id = Column(Integer, ForeignKey('species.id'), nullable=False)  # type: int
+    species_id = Column(
+        Integer, ForeignKey('species.id'), nullable=False)  # type: int
     species = relationship("Species")
 
-    background_id = Column(Integer,
-                           ForeignKey('backgrounds.id'),
-                           nullable=False)  # type: int
+    background_id = Column(
+        Integer, ForeignKey('backgrounds.id'), nullable=False)  # type: int
     background = relationship("Background")
 
-    place_id = Column(Integer, ForeignKey('places.id'), nullable=False)  # type: int
+    place_id = Column(
+        Integer, ForeignKey('places.id'), nullable=False)  # type: int
     place = relationship("Place")
 
-    god_id = Column(Integer, ForeignKey('gods.id'), nullable=False)  # type: int
+    god_id = Column(
+        Integer, ForeignKey('gods.id'), nullable=False)  # type: int
     god = relationship("God")
 
     xl = Column(Integer, nullable=False)  # type: int
@@ -242,10 +247,12 @@ class Game(Base):
     potions_used = Column(Integer, nullable=False)  # type: int
     scrolls_used = Column(Integer, nullable=False)  # type: int
 
-    ktyp_id = Column(Integer, ForeignKey('ktyps.id'), nullable=False)  # type: int
+    ktyp_id = Column(
+        Integer, ForeignKey('ktyps.id'), nullable=False)  # type: int
     ktyp = relationship("Ktyp")
 
-    scored = Column(Boolean, default=False, nullable=False, index=True)  # type: bool
+    scored = Column(
+        Boolean, default=False, nullable=False, index=True)  # type: bool
 
     streak_id = Column(Integer, ForeignKey('streaks.id'))  # type: int
     streak = relationship("Streak")
@@ -289,9 +296,8 @@ class Achievement(Base):
     key = Column(String(50), nullable=False)  # type: str
     name = Column(String(50), nullable=False)  # type: str
     description = Column(String(200), nullable=False)  # type: str
-    players = relationship("Player",
-                           secondary=AwardedAchievements,
-                           back_populates="achievements")
+    players = relationship(
+        "Player", secondary=AwardedAchievements, back_populates="achievements")
 
 
 def sqlite_performance_over_safety(dbapi_con, con_record) -> None:
@@ -339,5 +345,6 @@ def setup_database(database: str, credentials: Optional[str]=None) -> None:
 def get_session():
     """Create a new database session."""
     if Session is None:
-        raise Exception("Database hasn't been initialised, run setup_database() first!")
+        raise Exception(
+            "Database hasn't been initialised, run setup_database() first!")
     return Session()

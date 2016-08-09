@@ -616,9 +616,8 @@ def combo_highscore_holders(s: sqlalchemy.orm.session.Session,
         player = game.account.player.name
         results.setdefault(player, []).append(game)
 
-    return sorted(results.items(),
-                  key=lambda i: len(i[1]),
-                  reverse=True)[:limit]
+    return sorted(
+        results.items(), key=lambda i: len(i[1]), reverse=True)[:limit]
 
 
 def get_gobal_records(s: sqlalchemy.orm.session.Session) -> dict:

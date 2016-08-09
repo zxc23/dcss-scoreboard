@@ -22,34 +22,38 @@ def read_commandline():
     description = "Run DCSS Scoreboard."
     epilog = "Specify DB_USER/DB_PASS environment variables if required."
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
-    parser.add_argument('--logdir',
-                        help="Override logfile source. Default: logfiles/",
-                        default="logfiles")
-    parser.add_argument('--urlbase',
-                        help="Override website base URL. Default: file:///CWD")
-    parser.add_argument('--database',
-                        choices=('sqlite', 'postgres'),
-                        default='sqlite',
-                        help="Specify the database backend  (default: sqlite)")
-    parser.add_argument('--download-logfiles',
-                        action='store_true',
-                        help="Download logfiles first.")
-    parser.add_argument('--download-servers', nargs='*', metavar="SRC",
-                        help="Only download logfiles from these servers.")
-    parser.add_argument('--skip-import',
-                        action='store_true',
-                        help="Skip log import.")
-    parser.add_argument('--skip-scoring',
-                        action='store_true',
-                        help="Skip scoring.")
-    parser.add_argument('--skip-website',
-                        action='store_true',
-                        help="Skip website generation.")
-    parser.add_argument('--rebuild-player-pages',
-                        action='store_true',
-                        help="Re-write all player pages for the website.")
-    parser.add_argument('--db-credentials', metavar="user:passwd",
-                        help="Database credentials")
+    parser.add_argument(
+        '--logdir',
+        help="Override logfile source. Default: logfiles/",
+        default="logfiles")
+    parser.add_argument(
+        '--urlbase', help="Override website base URL. Default: file:///CWD")
+    parser.add_argument(
+        '--database',
+        choices=('sqlite', 'postgres'),
+        default='sqlite',
+        help="Specify the database backend  (default: sqlite)")
+    parser.add_argument(
+        '--download-logfiles',
+        action='store_true',
+        help="Download logfiles first.")
+    parser.add_argument(
+        '--download-servers',
+        nargs='*',
+        metavar="SRC",
+        help="Only download logfiles from these servers.")
+    parser.add_argument(
+        '--skip-import', action='store_true', help="Skip log import.")
+    parser.add_argument(
+        '--skip-scoring', action='store_true', help="Skip scoring.")
+    parser.add_argument(
+        '--skip-website', action='store_true', help="Skip website generation.")
+    parser.add_argument(
+        '--rebuild-player-pages',
+        action='store_true',
+        help="Re-write all player pages for the website.")
+    parser.add_argument(
+        '--db-credentials', metavar="user:passwd", help="Database credentials")
     args = parser.parse_args()
     return args
 
@@ -61,8 +65,8 @@ def main():
     scoreboard.orm.setup_database(args.database, args.db_credentials)
 
     if args.download_logfiles:
-        scoreboard.sources.download_sources(args.logdir,
-                                            servers=args.download_servers)
+        scoreboard.sources.download_sources(
+            args.logdir, servers=args.download_servers)
 
     if not args.skip_import:
         scoreboard.log_import.load_logfiles(logdir=args.logdir)
@@ -75,8 +79,8 @@ def main():
     if not args.skip_website:
         if args.rebuild_player_pages:
             players = None
-        scoreboard.write_website.write_website(urlbase=args.urlbase,
-                                               players=players)
+        scoreboard.write_website.write_website(
+            urlbase=args.urlbase, players=players)
 
 
 if __name__ == '__main__':

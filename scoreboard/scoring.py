@@ -29,8 +29,8 @@ def is_grief(s, game):
     """
 
     # Only an account's first game can be auto-detected as a grief
-    first_game = model.list_games(s, account=game.account, reverse_order=True,
-                                  limit=1)
+    first_game = model.list_games(
+        s, account=game.account, reverse_order=True, limit=1)
     if first_game != game:
         return False
 
@@ -147,8 +147,9 @@ def great_race(race, player_stats, achievements):
     if player_stats['race_wins'][race] < len(const.PLAYABLE_ROLES):
         return False
     # Check for completion
-    roles_won = set(get_game(gid)['char'][2:] for gid in player_stats['wins']
-                    if race == get_game(gid).rc)
+    roles_won = set(
+        get_game(gid)['char'][2:] for gid in player_stats['wins']
+        if race == get_game(gid).rc)
     if not const.PLAYABLE_ROLES - roles_won:
         achievements[achievement] = True
         return True
@@ -174,8 +175,9 @@ def great_role(role, player_stats, achievements):
     if player_stats['role_wins'][role] < len(const.PLAYABLE_RACES):
         return False
     # Check for completion
-    races_won = set(get_game(gid)['char'][:2] for gid in player_stats['wins']
-                    if role == get_game(gid)['char'][2:])
+    races_won = set(
+        get_game(gid)['char'][:2] for gid in player_stats['wins']
+        if role == get_game(gid)['char'][2:])
     if not const.PLAYABLE_RACES - races_won:
         achievements[achievement] = True
         return True
@@ -201,7 +203,7 @@ def handle_player_streak(s, game: orm.Game):
                 return
         game.streak = current_streak
 
-    else: # Game wasn't won
+    else:  # Game wasn't won
         # If there was no active streak, we're done
         if not current_streak:
             return

@@ -62,8 +62,8 @@ def prettycrawldate(d):
 
 def prettydate(d):
     """Jinja filter to convert datetime object to pretty text."""
-    return TIME_FORMAT.format(ts=d.isoformat(),
-                              t=d.strftime(PRETTY_TIME_FORMAT))
+    return TIME_FORMAT.format(
+        ts=d.isoformat(), t=d.strftime(PRETTY_TIME_FORMAT))
 
 
 def link_player(player, urlbase):
@@ -159,9 +159,10 @@ def _games_to_table(env,
 
     tbody = "\n".join(format_trow(game) for game in games)
 
-    return t.format(classes=const.TABLE_CLASSES,
-                    thead=thead if not skip_header else '',
-                    tbody=tbody)
+    return t.format(
+        classes=const.TABLE_CLASSES,
+        thead=thead if not skip_header else '',
+        tbody=tbody)
 
 
 def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
@@ -214,9 +215,9 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
                <th>Games</th>
                <th class="date-table-col text-xs-right">First Win</th>
                <th class="date-table-col text-xs-right">Last Win</th>
-               {loss}""".format(player=''
-                                if not show_player else '<th>Player</th>',
-                                loss='' if not show_loss else '<th>Loss</th>')
+               {loss}""".format(
+        player='' if not show_player else '<th>Player</th>',
+        loss='' if not show_loss else '<th>Loss</th>')
 
     trow = """<tr>
         <td class="text-xs-right">{wins}</td>
@@ -230,10 +231,11 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
     if limit:
         streaks = streaks[:limit]
 
-    return t.format(classes=const.TABLE_CLASSES,
-                    thead=thead,
-                    tbody="\n".join(format_trow(streak, show_player, show_loss)
-                                    for streak in streaks))
+    return t.format(
+        classes=const.TABLE_CLASSES,
+        thead=thead,
+        tbody="\n".join(
+            format_trow(streak, show_player, show_loss) for streak in streaks))
 
 
 def mosthighscorestotable(highscores):
@@ -313,7 +315,7 @@ def morgue_link(game, text="Morgue"):
 
 def percentage(n, digits=2):
     """Convert a number from 0-1 to a percentage."""
-    return "%s" % round(n*100, digits)
+    return "%s" % round(n * 100, digits)
 
 
 def shortest_win(games):
@@ -341,25 +343,26 @@ def generic_games_to_table(env, data):
 @jinja2.environmentfilter
 def generic_highscores_to_table(env, data, show_player=True):
     return _games_to_table(
-        env, data, show_player=show_player,
-        winning_games=True)
+        env, data, show_player=show_player, winning_games=True)
 
 
 @jinja2.environmentfilter
 def species_highscores_to_table(env, data):
-    return _games_to_table(env,
-                           data,
-                           show_player=True,
-                           prefix_col=lambda g: g.species.name,
-                           prefix_col_title='Species',
-                           winning_games=True)
+    return _games_to_table(
+        env,
+        data,
+        show_player=True,
+        prefix_col=lambda g: g.species.name,
+        prefix_col_title='Species',
+        winning_games=True)
 
 
 @jinja2.environmentfilter
 def background_highscores_to_table(env, data):
-    return _games_to_table(env,
-                           data,
-                           show_player=True,
-                           prefix_col=lambda g: g.background.name,
-                           prefix_col_title='Background',
-                           winning_games=True)
+    return _games_to_table(
+        env,
+        data,
+        show_player=True,
+        prefix_col=lambda g: g.background.name,
+        prefix_col_title='Background',
+        winning_games=True)

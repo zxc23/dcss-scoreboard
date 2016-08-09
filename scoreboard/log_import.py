@@ -78,8 +78,8 @@ def load_logfile(logfile, src):
     # We store the data as bytes rather than lines since file.seek is fast
     seek_pos = model.get_logfile_progress(s, logfile).bytes_parsed
 
-    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos) if
-                                seek_pos else ''))
+    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos)
+                                if seek_pos else ''))
     s = orm.get_session()
     f = open(logfile, encoding='utf-8')
     f.seek(seek_pos)
