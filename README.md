@@ -3,6 +3,7 @@
 A bundle of scripts to create a scoreboard website for DCSS.
 
 [![Code Climate](https://codeclimate.com/github/zxc23/dcss-scoreboard/badges/gpa.svg)](https://codeclimate.com/github/zxc23/dcss-scoreboard)
+[![Build Status](https://travis-ci.org/zxc23/dcss-scoreboard.svg?branch=master)](https://travis-ci.org/zxc23/dcss-scoreboard)
 
 ## Why make another scoreboard?
 
