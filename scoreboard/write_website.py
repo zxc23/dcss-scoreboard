@@ -118,8 +118,8 @@ def write_index(s, env):
 def write_streaks(s, env):
     print("Writing streaks")
     template = env.get_template('streaks.html')
-    active_streaks = model.get_streaks(s, active=True, sort_by_length=True)
-    best_streaks = model.get_streaks(s, sort_by_length=True, limit=10)
+    active_streaks = model.get_streaks(s, active=True)
+    best_streaks = model.get_streaks(s, limit=10)
     _write_file(path=os.path.join(WEBSITE_DIR, 'streaks.html'),
                 data=template.render(active_streaks=active_streaks,
                                      best_streaks=best_streaks))

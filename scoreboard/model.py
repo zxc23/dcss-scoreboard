@@ -649,39 +649,36 @@ def get_player_streak(s: sqlalchemy.orm.session.Session, player:
 @util.timer
 def get_streaks(s: sqlalchemy.orm.session.Session,
                 active: Optional[bool]=None,
-                sort_by_length: Optional[bool] = False,
                 limit: Optional[int]=None,
                 ) \
         -> Sequence[Streak]:
-    """Get streaks.
+    """Get streaks, ordered by length (longest first).
 
     Parameters:
         active: only return streaks with this active flag
-        sort_by_length: sort the returned streaks by length
         limit: only return (up to) limit results
 
     Returns:
         List of active streaks.
     """
     start = time.time()
-    q = s.query(Streak)
+    # The following code is a translation of this basic SQL:
+    # SELECT streaks.*, count(games.streak_id) as streak_length
+    # FROM streaks
+    # JOIN games ON (streaks.id = games.streak_id)
+    # GROUP BY streaks.id
+    # ORDER BY streak_length DESC
+    streak_length = func.count(Game.streak_id).label('streak_length')
+    q = s.query(Streak, streak_length).join(Streak.games)
+    q = q.group_by(Streak.id).having(streak_length > 1)
+    q = q.order_by(streak_length.desc())
     if active is not None:
         q = q.filter(Streak.active == sqlalchemy.true())
-    if sort_by_length:
-        streaks = q.all()
-        # XXX TODO THIS FILTERING/SORTING IS SO SLOW - DO IT IN SQL
-        print("Collected all streaks after %s secs" % (time.time() - start))
-        streaks = (i for i in streaks if len(i.games) > 1)
-        print("Removed one-game streaks after %s secs" % (time.time() - start))
-        streaks.sort(
-            key=lambda st: s.query(Game).filter(Game.streak == st).count(),
-            reverse=True)
-        print("Sorted streaks after %s secs" % (time.time() - start))
-        # list[:None] returns list -- so this works even if limit=None
-        return streaks[:limit]
-    else:
-        if limit is not None:
-            q = q.limit(limit)
-        streaks = q.all()
-        streaks = [i for i in streaks if len(i.games) > 1]  # XXX OH GOD
-        return streaks
+    if limit is not None:
+        q = q.limit(limit)
+    streaks = q.all()
+    # Since we added a column to the query, the result format is:
+    # ((Streak, length), (Streak, length), ...)
+    # It's annoying to deal with a custom format, and recalculating the streak
+    # length for a few streaks is NBD, so just return a list of Streaks
+    return [t.Streak for t in streaks]
