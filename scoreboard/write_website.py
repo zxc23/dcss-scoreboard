@@ -78,6 +78,7 @@ def achievement_data():
 
 
 def setup_website_dir(env, path, all_players):
+    """Create the website dir and add static content."""
     print("Writing HTML to %s" % path)
     if not os.path.exists(path):
         print("mkdir %s/" % path)
@@ -101,6 +102,7 @@ def setup_website_dir(env, path, all_players):
 
 
 def render_index(s, template):
+    """Render the index page."""
     return template.render(
         recent_wins=model.list_games(
             s, winning=True, limit=const.GLOBAL_TABLE_LENGTH),
@@ -110,6 +112,7 @@ def render_index(s, template):
 
 
 def write_index(s, env):
+    """Write the index page."""
     print("Writing index")
     template = env.get_template('index.html')
     data = render_index(s, template)
@@ -117,6 +120,7 @@ def write_index(s, env):
 
 
 def write_streaks(s, env):
+    """Write the streak page."""
     print("Writing streaks")
     template = env.get_template('streaks.html')
     active_streaks = model.get_streaks(s, active=True)
@@ -128,6 +132,7 @@ def write_streaks(s, env):
 
 
 def render_highscores(s, template):
+    """Render the highscores page."""
     overall_highscores = model.highscores(s)
     species_highscores = model.species_highscores(s)
     background_highscores = model.background_highscores(s)
@@ -146,6 +151,7 @@ def render_highscores(s, template):
 
 
 def write_highscores(s, env):
+    """Write the highscores page."""
     print("Writing highscores")
     template = env.get_template('highscores.html')
     data = render_highscores(s, template)
