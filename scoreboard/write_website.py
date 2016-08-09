@@ -98,7 +98,6 @@ def setup_website_dir(env, path, all_players):
                 data=jsmin.jsmin(js_template.render()))
 
 
-@util.timer
 def render_index(s, template):
     return template.render(recent_wins=model.list_games(
         s, winning=True, limit=const.GLOBAL_TABLE_LENGTH),
@@ -114,7 +113,6 @@ def write_index(s, env):
     _write_file(path=os.path.join(WEBSITE_DIR, 'index.html'), data=data)
 
 
-@util.timer
 def write_streaks(s, env):
     print("Writing streaks")
     template = env.get_template('streaks.html')
@@ -125,7 +123,6 @@ def write_streaks(s, env):
                                      best_streaks=best_streaks))
 
 
-@util.timer
 def render_highscores(s, template):
     overall_highscores = model.highscores(s)
     species_highscores = model.species_highscores(s)
@@ -214,7 +211,6 @@ def write_player_page(s, player_html_path: str, name: str, data: str) -> None:
     _write_file(path=os.path.join(player_html_path, name + '.html'), data=data)
 
 
-@util.timer
 def write_player_pages(s, env, players):
     """Write all player pages."""
     print("Writing %s player pages... " % len(players))
