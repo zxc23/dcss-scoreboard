@@ -667,10 +667,12 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     # FROM streaks
     # JOIN games ON (streaks.id = games.streak_id)
     # GROUP BY streaks.id
+    # HAVING streak_length > 1
     # ORDER BY streak_length DESC
     streak_length = func.count(Game.streak_id).label('streak_length')
     q = s.query(Streak, streak_length).join(Streak.games)
-    q = q.group_by(Streak.id).having(streak_length > 1)
+    q = q.group_by(Streak.id)
+    q = q.having(streak_length > 1)
     q = q.order_by(streak_length.desc())
     if active is not None:
         q = q.filter(Streak.active == sqlalchemy.true())
