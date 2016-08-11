@@ -133,7 +133,7 @@ GOD_NAME_FIXUPS = {
     'Lugafu': 'Trog',
     'Lucy': 'Lugonu',
 }
-RACE_SHORTNAME_FIXUPS = {'Ke': 'Te', }
+RACE_SHORTNAME_FIXUPS = { 'Ke': 'Te', 'DS': 'Ds', 'DG': 'Dg' }
 RACE_NAME_FIXUPS = {
     'Yellow Draconian': 'Draconian',
     'Grey Draconian': 'Draconian',
