@@ -26,13 +26,15 @@ def calculate_game_gid(game):
 
 def candidate_logfiles(logdir):
     """Yield (logfile, src) tuples from logdir."""
-    for d in os.scandir(logdir):
+    # Sorting by name is purely for beauty
+    # But maybe also a little to improve determinism
+    for d in sorted(os.scandir(logdir), key=lambda i:i.name.lower())):
         if not d.is_dir():
             continue
         src = d.name
         src_path = os.path.join(logdir, src)
         print("Loading logfiles from %s" % src_path)
-        for f in os.scandir(src_path):
+        for f in sorted(os.scandir(src_path), key=lambda i:i.name.lower()):
             f_path = os.path.join(src_path, f.name)
             if not f.is_file() or f.stat().st_size == 0:
                 continue
