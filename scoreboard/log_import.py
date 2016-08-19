@@ -28,7 +28,7 @@ def candidate_logfiles(logdir):
     """Yield (logfile, src) tuples from logdir."""
     # Sorting by name is purely for beauty
     # But maybe also a little to improve determinism
-    for d in sorted(os.scandir(logdir), key=lambda i:i.name.lower())):
+    for d in sorted(os.scandir(logdir), key=lambda i:i.name.lower()):
         if not d.is_dir():
             continue
         src = d.name
