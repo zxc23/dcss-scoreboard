@@ -3,7 +3,6 @@
 import os
 import re
 import time
-import multiprocessing
 import traceback
 
 import sqlalchemy.exc
@@ -55,13 +54,8 @@ def load_logfiles(logdir):
     """
     print("Loading all logfiles")
     start = time.time()
-    p = multiprocessing.Pool()
-    jobs = []
     for candidate in candidate_logfiles(logdir):
-        jobs.append(p.apply_async(load_logfile, candidate))
-        # load_logfile(*candidate)
-    for job in jobs:
-        job.get()
+        load_logfile(*candidate)
     end = time.time()
     print("Loaded logfiles in %s secs" % round(end - start, 2))
 
