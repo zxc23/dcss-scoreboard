@@ -20,19 +20,27 @@ class DBError(BaseException):
     pass
 
 
-def _reraise_dberror(function: Callable) -> Callable:
-    """Re-raise errors from decorated function as DBError.
+class DBIntegrityError(BaseException):
+    """Generic wrapper for sqlalchemy sqlalchemy.exc.IntegrityError errors."""
 
-    Doesn't re-wrap DBError exceptions.
+    pass
+
+
+def _reraise_dberror(function: Callable) -> Callable:
+    """Re-raise errors from decorated function as DBError or DBIntegrityError.
+
+    Doesn't re-wrap DBError/DBIntegrityError exceptions.
     """
 
     def f(*args, **kwargs):
-        """Re-raise exceptions as GaiaError."""
+        """Wrap Sqlalchemy errors."""
         try:
             return function(*args, **kwargs)
         except BaseException as e:
             if isinstance(e, DBError):
                 raise
+            elif isinstance(e, sqlalchemy.exc.IntegrityError):
+                raise DBIntegrityError from e
             else:
                 raise DBError from e
 
