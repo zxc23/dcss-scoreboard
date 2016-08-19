@@ -13,9 +13,8 @@ import jinja2
 
 from . import model
 from . import webutils
-import scoreboard.constants as const
 from . import orm
-from . import util
+from . import constants as const
 
 WEBSITE_DIR = 'website'
 
@@ -218,7 +217,7 @@ def render_player_page(s, template, player: orm.Player, global_records:
         active_streak=active_streak)
 
 
-def write_player_page(s, player_html_path: str, name: str, data: str) -> None:
+def write_player_page(player_html_path: str, name: str, data: str) -> None:
     """Write an individual player's page."""
     _write_file(path=os.path.join(player_html_path, name + '.html'), data=data)
 
@@ -236,7 +235,7 @@ def write_player_pages(s, env, players):
     n = 0
     for player in players:
         data = render_player_page(s, template, player, global_records)
-        write_player_page(s, player_html_path, player.name, data)
+        write_player_page(player_html_path, player.name, data)
         n += 1
         if not n % 100:
             print(n)
@@ -280,7 +279,3 @@ def write_website(players, urlbase=None):
     write_player_pages(s, env, players)
 
     print("Wrote website in %s seconds" % round(time.time() - start, 2))
-
-
-if __name__ == "__main__":
-    write_website()

@@ -20,7 +20,7 @@ Base = declarative_base()  # type: sqlalchemy.ext.declarative.api.DeclarativeMet
 Session = None
 
 
-@characteristic.with_repr(["name"])
+@characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class Server(Base):
     """A DCSS server -- a source of logfiles/milestones."""
 
@@ -42,7 +42,8 @@ AwardedAchievements = Table(
         nullable=False), )
 
 
-@characteristic.with_repr(["name", "server"])
+@characteristic.with_repr(  # pylint: disable=too-few-public-methods
+    ["name", "server"])
 class Account(Base):
     """An account -- a single username on a single server."""
 
@@ -71,7 +72,7 @@ class Account(Base):
         'name', 'server_id', name='name-server_id'), )
 
 
-@characteristic.with_repr(["name"])
+@characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class Player(Base):
     """A player -- a collection of accounts with shared metadata."""
 
@@ -84,7 +85,7 @@ class Player(Base):
     streak = relationship("Streak", uselist=False, back_populates="player")
 
 
-@characteristic.with_repr(["short"])
+@characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
 class Species(Base):
     """A DCSS player species."""
 
@@ -96,7 +97,7 @@ class Species(Base):
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
-@characteristic.with_repr(["short"])
+@characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
 class Background(Base):
     """A DCSS player background."""
 
@@ -109,7 +110,7 @@ class Background(Base):
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
-@characteristic.with_repr(["name"])
+@characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class God(Base):
     """A DCSS god."""
 
@@ -120,7 +121,7 @@ class God(Base):
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
-@characteristic.with_repr(["v"])
+@characteristic.with_repr(["v"])  # pylint: disable=too-few-public-methods
 class Version(Base):
     """A DCSS version."""
 
@@ -130,7 +131,7 @@ class Version(Base):
         String(10), nullable=False, index=True, unique=True)  # type: str
 
 
-@characteristic.with_repr(["short"])
+@characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
 class Branch(Base):
     """A DCSS Branch (Dungeon, Lair, etc)."""
 
@@ -144,7 +145,8 @@ class Branch(Base):
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
-@characteristic.with_repr(["branch", "level"])
+@characteristic.with_repr(  # pylint: disable=too-few-public-methods
+    ["branch", "level"])
 class Place(Base):
     """A DCSS Place (D:8, Pan:1, etc).
 
@@ -171,7 +173,7 @@ class Place(Base):
         'branch_id', 'level', name='branch_id-level'), )
 
 
-@characteristic.with_repr(["name"])
+@characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class Ktyp(Base):
     """A DCSS ktyp (mon, beam, etc)."""
 
@@ -181,7 +183,8 @@ class Ktyp(Base):
         String(20), nullable=False, index=True, unique=True)  # type: str
 
 
-@characteristic.with_repr(["player", "id"])
+@characteristic.with_repr(  # pylint: disable=too-few-public-methods
+    ["player", "id"])
 class Streak(Base):
     """A streak of wins.
 
@@ -205,7 +208,7 @@ class Streak(Base):
         postgresql_where=active == sqlalchemy.true()), )
 
 
-@characteristic.with_repr(["gid"])
+@characteristic.with_repr(["gid"])  # pylint: disable=too-few-public-methods
 class Game(Base):
     """A single DCSS game."""
 
@@ -278,7 +281,8 @@ class Game(Base):
         return '{}{}'.format(self.species.short, self.background.short)
 
 
-@characteristic.with_repr(["logfile"])
+@characteristic.with_repr(  # pylint: disable=too-few-public-methods
+    ["logfile"])
 class LogfileProgress(Base):
     """Logfile import progress."""
 
@@ -287,7 +291,7 @@ class LogfileProgress(Base):
     bytes_parsed = Column(Integer, nullable=False, default=0)  # type: int
 
 
-@characteristic.with_repr(["id"])
+@characteristic.with_repr(["id"])  # pylint: disable=too-few-public-methods
 class Achievement(Base):
     """Achievements."""
 
@@ -300,7 +304,8 @@ class Achievement(Base):
         "Player", secondary=AwardedAchievements, back_populates="achievements")
 
 
-def sqlite_performance_over_safety(dbapi_con, con_record) -> None:
+def sqlite_performance_over_safety(
+        dbapi_con, con_record) -> None:  # pylint: disable=unused-argument
     """Significantly speeds up inserts but will break on crash."""
     dbapi_con.execute('PRAGMA journal_mode = MEMORY')
     dbapi_con.execute('PRAGMA synchronous = OFF')
@@ -328,7 +333,7 @@ def setup_database(database: str, credentials: Optional[str]=None) -> None:
     Base.metadata.create_all(engine)
 
     # Create the global session manager
-    global Session
+    global Session  # pylint: disable=global-statement
     Session = sessionmaker(bind=engine)
 
     sess = Session()

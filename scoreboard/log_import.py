@@ -5,8 +5,6 @@ import re
 import time
 import traceback
 
-import sqlalchemy.exc
-
 import scoreboard.constants as const
 import scoreboard.model as model
 import scoreboard.orm as orm
@@ -17,6 +15,7 @@ LINE_SPLIT_PATTERN = re.compile('(?<!:):(?!:)')
 
 
 class LogImportError(Exception):
+    """Simple error wrapper."""
     pass
 
 
@@ -115,7 +114,6 @@ def handle_line(s, line, src):
             # Probably via an internal function that batches
             model.add_game(s, game)
         except model.DBError as e:
-            problem = True
             # print("Error adding game, rolling back (%s): %s" % (e.__cause__, game))
             s.rollback()
             tries += 1
@@ -141,6 +139,7 @@ def parse_field(k, v):
         except ValueError:
             pass
     if isinstance(v, str):
+        # pylint: disable=no-member
         v = v.replace("::", ":")  # Undo logfile escaping
     return k, v
 
@@ -182,7 +181,7 @@ def parse_line(line, src):
     game['gid'] = calculate_game_gid(game)
     # Data cleansing
     # Simplify version to 0.17/0.18/etc
-    game['v'] = re.match('(0.\d+)', game['v']).group()
+    game['v'] = re.match(r'(0.\d+)', game['v']).group()
     game.setdefault('tmsg', '')
     if 'god' not in game:
         game['god'] = 'Atheist'

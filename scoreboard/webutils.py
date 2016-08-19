@@ -4,7 +4,6 @@ import datetime
 
 import jinja2
 
-import scoreboard.model as model
 import scoreboard.modelutils as modelutils
 import scoreboard.constants as const
 
@@ -33,7 +32,7 @@ def prettydur(duration, hours=False):
         prettydur(0, hours=True) => '1'
         prettydur(86400, hours=True) => '24'
     """
-    if type(duration) != int:
+    if not isinstance(duration, int):
         duration = int(duration)
     delta = datetime.timedelta(seconds=duration)
     if hours:
@@ -271,6 +270,7 @@ def mosthighscorestotable(highscores):
 
 
 def recordsformatted(records):
+    """Show any records a player holds."""
     result = """{race}
                 {role}
                 {god}
@@ -337,17 +337,20 @@ def highscore(games):
 
 @jinja2.environmentfilter
 def generic_games_to_table(env, data):
+    """Convert list of games into a HTML table."""
     return _games_to_table(env, data, show_player=False, winning_games=False)
 
 
 @jinja2.environmentfilter
 def generic_highscores_to_table(env, data, show_player=True):
+    """Convert list of winning games into a HTML table."""
     return _games_to_table(
         env, data, show_player=show_player, winning_games=True)
 
 
 @jinja2.environmentfilter
 def species_highscores_to_table(env, data):
+    """Convert list of games for each species into a HTML table."""
     return _games_to_table(
         env,
         data,
@@ -359,6 +362,7 @@ def species_highscores_to_table(env, data):
 
 @jinja2.environmentfilter
 def background_highscores_to_table(env, data):
+    """Convert list of games for each background into a HTML table."""
     return _games_to_table(
         env,
         data,
