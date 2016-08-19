@@ -83,12 +83,7 @@ def load_logfile(logfile, src):
         # skip blank lines
         if not line.strip():
             continue
-        try:
-            handle_line(s, line, src)
-        except LogImportError:
-            print("Couldn't import %s. Exception follows:" % line)
-            print(traceback.format_exc())
-        else:
+        if handle_line(s, line, src):
             new_games += 1
     s.commit()
     # Save the new number of lines processed in the database
@@ -108,22 +103,17 @@ def handle_line(s, line, src):
     if game is None:
         return False
     # Store the game in the database
-    tries = 0
-    success = False
-    while not success:
-        try:
-            # TODO should use model.add_games
-            # Probably via an internal function that batches
-            model.add_game(s, game)
-        except model.DBError as e:
-            # print("Error adding game, rolling back (%s): %s" % (e.__cause__, game))
-            s.rollback()
-            tries += 1
-            if tries == 3:
-                raise LogImportError from e
-        else:
-            success = True
-    return success
+    try:
+        model.add_game(s, game)
+    except model.DBError as e:
+        print("Couldn't import %s. Exception follows:" % line)
+        print(traceback.format_exc())
+        print()
+        return False
+    except model.DBIntegrityError as e:
+        print("Tried to import duplicate game: %s" % game['gid'])
+        return False
+    return True
 
 
 def parse_field(k, v):
