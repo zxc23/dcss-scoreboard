@@ -10,9 +10,9 @@ install:
   - pip install yapf pylint
   - pip install -r requirements.txt
 script:
-  - echo "Checking formatting..." && echo -en 'travis_fold:start:yapf\\r'
+  - echo "yapf..." && echo -en 'travis_fold:start:yapf\\r'
   - test/yapf.sh
   - echo -en 'travis_fold:end:yapf\\r'
-  - echo "Linting..." && echo -en 'travis_fold:start:pylint\\r'
+  - echo "pylint..." && echo -en 'travis_fold:start:pylint\\r'
   - pylint scoreboard
   - echo -en 'travis_fold:end:pylint\\r'
