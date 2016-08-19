@@ -28,13 +28,13 @@ def candidate_logfiles(logdir):
     """Yield (logfile, src) tuples from logdir."""
     # Sorting by name is purely for beauty
     # But maybe also a little to improve determinism
-    for d in sorted(os.scandir(logdir), key=lambda i:i.name.lower()):
+    for d in sorted(os.scandir(logdir), key=lambda i: i.name.lower()):
         if not d.is_dir():
             continue
         src = d.name
         src_path = os.path.join(logdir, src)
         print("Loading logfiles from %s" % src_path)
-        for f in sorted(os.scandir(src_path), key=lambda i:i.name.lower()):
+        for f in sorted(os.scandir(src_path), key=lambda i: i.name.lower()):
             f_path = os.path.join(src_path, f.name)
             if not f.is_file() or f.stat().st_size == 0:
                 continue
@@ -105,12 +105,12 @@ def handle_line(s, line, src):
     # Store the game in the database
     try:
         model.add_game(s, game)
-    except model.DBError as e:
+    except model.DBError:
         print("Couldn't import %s. Exception follows:" % line)
         print(traceback.format_exc())
         print()
         return False
-    except model.DBIntegrityError as e:
+    except model.DBIntegrityError:
         print("Tried to import duplicate game: %s" % game['gid'])
         return False
     return True
