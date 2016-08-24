@@ -245,7 +245,7 @@ BLACKLISTS = {'griefers': {},
                'notqw', 'jw', 'parabodrick', 'hyperqwbe', 'cashybrid',
                'tstbtto', 'parabolic', 'oppbolic', 'ew', 'rushxxi', 'gaubot',
                'cojitobot', 'paulcdejean', 'otabotab', 'nakatomy', 'testingqw',
-               'beemell', 'beem', 'drasked', 'phybot'}}
+               'beemell', 'beem', 'drasked', 'phybot', 'khrogbot'}}
 TABLE_CLASSES = "table table-hover table-striped"
 LOGFILE_REGEX = re.compile('(logfile|allgames)')
 MILESTONE_REGEX = re.compile('milestone')
