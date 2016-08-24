@@ -3,6 +3,7 @@
 import os
 import json
 import time
+import datetime
 import subprocess
 import collections
 
@@ -57,6 +58,7 @@ def jinja_env(urlbase, s):
     env.globals['playable_backgrounds'] = model.list_backgrounds(
         s, playable=True)
     env.globals['playable_gods'] = model.list_gods(s, playable=True)
+    env.globals['current_time'] = datetime.datetime.utcnow()
 
     if urlbase:
         env.globals['urlbase'] = urlbase
