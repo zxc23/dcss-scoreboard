@@ -100,13 +100,13 @@ def handle_player_streak(s, game: orm.Game):
         game.streak = current_streak
 
     else:  # Game wasn't won
-        # If there was no active streak, we're done
+        # If there is no active streak, we're done
         if not current_streak:
             return
         # Ignore game if griefing detected
         if is_grief(s, game):
             return
-        # Close any active streak
+        # If the game is a non-grief loss, close the active streak
         current_streak.active = False
         s.add(current_streak)
 
@@ -120,6 +120,8 @@ def score_game(s, game: orm.Game):
 
     Returns: Nothing
     """
+    if game.account.blacklisted:
+        return
     handle_player_streak(s, game)
     # Increment wins
     if game.ktyp == 'winning':
@@ -147,8 +149,6 @@ def score_games():
         if not games:
             break
         for game in games:
-            if game.account.blacklisted:
-                continue
             score_game(s, game)
             game.scored = True
             s.add(game)
