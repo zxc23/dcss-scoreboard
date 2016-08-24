@@ -381,7 +381,8 @@ def list_accounts(s: sqlalchemy.orm.session.Session,
     """
     q = s.query(Account)
     if blacklisted is not None:
-        q = q.filter(Account.blacklisted == blacklisted)
+        q = q.filter(Account.blacklisted == sqlalchemy.true()
+                     if blacklisted else sqlalchemy.false())
     results = q.all()
     return results
 
@@ -399,7 +400,8 @@ def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *,
     q = s.query(cls)
     if playable is not None:
         # Type[Any] has no attribute "playable"
-        q = q.filter(cls.playable == playable)  # type: ignore
+        q = q.filter(cls.playable == sqlalchemy.true()
+                     if playable else sqlalchemy.false())
     return q.order_by(getattr(cls, 'name')).all()
 
 
@@ -472,7 +474,8 @@ def list_games(s: sqlalchemy.orm.session.Session,
     if account is not None:
         q = q.join(Game.account).filter(Account.id == account.id)
     if scored is not None:
-        q = q.filter(Game.scored == scored)
+        q = q.filter(Game.scored == sqlalchemy.true()
+                     if scored else sqlalchemy.false())
     if gid is not None:
         q = q.filter(Game.gid == gid)
     if winning is not None:
@@ -673,7 +676,8 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     q = q.having(streak_length > 1)
     q = q.order_by(streak_length.desc())
     if active is not None:
-        q = q.filter(Streak.active == sqlalchemy.true())
+        q = q.filter(Streak.active == sqlalchemy.true()
+                     if active else sqlalchemy.false())
     if limit is not None:
         q = q.limit(limit)
     streaks = q.all()
