@@ -55,7 +55,8 @@ class Account(Base):
     server = relationship("Server")
     blacklisted = Column(Boolean, nullable=False, default=False)  # type: bool
     player_id = Column(
-        Integer, ForeignKey('players.id'), nullable=False)  # type: int
+        Integer, ForeignKey('players.id'), nullable=False,
+        index=True)  # type: int
     player = relationship("Player")
 
     @property
