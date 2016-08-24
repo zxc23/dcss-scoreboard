@@ -686,3 +686,13 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     # It's annoying to deal with a custom format, and recalculating the streak
     # length for a few streaks is NBD, so just return a list of Streaks
     return [t.Streak for t in streaks]
+
+
+def count_games(s: sqlalchemy.orm.session.Session,
+                *,
+                scored: Optional[bool]=None) -> int:
+    q = s.query(Game)
+    if scored is not None:
+        q = q.filter(Game.scored == sqlalchemy.true()
+                     if scored else sqlalchemy.false())
+    return q.count()

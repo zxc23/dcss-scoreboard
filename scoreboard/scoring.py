@@ -136,13 +136,13 @@ def score_game(s, game: orm.Game):
 
 def score_games():
     """Score all unscored games."""
-    print("Scoring all games...")
     start = time.time()
-    scored = 0
-
     scored_players = set()
-
     s = orm.get_session()
+    scored = model.count_games(s, scored=True)
+    new_scored = 0
+    unscored = model.count_games(s, scored=False)
+    print("Scoring %s games (%s previously scored)..." % (unscored, scored))
 
     while True:
         games = model.list_games(s, scored=False, limit=100)
@@ -153,16 +153,16 @@ def score_games():
             game.scored = True
             s.add(game)
             scored_players.add(game.player.name)
-            scored += 1
-            if scored and scored % 10000 == 0:
-                print(scored)
+            new_scored += 1
+            if new_scored and new_scored % 10000 == 0:
+                print(new_scored)
         s.commit()
 
     # Add manual achievements
-    add_manual_achievements(s)
+    add_all_manual_achievements(s)
 
     end = time.time()
     print("Scored %s new games (for %s players) in %s secs" %
-          (scored, len(scored_players), round(end - start, 2)))
+          (new_scored, len(scored_players), round(end - start, 2)))
 
     return scored_players
