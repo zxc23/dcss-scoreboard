@@ -43,18 +43,17 @@ def is_grief(s, game):
     return False
 
 
-def add_manual_achievements(s):
+def add_all_manual_achievements(s):
     """Add manual achievements to players' stats."""
+    print("Adding manual achievements")
     for name, achievements in const.MANUAL_ACHIEVEMENTS.items():
         player = model.get_player(s, name)
-        for achievement in achievements.keys():
-            cheevo = model.get_achievement(s, achievement)
-            if cheevo and cheevo not in player.achievements:
-                player.achievements.append(cheevo)
+        achievements = achievements.keys()
+        for achievement in achievements:
+            achievement = model.get_achievement(s, achievement)
+            if achievement not in player.achievements:
+                player.achievements.append(achivement)
                 s.add(player)
-            elif not cheevo:
-                print("Warning: couldn't find manually specified achievement"
-                      " %s in the database!" % achievement)
     s.commit()
 
 
