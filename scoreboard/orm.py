@@ -265,7 +265,9 @@ class Game(Base):
         # These combined indexes help find various highscores
         Index('species_highscore_index', species_id, score),
         Index('background_highscore_index', background_id, score),
-        Index('combo_highscore_index', species_id, background_id, score), )
+        Index('combo_highscore_index', species_id, background_id, score),
+        Index('fastest_highscore_index', ktyp_id, dur),
+        Index('shortest_highscore_index', ktyp_id, turn), )
 
     @property
     def player(self) -> Player:
