@@ -260,6 +260,12 @@ class Game(Base):
     streak_id = Column(Integer, ForeignKey('streaks.id'))  # type: int
     streak = relationship("Streak")
 
+    __table_args__ = (
+        # These combined indexes help find various highscores
+        Index('species_highscore_index', species_id, score),
+        Index('background_highscore_index', background_id, score),
+        Index('combo_highscore_index', species_id, background_id, score), )
+
     @property
     def player(self) -> Player:
         """Convenience shortcut to access player."""
