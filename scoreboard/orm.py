@@ -257,7 +257,8 @@ class Game(Base):
     scored = Column(
         Boolean, default=False, nullable=False, index=True)  # type: bool
 
-    streak_id = Column(Integer, ForeignKey('streaks.id'))  # type: int
+    streak_id = Column(
+        Integer, ForeignKey('streaks.id'), index=True)  # type: int
     streak = relationship("Streak")
 
     __table_args__ = (
