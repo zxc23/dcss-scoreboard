@@ -139,6 +139,7 @@ GOD_NAME_FIXUPS = {
     'Lugafu': 'Trog',
     'Lucy': 'Lugonu',
 }
+BACKGROUND_SHORTNAME_FIXUPS = {'Am' : 'AM'}
 SPECIES_SHORTNAME_FIXUPS = {'Ke': 'Te', 'DS': 'Ds', 'DG': 'Dg', 'OP' : 'Op'}
 SPECIES_NAME_FIXUPS = {
     'Yellow Draconian': 'Draconian',

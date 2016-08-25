@@ -319,6 +319,10 @@ def create_game_mapping(s: sqlalchemy.orm.session.Session, data: dict) -> dict:
         oldrace = data['char'][:2]
         newrace = const.SPECIES_SHORTNAME_FIXUPS[oldrace]
         data['char'] = newrace + data['char'][2:]
+    if data['char'][2:] in const.BACKGROUND_SHORTNAME_FIXUPS:
+        oldbg = data['char'][2:]
+        newbg = const.BACKGROUND_SHORTNAME_FIXUPS[oldbg]
+        data['char'] = data['char'][:2] + newbg
     data['br'] = const.BRANCH_NAME_FIXUPS.get(data['br'], data['br'])
     data['ktyp'] = const.KTYP_FIXUPS.get(data['ktyp'], data['ktyp'])
 
