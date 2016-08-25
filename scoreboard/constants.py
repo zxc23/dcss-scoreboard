@@ -200,6 +200,7 @@ BRANCHES = {
     Branch('Hive', 'Hive', True, False),
     Branch('Blade', 'Hall of Blades', True, False),
     Branch('Forest', 'Enchanted Forest', True, False),
+    Branch('Shrine', 'Shrine', False, True),
 }
 MANUAL_ACHIEVEMENTS = {
     'comborobin': {
