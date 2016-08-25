@@ -39,7 +39,7 @@ def _reraise_dberror(function: Callable) -> Callable:
         except BaseException as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
-            elif isinstance(e, DBError):
+            elif isinstance(e, DBError) or isinstance(e, DBIntegrityError):
                 raise
             elif isinstance(e, sqlalchemy.exc.IntegrityError):
                 raise DBIntegrityError from e

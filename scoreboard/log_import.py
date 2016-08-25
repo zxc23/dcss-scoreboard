@@ -109,9 +109,11 @@ def handle_line(s, line, src):
         print("Couldn't import %s. Exception follows:" % line)
         print(traceback.format_exc())
         print()
+        s.rollback()
         return False
     except model.DBIntegrityError:
         print("Tried to import duplicate game: %s" % game['gid'])
+        s.rollback()
         return False
     return True
 
