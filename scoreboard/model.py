@@ -314,10 +314,10 @@ def create_game_mapping(s: sqlalchemy.orm.session.Session, data: dict) -> dict:
 
     # Normalise some data
     data['god'] = const.GOD_NAME_FIXUPS.get(data['god'], data['god'])
-    data['race'] = const.RACE_NAME_FIXUPS.get(data['race'], data['race'])
-    if data['char'][:2] in const.RACE_SHORTNAME_FIXUPS:
+    data['race'] = const.SPECIES_NAME_FIXUPS.get(data['race'], data['race'])
+    if data['char'][:2] in const.SPECIES_SHORTNAME_FIXUPS:
         oldrace = data['char'][:2]
-        newrace = const.RACE_SHORTNAME_FIXUPS[oldrace]
+        newrace = const.SPECIES_SHORTNAME_FIXUPS[oldrace]
         data['char'] = newrace + data['char'][2:]
     data['br'] = const.BRANCH_NAME_FIXUPS.get(data['br'], data['br'])
     data['ktyp'] = const.KTYP_FIXUPS.get(data['ktyp'], data['ktyp'])

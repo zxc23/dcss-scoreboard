@@ -3,49 +3,49 @@
 import re
 from collections import namedtuple
 
-Race = namedtuple('Race', ['short', 'full', 'playable'])
+Species = namedtuple('Species', ['short', 'full', 'playable'])
 Background = namedtuple('Background', ['short', 'full', 'playable'])
 God = namedtuple('God', ['name', 'playable'])
 
 SPECIES = {
-    Race('Ce', 'Centaur', True),
-    Race('DD', 'Deep Dwarf', True),
-    Race('DE', 'Deep Elf', True),
-    Race('Dg', 'Demigod', True),
-    Race('Dr', 'Draconian', True),
-    Race('Ds', 'Demonspawn', True),
-    Race('Fe', 'Felid', True),
-    Race('Fo', 'Formicid', True),
-    Race('Gh', 'Ghoul', True),
-    Race('Gr', 'Gargoyle', True),
-    Race('HE', 'High Elf', True),
-    Race('HO', 'Hill Orc', True),
-    Race('Ha', 'Halfling', True),
-    Race('Hu', 'Human', True),
-    Race('Ko', 'Kobold', True),
-    Race('Mf', 'Merfolk', True),
-    Race('Mi', 'Minotaur', True),
-    Race('Mu', 'Mummy', True),
-    Race('Na', 'Naga', True),
-    Race('Op', 'Octopode', True),
-    Race('Og', 'Ogre', True),
-    Race('Sp', 'Spriggan', True),
-    Race('Te', 'Tengu', True),
-    Race('Tr', 'Troll', True),
-    Race('VS', 'Vine Stalker', True),
-    Race('Vp', 'Vampire', True),
-    # Non-playable races
-    Race('El', 'Elf', False),
-    Race('Gn', 'Gnome', False),
-    Race('OM', 'Ogre-Mage', False),
-    Race('HD', 'Hill Dwarf', False),
-    Race('MD', 'Mountain Dwarf', False),
-    Race('GE', 'Grey Elf', False),
-    Race('SE', 'Sludge Elf', False),
-    Race('LO', 'Lava Orc', False),
-    Race('Dj', 'Djinni', False),
-    Race('Pl', 'Plutonian', False),
-    Race('??', 'Unknown', False),
+    Species('Ce', 'Centaur', True),
+    Species('DD', 'Deep Dwarf', True),
+    Species('DE', 'Deep Elf', True),
+    Species('Dg', 'Demigod', True),
+    Species('Dr', 'Draconian', True),
+    Species('Ds', 'Demonspawn', True),
+    Species('Fe', 'Felid', True),
+    Species('Fo', 'Formicid', True),
+    Species('Gh', 'Ghoul', True),
+    Species('Gr', 'Gargoyle', True),
+    Species('HE', 'High Elf', True),
+    Species('HO', 'Hill Orc', True),
+    Species('Ha', 'Halfling', True),
+    Species('Hu', 'Human', True),
+    Species('Ko', 'Kobold', True),
+    Species('Mf', 'Merfolk', True),
+    Species('Mi', 'Minotaur', True),
+    Species('Mu', 'Mummy', True),
+    Species('Na', 'Naga', True),
+    Species('Op', 'Octopode', True),
+    Species('Og', 'Ogre', True),
+    Species('Sp', 'Spriggan', True),
+    Species('Te', 'Tengu', True),
+    Species('Tr', 'Troll', True),
+    Species('VS', 'Vine Stalker', True),
+    Species('Vp', 'Vampire', True),
+    # Non-playable species
+    Species('El', 'Elf', False),
+    Species('Gn', 'Gnome', False),
+    Species('OM', 'Ogre-Mage', False),
+    Species('HD', 'Hill Dwarf', False),
+    Species('MD', 'Mountain Dwarf', False),
+    Species('GE', 'Grey Elf', False),
+    Species('SE', 'Sludge Elf', False),
+    Species('LO', 'Lava Orc', False),
+    Species('Dj', 'Djinni', False),
+    Species('Pl', 'Plutonian', False),
+    Species('??', 'Unknown', False),
 }
 
 BACKGROUNDS = {
@@ -139,8 +139,8 @@ GOD_NAME_FIXUPS = {
     'Lugafu': 'Trog',
     'Lucy': 'Lugonu',
 }
-RACE_SHORTNAME_FIXUPS = {'Ke': 'Te', 'DS': 'Ds', 'DG': 'Dg'}
-RACE_NAME_FIXUPS = {
+SPECIES_SHORTNAME_FIXUPS = {'Ke': 'Te', 'DS': 'Ds', 'DG': 'Dg', 'OP' : 'Op'}
+SPECIES_NAME_FIXUPS = {
     'Yellow Draconian': 'Draconian',
     'Grey Draconian': 'Draconian',
     'White Draconian': 'Draconian',
