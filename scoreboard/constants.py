@@ -158,7 +158,8 @@ BRANCH_NAME_FIXUPS = {
     # April fool's one year
     'Nor': 'Coc',
     # Rename
-    'Vault': 'Vaults'
+    'Vault': 'Vaults',
+    'Shoal': 'Shoals'
 }
 
 Branch = namedtuple('Branch', ['short', 'full', 'multilevel', 'playable'])
