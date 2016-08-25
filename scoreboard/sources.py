@@ -17,7 +17,7 @@ WGET_SOURCE_CMDLINE = ("wget --timeout 10 --no-verbose -c --tries 5 "
                        "-O '{outfile}' '{url}'")
 # Ignored stuff: sprint & zotdef games, dead servers
 IGNORED_FILES_REGEX = re.compile(
-    '(sprint|zotdef|rl.heh.fi|crawlus.somatika.net)')
+    r'(sprint|zotdef|rl.heh.fi|crawlus.somatika.net|nostalgia|mulch|squarelos|combo_god)')
 
 
 def sources(src):
@@ -35,6 +35,9 @@ def sources(src):
         # be supported
         if not isinstance(line, str):
             continue
+        # We don't support using autoindex folders to download wildcard file
+        # names, luckily only a few weird files are affected so we just ignore
+        # them until someone complains.
         line = line.replace('*', '')
         expanded_sources.extend(braceexpand(line))
     for line in expanded_sources:
