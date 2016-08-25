@@ -300,4 +300,6 @@ KTYP_FIXUPS = {
     # Renames
     'divine wrath': 'divine_wrath',
     'wild magic': 'wild_magic',
+    'self aimed': 'self_aimed',
+    'falling down stairs': 'falling_down_stairs'
 }
