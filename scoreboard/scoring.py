@@ -52,7 +52,7 @@ def add_all_manual_achievements(s):
         for achievement in achievements:
             achievement = model.get_achievement(s, achievement)
             if achievement not in player.achievements:
-                player.achievements.append(achivement)
+                player.achievements.append(achievement)
                 s.add(player)
     s.commit()
 
