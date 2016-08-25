@@ -696,6 +696,11 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
 def count_games(s: sqlalchemy.orm.session.Session,
                 *,
                 scored: Optional[bool]=None) -> int:
+    """Return count of games matching specified conditions.
+
+    Arguments match list_games.
+    TODO: Should probably use a common base function with list_games.
+    """
     q = s.query(Game)
     if scored is not None:
         q = q.filter(Game.scored == (sqlalchemy.true()
