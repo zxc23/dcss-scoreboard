@@ -196,6 +196,7 @@ BRANCHES = {
     Branch('Bazaar', 'Bazaar', False, True),
     Branch('WizLab', "Wizard\'s Laboratory", False, True),
     Branch('Trove', 'Treasure Trove', False, True),
+    Branch('Desolation', 'Desolation of Salt', False, True),
     # Non-playable branches
     Branch('Hive', 'Hive', True, False),
     Branch('Blade', 'Hall of Blades', True, False),
