@@ -247,9 +247,7 @@ class Game(Base):
     runes = Column(Integer, nullable=False)  # type: int
     score = Column(Integer, nullable=False, index=True)  # type: int
     start = Column(DateTime, nullable=False, index=True)  # type: DateTime
-    # end doesn't need an index, first_game_index below is sufficient
-    # since the first column in a multi-column index can be used alone
-    end = Column(DateTime, nullable=False)  # type: DateTime
+    end = Column(DateTime, nullable=False, index=True)  # type: DateTime
     potions_used = Column(Integer, nullable=False)  # type: int
     scrolls_used = Column(Integer, nullable=False)  # type: int
 
@@ -265,16 +263,16 @@ class Game(Base):
     streak = relationship("Streak")
 
     __table_args__ = (
-        # These combined indexes help find various highscores
+        # Used to find various highscores in model
         Index('species_highscore_index', species_id, score),
         Index('background_highscore_index', background_id, score),
         Index('combo_highscore_index', species_id, background_id, score),
         Index('fastest_highscore_index', ktyp_id, dur),
         Index('shortest_highscore_index', ktyp_id, turn),
+        # Used by scoring.score_games
         Index('unscored_games', scored, end),
         # Used by scoring.is_grief
-        # Note that we put end first so it can replace the default end index
-        Index('first_game_index', end, account_id), )
+        Index('first_game_index', account_id, end), )
 
     @property
     def player(self) -> Player:
