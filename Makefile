@@ -3,7 +3,8 @@ all: yapf pylint
 
 .PHONY : yapf
 yapf:
-	git ls-files '*.py' | xargs -P4 yapf -i
+	@echo 'yapf -i'
+	@git ls-files '*.py' | xargs -P4 yapf -i
 
 .PHONY : pylint
 pylint:
