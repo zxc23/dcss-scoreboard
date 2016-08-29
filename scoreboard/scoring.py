@@ -138,11 +138,8 @@ def score_games():
     start = time.time()
     scored_players = set()
     s = orm.get_session()
-    scored = model.count_games(s, scored=True)
     new_scored = 0
-    unscored = model.count_games(s, scored=False)
-    print("Scoring %s games (%s previously scored)..." % (unscored, scored))
-
+    print("Scoring games...")
     while True:
         games = model.list_games(s, scored=False, limit=100)
         if not games:
