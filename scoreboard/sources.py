@@ -123,3 +123,5 @@ def download_sources(dest: str, servers: Optional[str]=None):
         jobs.append(p.apply_async(download_source_files, (urls, destdir)))
     for job in jobs:
         job.get()
+    p.close()
+    p.join()
