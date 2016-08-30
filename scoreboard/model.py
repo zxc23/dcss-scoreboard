@@ -98,17 +98,6 @@ def get_player(s: sqlalchemy.orm.session.Session, name: str) -> Player:
         return player
 
 
-def setup_servers(s: sqlalchemy.orm.session.Session) -> None:
-    """Set up basic source data.
-
-    Right now this just adds the 'unknown' source.
-    """
-    if not s.query(Server).filter(Server.name == '???').first():
-        print("Adding server '???'")
-        s.add(Server(name='???'))
-        s.commit()
-
-
 def setup_species(s: sqlalchemy.orm.session.Session) -> None:
     """Load species data into the database."""
     new = []

@@ -45,7 +45,6 @@ SPECIES = {
     Species('LO', 'Lava Orc', False),
     Species('Dj', 'Djinni', False),
     Species('Pl', 'Plutonian', False),
-    Species('??', 'Unknown', False),
 }
 
 BACKGROUNDS = {
@@ -85,7 +84,6 @@ BACKGROUNDS = {
     Background('St', 'Stalker', False),
     Background('Th', 'Thief', False),
     Background('Jr', 'Jester', False),
-    Background('??', 'Unknown', False),
 }
 
 GODS = {
@@ -116,7 +114,6 @@ GODS = {
     God('Yredelemnul', True),
     God('Zin', True),
     # Non-playable gods
-    God('Unknown', False),
 }
 
 PLAYABLE_SPECIES = {s for s in SPECIES if s.playable}

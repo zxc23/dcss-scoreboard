@@ -352,7 +352,6 @@ def setup_database(database: str, credentials: Optional[str]=None) -> None:
 
     sess = Session()
 
-    model.setup_servers(sess)
     model.setup_species(sess)
     model.setup_backgrounds(sess)
     model.setup_gods(sess)
