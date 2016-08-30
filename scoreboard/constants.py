@@ -138,6 +138,7 @@ GOD_NAME_FIXUPS = {
     # Nostalgia names
     'Lugafu': 'Trog',
     'Lucy': 'Lugonu',
+    'Feawn': 'Fedhas'
 }
 BACKGROUND_SHORTNAME_FIXUPS = {'Am': 'AM'}
 SPECIES_SHORTNAME_FIXUPS = {'Ke': 'Te', 'DS': 'Ds', 'DG': 'Dg', 'OP': 'Op'}
