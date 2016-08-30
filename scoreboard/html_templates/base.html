@@ -38,7 +38,7 @@
           <nav class="navbar">
             <div class="nav navbar-nav">
               {% for href, id, title in navigation_bar %}
-              <a class="nav-item nav-link {% if id == active_page %}active{% endif %}" href="{{ urlbase }}{{ href }}">{{ title }}</span></a>
+              <a class="nav-item nav-link {% if id == active_page %}active{% endif %}" href="{{ urlbase }}{{ href }}">{{ title }}</a>
               {% endfor %}
               <form class="nav-item form-inline pull-sm-right">
                 <input id="playersearch" class="form-control" type="text" placeholder="Player Search" data-autofirst="True" />
