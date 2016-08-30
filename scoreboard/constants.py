@@ -102,7 +102,6 @@ GODS = {
     God('Makhleb', True),
     God('Nemelex Xobeh', True),
     God('Okawaru', True),
-    God('Pakellas', True),
     God('Qazlal', True),
     God('Ru', True),
     God('Sif Muna', True),
@@ -114,6 +113,7 @@ GODS = {
     God('Yredelemnul', True),
     God('Zin', True),
     # Non-playable gods
+    God('Pakellas', False)
 }
 
 PLAYABLE_SPECIES = {s for s in SPECIES if s.playable}
