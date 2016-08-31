@@ -138,7 +138,7 @@ def _games_to_table(env,
               {runes}
               <th class="text-xs-right">Turns</th>
               <th class="text-xs-right">Duration</th>
-              <th>Date</th>
+              <th class="text-xs-right">Date</th>
               <th>Version</th>
               <th class="text-xs-center">💀</th>""".format(
         prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
