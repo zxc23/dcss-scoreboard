@@ -101,12 +101,12 @@ def _games_to_table(env,
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
             player_row='' if not show_player else "<td>%s</td>" %
             link_player(game.account.player.name, env.globals['urlbase']),
-            score=prettyint(game.score),
             character="{}{}".format(game.species.short, game.background.short),
             god=game.god.name,
             place=""
             if winning_games else "<td>%s</td>" % game.place.as_string,
             end="" if winning_games else "<td>%s</td>" % game.tmsg,
+            runes=game.runes,
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
             date=prettydate(game.end),
@@ -126,11 +126,11 @@ def _games_to_table(env,
 
     thead = """{prefix}
               {player}
-              <th class="text-xs-right">Score</th>
               <th>Combo</th>
               <th>God</th>
               {place}
               {end}
+              <th class="text-xs-right">Runes</th>
               <th class="text-xs-right">Turns</th>
               <th class="text-xs-right">Duration</th>
               <th class="text-xs-right">Date</th>
@@ -144,11 +144,11 @@ def _games_to_table(env,
     trow = """<tr>
       {prefix_col}
       {player_row}
-      <td class="text-xs-right">{score}</td>
       <td>{character}</td>
       <td>{god}</td>
       {place}
       {end}
+      <td class="text-xs-right">{runes}</td>
       <td class="text-xs-right">{turns}</td>
       <td class="text-xs-right">{duration}</td>
       <td class="text-xs-right">{date}</td>
