@@ -528,8 +528,8 @@ def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class,
     q = s.query(Game)
     for i in s.query(mapped_class).filter(
             # error: Type[Any] has no attribute "playable"
-            mapped_class.playable == sqlalchemy.true()  # type: ignore
-    ).order_by(mapped_class.name).all():  # type: ignore
+            mapped_class.playable == sqlalchemy.true()
+    ).order_by(mapped_class.name).all():
         result = q.filter(
             game_column == i).order_by(Game.score.desc()).limit(1).first()
         if result:

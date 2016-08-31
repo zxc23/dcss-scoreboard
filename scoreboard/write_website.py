@@ -162,7 +162,7 @@ def write_highscores(s, env):
 
 
 def _get_player_records(global_records, player):
-    out = {}
+    out = {}  # type: dict
     for typ, games in global_records.items():
         for game in games:
             if game.player.name == player:
@@ -175,7 +175,7 @@ def _get_player_records(global_records, player):
 
 def _wins_per_species(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
     """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
-    out = collections.OrderedDict()
+    out = collections.OrderedDict()  # type: dict
     for sp in model.list_species(s, playable=True):
         out[sp] = [g for g in games if g.won and g.species == sp]
     return out
@@ -183,7 +183,7 @@ def _wins_per_species(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
 
 def _wins_per_background(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
     """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
-    out = collections.OrderedDict()
+    out = collections.OrderedDict()  # type: dict
     for bg in model.list_backgrounds(s, playable=True):
         out[bg] = [g for g in games if g.won and g.background == bg]
     return out
@@ -191,7 +191,7 @@ def _wins_per_background(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
 
 def _wins_per_god(s, games: Iterable[orm.Game]) -> Iterable[orm.Game]:
     """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
-    out = collections.OrderedDict()
+    out = collections.OrderedDict()  # type: dict
     for god in model.list_gods(s, playable=True):
         out[god] = [g for g in games if g.won and g.god == god]
     return out

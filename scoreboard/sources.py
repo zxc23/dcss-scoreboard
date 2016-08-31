@@ -26,7 +26,7 @@ def sources(src):
     Expands bash style '{a,b}{1,2}' strings into all their permutations.
     Excludes URLs that match IGNORED_FILES_REGEX.
     """
-    expanded_sources = []
+    expanded_sources = []  # type: list
     if not src['base'].endswith('/'):
         src['base'] += '/'
     for line in src['logs']:

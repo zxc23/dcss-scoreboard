@@ -4,3 +4,4 @@ jsmin
 braceexpand
 characteristic
 pyyaml
+mypy-lang

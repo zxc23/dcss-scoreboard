@@ -16,3 +16,6 @@ script:
   - echo "pylint..." && echo -en 'travis_fold:start:pylint\\r'
   - make pylint
   - echo -en 'travis_fold:end:pylint\\r'
+  #- echo "mypy..." && echo -en 'travis_fold:start:mypy\\r'
+  #- make mypy
+  #- echo -en 'travis_fold:end:mypy\\r'
