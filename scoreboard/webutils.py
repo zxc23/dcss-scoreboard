@@ -101,10 +101,10 @@ def _games_to_table(env,
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
             player_row='' if not show_player else "<td>%s</td>" %
-            link_player(game.account.player.name, env.globals['urlbase']),
+            link_player(game.player.name, env.globals['urlbase']),
             score='<td class="text-xs-right">{}</td>'.format(
                 prettyint(game.score)) if winning_games else '',
-            character="{}{}".format(game.species.short, game.background.short),
+            character=game.char,
             god=game.god.name,
             place=""
             if winning_games else "<td>%s</td>" % game.place.as_string,
@@ -138,9 +138,9 @@ def _games_to_table(env,
               {runes}
               <th class="text-xs-right">Turns</th>
               <th class="text-xs-right">Duration</th>
-              <th class="text-xs-right">Date</th>
+              <th>Date</th>
               <th>Version</th>
-              <th>Morgue</th>""".format(
+              <th class="text-xs-center">💀</th>""".format(
         prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
         player='' if not show_player else '<th>Player</th>',
         score='<th class="text-xs-right">Score</th>' if winning_games else '',
@@ -160,7 +160,7 @@ def _games_to_table(env,
       <td class="text-xs-right">{turns}</td>
       <td class="text-xs-right">{duration}</td>
       <td class="text-xs-right">{date}</td>
-      <td class="text-xs-right">{version}</td>
+      <td>{version}</td>
       <td>{morgue}</td>
     </tr>"""
 
