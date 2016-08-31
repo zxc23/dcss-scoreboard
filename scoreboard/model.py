@@ -672,7 +672,8 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     q = q.group_by(Streak.id)
     q = q.having(streak_length > 1)
     if max_age is not None:
-        q = q.having(streak_last_activity > func.date('now', '-%s day' % max_age))
+        q = q.having(
+            streak_last_activity > func.date('now', '-%s day' % max_age))
     q = q.order_by(streak_length.desc())
     if active is not None:
         q = q.filter(Streak.active == (sqlalchemy.true()
