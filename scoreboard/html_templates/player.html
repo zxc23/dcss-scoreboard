@@ -82,7 +82,7 @@
 
 <div class="row">
   <div class="col-sm-12">
-    {% if wins|length > 10 %}
+    {% if wins|length > 15 %}
       {{ wins[:10]|generic_highscores_to_table(show_player=False) }}
       <div class="collapse" id="lessrecentwins">
         {{ wins[10:]|generic_highscores_to_table(show_player=False) }}
