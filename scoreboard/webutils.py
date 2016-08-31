@@ -152,7 +152,7 @@ def _games_to_table(env,
       <td class="text-xs-right">{turns}</td>
       <td class="text-xs-right">{duration}</td>
       <td class="text-xs-right">{date}</td>
-      <td>{version}</td>
+      <td class="text-xs-right">{version}</td>
       <td>{morgue}</td>
     </tr>"""
 
