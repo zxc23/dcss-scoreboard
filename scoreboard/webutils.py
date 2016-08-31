@@ -317,8 +317,8 @@ def morgue_link(game, text="Morgue"):
 
     Game can be either a gid string or a game object.
     """
-    return "<a href='" + modelutils.morgue_url(game) + "'>" + str(
-        text) + "</a>"
+    return '<a href="{url}">{text}</a>'.format(
+        url=modelutils.morgue_url(game), text=text)
 
 
 def percentage(n, digits=2):
