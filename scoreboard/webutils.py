@@ -96,7 +96,8 @@ def _games_to_table(env,
     def format_trow(game):
         """Convert a game to a table row."""
         return trow.format(
-            win='table-success' if game.won else '',
+            tr_class='class="table-success"'
+            if (game.won and not winning_games) else '',
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
             player_row='' if not show_player else "<td>%s</td>" %
@@ -141,7 +142,7 @@ def _games_to_table(env,
         place='' if winning_games else '<th>Place</th>',
         end='' if winning_games else '<th>End</th>')
 
-    trow = """<tr>
+    trow = """<tr {tr_class}>
       {prefix_col}
       {player_row}
       <td>{character}</td>
