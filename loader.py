@@ -53,6 +53,11 @@ def read_commandline():
         action='store_true',
         help="Re-write all player pages for the website.")
     parser.add_argument(
+        '--players',
+        nargs='+',
+        metavar='PLAYER',
+        help="Re-write the specified player pages.")
+    parser.add_argument(
         '--db-credentials', metavar="user:passwd", help="Database credentials")
     args = parser.parse_args()
     return args
@@ -74,11 +79,16 @@ def main():
     if not args.skip_scoring:
         players = scoreboard.scoring.score_games()
     else:
-        players = False
+        players = None
 
     if not args.skip_website:
         if args.rebuild_player_pages:
             players = None
+        if args.players:
+            if players:
+                players.update(args.players)
+            else:
+                players = args.players
         scoreboard.write_website.write_website(
             urlbase=args.urlbase, players=players)
 
