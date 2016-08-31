@@ -294,6 +294,16 @@ class Game(Base):
         """Four letter character code eg 'MiFi'."""
         return '{}{}'.format(self.species.short, self.background.short)
 
+    @property
+    def pretty_tmsg(self) -> str:
+        """Pretty tmsg, more suitable for scoreboard display."""
+        msg = self.tmsg
+        if msg == 'escaped with the Orb':
+            msg += '!'
+        # We don't use str.capitalize because it lower-cases all letters but
+        # the first. We just want to specifically capitalise the first letter.
+        return msg[0].upper() + msg[1:]
+
 
 @characteristic.with_repr(  # pylint: disable=too-few-public-methods
     ["logfile"])

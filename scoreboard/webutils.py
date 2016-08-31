@@ -106,7 +106,7 @@ def _games_to_table(env,
             god=game.god.name,
             place=""
             if winning_games else "<td>%s</td>" % game.place.as_string,
-            end="" if winning_games else "<td>%s</td>" % game.tmsg,
+            end="" if winning_games else "<td>%s</td>" % game.pretty_tmsg,
             runes=game.runes,
             turns=prettyint(game.turn),
             duration=prettydur(game.dur),
