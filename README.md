@@ -1,6 +1,6 @@
 # DCSS Scoreboard
 
-A bundle of scripts to create a scoreboard website for DCSS.
+Tool to create a scoreboard for online DCSS games.
 
 [![Code Climate](https://codeclimate.com/github/zxc23/dcss-scoreboard/badges/gpa.svg)](https://codeclimate.com/github/zxc23/dcss-scoreboard)
 [![Build Status](https://travis-ci.org/zxc23/dcss-scoreboard.svg?branch=master)](https://travis-ci.org/zxc23/dcss-scoreboard)
@@ -19,16 +19,15 @@ A bundle of scripts to create a scoreboard website for DCSS.
 
 ## High-level program flow
 
-1. Download logfiles using `wget --continue`
-1. Load each game (eg each line) from logfiles into the database 'games' table
-  1. Games are loaded with scored=False
-1. Score each unscored game
-  1. Handle streaks (extend/close an existing one, or start a new one)
-  1. Handle achievements (check for the game unlocking new achievements)
-  1. Return a list of players who have a newly scored game
-1. Write the website
-  1. Write all global pages (index, highscores, streaks)
-  1. Write player pages for updated players, using the list of players with a newly scored game
+1. `loader.py`: CLI entrypoint
+  1. `sources.py`: download logfiles in parallel using `wget --continue`
+  1. `log_import.py`: load each game (eg each line) from logfiles into the database
+  1. `scoring.py`: score each unscored game:
+    1. Handle streaks
+    1. Handle achievements
+  1. `write_website.py`: create the website directory
+    1. Write all global pages (index, highscores, streaks)
+    1. Write pages for players with newly scored games
 
 ## How to use
 
