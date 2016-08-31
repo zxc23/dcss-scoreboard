@@ -124,7 +124,7 @@ def write_streaks(s, env):
     """Write the streak page."""
     print("Writing streaks")
     template = env.get_template('streaks.html')
-    active_streaks = model.get_streaks(s, active=True)
+    active_streaks = model.get_streaks(s, active=True, max_age=365)
     best_streaks = model.get_streaks(s, limit=10)
     _write_file(
         path=os.path.join(WEBSITE_DIR, 'streaks.html'),

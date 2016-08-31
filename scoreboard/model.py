@@ -646,6 +646,7 @@ def get_player_streak(s: sqlalchemy.orm.session.Session, player:
 def get_streaks(s: sqlalchemy.orm.session.Session,
                 active: Optional[bool]=None,
                 limit: Optional[int]=None,
+                max_age: Optional[int]=None,
                 ) \
         -> Sequence[Streak]:
     """Get streaks, ordered by length (longest first).
@@ -653,6 +654,7 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     Parameters:
         active: only return streaks with this active flag
         limit: only return (up to) limit results
+        max_age: only return streaks with a win less than this many days old
 
     Returns:
         List of active streaks.
@@ -665,9 +667,12 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     # HAVING streak_length > 1
     # ORDER BY streak_length DESC
     streak_length = func.count(Game.streak_id).label('streak_length')
+    streak_last_activity = func.max(Game.end).label('streak_last_activity')
     q = s.query(Streak, streak_length).join(Streak.games)
     q = q.group_by(Streak.id)
     q = q.having(streak_length > 1)
+    if max_age is not None:
+        q = q.having(streak_last_activity > func.date('now', '-%s day' % max_age))
     q = q.order_by(streak_length.desc())
     if active is not None:
         q = q.filter(Streak.active == (sqlalchemy.true()

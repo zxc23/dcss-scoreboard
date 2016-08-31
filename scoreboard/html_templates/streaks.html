@@ -19,6 +19,7 @@
     <div class="tab-content">
       <div class="tab-pane active" id="active" role="tabpanel">
         {{ active_streaks|streakstotable(show_loss=False, limit=20) }}
+        <p><small>* Only includes active streaks active in the past year</small></p>
       </div>
       <div class="tab-pane" id="longest" role="tabpanel">
         {{ best_streaks|streakstotable(limit=20) }}
