@@ -290,6 +290,11 @@ class Game(Base):
         return self.ktyp.name == 'quitting'
 
     @property
+    def boring(self) -> bool:
+        """Boolean to represent if this game was quit, left, or wizmoded."""
+        return self.ktyp.name in ['quitting', 'leaving', 'wizmode']
+
+    @property
     def char(self) -> str:
         """Four letter character code eg 'MiFi'."""
         return '{}{}'.format(self.species.short, self.background.short)

@@ -13,7 +13,7 @@
     <p><strong>Games Played:</strong> {{ games|length|prettyint }}</p>
     {% set wins = games|selectattr("won", "equalto", True)|list %}
     <p><strong>Wins:</strong> {{ wins|length }} ({{ (wins|length / games|length)|percentage }}%)</p>
-    {% set quits = games|selectattr("quit", "equalto", True)|list %}
+    {% set quits = games|selectattr("boring", "equalto", True)|list %}
     <p><strong>Quits:</strong> {{ quits|length }} ({{  (quits|length / games|length)|percentage }}%)</p>
   </div>
   <div class="col-sm-3">
