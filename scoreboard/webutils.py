@@ -28,7 +28,7 @@ def prettydur(duration, hours=False):
             'hours played' metric).
 
     Examples:
-        prettydur(170) => '0:02:50'
+        prettydur(170) => '00:02:50'
         prettydur(87000) => '24:10:00'
         prettydur(0, hours=True) => '1'
         prettydur(86400, hours=True) => '24'
@@ -37,9 +37,19 @@ def prettydur(duration, hours=False):
         duration = int(duration)
     if hours:
         return str(duration // 3600) if duration > 3600 else '1'
+
     if duration >= 86400:
-        return str(duration // 3600) + str(datetime.timedelta(seconds=(duration % 3600)))[1:]
-    return str(datetime.timedelta(seconds=duration))
+        hours = duration // 3600
+        mins = (duration % 3600) // 60
+        secs = (duration % 3600) % 60
+        dur = '%s:%s:%s' % (hours, mins, secs)
+    else:
+        dur = str(datetime.timedelta(seconds=duration))
+        if dur.startswith('0:'):
+            # Convert 0:12:34 => 00:12:34
+            dur = '0' + dur
+
+    return dur
 
 
 def prettycounter(d):
