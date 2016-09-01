@@ -105,6 +105,7 @@ def _games_to_table(env,
             score='<td class="text-xs-right">{}</td>'.format(
                 prettyint(game.score)) if winning_games else '',
             character=game.char,
+            full_character=game.species.name + ' ' + game.background.name,
             god=game.god.name,
             place=""
             if winning_games else "<td>%s</td>" % game.place.as_string,
@@ -152,7 +153,7 @@ def _games_to_table(env,
       {prefix_col}
       {player_row}
       {score}
-      <td>{character}</td>
+      <td><abbr title="{full_character}">{character}</abbrev></td>
       <td>{god}</td>
       {place}
       {end}
