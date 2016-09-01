@@ -583,11 +583,21 @@ def combo_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
 
 def fastest_wins(s: sqlalchemy.orm.session.Session,
                  *,
-                 limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
-    """Return up to limit fastest wins."""
+                 limit: int=const.GLOBAL_TABLE_LENGTH,
+                 exclude_bots: bool=True) -> Sequence[Game]:
+    """Return up to limit fastest wins.
+
+    exclude_bots: If True, exclude known bot accounts from the rankings.
+    """
     ktyp = get_ktyp(s, 'winning')
-    return s.query(Game).filter(
-        Game.ktyp == ktyp).order_by('dur').limit(limit).all()
+    q = s.query(Game).filter(
+        Game.ktyp == ktyp).order_by('dur')
+    if exclude_bots:
+        q = q.join(Game.account).join(Account.player)
+        for bot_name in const.BLACKLISTS['bots']:
+            bot = get_player(s, bot_name)
+            q = q.filter(Player.id != bot.id)
+    return q.limit(limit).all()
 
 
 def shortest_wins(s: sqlalchemy.orm.session.Session,

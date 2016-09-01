@@ -139,7 +139,7 @@ def render_highscores(s, template):
     background_highscores = model.background_highscores(s)
     god_highscores = model.god_highscores(s)
     combo_highscores = model.combo_highscores(s)
-    fastest_wins = model.fastest_wins(s)
+    fastest_wins = model.fastest_wins(s, exclude_bots=True)
     shortest_wins = model.shortest_wins(s)
     return template.render(
         overall_highscores=overall_highscores,
