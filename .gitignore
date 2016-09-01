@@ -8,3 +8,4 @@ __pycache__
 .vscode/
 .vagrant/
 .idea/
+database.db
