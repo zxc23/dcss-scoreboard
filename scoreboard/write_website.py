@@ -108,10 +108,10 @@ def render_index(s, template):
         recent_wins=model.list_games(
             s, winning=True, limit=const.FRONTPAGE_TABLE_LENGTH),
         active_streaks=[],
-        overall_highscores=model.highscores(s,
-            limit=const.FRONTPAGE_TABLE_LENGTH),
-        combo_high_scores=model.combo_highscore_holders(s,
-            limit=const.FRONTPAGE_TABLE_LENGTH))
+        overall_highscores=model.highscores(
+            s, limit=const.FRONTPAGE_TABLE_LENGTH),
+        combo_high_scores=model.combo_highscore_holders(
+            s, limit=const.FRONTPAGE_TABLE_LENGTH))
 
 
 def write_index(s, env):

@@ -590,8 +590,7 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
     exclude_bots: If True, exclude known bot accounts from the rankings.
     """
     ktyp = get_ktyp(s, 'winning')
-    q = s.query(Game).filter(
-        Game.ktyp == ktyp).order_by('dur')
+    q = s.query(Game).filter(Game.ktyp == ktyp).order_by('dur')
     if exclude_bots:
         q = q.join(Game.account).join(Account.player)
         for bot_name in const.BLACKLISTS['bots']:
