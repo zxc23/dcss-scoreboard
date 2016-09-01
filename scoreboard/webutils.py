@@ -102,6 +102,8 @@ def _games_to_table(env,
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
             player_row='' if not show_player else "<td>%s</td>" %
             link_player(game.account.player.name, env.globals['urlbase']),
+            score='<td class="text-xs-right">{}</td>'.format(
+                prettyint(game.score)) if winning_games else '',
             character="{}{}".format(game.species.short, game.background.short),
             god=game.god.name,
             place=""
@@ -128,6 +130,7 @@ def _games_to_table(env,
 
     thead = """{prefix}
               {player}
+              {score}
               <th>Combo</th>
               <th>God</th>
               {place}
@@ -140,6 +143,7 @@ def _games_to_table(env,
               <th>Morgue</th>""".format(
         prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
         player='' if not show_player else '<th>Player</th>',
+        score='<th class="text-xs-right">Score</th>' if winning_games else '',
         place='' if winning_games else '<th>Place</th>',
         end='' if winning_games else '<th>End</th>',
         runes='<th class="text-xs-right">Runes</th>' if winning_games else '')
@@ -147,6 +151,7 @@ def _games_to_table(env,
     trow = """<tr {tr_class}>
       {prefix_col}
       {player_row}
+      {score}
       <td>{character}</td>
       <td>{god}</td>
       {place}
