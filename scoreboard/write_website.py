@@ -31,6 +31,7 @@ def jinja_env(urlbase, s):
     template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
     env.filters['prettyint'] = webutils.prettyint
+    env.filters['prettyhours'] = webutils.prettyhours
     env.filters['prettydur'] = webutils.prettydur
     env.filters['prettycounter'] = webutils.prettycounter
     env.filters['prettycrawldate'] = webutils.prettycrawldate

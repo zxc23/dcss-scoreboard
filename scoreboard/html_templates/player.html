@@ -17,7 +17,7 @@
     <p><strong>Quits:</strong> {{ quits|length }} ({{  (quits|length / games|length)|percentage }}%)</p>
   </div>
   <div class="col-sm-3">
-    <p><strong>Total Playtime:</strong> {{ games|map(attribute="dur")|sum|prettydur(hours=True) }} hours</p>
+    <p><strong>Total Playtime:</strong> {{ games|map(attribute="dur")|sum|prettyhours }} hours</p>
     {% set highest = games|highscore %}
     <p><strong>Highest Score:</strong> {{ highest|morgue_link(highest.score|prettyint + ' points') }}</p>
     {% if wins %}

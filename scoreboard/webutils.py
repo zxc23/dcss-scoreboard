@@ -1,7 +1,5 @@
 """Utility functions for website generation."""
 
-import datetime
-
 import jinja2
 
 import scoreboard.modelutils as modelutils
@@ -19,37 +17,35 @@ def prettyint(value):
     return "{0:,}".format(value)
 
 
-def prettydur(duration, hours=False):
+def prettyhours(duration):
+    """Jinja filter to convert duration in seconds to hours (min 1).
+
+    Parameters:
+        duration: (int) duration in seconds
+
+    Examples:
+        prettyhours(0) => '1'
+        prettyhours(86400) => '24'
+    """
+    if not isinstance(duration, int):
+        duration = int(duration)
+    return str(duration // 3600) if duration > 3600 else '1'
+
+
+def prettydur(duration):
     """Jinja filter to convert duration in seconds to a pretty "HH:MM:SS".
 
     Parameters:
         duration: (int) duration in seconds
-        hours (bool) Convert to only hours (with a minimum of 1 -- for player
-            'hours played' metric).
 
     Examples:
         prettydur(170) => '00:02:50'
         prettydur(87000) => '24:10:00'
-        prettydur(0, hours=True) => '1'
-        prettydur(86400, hours=True) => '24'
     """
     if not isinstance(duration, int):
         duration = int(duration)
-    if hours:
-        return str(duration // 3600) if duration > 3600 else '1'
-
-    if duration >= 86400:
-        hours = duration // 3600
-        mins = (duration % 3600) // 60
-        secs = (duration % 3600) % 60
-        dur = '%s:%s:%s' % (hours, mins, secs)
-    else:
-        dur = str(datetime.timedelta(seconds=duration))
-        if dur.startswith('0:'):
-            # Convert 0:12:34 => 00:12:34
-            dur = '0' + dur
-
-    return dur
+    return '%02d:%02d:%02d' % (duration // 3600, duration % 3600 // 60,
+                               duration % 60)
 
 
 def prettycounter(d):
