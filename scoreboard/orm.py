@@ -22,7 +22,11 @@ Session = None
 
 @characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class Server(Base):
-    """A DCSS server -- a source of logfiles/milestones."""
+    """A DCSS server -- a source of logfiles/milestones.
+
+    Columns:
+        name: Server's short name (eg CAO, CPO).
+    """
 
     __tablename__ = 'servers'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -30,6 +34,10 @@ class Server(Base):
         String(4), nullable=False, index=True, unique=True)  # type: str
 
 
+# Many-to-many mapping of players to achivements
+# Columns:
+#   level: the level of the achievement awarded. Should be '1' for single-level
+#       achievements.
 AwardedAchievements = Table(
     'awarded_achievements',
     Base.metadata,
@@ -39,13 +47,24 @@ AwardedAchievements = Table(
         'achievement_id',
         Integer,
         ForeignKey('achievements.id'),
-        nullable=False), )
+        nullable=False),
+    Column(
+        'level',
+        Integer,
+        nullable=False),
+    )
 
 
 @characteristic.with_repr(  # pylint: disable=too-few-public-methods
     ["name", "server"])
 class Account(Base):
-    """An account -- a single username on a single server."""
+    """An account -- a single username on a single server.
+
+    Columns:
+        name: name of the account on the server
+        blacklisted: if the account has been blacklisted. Accounts started as
+            streak griefers/etc are blacklisted.
+    """
 
     __tablename__ = 'accounts'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -75,7 +94,14 @@ class Account(Base):
 
 @characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class Player(Base):
-    """A player -- a collection of accounts with shared metadata."""
+    """A player -- a collection of accounts with shared metadata.
+
+    Columns:
+        name: Player's name. For now, this is the same as the accounts that
+            make up the player. In future, it could be changed so that
+            differently-named accounts can make up a single player (eg
+            Sequell nick mapping).
+    """
 
     __tablename__ = 'players'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -88,7 +114,15 @@ class Player(Base):
 
 @characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
 class Species(Base):
-    """A DCSS player species."""
+    """A DCSS player species.
+
+    Columns:
+        short: short species name, eg 'HO', 'Mi'.
+        name: long species name, eg 'Hill Orc', 'Minotaur'.
+        playable: if the species is playable in the current version.
+            Not quite sure what to do in the case of a mismatch between stable
+            and trunk...
+    """
 
     __tablename__ = 'species'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -100,7 +134,15 @@ class Species(Base):
 
 @characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
 class Background(Base):
-    """A DCSS player background."""
+    """A DCSS player background.
+
+    Columns:
+        short: short background name, eg 'En', 'Be'.
+        name: long background name, eg 'Enchanter', 'Berserker'.
+        playable: if the background is playable in the current version.
+            Not quite sure what to do in the case of a mismatch between stable
+            and trunk...
+    """
 
     __tablename__ = 'backgrounds'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -113,7 +155,14 @@ class Background(Base):
 
 @characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class God(Base):
-    """A DCSS god."""
+    """A DCSS god.
+
+    Columns:
+        name: full god name, eg 'Nemelex Xobeh', 'Trog'.
+        playable: if the god is playable in the current version.
+            Not quite sure what to do in the case of a mismatch between stable
+            and trunk...
+    """
 
     __tablename__ = 'gods'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -124,7 +173,11 @@ class God(Base):
 
 @characteristic.with_repr(["v"])  # pylint: disable=too-few-public-methods
 class Version(Base):
-    """A DCSS version."""
+    """A DCSS version.
+
+    Columns:
+        v: version string, eg '0.17', '0.18'.
+    """
 
     __tablename__ = 'versions'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -134,7 +187,17 @@ class Version(Base):
 
 @characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
 class Branch(Base):
-    """A DCSS Branch (Dungeon, Lair, etc)."""
+    """A DCSS Branch (Dungeon, Lair, etc).
+
+    Columns:
+        short: short code, eg 'D', 'Wizlab'.
+        name: full name, eg 'Dungeon', 'Wizard\'s Laboratory'.
+        multilevel: Is the branch multi-level? Note: Pandemonium is not
+            considered multilevel, since its levels are not numbered ingame.
+        playable: Is it playable in the current version?
+            Not quite sure what to do in the case of a mismatch between stable
+            and trunk...
+    """
 
     __tablename__ = 'branches'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
@@ -151,7 +214,8 @@ class Branch(Base):
 class Place(Base):
     """A DCSS Place (D:8, Pan:1, etc).
 
-    Note that single-level branches have a level of 1.
+    Note that single-level branches have a single place with level=1 (eg
+        Temple:1, Pan:1).
     """
 
     __tablename__ = 'places'
@@ -190,7 +254,10 @@ class Streak(Base):
     """A streak of wins.
 
     Each player can have one active streak at a time, this is enforced with a
-    partial index (note: not supported in MySQL).
+    partial index (note: only supported in postgresql).
+
+    Columns:
+        active: is the streak currently active?
     """
 
     __tablename__ = 'streaks'
@@ -211,7 +278,23 @@ class Streak(Base):
 
 @characteristic.with_repr(["gid"])  # pylint: disable=too-few-public-methods
 class Game(Base):
-    """A single DCSS game."""
+    """A single DCSS game.
+
+    Columns (most are self-explanatory):
+        gid: unique id for the game, comprised of "name:server:start". For
+            compatibility with sequell.
+        xl
+        tmsg: description of game end
+        turn
+        dur
+        runes
+        score
+        start: start time for the game (in UTC)
+        end: end time for the game (in UTC)
+        potions_use:
+        scrolls_used
+        scored: Has the game been procssed by scoring yet?
+    """
 
     __tablename__ = 'games'
     gid = Column(String(50), primary_key=True, nullable=False)  # type: str
@@ -276,27 +359,27 @@ class Game(Base):
 
     @property
     def player(self) -> Player:
-        """Convenience shortcut to access player."""
+        """Convenience shortcut."""
         return self.account.player
 
     @property
     def won(self) -> bool:
-        """Boolean to represent if this game was won."""
+        """Was this game won."""
         return self.ktyp.name == 'winning'
 
     @property
     def quit(self) -> bool:
-        """Boolean to represent if this game was quit."""
+        """Was this game quit."""
         return self.ktyp.name == 'quitting'
 
     @property
     def boring(self) -> bool:
-        """Boolean to represent if this game was quit, left, or wizmoded."""
+        """Was this game was quit, left, or wizmoded."""
         return self.ktyp.name in ['quitting', 'leaving', 'wizmode']
 
     @property
     def char(self) -> str:
-        """Four letter character code eg 'MiFi'."""
+        """Character code eg 'MiFi'."""
         return '{}{}'.format(self.species.short, self.background.short)
 
     @property
@@ -313,7 +396,13 @@ class Game(Base):
 @characteristic.with_repr(  # pylint: disable=too-few-public-methods
     ["logfile"])
 class LogfileProgress(Base):
-    """Logfile import progress."""
+    """Logfile import progress.
+
+    Columns:
+        name: logfile filename
+        bytes_parsed: how many bytes have been read already. Log import code
+            will seek this far in when resuming.
+    """
 
     __tablename__ = 'logfile_progress'
     name = Column(String(100), primary_key=True)  # type: str
