@@ -80,3 +80,7 @@ footer p {
 .text-muted {
   color: #bbc0c4; /* about 30% lighter than the base bootstrap colour */
 }
+
+abbr[title] {
+  text-decoration: none;
+}
