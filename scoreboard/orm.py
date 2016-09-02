@@ -375,7 +375,7 @@ class Game(Base):
     @property
     def boring(self) -> bool:
         """Was this game was quit, left, or wizmoded."""
-        return self.ktyp.name in ['quitting', 'leaving', 'wizmode']
+        return self.ktyp.name in ('quitting', 'leaving', 'wizmode')
 
     @property
     def char(self) -> str:

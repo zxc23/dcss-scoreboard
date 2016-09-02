@@ -28,18 +28,18 @@ def prettydur(duration, hours=False):
             'hours played' metric).
 
     Examples:
-        prettydur(170) => '0:2:50'
+        prettydur(170) => '0:02:50'
+        prettydur(87000) => '24:10:00'
         prettydur(0, hours=True) => '1'
         prettydur(86400, hours=True) => '24'
     """
     if not isinstance(duration, int):
         duration = int(duration)
-    delta = datetime.timedelta(seconds=duration)
     if hours:
-        dur = delta.total_seconds() / 3600
-        return str(int(dur)) if dur > 1 else '1'
-    else:
-        return str(delta)
+        return str(duration // 3600) if duration > 3600 else '1'
+    if duration >= 86400:
+        return str(duration // 3600) + str(datetime.timedelta(seconds=(duration % 3600)))[1:]
+    return str(datetime.timedelta(seconds=duration))
 
 
 def prettycounter(d):
@@ -105,6 +105,7 @@ def _games_to_table(env,
             score='<td class="text-xs-right">{}</td>'.format(
                 prettyint(game.score)) if winning_games else '',
             character=game.char,
+            full_character=game.species.name + ' ' + game.background.name,
             god=game.god.name,
             place=""
             if winning_games else "<td>%s</td>" % game.place.as_string,
@@ -152,7 +153,7 @@ def _games_to_table(env,
       {prefix_col}
       {player_row}
       {score}
-      <td>{character}</td>
+      <td><abbr title="{full_character}">{character}</abbrev></td>
       <td>{god}</td>
       {place}
       {end}
