@@ -411,7 +411,17 @@ class LogfileProgress(Base):
 
 @characteristic.with_repr(["id"])  # pylint: disable=too-few-public-methods
 class Achievement(Base):
-    """Achievements."""
+    """Achievements.
+
+    Column:
+        key: short, human-readable key to refer to the achievement, eg
+            'polytheist'
+        name: long, human-readable name, eg 'Polytheist'
+        description: human-readable description of the achievement. This should
+            be written as a directive to the reader, eg 'Win a game with each
+            God'
+        multilevel: is the achievement binary or can it be partially completed?
+    """
 
     __tablename__ = 'achievements'
     id = Column(Integer, primary_key=True)  # type: int
@@ -420,6 +430,7 @@ class Achievement(Base):
     description = Column(String(200), nullable=False)  # type: str
     players = relationship(
         "Player", secondary=AwardedAchievements, back_populates="achievements")
+    multilevel = Column(Boolean), nullable=False)  # type: bool
 
 
 def sqlite_performance_over_safety(

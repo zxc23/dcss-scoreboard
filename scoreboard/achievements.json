@@ -3,37 +3,31 @@
     "name": "Good Player",
     "id": "goodplayer",
     "description": "Won 10 games.",
-    "section": "general"
+    "levels": 1
   },
   {
     "name": "Great Player",
     "id": "greatplayer",
     "description": "Won a game with every currently playable species.",
-    "section": "general"
+    "levels": 1
   },
   {
     "name": "Greatest Player",
     "id": "greatestplayer",
     "description": "Won a game with every currently playable combo.",
-    "section": "general"
-  },
-  {
-    "name": "Century Player",
-    "id": "centuryplayer",
-    "description": "Won 100 games.",
-    "section": "general"
+    "levels": 1
   },
   {
     "name": "Greater Player",
     "id": "greaterplayer",
     "description": "Won a game with every currently playable species and background.",
-    "section": "general"
+    "levels": 1
   },
   {
     "name": "Polytheist",
     "id": "polytheist",
     "description": "Won a game with every currently playable god.",
-    "section": "general"
+    "levels": 1
   },
   {
     "name": "Potion-less and Scroll-less Win",

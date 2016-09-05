@@ -110,6 +110,10 @@ def handle_player_streak(s, game: orm.Game):
         s.add(current_streak)
 
 
+def handle_achievements(s, game: orm.Game):
+    pass
+
+
 def score_game(s, game: orm.Game):
     """Score a single game.
 
@@ -122,15 +126,7 @@ def score_game(s, game: orm.Game):
     if game.account.blacklisted:
         return
     handle_player_streak(s, game)
-    # Increment wins
-    if game.ktyp == 'winning':
-        pass
-        # Check greatplayer
-        # Check greaterplayer
-        # Check for great race completion
-        # Check for great role completion
-
-        # Finalise the changes to stats
+    handle_achievements(s, game)
 
 
 def score_games():
