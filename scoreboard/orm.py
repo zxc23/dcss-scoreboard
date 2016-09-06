@@ -430,7 +430,7 @@ class Achievement(Base):
     description = Column(String(200), nullable=False)  # type: str
     players = relationship(
         "Player", secondary=AwardedAchievements, back_populates="achievements")
-    multilevel = Column(Boolean), nullable=False)  # type: bool
+    multilevel = Column(Boolean, nullable=False)  # type: bool
 
 
 def sqlite_performance_over_safety(
