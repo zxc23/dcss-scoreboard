@@ -1,5 +1,10 @@
 .PHONY : all
-all: yapf pylint mypy
+all: syntax yapf pylint mypy
+
+.PHONY : syntax
+syntax:
+	@echo 'syntax check'
+	@git ls-files '*.py' | xargs -P4 -n1 python -m py_compile
 
 .PHONY : yapf
 yapf:

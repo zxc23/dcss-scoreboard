@@ -10,6 +10,8 @@ install:
   - pip install yapf pylint
   - pip install -r requirements.txt
 script:
+  - echo "syntax..." && echo -en 'travis_fold:start:syntax\\r'
+  - make syntax
   - echo "yapf..." && echo -en 'travis_fold:start:yapf\\r'
   - make yapf
   - echo -en 'travis_fold:end:yapf\\r'
