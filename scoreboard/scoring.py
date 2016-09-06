@@ -1,6 +1,9 @@
 """Take game data and figure out scoring."""
 
 import time
+from typing import Sequence
+
+import sqlalchemy.orm  # for sqlalchemy.orm.session.Session type hints
 
 import scoreboard.model as model
 import scoreboard.orm as orm
@@ -8,7 +11,8 @@ import scoreboard.constants as const
 
 
 def is_valid_streak_addition(
-        game, current_streak):  # pylint: disable=unused-argument
+        game: orm.Game, current_streak:
+        orm.Streak) -> bool:  # pylint: disable=unused-argument
     """Check if the game is a valid addition to the streak."""
     # Valid if no streak to begin with
     if not current_streak:
@@ -17,7 +21,7 @@ def is_valid_streak_addition(
     return True
 
 
-def is_grief(s, game):
+def is_grief(s: sqlalchemy.orm.session.Session, game: orm.Game) -> bool:
     """Check if the game is a streak-breaking grief.
 
     This involves experimental anti-griefing heuristics.
@@ -43,29 +47,8 @@ def is_grief(s, game):
     return False
 
 
-def great_race(player, species):  # pylint: disable=unused-argument
-    """Check if the player has great race.
-
-    Returns True or False.
-    """
-    # Check we haven't already achieved this
-    # Check we actually have enough potential wins for greatrace (for speed)
-    # Check for completion
-    return False
-
-
-def great_role(player, background):  # pylint: disable=unused-argument
-    """Check if a player has great role.
-
-    Returns True or False.
-    """
-    # Check we haven't already achieved this
-    # Check we actually have enough potential wins for greatrole (for speed)
-    # Check for completion
-    return False
-
-
-def handle_player_streak(s, game: orm.Game):
+def handle_player_streak(s: sqlalchemy.orm.session.Session, game:
+                         orm.Game) -> None:
     """Figure out what a game means for the player's streak.
 
     A first win will start a streak.
@@ -96,7 +79,8 @@ def handle_player_streak(s, game: orm.Game):
         s.add(current_streak)
 
 
-def _add_achievement(s, player, key):
+def _add_achievement(s: sqlalchemy.orm.session.Session, player: orm.Player,
+                     key: str) -> None:
     achievement = model.get_achievement(s, key)
     if achievement not in player.achievements:
         # print("Adding %s to %s" % (key, player.name))
@@ -107,7 +91,8 @@ def _add_achievement(s, player, key):
 # pass
 
 
-def handle_achievements(s, game: orm.Game):
+def handle_achievements(s: sqlalchemy.orm.session.Session, game:
+                        orm.Game) -> None:
     """Figure out if a game should award a player achievements."""
     if game.won:
         _add_achievement(s, game.player, 'won1')
@@ -125,7 +110,7 @@ def handle_achievements(s, game: orm.Game):
             _add_achievement(s, game.player, '75tdam')
 
 
-def score_game(s, game: orm.Game):
+def score_game(s: sqlalchemy.orm.session.Session, game: orm.Game) -> None:
     """Score a single game.
 
     Parameters:
@@ -140,7 +125,7 @@ def score_game(s, game: orm.Game):
     handle_achievements(s, game)
 
 
-def score_games():
+def score_games() -> set:
     """Score all unscored games."""
     start = time.time()
     scored_players = set()

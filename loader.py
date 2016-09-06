@@ -11,13 +11,13 @@ import scoreboard.scoring
 import scoreboard.write_website
 
 
-def error(msg):
+def error(msg: str) -> None:
     """Print an error and exit."""
     print(msg, file=sys.stderr)
     sys.exit(1)
 
 
-def read_commandline():
+def read_commandline() -> argparse.Namespace:
     """Parse command line args and validate them."""
     description = "Run DCSS Scoreboard."
     epilog = "Specify DB_USER/DB_PASS environment variables if required."
@@ -63,7 +63,7 @@ def read_commandline():
     return args
 
 
-def main():
+def main() -> None:
     """Run CLI."""
     args = read_commandline()
 

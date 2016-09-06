@@ -2,8 +2,10 @@
 
 import datetime
 
+import scoreboard.orm as orm
 
-def crawl_date_to_datetime(d):
+
+def crawl_date_to_datetime(d: str) -> datetime.datetime:
     """Converts a crawl date string to a datetime object.
 
     Note: crawl dates use a 0-indexed month... I think you can blame struct_tm
@@ -20,7 +22,7 @@ def crawl_date_to_datetime(d):
         second=int(d[12:14]))
 
 
-def _morgue_prefix(src, version):
+def _morgue_prefix(src: str, version: str) -> str:
     if src == "cao":
         prefix = "http://crawl.akrasiac.org/rawdata"
     elif src == "cdo":
@@ -49,7 +51,7 @@ def _morgue_prefix(src, version):
     return prefix
 
 
-def morgue_url(game):
+def morgue_url(game: orm.Game) -> str:
     """Generates a morgue URL from a game."""
     src = game.account.server.name
     prefix = _morgue_prefix(src, game.version.v)
@@ -59,7 +61,7 @@ def morgue_url(game):
     return "%s/%s/morgue-%s-%s.txt" % (prefix, name, name, timestamp)
 
 
-def version_url(version):
+def version_url(version: str) -> str:
     """Cleans up version strings for use in morgue URLs."""
     if version[-2:] == "a0":
         return "trunk"

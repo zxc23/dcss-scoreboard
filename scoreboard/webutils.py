@@ -1,15 +1,19 @@
 """Utility functions for website generation."""
 
+from typing import Iterable, Callable, Sequence, Optional
+import datetime  # for typing
+
 import jinja2
 
 import scoreboard.modelutils as modelutils
 import scoreboard.constants as const
+import scoreboard.orm as orm
 
 PRETTY_TIME_FORMAT = '%-d %B %Y'
 TIME_FORMAT = '<time class="timeago" datetime="{ts}Z">{t}</time>'
 
 
-def prettyint(value):
+def prettyint(value: int) -> str:
     """Jinja filter to prettify ints.
 
     eg, 1234567 to '1,234,567'.
@@ -17,7 +21,7 @@ def prettyint(value):
     return "{0:,}".format(value)
 
 
-def prettyhours(duration):
+def prettyhours(duration: int) -> str:
     """Jinja filter to convert duration in seconds to hours (min 1).
 
     Parameters:
@@ -32,7 +36,7 @@ def prettyhours(duration):
     return str(duration // 3600) if duration > 3600 else '1'
 
 
-def prettydur(duration):
+def prettydur(duration: int) -> str:
     """Jinja filter to convert duration in seconds to a pretty "HH:MM:SS".
 
     Parameters:
@@ -48,7 +52,7 @@ def prettydur(duration):
                                duration % 60)
 
 
-def prettycounter(d):
+def prettycounter(d: dict) -> str:
     """Jinja filter to convert an ordered dict to pretty text.
     eg, {'c':1, 'b': 3, 'a': 2} to 'a (2), c (1), b (3)'.
     """
@@ -59,32 +63,32 @@ def prettycounter(d):
         close="" if len(v) > 0 else '</span>') for k, v in d.items())
 
 
-def prettycrawldate(d):
+def prettycrawldate(d: str) -> str:
     """Jinja filter to convert crawl date string to pretty text."""
-    d = modelutils.crawl_date_to_datetime(d)
-    return prettydate(d)
+    date = modelutils.crawl_date_to_datetime(d)
+    return prettydate(date)
 
 
-def prettydate(d):
+def prettydate(d: datetime.datetime) -> str:
     """Jinja filter to convert datetime object to pretty text."""
     return TIME_FORMAT.format(
         ts=d.isoformat(), t=d.strftime(PRETTY_TIME_FORMAT))
 
 
-def link_player(player, urlbase):
+def link_player(player: str, urlbase: str) -> str:
     """Convert a player name into a link."""
     return "<a href='{base}/players/{name}.html'>{name}</a>".format(
         base=urlbase, name=player)
 
 
-def _games_to_table(env,
-                    games,
+def _games_to_table(env: jinja2.environment.Environment,
+                    games: Iterable[orm.Game],
                     *,
-                    prefix_col=None,
-                    prefix_col_title=None,
-                    show_player=False,
-                    winning_games=False,
-                    skip_header=False):
+                    prefix_col: Optional[Callable]=None,
+                    prefix_col_title: Optional[str]=None,
+                    show_player: bool=False,
+                    winning_games: bool=False,
+                    skip_header: bool=False) -> str:
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
@@ -99,7 +103,7 @@ def _games_to_table(env,
     Returns: (string) '<table>contents</table>'.
     """
 
-    def format_trow(game):
+    def format_trow(game: orm.Game) -> str:
         """Convert a game to a table row."""
         return trow.format(
             tr_class='class="table-success"'
@@ -179,7 +183,10 @@ def _games_to_table(env,
         tbody=tbody)
 
 
-def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
+def streakstotable(streaks: Sequence[orm.Streak],
+                   show_player: bool=True,
+                   show_loss: bool=True,
+                   limit: Optional[int]=None) -> str:
     """Jinja filter to convert a list of streaks into a standard table.
 
     Parameters:
@@ -191,7 +198,8 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
     Returns: (string) '<table>contents</table>'.
     """
 
-    def format_trow(streak, show_player, show_loss):
+    def format_trow(streak: orm.Streak, show_player: bool, show_loss:
+                    bool) -> str:
         """Convert a streak to a table row."""
         player = ""
         loss = ""
@@ -252,7 +260,7 @@ def streakstotable(streaks, show_player=True, show_loss=True, limit=None):
             format_trow(streak, show_player, show_loss) for streak in streaks))
 
 
-def mosthighscorestotable(highscores):
+def mosthighscorestotable(highscores: Iterable) -> str:
     """Jinja filter to convert a list of combo highscores by players into a standard table."""
     table = """<table class="{classes}">
           <thead>
@@ -284,7 +292,7 @@ def mosthighscorestotable(highscores):
     return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
 
 
-def recordsformatted(records):
+def recordsformatted(records: dict) -> str:
     """Show any records a player holds."""
     result = """{race}
                 {role}
@@ -319,7 +327,7 @@ def recordsformatted(records):
     return result.format(race=race, role=role, god=god, combo=combo)
 
 
-def morgue_link(game, text="Morgue"):
+def morgue_link(game: orm.Game, text: str="Morgue") -> str:
     """Returns a hyperlink to a morgue file.
 
     Game can be either a gid string or a game object.
@@ -328,43 +336,47 @@ def morgue_link(game, text="Morgue"):
         url=modelutils.morgue_url(game), text=text)
 
 
-def percentage(n, digits=2):
+def percentage(n: int, digits: int=2) -> str:
     """Convert a number from 0-1 to a percentage."""
     return "%s" % round(n * 100, digits)
 
 
-def shortest_win(games):
+def shortest_win(games: Iterable[orm.Game]) -> orm.Game:
     """Given a list of games, return the win which is the shortest (turns)."""
     wins = filter(lambda g: g.won, games)
     return min(wins, key=lambda g: g.turn)
 
 
-def fastest_win(games):
+def fastest_win(games: Iterable[orm.Game]) -> orm.Game:
     """Given a list of games, return the win which is the fastest (time)."""
     wins = filter(lambda g: g.won, games)
     return min(wins, key=lambda g: g.dur)
 
 
-def highscore(games):
+def highscore(games: orm.Game) -> orm.Game:
     """Given a list of games, return the highest scoring game."""
     return max(games, key=lambda g: g.score)
 
 
 @jinja2.environmentfilter
-def generic_games_to_table(env, data):
+def generic_games_to_table(env: jinja2.environment.Environment, data:
+                           Iterable) -> str:
     """Convert list of games into a HTML table."""
     return _games_to_table(env, data, show_player=False, winning_games=False)
 
 
 @jinja2.environmentfilter
-def generic_highscores_to_table(env, data, show_player=True):
+def generic_highscores_to_table(env: jinja2.environment.Environment,
+                                data: Iterable,
+                                show_player: bool=True) -> str:
     """Convert list of winning games into a HTML table."""
     return _games_to_table(
         env, data, show_player=show_player, winning_games=True)
 
 
 @jinja2.environmentfilter
-def species_highscores_to_table(env, data):
+def species_highscores_to_table(env: jinja2.environment.Environment, data:
+                                Iterable) -> str:
     """Convert list of games for each species into a HTML table."""
     return _games_to_table(
         env,
@@ -376,7 +388,8 @@ def species_highscores_to_table(env, data):
 
 
 @jinja2.environmentfilter
-def background_highscores_to_table(env, data):
+def background_highscores_to_table(env: jinja2.environment.Environment, data:
+                                   Iterable) -> str:
     """Convert list of games for each background into a HTML table."""
     return _games_to_table(
         env,

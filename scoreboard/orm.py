@@ -1,6 +1,7 @@
 """Basic data model."""
 
 from typing import Optional
+import sqlite3  # for typing
 
 import characteristic
 
@@ -427,7 +428,9 @@ class Achievement(Base):
 
 
 def sqlite_performance_over_safety(
-        dbapi_con, con_record) -> None:  # pylint: disable=unused-argument
+        dbapi_con: sqlite3.Connection, con_record:
+        sqlalchemy.pool._ConnectionRecord
+) -> None:  # pylint: disable=unused-argument
     """Significantly speeds up inserts but will break on crash."""
     dbapi_con.execute('PRAGMA journal_mode = MEMORY')
     dbapi_con.execute('PRAGMA synchronous = OFF')
@@ -468,7 +471,7 @@ def setup_database(database: str, credentials: Optional[str]=None) -> None:
     model.setup_ktyps(sess)
 
 
-def get_session():
+def get_session() -> sqlalchemy.orm.session.Session:
     """Create a new database session."""
     if Session is None:
         raise Exception(

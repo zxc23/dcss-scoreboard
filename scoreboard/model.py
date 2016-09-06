@@ -4,6 +4,7 @@ from typing import Optional, Tuple, Callable, Sequence
 
 import sqlalchemy
 import sqlalchemy.orm
+import sqlalchemy.ext.declarative  # for typing
 from sqlalchemy import func
 
 import scoreboard.constants as const
@@ -30,7 +31,7 @@ def _reraise_dberror(function: Callable) -> Callable:
     Doesn't re-wrap DBError/DBIntegrityError exceptions.
     """
 
-    def f(*args, **kwargs):
+    def f(*args, **kwargs):  # type: ignore
         """Wrap Sqlalchemy errors."""
         try:
             return function(*args, **kwargs)
@@ -392,7 +393,7 @@ def list_players(s: sqlalchemy.orm.session.Session) -> Sequence[Player]:
 
 
 def _generic_char_type_lister(s: sqlalchemy.orm.session.Session, *,
-                              cls,
+                              cls: sqlalchemy.ext.declarative.api.DeclarativeMeta,
                               playable: Optional[bool]) \
         -> Sequence:
     q = s.query(cls)
@@ -567,8 +568,10 @@ def highscores(s: sqlalchemy.orm.session.Session,
 
 
 # TODO: type game_column
-def _highscores_helper(s: sqlalchemy.orm.session.Session, mapped_class,
-                       game_column) -> Sequence[Game]:
+def _highscores_helper(
+        s: sqlalchemy.orm.session.Session, mapped_class:
+        sqlalchemy.ext.declarative.api.DeclarativeMeta, game_column:
+        sqlalchemy.orm.attributes.InstrumentedAttribute) -> Sequence[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 
     Parameters:

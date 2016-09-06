@@ -4,6 +4,9 @@ import os
 import re
 import time
 import traceback
+from typing import Iterable, Optional, Union
+
+import sqlalchemy.orm  # for sqlalchemy.orm.session.Session type hints
 
 import scoreboard.constants as const
 import scoreboard.model as model
@@ -19,12 +22,12 @@ class LogImportError(Exception):
     pass
 
 
-def calculate_game_gid(game):
+def calculate_game_gid(game: dict) -> str:
     """Calculate GID for a game. Sequell compatible."""
     return "%s:%s:%s" % (game['name'], game['src'], game['start'])
 
 
-def candidate_logfiles(logdir):
+def candidate_logfiles(logdir: str) -> Iterable[tuple[str, str]]:
     """Yield (logfile, src) tuples from logdir."""
     # Sorting by name is purely for beauty
     # But maybe also a little to improve determinism
@@ -47,7 +50,7 @@ def candidate_logfiles(logdir):
                 print("Skipping unknown file {}".format(f.name))
 
 
-def load_logfiles(logdir):
+def load_logfiles(logdir: str) -> None:
     """Read logfiles and parse their data.
 
     Logfiles are kept in a directory with structure:
@@ -61,10 +64,10 @@ def load_logfiles(logdir):
     print("Loaded logfiles in %s secs" % round(end - start, 2))
 
 
-def load_logfile(logfile, src):
+def load_logfile(logfile: str, src: str) -> None:
     """Load a single logfile into the database."""
     if os.stat(logfile).st_size == 0:
-        return 0
+        return
     start = time.time()
     lines = 0
     new_games = 0
@@ -93,7 +96,8 @@ def load_logfile(logfile, src):
     print(msg.format(f=logfile, l=lines, g=new_games, s=round(end - start, 2)))
 
 
-def handle_line(s, line, src):
+def handle_line(s: sqlalchemy.orm.session.Session, line: str, src:
+                str) -> bool:
     """Given a line, parse it and save it into the database.
 
     Returns True if the line was successfully parsed and added to the database.
@@ -118,7 +122,7 @@ def handle_line(s, line, src):
     return True
 
 
-def parse_field(k, v):
+def parse_field(k: str, v: str) -> tuple[str, Union[int, str]]:
     """Convert field data into the correct data type.
 
     Integer fields are stored as ints, everything else string.
@@ -129,7 +133,8 @@ def parse_field(k, v):
     # Name field is sometimes parseable as an int
     if k != 'name':
         try:
-            v = int(v)
+            # mypy error related to union data type
+            v = int(v)  # type: ignore
         except ValueError:
             pass
     if isinstance(v, str):
@@ -138,7 +143,7 @@ def parse_field(k, v):
     return k, v
 
 
-def parse_line(line, src):
+def parse_line(line: str, src: str) -> Optional[dict]:
     """Read a single logfile line and insert it into the database.
 
     If the game is not valid, None is returned. Invalid games could be:
@@ -161,7 +166,8 @@ def parse_line(line, src):
             raise ValueError("Couldn't parse line (bad field %r), skipping: %r"
                              % (field, line))
         k, v = parse_field(*fields)
-        game[k] = v
+        # mypy error related to union data type
+        game[k] = v  # type: ignore
 
     # Validate the data
     if 'start' not in game:

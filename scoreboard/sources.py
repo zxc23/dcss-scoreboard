@@ -5,7 +5,7 @@ import os
 import subprocess
 import urllib.parse
 import re
-from typing import Optional
+from typing import Optional, Iterable, Sequence
 
 import yaml
 from braceexpand import braceexpand
@@ -20,7 +20,7 @@ IGNORED_FILES_REGEX = re.compile(
     r'(sprint|zotdef|rl.heh.fi|crawlus.somatika.net|nostalgia|mulch|squarelos|combo_god)')
 
 
-def sources(src):
+def sources(src: dict) -> Iterable[str]:
     """Return a full, raw listing of logfile/milestone URLs for a given src dict.
 
     Expands bash style '{a,b}{1,2}' strings into all their permutations.
@@ -48,7 +48,7 @@ def sources(src):
             yield entry
 
 
-def source_data():
+def source_data() -> dict:
     """Return a dict of {src: data, src: data} from source.yml."""
     out = {}
     rawpath = os.path.join(os.path.dirname(__file__), 'sources.yml')
@@ -58,7 +58,7 @@ def source_data():
     return out
 
 
-def url_to_filename(url):
+def url_to_filename(url: str) -> str:
     """Convert milestone/logfile url to filename.
 
     Example:
@@ -68,7 +68,7 @@ def url_to_filename(url):
     return urllib.parse.urlparse(url).path.lstrip('/').replace('/', '-')
 
 
-def download_source_files(urls, dest):
+def download_source_files(urls: Sequence, dest: str) -> None:
     """Download logfile/milestone files for a single source."""
     print("Downloading {} files to {}".format(len(urls), dest))
     for url in urls:
@@ -91,7 +91,7 @@ def download_source_files(urls, dest):
             print("Finished downloading {}.".format(url))
 
 
-def download_sources(dest: str, servers: Optional[str]=None):
+def download_sources(dest: str, servers: Optional[str]=None) -> None:
     """Download all logfile/milestone files.
 
     Parameters:
@@ -114,7 +114,8 @@ def download_sources(dest: str, servers: Optional[str]=None):
             else:
                 print("Invalid server '%s' specified, skipping." % server)
         all_sources = temp
-    p = multiprocessing.Pool(10)
+    p = multiprocessing.Pool(10)  # type: ignore
+    p  # should be type: multiprocessing.pool.ThreadPool -- but not in typeshed yet
     jobs = []
     for src, urls in all_sources.items():
         destdir = os.path.join(dest, src)
