@@ -76,7 +76,7 @@ class Account(Base):
     player_id = Column(
         Integer, ForeignKey('players.id'), nullable=False,
         index=True)  # type: int
-    player = relationship("Player")
+    player = relationship("Player", back_populates='accounts')
 
     @property
     def canonical_name(self) -> str:
@@ -106,6 +106,7 @@ class Player(Base):
     __tablename__ = 'players'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), unique=True, nullable=False)  # type: str
+    accounts = relationship("Account", back_populates="player")  # type: list
     achievements = relationship(
         "Achievement", secondary=AwardedAchievements, back_populates="players")
 
