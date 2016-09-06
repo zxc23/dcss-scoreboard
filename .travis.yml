@@ -15,9 +15,9 @@ script:
   - echo "yapf..." && echo -en 'travis_fold:start:yapf\\r'
   - make yapf
   - echo -en 'travis_fold:end:yapf\\r'
-  - echo "pylint..." && echo -en 'travis_fold:start:pylint\\r'
-  - make pylint
-  - echo -en 'travis_fold:end:pylint\\r'
+  #- echo "pylint..." && echo -en 'travis_fold:start:pylint\\r'
+  #- make pylint
+  #- echo -en 'travis_fold:end:pylint\\r'
   #- echo "mypy..." && echo -en 'travis_fold:start:mypy\\r'
   #- make mypy
   #- echo -en 'travis_fold:end:mypy\\r'
