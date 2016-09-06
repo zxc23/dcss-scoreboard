@@ -710,3 +710,66 @@ def count_games(s: sqlalchemy.orm.session.Session,
         q = q.filter(Game.scored == (sqlalchemy.true()
                                      if scored else sqlalchemy.false()))
     return q.count()
+
+
+def _player_wins_per_foo(s: sqlalchemy.orm.session.Session,
+                         player: Player,
+                         mapped_class,
+                         game_map_column,
+                         game_id_column) -> Sequence[Tuple[Species, int]]:
+    """Generic function to return sequence of (Foo, #wins) for the given player.
+
+    Foo may be Species, Background or God.
+
+    Only includes playable Foo. Foo without wins are not included.
+    """
+    ktyp = get_ktyp(s, 'winning')
+
+    q = s.query(mapped_class, func.count('*'))
+    q = q.join(game_map_column).group_by(game_id_column)
+    q = q.filter(mapped_class.playable == sqlalchemy.true())
+    q = q.filter(Game.ktyp_id == ktyp.id)
+
+    # Matching against the explicit account_ids of a player is significantly
+    # faster than having the query perform a full join against the accounts &
+    # player tables.
+    # We need to explicitly use the account_id column (rather than account)
+    # since sqlalchemy doesn't support using .in_ against objects:
+    # NotImplementedError: in_() not yet supported for relationships.
+    #   For a simple many-to-one, use in_() against the set of foreign key
+    #   values.
+    q = q.filter(Game.account_id.in_(player.id for player in player.accounts))
+
+    for foo in s.query(mapped_class).filter(playable == sqlalchemy.true())
+    return q.all()
+
+
+def player_wins_per_species(s: sqlalchemy.orm.session.Session,
+                            player: Player) -> Sequence[Tuple[Species, int]]:
+    """Return sequence of (species, wins) for the given player.
+
+    Only includes playable species. Species without wins are not included.
+    """
+    return _player_wins_per_foo(s, player, Species, Game.species,
+                                Game.species_id)
+
+
+def player_wins_per_god(s: sqlalchemy.orm.session.Session,
+                            player: Player) -> Sequence[Tuple[God, int]]:
+    """Return sequence of (god, wins) for the given player.
+
+    Only includes playable gods. Gods without wins are not included.
+    """
+    return _player_wins_per_foo(s, player, God, Game.god,
+                                Game.god_id)
+
+
+def player_wins_per_background(s: sqlalchemy.orm.session.Session,
+                            player: Player) -> Sequence[Tuple[Background, int]]:
+    """Return sequence of (background, wins) for the given player.
+
+    Only includes playable backgrounds.
+    Backgrounds without wins are not included.
+    """
+    return _player_wins_per_foo(s, player, Background, Game.background,
+                                Game.background_id)

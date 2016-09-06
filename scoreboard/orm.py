@@ -76,7 +76,7 @@ class Account(Base):
     player_id = Column(
         Integer, ForeignKey('players.id'), nullable=False,
         index=True)  # type: int
-    player = relationship("Player")
+    player = relationship("Player", back_populates="accounts")
 
     @property
     def canonical_name(self) -> str:
@@ -106,6 +106,7 @@ class Player(Base):
     __tablename__ = 'players'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), unique=True, nullable=False)  # type: str
+    accounts = relationship("Account", back_populates="player")
     achievements = relationship(
         "Achievement", secondary=AwardedAchievements, back_populates="players")
 
@@ -299,6 +300,7 @@ class Game(Base):
     __tablename__ = 'games'
     gid = Column(String(50), primary_key=True, nullable=False)  # type: str
 
+    # No index needed since first_game_index provides it already
     account_id = Column(
         Integer, ForeignKey('accounts.id'), nullable=False)  # type: int
     account = relationship("Account")
@@ -334,6 +336,7 @@ class Game(Base):
     potions_used = Column(Integer, nullable=False)  # type: int
     scrolls_used = Column(Integer, nullable=False)  # type: int
 
+    # Don't need an index due to shortest/fastest_highscore_index
     ktyp_id = Column(
         Integer, ForeignKey('ktyps.id'), nullable=False)  # type: int
     ktyp = relationship("Ktyp")
@@ -355,7 +358,12 @@ class Game(Base):
         # Used by scoring.score_games
         Index('unscored_games', scored, end),
         # Used by scoring.is_grief
-        Index('first_game_index', account_id, end), )
+        Index('first_game_index', account_id, end),
+        # Used by player_wins_per_species/background/god
+        Index('player_wins_per_species', ktyp_id, species_id),
+        Index('player_wins_per_background', ktyp_id, background_id),
+        Index('player_wins_per_god', ktyp_id, god_id),
+        )
 
     @property
     def player(self) -> Player:
@@ -430,7 +438,7 @@ class Achievement(Base):
     description = Column(String(200), nullable=False)  # type: str
     players = relationship(
         "Player", secondary=AwardedAchievements, back_populates="achievements")
-    multilevel = Column(Boolean), nullable=False)  # type: bool
+    # multilevel = Column(Boolean, nullable=False)  # type: bool
 
 
 def sqlite_performance_over_safety(
