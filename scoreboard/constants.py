@@ -6,7 +6,8 @@ from collections import namedtuple
 Species = namedtuple('Species', ['short', 'full', 'playable'])
 Background = namedtuple('Background', ['short', 'full', 'playable'])
 God = namedtuple('God', ['name', 'playable'])
-Achievement = namedtuple('Achievement', ['key', 'name', 'description', 'hidden', 'players'])
+Achievement = namedtuple('Achievement',
+                         ['key', 'name', 'description', 'hidden', 'players'])
 
 SPECIES = {
     Species('Ce', 'Centaur', True),
@@ -267,20 +268,47 @@ KTYP_FIXUPS = {
     'falling down stairs': 'falling_down_stairs'
 }
 ACHIEVEMENTS = {
-    Achievement('won1', 'It belongs in a Museum!', 'Escape with the Orb of Zot.', False, tuple()),
-    Achievement('wondur2.5hr', 'Under 9000', 'Win a game in under two and a half hours.', False, tuple()),
-    Achievement('fivebyfive', 'Five by Five', 'Win a game in under 55,555 turns.', False, tuple()),
-    Achievement('gselfkill', 'Unnatural Selection', 'Die to your own ghost.', False, tuple()),
-    Achievement('lostwith3+runes', 'Hubris', 'Die with at least three runes.', False, tuple()),
-    Achievement('75tdam', 'Owned', 'Die after taking 75 damage (or more).', False, tuple()),
-    Achievement('all_species', 'Xenophiliac', 'Win a game with every playable species.', False, tuple()),
-    Achievement('all_backgrounds', 'Jack of all Trades', 'Win a game with every playable background.', False, tuple()),
-    Achievement('all_gods', 'Polytheist', 'Win a game with every playable god.', False, tuple()),
-    Achievement('0.18_first', '0.18 Tournament: First Place', 'First place in the 0.18 tournament, May 2016.', True, ('Yermak',)),
-    Achievement('0.18_second', '0.18 Tournament: Second Place', 'Second place in the 0.18 tournament, May 2016.', True, ('Demise',)),
-    Achievement('0.18_third', '0.18 Tournament: Third Place', 'Third place in the 0.18 tournament, May 2016.', True, ('Ultraviolent4',)),
-    Achievement('0.18_clan_first', '0.18 Tournament: First Place (Clan)', 'Part of the first placed clan in the 0.18 tournament, May 2016.', True, ('WalkerBoh', 'MorganLeah', 'Snack', 'moose', 'n1000', 'Lasty')),
-    Achievement('0.18_clan_second', '0.18 Tournament: Second Place (Clan)', 'Part of the second placed clan in the 0.18 tournament, May 2016.', True, ('Demise', 'BobtheCannibal69', 'Megaslime', 'Ultraviolent4', 'chequers', 'krfreak')),
-    Achievement('0.18_clan_third', '0.18 Tournament: Third Place (Clan)', 'Part of the third placed clan in the 0.18 tournament, May 2016.', True, ('irum', 'Dowan', 'SilvereR', 'mooon', 'sheltermaker01', 'thrrja')),
+    Achievement('won1', 'It belongs in a Museum!',
+                'Escape with the Orb of Zot.', False, tuple()),
+    Achievement('wondur2.5hr', 'Under 9000',
+                'Win a game in under two and a half hours.', False, tuple()),
+    Achievement('fivebyfive', 'Five by Five',
+                'Win a game in under 55,555 turns.', False, tuple()),
+    Achievement('gselfkill', 'Unnatural Selection', 'Die to your own ghost.',
+                False, tuple()),
+    Achievement('lostwith3+runes', 'Hubris', 'Die with at least three runes.',
+                False, tuple()),
+    Achievement('75tdam', 'Owned', 'Die after taking 75 damage (or more).',
+                False, tuple()),
+    Achievement('all_species', 'Xenophiliac',
+                'Win a game with every playable species.', False, tuple()),
+    Achievement('all_backgrounds', 'Jack of all Trades',
+                'Win a game with every playable background.', False, tuple()),
+    Achievement('all_gods', 'Polytheist',
+                'Win a game with every playable god.', False, tuple()),
+    Achievement('0.18_first', '0.18 Tournament: First Place',
+                'First place in the 0.18 tournament, May 2016.', True,
+                ('Yermak', )),
+    Achievement('0.18_second', '0.18 Tournament: Second Place',
+                'Second place in the 0.18 tournament, May 2016.', True,
+                ('Demise', )),
+    Achievement('0.18_third', '0.18 Tournament: Third Place',
+                'Third place in the 0.18 tournament, May 2016.', True,
+                ('Ultraviolent4', )),
+    Achievement(
+        '0.18_clan_first', '0.18 Tournament: First Place (Clan)',
+        'Part of the first placed clan in the 0.18 tournament, May 2016.',
+        True, ('WalkerBoh', 'MorganLeah', 'Snack', 'moose', 'n1000', 'Lasty')),
+    Achievement(
+        '0.18_clan_second', '0.18 Tournament: Second Place (Clan)',
+        'Part of the second placed clan in the 0.18 tournament, May 2016.',
+        True, ('Demise', 'BobtheCannibal69', 'Megaslime', 'Ultraviolent4',
+               'chequers', 'krfreak')),
+    Achievement(
+        '0.18_clan_third', '0.18 Tournament: Third Place (Clan)',
+        'Part of the third placed clan in the 0.18 tournament, May 2016.',
+        True,
+        ('irum', 'Dowan', 'SilvereR', 'mooon', 'sheltermaker01', 'thrrja')),
 }
-GHOST_KILL_VERBS = { 'drained of all life', 'hit from afar', 'blown up by', 'incinerated', 'blasted', 'slain' }
+GHOST_KILL_VERBS = {'drained of all life', 'hit from afar', 'blown up by',
+                    'incinerated', 'blasted', 'slain'}

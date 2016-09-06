@@ -1,7 +1,5 @@
 """Defines the database models for this module."""
 
-import os
-import json
 from typing import Optional, Tuple, Callable, Sequence
 
 import sqlalchemy
@@ -137,7 +135,8 @@ def setup_achievements(s: sqlalchemy.orm.session.Session) -> None:
             achievement.description = proto.description
             s.add(achievement)
             for player_name in proto.players:
-                print("Awarding achievement '%s' to '%s'" % (achievement.name, player_name))
+                print("Awarding achievement '%s' to '%s'" %
+                      (achievement.name, player_name))
                 player = get_player(s, player_name)
                 player.achievements.append(achievement)
                 s.add(player)
@@ -752,6 +751,7 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     return [t.Streak for t in streaks]
 
 
-def list_achievements(s: sqlalchemy.orm.session.Session) -> Sequence[Achievement]:
+def list_achievements(s:
+                      sqlalchemy.orm.session.Session) -> Sequence[Achievement]:
     """Get all streaks."""
     return s.query(Achievement).all()

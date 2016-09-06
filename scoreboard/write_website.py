@@ -168,7 +168,7 @@ def render_achievements(template):
     return template.render()
 
 
-def write_achievements(s, env):
+def write_achievements(env):
     """Write the achievements page."""
     print("Writing achievements")
     template = env.get_template('achievements.html')
@@ -295,7 +295,7 @@ def write_website(players, urlbase=None):
 
     write_highscores(s, env)
 
-    write_achievements(s, env)
+    write_achievements(env)
 
     write_player_pages(s, env, players)
 

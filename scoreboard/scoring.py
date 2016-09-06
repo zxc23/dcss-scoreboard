@@ -103,9 +103,8 @@ def _add_achievement(s, player, key):
         player.achievements.append(achievement)
         s.add(player)
 
-
 # def handle_greatfoo_achievements(s, game):
-    # pass
+# pass
 
 
 def handle_achievements(s, game: orm.Game):
@@ -118,7 +117,7 @@ def handle_achievements(s, game: orm.Game):
             _add_achievement(s, game.player, 'fivebyfive')
         # handle_greatfoo_achievements(s, game)
     else:
-        if any(map(lambda verb: game.tmsg.startswith(verb), const.GHOST_KILL_VERBS)):
+        if any(map(game.tmsg.startswith, const.GHOST_KILL_VERBS)):
             _add_achievement(s, game.player, 'gselfkill')
         if game.runes > 2:
             _add_achievement(s, game.player, 'lostwith3+runes')
