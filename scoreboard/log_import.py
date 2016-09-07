@@ -4,7 +4,7 @@ import os
 import re
 import time
 import traceback
-from typing import Iterable, Optional, Union
+from typing import Iterable, Optional, Union, Tuple
 
 import sqlalchemy.orm  # for sqlalchemy.orm.session.Session type hints
 
@@ -27,7 +27,7 @@ def calculate_game_gid(game: dict) -> str:
     return "%s:%s:%s" % (game['name'], game['src'], game['start'])
 
 
-def candidate_logfiles(logdir: str) -> Iterable[tuple[str, str]]:
+def candidate_logfiles(logdir: str) -> Iterable[Tuple[str, str]]:
     """Yield (logfile, src) tuples from logdir."""
     # Sorting by name is purely for beauty
     # But maybe also a little to improve determinism
@@ -122,7 +122,7 @@ def handle_line(s: sqlalchemy.orm.session.Session, line: str, src:
     return True
 
 
-def parse_field(k: str, v: str) -> tuple[str, Union[int, str]]:
+def parse_field(k: str, v: str) -> Tuple[str, Union[int, str]]:
     """Convert field data into the correct data type.
 
     Integer fields are stored as ints, everything else string.
