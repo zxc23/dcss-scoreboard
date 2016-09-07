@@ -435,19 +435,16 @@ def list_gods(s: sqlalchemy.orm.session.Session,
     return _generic_char_type_lister(s, cls=God, playable=playable)
 
 
-def list_games(s: sqlalchemy.orm.session.Session,
-               *,
-               player: Optional[Player]=None,
-               account: Optional[Account]=None,
-               scored: Optional[bool]=None,
-               limit: Optional[int]=None,
-               gid: Optional[str]=None,
-               winning: Optional[bool]=None,
-               reverse_order: bool=False) -> Sequence[Game]:
-    """Get a list of all games that match a specified condition.
-
-    Return data is ordered most recent -> least recent, unless
-    reverse_order=True.
+def _games(s: sqlalchemy.orm.session.Session,
+           *,
+           player: Optional[Player]=None,
+           account: Optional[Account]=None,
+           scored: Optional[bool]=None,
+           limit: Optional[int]=None,
+           gid: Optional[str]=None,
+           winning: Optional[bool]=None,
+           reverse_order: Optional[bool]=False) -> sqlalchemy.orm.query.Query:
+    """Build a query to match games with certain conditions.
 
     Parameters:
         player: If specified, only return games with a matching player
@@ -456,10 +453,11 @@ def list_games(s: sqlalchemy.orm.session.Session,
         limit: If specified, return up to limit games
         gid: If specified, only return game with matching gid
         winning: If specified, only return games where ktyp==/!='winning'
-        reverse_order: If True, return games least->most recent
+        reverse_order: If specified, return games least->most recent (if True),
+            or most->least recent (if False)
 
-    Return:
-        list of Game objects
+    Returns:
+        query object you can call.
     """
     q = s.query(Game)
     if player is not None:
@@ -478,10 +476,62 @@ def list_games(s: sqlalchemy.orm.session.Session,
             q = q.filter(Game.ktyp_id == ktyp.id)
         else:
             q = q.filter(Game.ktyp_id != ktyp.id)
-    q = q.order_by(Game.end.desc() if not reverse_order else Game.end.asc())
+    if reverse_order is not None:
+        q = q.order_by(Game.end.desc()
+                       if not reverse_order else Game.end.asc())
     if limit is not None:
         q = q.limit(limit)
-    return q.all()
+    return q
+
+
+def list_games(s: sqlalchemy.orm.session.Session,
+               *,
+               player: Optional[Player]=None,
+               account: Optional[Account]=None,
+               scored: Optional[bool]=None,
+               limit: Optional[int]=None,
+               gid: Optional[str]=None,
+               winning: Optional[bool]=None,
+               reverse_order: bool=False) -> Sequence[Game]:
+    """Get a list of all games that match specified conditions.
+
+    See _games documentation for parameters.
+
+    Return:
+        list of Games.
+    """
+    return _games(
+        s,
+        player=player,
+        account=account,
+        scored=scored,
+        limit=limit,
+        gid=gid,
+        winning=winning,
+        reverse_order=reverse_order).all()
+
+
+def count_games(s: sqlalchemy.orm.session.Session,
+                *,
+                player: Optional[Player]=None,
+                account: Optional[Account]=None,
+                scored: Optional[bool]=None,
+                gid: Optional[str]=None,
+                winning: Optional[bool]=None) -> int:
+    """Get a count of all games that match specified conditions.
+
+    See _games documentation for parameters.
+
+    Return:
+        count of matching Games.
+    """
+    return _games(
+        s,
+        player=player,
+        account=account,
+        scored=scored,
+        gid=gid,
+        winning=winning).count()
 
 
 # Really, the type signature should be the same as get_games, just without limit
