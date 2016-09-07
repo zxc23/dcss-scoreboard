@@ -267,7 +267,7 @@ KTYP_FIXUPS = {
     'self aimed': 'self_aimed',
     'falling down stairs': 'falling_down_stairs'
 }
-ACHIEVEMENTS = {
+ACHIEVEMENTS = (
     Achievement('won1', 'It belongs in a Museum!',
                 'Escape with the Orb of Zot.', False, tuple()),
     Achievement('wondur2.5hr', 'Under 9000',
@@ -309,6 +309,6 @@ ACHIEVEMENTS = {
         'Part of the third placed clan in the 0.18 tournament, May 2016.',
         True,
         ('irum', 'Dowan', 'SilvereR', 'mooon', 'sheltermaker01', 'thrrja')),
-}
+)
 GHOST_KILL_VERBS = {'drained of all life', 'hit from afar', 'blown up by',
                     'incinerated', 'blasted', 'slain'}
