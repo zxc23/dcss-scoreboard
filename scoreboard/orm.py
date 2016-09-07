@@ -325,6 +325,9 @@ class Game(Base):
     god = relationship("God")
 
     xl = Column(Integer, nullable=False)  # type: int
+    dam = Column(Integer, nullable=False)  # type: int
+    sdam = Column(Integer, nullable=False)  # type: int
+    tdam = Column(Integer, nullable=False)  # type: int
     tmsg = Column(String(1000), nullable=False)  # type: str
     turn = Column(Integer, nullable=False)  # type: int
     dur = Column(Integer, nullable=False)  # type: int
