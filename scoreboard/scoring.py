@@ -43,20 +43,6 @@ def is_grief(s, game):
     return False
 
 
-def add_all_manual_achievements(s):
-    """Add manual achievements to players' stats."""
-    print("Adding manual achievements")
-    for name, achievements in const.MANUAL_ACHIEVEMENTS.items():
-        player = model.get_player(s, name)
-        achievements = achievements.keys()
-        for achievement in achievements:
-            achievement = model.get_achievement(s, achievement)
-            if achievement not in player.achievements:
-                player.achievements.append(achievement)
-                s.add(player)
-    s.commit()
-
-
 def great_race(player, species):  # pylint: disable=unused-argument
     """Check if the player has great race.
 
@@ -110,8 +96,34 @@ def handle_player_streak(s, game: orm.Game):
         s.add(current_streak)
 
 
+def _add_achievement(s, player, key):
+    achievement = model.get_achievement(s, key)
+    if achievement not in player.achievements:
+        # print("Adding %s to %s" % (key, player.name))
+        player.achievements.append(achievement)
+        s.add(player)
+
+
+# def handle_greatfoo_achievements(s, game):
+    # pass
+
+
 def handle_achievements(s, game: orm.Game):
-    pass
+    """Figure out if a game should award a player achievements."""
+    if game.won:
+        _add_achievement(s, game.player, 'won1')
+        if game.dur < 9000:
+            _add_achievement(s, game.player, 'wondur2.5hr')
+        if game.turn < 55555:
+            _add_achievement(s, game.player, 'fivebyfive')
+        # handle_greatfoo_achievements(s, game)
+    else:
+        if any(map(lambda verb: game.tmsg.startswith(verb), const.GHOST_KILL_VERBS)):
+            _add_achievement(s, game.player, 'gselfkill')
+        if game.runes > 2:
+            _add_achievement(s, game.player, 'lostwith3+runes')
+        if game.tdam > 74:
+            _add_achievement(s, game.player, '75tdam')
 
 
 def score_game(s, game: orm.Game):
@@ -149,9 +161,6 @@ def score_games():
             if new_scored and new_scored % 10000 == 0:
                 print(new_scored)
         s.commit()
-
-    # Add manual achievements
-    add_all_manual_achievements(s)
 
     end = time.time()
     print("Scored %s new games (for %s players) in %s secs" %

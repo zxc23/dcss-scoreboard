@@ -6,6 +6,7 @@ from collections import namedtuple
 Species = namedtuple('Species', ['short', 'full', 'playable'])
 Background = namedtuple('Background', ['short', 'full', 'playable'])
 God = namedtuple('God', ['name', 'playable'])
+Achievement = namedtuple('Achievement', ['key', 'name', 'description', 'hidden', 'players'])
 
 SPECIES = {
     Species('Ce', 'Centaur', True),
@@ -201,44 +202,6 @@ BRANCHES = {
     Branch('Forest', 'Enchanted Forest', True, False),
     Branch('Shrine', 'Shrine', False, True),
 }
-MANUAL_ACHIEVEMENTS = {
-    'comborobin': {
-        'greatestplayer': True
-    },
-    'Stabwound': {
-        '0.4_winner': True
-    },
-    '78291': {
-        '0.5_winner': True
-    },
-    'elliptic': {
-        '0.7_winner': True,
-        '0.10_winner': True
-    },
-    'mikee': {
-        '0.8_winner': True
-    },
-    'theglow': {
-        '0.9_winner': True,
-        '0.11_winner': True
-    },
-    'jeanjacques': {
-        '0.12_winner': True
-    },
-    'bmfx': {
-        '0.13_winner': True
-    },
-    'Tolias': {
-        '0.14_winner': True,
-        '0.15_winner': True
-    },
-    'DrKe': {
-        '0.16_winner': True
-    },
-    'cosmonaut': {
-        '0.17_winner': True
-    },
-}
 GLOBAL_TABLE_LENGTH = 50
 FRONTPAGE_TABLE_LENGTH = 10
 PLAYER_TABLE_LENGTH = 10
@@ -303,3 +266,21 @@ KTYP_FIXUPS = {
     'self aimed': 'self_aimed',
     'falling down stairs': 'falling_down_stairs'
 }
+ACHIEVEMENTS = {
+    Achievement('won1', 'It belongs in a Museum!', 'Escape with the Orb of Zot.', False, tuple()),
+    Achievement('wondur2.5hr', 'Under 9000', 'Win a game in under two and a half hours.', False, tuple()),
+    Achievement('fivebyfive', 'Five by Five', 'Win a game in under 55,555 turns.', False, tuple()),
+    Achievement('gselfkill', 'Unnatural Selection', 'Die to your own ghost.', False, tuple()),
+    Achievement('lostwith3+runes', 'Hubris', 'Die with at least three runes.', False, tuple()),
+    Achievement('75tdam', 'Owned', 'Die after taking 75 damage (or more).', False, tuple()),
+    Achievement('all_species', 'Xenophiliac', 'Win a game with every playable species.', False, tuple()),
+    Achievement('all_backgrounds', 'Jack of all Trades', 'Win a game with every playable background.', False, tuple()),
+    Achievement('all_gods', 'Polytheist', 'Win a game with every playable god.', False, tuple()),
+    Achievement('0.18_first', '0.18 Tournament: First Place', 'First place in the 0.18 tournament, May 2016.', True, ('Yermak',)),
+    Achievement('0.18_second', '0.18 Tournament: Second Place', 'Second place in the 0.18 tournament, May 2016.', True, ('Demise',)),
+    Achievement('0.18_third', '0.18 Tournament: Third Place', 'Third place in the 0.18 tournament, May 2016.', True, ('Ultraviolent4',)),
+    Achievement('0.18_clan_first', '0.18 Tournament: First Place (Clan)', 'Part of the first placed clan in the 0.18 tournament, May 2016.', True, ('WalkerBoh', 'MorganLeah', 'Snack', 'moose', 'n1000', 'Lasty')),
+    Achievement('0.18_clan_second', '0.18 Tournament: Second Place (Clan)', 'Part of the second placed clan in the 0.18 tournament, May 2016.', True, ('Demise', 'BobtheCannibal69', 'Megaslime', 'Ultraviolent4', 'chequers', 'krfreak')),
+    Achievement('0.18_clan_third', '0.18 Tournament: Third Place (Clan)', 'Part of the third placed clan in the 0.18 tournament, May 2016.', True, ('irum', 'Dowan', 'SilvereR', 'mooon', 'sheltermaker01', 'thrrja')),
+}
+GHOST_KILL_VERBS = { 'drained of all life', 'hit from afar', 'blown up by', 'incinerated', 'blasted', 'slain' }

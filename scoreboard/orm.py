@@ -33,11 +33,7 @@ class Server(Base):
     name = Column(
         String(4), nullable=False, index=True, unique=True)  # type: str
 
-
 # Many-to-many mapping of players to achivements
-# Columns:
-#   level: the level of the achievement awarded. Should be '1' for single-level
-#       achievements.
 AwardedAchievements = Table(
     'awarded_achievements',
     Base.metadata,
@@ -47,12 +43,7 @@ AwardedAchievements = Table(
         'achievement_id',
         Integer,
         ForeignKey('achievements.id'),
-        nullable=False),
-    Column(
-        'level',
-        Integer,
-        nullable=False),
-    )
+        nullable=False))
 
 
 @characteristic.with_repr(  # pylint: disable=too-few-public-methods
@@ -413,7 +404,7 @@ class LogfileProgress(Base):
     bytes_parsed = Column(Integer, nullable=False, default=0)  # type: int
 
 
-@characteristic.with_repr(["id"])  # pylint: disable=too-few-public-methods
+@characteristic.with_repr(["key"])  # pylint: disable=too-few-public-methods
 class Achievement(Base):
     """Achievements.
 
@@ -424,17 +415,15 @@ class Achievement(Base):
         description: human-readable description of the achievement. This should
             be written as a directive to the reader, eg 'Win a game with each
             God'
-        multilevel: is the achievement binary or can it be partially completed?
     """
 
     __tablename__ = 'achievements'
     id = Column(Integer, primary_key=True)  # type: int
-    key = Column(String(50), nullable=False)  # type: str
-    name = Column(String(50), nullable=False)  # type: str
+    key = Column(String(50), nullable=False, index=True)  # type: str
+    name = Column(String(50), nullable=False, index=True)  # type: str
     description = Column(String(200), nullable=False)  # type: str
     players = relationship(
         "Player", secondary=AwardedAchievements, back_populates="achievements")
-    multilevel = Column(Boolean, nullable=False)  # type: bool
 
 
 def sqlite_performance_over_safety(

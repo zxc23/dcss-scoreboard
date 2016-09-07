@@ -63,6 +63,20 @@
   </div>
 {% endif %}
 <hr/>
+<h3>Achievements</h3>
+{% for row in player.achievements|batch(3) %}
+<div class="row">
+  {% for achievement in row %}
+  <div class="col-sm-4">
+    <div class="card card-block">
+      <h4 class="card-title">{{ achievement.name }}</h4>
+      <p>{{ achievement.description }}</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+<hr/>
 {% if wins|length %}
 <h3>Wins</h3>
 <div class="row m-b-1">

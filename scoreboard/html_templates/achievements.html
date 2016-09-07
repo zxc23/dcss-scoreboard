@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% set active_page = 'achievements' %}
+{% block title %}Win Streaks{% endblock %}
+{% block heading %}Win Streaks{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-sm-12">
+    {% for achievement in all_achievements|sort(attribute='name') %}
+    <h2>{{ achievement.name }}</h2>
+    <h2><small class="text-muted">{{ achievement.description }}</small></h2>
+    <p>{{ achievement.players|join(', ', attribute='name') }}</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
