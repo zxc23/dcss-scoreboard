@@ -1,7 +1,6 @@
 """Take game data and figure out scoring."""
 
 import time
-from typing import Sequence
 
 import sqlalchemy.orm  # for sqlalchemy.orm.session.Session type hints
 
@@ -10,9 +9,8 @@ import scoreboard.orm as orm
 import scoreboard.constants as const
 
 
-def is_valid_streak_addition(
-        game: orm.Game, current_streak:
-        orm.Streak) -> bool:  # pylint: disable=unused-argument
+def is_valid_streak_addition(game: orm.Game, current_streak:
+                             orm.Streak) -> bool:
     """Check if the game is a valid addition to the streak."""
     # Valid if no streak to begin with
     if not current_streak:

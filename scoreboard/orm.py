@@ -428,10 +428,12 @@ class Achievement(Base):
 
 
 def sqlite_performance_over_safety(
-        dbapi_con: sqlite3.Connection, con_record:
-        sqlalchemy.pool._ConnectionRecord
-) -> None:  # pylint: disable=unused-argument
+        dbapi_con: sqlite3.Connection,
+        con_record:
+        sqlalchemy.pool._ConnectionRecord  # pylint: disable=protected-access
+) -> None:
     """Significantly speeds up inserts but will break on crash."""
+    con_record  # pylint: disable=pointless-statement
     dbapi_con.execute('PRAGMA journal_mode = MEMORY')
     dbapi_con.execute('PRAGMA synchronous = OFF')
 

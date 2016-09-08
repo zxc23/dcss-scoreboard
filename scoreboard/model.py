@@ -539,7 +539,6 @@ def count_games(s: sqlalchemy.orm.session.Session,
         winning=winning).count()
 
 
-# Really, the type signature should be the same as get_games, just without limit
 def get_game(s: sqlalchemy.orm.session.Session, **kwargs: dict) -> Game:
     """Get a single game. See get_games docstring/type signature."""
     kwargs.setdefault('limit', 1)  # type: ignore

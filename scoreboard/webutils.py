@@ -1,6 +1,6 @@
 """Utility functions for website generation."""
 
-from typing import Iterable, Callable, Sequence, Optional
+from typing import Iterable, Sequence, Optional
 import datetime  # for typing
 
 import jinja2

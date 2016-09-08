@@ -114,8 +114,8 @@ def download_sources(dest: str, servers: Optional[str]=None) -> None:
             else:
                 print("Invalid server '%s' specified, skipping." % server)
         all_sources = temp
+    # Not yet in typeshet
     p = multiprocessing.Pool(10)  # type: ignore
-    p  # should be type: multiprocessing.pool.ThreadPool -- but not in typeshed yet
     jobs = []
     for src, urls in all_sources.items():
         destdir = os.path.join(dest, src)
