@@ -545,7 +545,6 @@ ACHIEVEMENTS = (
     Achievement(
         '0.4_clan_third', '0.4 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.4 tournament, August 2008.',
-        True, ('Eronarn', 'Foggy', 'Tag', 'Voiks', 'eternal', 'pointless')),
-)
+        True, ('Eronarn', 'Foggy', 'Tag', 'Voiks', 'eternal', 'pointless')), )
 GHOST_KILL_VERBS = {'drained of all life', 'hit from afar', 'blown up by',
                     'incinerated', 'blasted', 'slain'}
