@@ -34,6 +34,11 @@ def read_commandline() -> argparse.Namespace:
         default='sqlite',
         help="Specify the database backend  (default: sqlite)")
     parser.add_argument(
+        '--database-path',
+        default='database.db3',
+        help='Database path (for sqlite). Default: database.db3'
+    )
+    parser.add_argument(
         '--download-logfiles',
         action='store_true',
         help="Download logfiles first.")
@@ -58,7 +63,8 @@ def read_commandline() -> argparse.Namespace:
         metavar='PLAYER',
         help="Re-write the specified player pages.")
     parser.add_argument(
-        '--db-credentials', metavar="user:passwd", help="Database credentials")
+        '--db-credentials', metavar="user:passwd", help="Database credentials",
+        default='')
     args = parser.parse_args()
     return args
 
@@ -67,7 +73,9 @@ def main() -> None:
     """Run CLI."""
     args = read_commandline()
 
-    scoreboard.orm.setup_database(args.database, args.db_credentials)
+    scoreboard.orm.setup_database(database=args.database,
+                                  path=args.database_path,
+                                  credentials=args.db_credentials)
 
     if args.download_logfiles:
         scoreboard.sources.download_sources(
