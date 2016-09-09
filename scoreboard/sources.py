@@ -5,6 +5,7 @@ import os
 import subprocess
 import urllib.parse
 import re
+import shlex
 from typing import Optional, Iterable, Sequence
 
 import yaml
@@ -52,7 +53,7 @@ def source_data() -> dict:
     """Return a dict of {src: data, src: data} from source.yml."""
     out = {}
     rawpath = os.path.join(os.path.dirname(__file__), 'sources.yml')
-    raw_yaml = yaml.load(open(rawpath, encoding='utf8'))
+    raw_yaml = yaml.safe_load(open(rawpath, encoding='utf8'))
     for src in raw_yaml['sources']:
         out[src['name']] = tuple(sources(src))
     return out
@@ -77,9 +78,10 @@ def download_source_files(urls: Sequence, dest: str) -> None:
         if os.path.exists(destfile) and os.stat(destfile).st_size == 0:
             continue
         # print("Downloading {} to {}".format(url, destfile))
-        cmdline = WGET_SOURCE_CMDLINE.format(outfile=destfile, url=url)
+        cmdline = shlex.split(
+            WGET_SOURCE_CMDLINE.format(
+                outfile=destfile, url=url))
         p = subprocess.run(cmdline,
-                           shell=True,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
         if p.returncode:
