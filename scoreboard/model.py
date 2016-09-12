@@ -338,9 +338,9 @@ def create_game_mapping(s: sqlalchemy.orm.session.Session, data: dict) -> dict:
         'ktyp_id': get_ktyp(s, data['ktyp']).id,
         'potions_used': data.get('potionsused', -1),
         'scrolls_used': data.get('scrollsused', -1),
-        'dam': data['dam'],
-        'tdam': data.get('tdam', data['dam']),
-        'sdam': data.get('sdam', data['dam']),
+        'dam': data.get('dam', 0),
+        'tdam': data.get('tdam', data.get('dam', 0)),
+        'sdam': data.get('sdam', data.get('dam', 0)),
     }
 
     return game
