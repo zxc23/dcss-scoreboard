@@ -1,5 +1,6 @@
 """Defines the database models for this module."""
 
+import functools
 from typing import Optional, Tuple, Callable, Sequence
 
 import sqlalchemy
@@ -48,6 +49,7 @@ def _reraise_dberror(function: Callable) -> Callable:
     return f
 
 
+@functools.lru_cache(maxsize=16)
 def get_server(s: sqlalchemy.orm.session.Session, name: str) -> Server:
     """Get a server, creating it if needed."""
     server = s.query(Server).filter(Server.name == name).first()
@@ -60,6 +62,7 @@ def get_server(s: sqlalchemy.orm.session.Session, name: str) -> Server:
         return server
 
 
+@functools.lru_cache(maxsize=128)
 def get_account(s: sqlalchemy.orm.session.Session, name: str, server:
                 Server) -> Account:
     """Get a player's object, creating them if needed.
@@ -80,6 +83,7 @@ def get_account(s: sqlalchemy.orm.session.Session, name: str, server:
         return acc
 
 
+@functools.lru_cache(maxsize=128)
 def get_player(s: sqlalchemy.orm.session.Session, name: str) -> Player:
     """Get a player's object, creating them if needed.
 
@@ -166,6 +170,7 @@ def setup_ktyps(s: sqlalchemy.orm.session.Session) -> None:
     s.commit()
 
 
+@functools.lru_cache(maxsize=32)
 def get_version(s: sqlalchemy.orm.session.Session, v: str) -> Version:
     """Get a version, creating it if needed."""
     version = s.query(Version).filter(Version.v == v).first()
@@ -192,6 +197,7 @@ def setup_branches(s: sqlalchemy.orm.session.Session) -> None:
     s.commit()
 
 
+@functools.lru_cache(maxsize=256)
 def get_place(s: sqlalchemy.orm.session.Session, branch: Branch, lvl:
               int) -> Place:
     """Get a place, creating it if needed."""
@@ -206,6 +212,7 @@ def get_place(s: sqlalchemy.orm.session.Session, branch: Branch, lvl:
         return place
 
 
+@functools.lru_cache(maxsize=64)
 def get_species(s: sqlalchemy.orm.session.Session, sp: str) -> Species:
     """Get a species by short code, creating it if needed."""
     species = s.query(Species).filter(Species.short == sp).first()
@@ -220,6 +227,7 @@ def get_species(s: sqlalchemy.orm.session.Session, sp: str) -> Species:
         return species
 
 
+@functools.lru_cache(maxsize=64)
 def get_background(s: sqlalchemy.orm.session.Session, bg: str) -> Background:
     """Get a background by short code, creating it if needed."""
     background = s.query(Background).filter(Background.short == bg).first()
@@ -234,6 +242,7 @@ def get_background(s: sqlalchemy.orm.session.Session, bg: str) -> Background:
         return background
 
 
+@functools.lru_cache(maxsize=32)
 def get_god(s: sqlalchemy.orm.session.Session, name: str) -> God:
     """Get a god by name, creating it if needed."""
     god = s.query(God).filter(God.name == name).first()
@@ -248,6 +257,7 @@ def get_god(s: sqlalchemy.orm.session.Session, name: str) -> God:
         return god
 
 
+@functools.lru_cache(maxsize=64)
 def get_ktyp(s: sqlalchemy.orm.session.Session, name: str) -> Ktyp:
     """Get a ktyp by name, creating it if needed."""
     ktyp = s.query(Ktyp).filter(Ktyp.name == name).first()
@@ -262,6 +272,7 @@ def get_ktyp(s: sqlalchemy.orm.session.Session, name: str) -> Ktyp:
         return ktyp
 
 
+@functools.lru_cache(maxsize=64)
 def get_branch(s: sqlalchemy.orm.session.Session, br: str) -> Branch:
     """Get a branch by short name, creating it if needed."""
     branch = s.query(Branch).filter(Branch.short == br).first()
