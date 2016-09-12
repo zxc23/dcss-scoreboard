@@ -339,7 +339,7 @@ def create_game_mapping(s: sqlalchemy.orm.session.Session, data: dict) -> dict:
         'version_id': get_version(s, data['v']).id,
         'place_id': get_place(s, branch, data['lvl']).id,
         'xl': data['xl'],
-        'tmsg': data['tmsg'],
+        'tmsg': data.get('tmsg', ''),
         'turn': data['turn'],
         'dur': data['dur'],
         'runes': data.get('urune', 0),

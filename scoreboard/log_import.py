@@ -182,7 +182,6 @@ def parse_line(line: str, src: str) -> Optional[dict]:
     # Data cleansing
     # Simplify version to 0.17/0.18/etc
     game['v'] = re.match(r'(0.\d+)', game['v']).group()
-    game.setdefault('tmsg', '')
     if 'god' not in game:
         game['god'] = 'Atheist'
     return game
