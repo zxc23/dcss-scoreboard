@@ -549,12 +549,6 @@ def get_game(s: sqlalchemy.orm.session.Session, **kwargs: dict) -> Game:
         return result[0]
 
 
-def get_achievement(s: sqlalchemy.orm.session.Session, key:
-                    str) -> Achievement:
-    """Get an achievement."""
-    return s.query(Achievement).filter(Achievement.key == key).one()
-
-
 def highscores(s: sqlalchemy.orm.session.Session,
                *,
                limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:

@@ -77,37 +77,6 @@ def handle_player_streak(s: sqlalchemy.orm.session.Session, game:
         s.add(current_streak)
 
 
-def _add_achievement(s: sqlalchemy.orm.session.Session, player: orm.Player,
-                     key: str) -> None:
-    achievement = model.get_achievement(s, key)
-    if achievement not in player.achievements:
-        # print("Adding %s to %s" % (key, player.name))
-        player.achievements.append(achievement)
-        s.add(player)
-
-# def handle_greatfoo_achievements(s, game):
-# pass
-
-
-def handle_achievements(s: sqlalchemy.orm.session.Session, game:
-                        orm.Game) -> None:
-    """Figure out if a game should award a player achievements."""
-    if game.won:
-        _add_achievement(s, game.player, 'won1')
-        if game.dur < 9000:
-            _add_achievement(s, game.player, 'wondur2.5hr')
-        if game.turn < 55555:
-            _add_achievement(s, game.player, 'fivebyfive')
-        # handle_greatfoo_achievements(s, game)
-    else:
-        if any(map(game.tmsg.startswith, const.GHOST_KILL_VERBS)):
-            _add_achievement(s, game.player, 'gselfkill')
-        if game.runes > 2:
-            _add_achievement(s, game.player, 'lostwith3+runes')
-        if game.tdam > 74:
-            _add_achievement(s, game.player, '75tdam')
-
-
 def score_game(s: sqlalchemy.orm.session.Session, game: orm.Game) -> None:
     """Score a single game.
 
@@ -120,7 +89,6 @@ def score_game(s: sqlalchemy.orm.session.Session, game: orm.Game) -> None:
     if game.account.blacklisted:
         return
     handle_player_streak(s, game)
-    handle_achievements(s, game)
 
 
 def score_games() -> set:

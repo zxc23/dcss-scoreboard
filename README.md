@@ -24,7 +24,6 @@ Tool to create a scoreboard for online DCSS games.
   1. `log_import.py`: load each game (eg each line) from logfiles into the database
   1. `scoring.py`: score each unscored game:
     1. Handle streaks
-    1. Handle achievements
   1. `write_website.py`: create the website directory
     1. Write all global pages (index, highscores, streaks)
     1. Write pages for players with newly scored games

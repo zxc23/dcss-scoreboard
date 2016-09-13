@@ -268,24 +268,6 @@ KTYP_FIXUPS = {
     'falling down stairs': 'falling_down_stairs'
 }
 ACHIEVEMENTS = (
-    Achievement('won1', 'It belongs in a Museum!',
-                'Escape with the Orb of Zot.', False, tuple()),
-    Achievement('wondur2.5hr', 'Under 9000',
-                'Win a game in under two and a half hours.', False, tuple()),
-    Achievement('fivebyfive', 'Five by Five',
-                'Win a game in under 55,555 turns.', False, tuple()),
-    Achievement('gselfkill', 'Unnatural Selection', 'Die to your own ghost.',
-                False, tuple()),
-    Achievement('lostwith3+runes', 'Hubris', 'Die with at least three runes.',
-                False, tuple()),
-    Achievement('75tdam', 'Annihilated',
-                'Die after taking 75 damage (or more).', False, tuple()),
-    Achievement('all_species', 'Xenophiliac',
-                'Win a game with every playable species.', False, tuple()),
-    Achievement('all_backgrounds', 'Jack of all Trades',
-                'Win a game with every playable background.', False, tuple()),
-    Achievement('all_gods', 'Polytheist',
-                'Win a game with every playable god.', False, tuple()),
     Achievement('0.18_first', '0.18 Tournament: First Place',
                 'First place in the 0.18 tournament, May 2016.', True,
                 ('Yermak', )),
@@ -546,5 +528,3 @@ ACHIEVEMENTS = (
         '0.4_clan_third', '0.4 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.4 tournament, August 2008.',
         True, ('Eronarn', 'Foggy', 'Tag', 'Voiks', 'eternal', 'pointless')), )
-GHOST_KILL_VERBS = {'drained of all life', 'hit from afar', 'blown up by',
-                    'incinerated', 'blasted', 'slain'}

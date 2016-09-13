@@ -62,7 +62,6 @@ def jinja_env(
     env.globals['playable_backgrounds'] = model.list_backgrounds(
         s, playable=True)
     env.globals['playable_gods'] = model.list_gods(s, playable=True)
-    env.globals['all_achievements'] = model.list_achievements(s)
     env.globals['current_time'] = datetime.datetime.utcnow()
 
     if urlbase:
@@ -160,19 +159,6 @@ def write_highscores(s: sqlalchemy.orm.session.Session, env:
     template = env.get_template('highscores.html')
     data = render_highscores(s, template)
     _write_file(path=os.path.join(WEBSITE_DIR, 'highscores.html'), data=data)
-
-
-def render_achievements(template: jinja2.environment.Template) -> str:
-    """Render the achievements page."""
-    return template.render()
-
-
-def write_achievements(env: jinja2.environment.Environment) -> None:
-    """Write the achievements page."""
-    print("Writing achievements")
-    template = env.get_template('achievements.html')
-    data = render_achievements(template)
-    _write_file(path=os.path.join(WEBSITE_DIR, 'achievements.html'), data=data)
 
 
 def _get_player_records(global_records: dict, player: orm.Player) -> dict:
@@ -299,8 +285,6 @@ def write_website(players: Optional[Iterable], urlbase: str=None) -> None:
     write_streaks(s, env)
 
     write_highscores(s, env)
-
-    write_achievements(env)
 
     write_player_pages(s, env, players)
 
