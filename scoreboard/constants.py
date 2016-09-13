@@ -57,7 +57,7 @@ BACKGROUNDS = {
     Background('As', 'Assassin', True),
     Background('Be', 'Berserker', True),
     Background('CK', 'Chaos Knight', True),
-    Background('Cj', 'Conjuror', True),
+    Background('Cj', 'Conjurer', True),
     Background('EE', 'Earth Elementalist', True),
     Background('En', 'Enchanter', True),
     Background('FE', 'Fire Elementalist', True),
