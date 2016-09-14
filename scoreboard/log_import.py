@@ -71,7 +71,7 @@ def load_logfiles(logdir: str) -> None:
             game = parse_logfile_line(s, line)
             add_game(s, game)
             lines += 1
-            if lines % 1000 == 0:
+            if lines % 10000 == 0:
                 print("Processed %s lines..." % lines)
                 s.commit()
     s.commit()
@@ -167,7 +167,7 @@ def parse_logfile_line(s: sqlalchemy.orm.session.Session,
     server = model.get_server(s, game['src'])
     gamedict = {
         'gid': game['gid'],
-        'account_id': model.get_account(s, game['name'], server).id,
+        'account_id': model.get_account_id(s, game['name'], server),
         'species_id': model.get_species(s, game['char'][:2]).id,
         'background_id': model.get_background(s, game['char'][2:]).id,
         'god_id': model.get_god(s, game['god']).id,
@@ -208,8 +208,6 @@ def add_game(s: sqlalchemy.orm.session.Session,
     except model.DBIntegrityError:
         print("Tried to import duplicate game: %s" % game['gid'])
         s.rollback()
-        if fast_fail:
-            raise
         return False
     else:
         # s.commit()

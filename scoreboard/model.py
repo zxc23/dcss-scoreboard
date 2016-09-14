@@ -63,24 +63,24 @@ def get_server(s: sqlalchemy.orm.session.Session, name: str) -> Server:
 
 
 @functools.lru_cache(maxsize=128)
-def get_account(s: sqlalchemy.orm.session.Session, name: str, server:
-                Server) -> Account:
-    """Get a player's object, creating them if needed.
+def get_account_id(s: sqlalchemy.orm.session.Session, name: str, server:
+                Server) -> int:
+    """Get an account id, creating the account if needed.
 
     Note that player names are not case sensitive, so names are stored with
     their canonical capitalisation but we always compare the lowercase version.
     """
-    player = get_player(s, name)
-    acc = s.query(Account).filter(
+    player_id = get_player_id(s, name)
+    acc = s.query(Account.id).filter(
         func.lower(Account.name) == name.lower(),
-        Account.server == server).first()
+        Account.server == server).one_or_none()
     if acc:
-        return acc
+        return acc[0]
     else:
-        acc = Account(name=name, server=server, player=player)
+        acc = Account(name=name, server=server, player_id=player_id)
         s.add(acc)
         s.commit()
-        return acc
+        return acc.id
 
 
 @functools.lru_cache(maxsize=128)
@@ -99,6 +99,24 @@ def get_player(s: sqlalchemy.orm.session.Session, name: str) -> Player:
         s.add(player)
         s.commit()
         return player
+
+
+@functools.lru_cache(maxsize=128)
+def get_player_id(s: sqlalchemy.orm.session.Session, name: str) -> Player:
+    """Get a player's object, creating them if needed.
+
+    Note that player names are not case sensitive, so names are stored with
+    their canonical capitalisation but we always compare the lowercase version.
+    """
+    player = s.query(Player.id).filter(
+        func.lower(Player.name) == name.lower()).one_or_none()
+    if player:
+        return player[0]
+    else:
+        player = Player(name=name)
+        s.add(player)
+        s.commit()
+        return player.id
 
 
 def setup_species(s: sqlalchemy.orm.session.Session) -> None:
@@ -600,8 +618,8 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
     if exclude_bots:
         q = q.join(Game.account).join(Account.player)
         for bot_name in const.BLACKLISTS['bots']:
-            bot = get_player(s, bot_name)
-            q = q.filter(Player.id != bot.id)
+            bot_id = get_player_id(s, bot_name)
+            q = q.filter(Player.id != bot_id)
     return q.limit(limit).all()
 
 
