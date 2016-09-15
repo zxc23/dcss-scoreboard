@@ -454,7 +454,7 @@ def setup_database(*,
     else:
         raise ValueError("Unknown database type!")
     print("Connecting to {}".format(db_uri))
-    engine_opts = {'poolclass': sqlalchemy.pool.NullPool}
+    engine_opts = {'poolclass': sqlalchemy.pool.NullPool }
     engine = sqlalchemy.create_engine(db_uri, **engine_opts)
 
     if db_uri.startswith('sqlite'):

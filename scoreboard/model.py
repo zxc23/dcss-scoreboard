@@ -296,65 +296,10 @@ def create_streak(s: sqlalchemy.orm.session.Session, player: Player) -> Streak:
 
 
 @_reraise_dberror
-def add_game(s: sqlalchemy.orm.session.Session, game_data: dict) -> None:
-    """Normalise and add a game to the database."""
-    add_games(s, [game_data])
-
-
-@_reraise_dberror
-def add_games(s: sqlalchemy.orm.session.Session, games_data:
-              Sequence[dict]) -> None:
+def add_games(s: sqlalchemy.orm.session.Session,
+              games: Sequence[dict]) -> None:
     """Normalise and add multiple games to the database."""
-    games = []
-    for game in games_data:
-        games.append(create_game_mapping(s, game))
     s.bulk_insert_mappings(Game, games)
-
-
-def create_game_mapping(s: sqlalchemy.orm.session.Session, data: dict) -> dict:
-    """Convert raw log dict into a game object."""
-
-    # Normalise some data
-    data['god'] = const.GOD_NAME_FIXUPS.get(data['god'], data['god'])
-    data['race'] = const.SPECIES_NAME_FIXUPS.get(data['race'], data['race'])
-    if data['char'][:2] in const.SPECIES_SHORTNAME_FIXUPS:
-        oldrace = data['char'][:2]
-        newrace = const.SPECIES_SHORTNAME_FIXUPS[oldrace]
-        data['char'] = newrace + data['char'][2:]
-    if data['char'][2:] in const.BACKGROUND_SHORTNAME_FIXUPS:
-        oldbg = data['char'][2:]
-        newbg = const.BACKGROUND_SHORTNAME_FIXUPS[oldbg]
-        data['char'] = data['char'][:2] + newbg
-    data['br'] = const.BRANCH_NAME_FIXUPS.get(data['br'], data['br'])
-    data['ktyp'] = const.KTYP_FIXUPS.get(data['ktyp'], data['ktyp'])
-
-    branch = get_branch(s, data['br'])
-    server = get_server(s, data['src'])
-    game = {
-        'gid': data['gid'],
-        'account_id': get_account(s, data['name'], server).id,
-        'species_id': get_species(s, data['char'][:2]).id,
-        'background_id': get_background(s, data['char'][2:]).id,
-        'god_id': get_god(s, data['god']).id,
-        'version_id': get_version(s, data['v']).id,
-        'place_id': get_place(s, branch, data['lvl']).id,
-        'xl': data['xl'],
-        'tmsg': data.get('tmsg', ''),
-        'turn': data['turn'],
-        'dur': data['dur'],
-        'runes': data.get('urune', 0),
-        'score': data['sc'],
-        'start': modelutils.crawl_date_to_datetime(data['start']),
-        'end': modelutils.crawl_date_to_datetime(data['end']),
-        'ktyp_id': get_ktyp(s, data['ktyp']).id,
-        'potions_used': data.get('potionsused', -1),
-        'scrolls_used': data.get('scrollsused', -1),
-        'dam': data.get('dam', 0),
-        'tdam': data.get('tdam', data.get('dam', 0)),
-        'sdam': data.get('sdam', data.get('dam', 0)),
-    }
-
-    return game
 
 
 def get_logfile_progress(s: sqlalchemy.orm.session.Session, logfile:

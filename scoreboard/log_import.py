@@ -1,5 +1,6 @@
 """Handle reading logfiles and parsing them."""
 
+import collections
 import os
 import re
 import time
@@ -10,6 +11,7 @@ import sqlalchemy.orm  # for sqlalchemy.orm.session.Session type hints
 
 import scoreboard.constants as const
 import scoreboard.model as model
+import scoreboard.modelutils as modelutils
 import scoreboard.orm as orm
 
 # Logfile format escapes : as ::, so we use re.split
@@ -27,7 +29,11 @@ def calculate_game_gid(game: dict) -> str:
     return "%s:%s:%s" % (game['name'], game['src'], game['start'])
 
 
-def candidate_logfiles(logdir: str) -> Iterable[Tuple[str, str]]:
+Logfile = collections.namedtuple('Logfile', ('path', 'src'))
+LogfileLine = collections.namedtuple('LogfileLine', ('data', 'src'))
+
+
+def candidate_logfiles(logdir: str) -> Iterable[Logfile]:
     """Yield (logfile, src) tuples from logdir."""
     # Sorting by name is purely for beauty
     # But maybe also a little to improve determinism
@@ -45,7 +51,7 @@ def candidate_logfiles(logdir: str) -> Iterable[Tuple[str, str]]:
                 # XXX to be handled later
                 continue
             elif re.search(const.LOGFILE_REGEX, f.name):
-                yield (f_path, src)
+                yield Logfile(f_path, src)
             else:
                 print("Skipping unknown file {}".format(f.name))
 
@@ -58,92 +64,51 @@ def load_logfiles(logdir: str) -> None:
     """
     print("Loading all logfiles")
     start = time.time()
-    for candidate in candidate_logfiles(logdir):
-        load_logfile(*candidate)
+    lines = 0
+    s = orm.get_session()
+    for logfile in candidate_logfiles(logdir):
+        for line in read_logfile(s, logfile):
+            game = parse_logfile_line(s, line)
+            add_game(s, game)
+            lines += 1
+            if lines % 1000 == 0:
+                print("Processed %s lines..." % lines)
+                s.commit()
+    s.commit()
     end = time.time()
     print("Loaded logfiles in %s secs" % round(end - start, 2))
 
 
-def load_logfile(logfile: str, src: str) -> None:
-    """Load a single logfile into the database."""
-    if os.stat(logfile).st_size == 0:
-        return
+def read_logfile(s: sqlalchemy.orm.session.Session,
+                 logfile: Logfile) -> Iterable[LogfileLine]:
+    if os.stat(logfile.path).st_size == 0:
+        return StopIteration
     start = time.time()
-    lines = 0
-    new_games = 0
-    s = orm.get_session()
     # How many lines have we already processed?
     # We store the data as bytes rather than lines since file.seek is fast
-    seek_pos = model.get_logfile_progress(s, logfile).bytes_parsed
+    seek_pos = model.get_logfile_progress(s, logfile.path).bytes_parsed
 
-    print("Reading %s%s... " % (logfile, (" from byte %s" % seek_pos)
-                                if seek_pos else ''))
-    s = orm.get_session()
-    f = open(logfile, encoding='utf-8')
+    print("Reading %s from byte %s... " % (logfile.path, seek_pos))
+    f = open(logfile.path, encoding='utf-8')
     f.seek(seek_pos)
-    for line in f:
+    
+    lines = 0
+    line = f.readline()
+    while line:
         lines += 1
         # skip blank lines
         if not line.strip():
             continue
-        if handle_line(s, line, src):
-            new_games += 1
-    s.commit()
-    # Save the new number of lines processed in the database
-    model.save_logfile_progress(s, logfile, f.tell())
+        yield LogfileLine(line, logfile.src)
+        line = f.readline()
+    model.save_logfile_progress(s, logfile.path, f.tell())
     end = time.time()
-    msg = "Finished reading {f} ({l} new lines, {g} new games) in {s} secs"
-    print(msg.format(f=logfile, l=lines, g=new_games, s=round(end - start, 2)))
+    msg = "Finished reading {f} ({l} new lines) in {s} secs"
+    print(msg.format(f=logfile.path, l=lines, s=round(end - start, 2)))
 
 
-def handle_line(s: sqlalchemy.orm.session.Session, line: str, src:
-                str) -> bool:
-    """Given a line, parse it and save it into the database.
-
-    Returns True if the line was successfully parsed and added to the database.
-    """
-    game = parse_line(line, src)
-    # Check we got a game back
-    if game is None:
-        return False
-    # Store the game in the database
-    try:
-        model.add_game(s, game)
-    except model.DBError:
-        print("Couldn't import %s. Exception follows:" % line)
-        print(traceback.format_exc())
-        print()
-        s.rollback()
-        return False
-    except model.DBIntegrityError:
-        print("Tried to import duplicate game: %s" % game['gid'])
-        s.rollback()
-        return False
-    return True
-
-
-def parse_field(k: str, v: str) -> Tuple[str, Union[int, str]]:
-    """Convert field data into the correct data type.
-
-    Integer fields are stored as ints, everything else string.
-    """
-    # A few games have junk surrounding a field, like \n or \x00. Trim it.
-    k = k.strip()
-    v = v.strip()
-    # Name field is sometimes parseable as an int
-    if k != 'name':
-        try:
-            # mypy error related to union data type
-            v = int(v)  # type: ignore
-        except ValueError:
-            pass
-    if isinstance(v, str):
-        # pylint: disable=no-member
-        v = v.replace("::", ":")  # Undo logfile escaping
-    return k, v
-
-
-def parse_line(line: str, src: str) -> Optional[dict]:
+def parse_logfile_line(s: sqlalchemy.orm.session.Session,
+                       line: LogfileLine) -> Optional[dict]:
     """Read a single logfile line and insert it into the database.
 
     If the game is not valid, None is returned. Invalid games could be:
@@ -155,10 +120,10 @@ def parse_line(line: str, src: str) -> Optional[dict]:
     if '\x00' in line:
         return None
 
-    game = {'src': src}
+    game = {'src': line.src}
 
     # Parse the log's raw field data
-    for field in re.split(LINE_SPLIT_PATTERN, line):
+    for field in re.split(LINE_SPLIT_PATTERN, line.data):
         if not field.strip():
             continue
         fields = field.split('=', 1)
@@ -166,22 +131,108 @@ def parse_line(line: str, src: str) -> Optional[dict]:
             raise ValueError("Couldn't parse line (bad field %r), skipping: %r"
                              % (field, line))
         k, v = parse_field(*fields)
-        # mypy error related to union data type
-        game[k] = v  # type: ignore
+        game[k] = v
 
-    # Validate the data
+    # Validate the data -- some old broken games don't have this field and
+    # and should be ignored.
     if 'start' not in game:
         return None
     # We should only parse vanilla dcss games
     if game['lv'] != '0.1':
         return None
-    # Create some derived fields
-    game['rc'] = game['char'][:2]
-    game['bg'] = game['char'][2:]
     game['gid'] = calculate_game_gid(game)
     # Data cleansing
     # Simplify version to 0.17/0.18/etc
-    game['v'] = re.match(r'(0.\d+)', game['v']).group()
+    game['v'] = re.match(r"(0.\d+)", game['v']).group()
     if 'god' not in game:
         game['god'] = 'Atheist'
-    return game
+    # Normalise old data
+    game['god'] = const.GOD_NAME_FIXUPS.get(game['god'], game['god'])
+    game['race'] = const.SPECIES_NAME_FIXUPS.get(game['race'], game['race'])
+    if game['char'][:2] in const.SPECIES_SHORTNAME_FIXUPS:
+        oldrace = game['char'][:2]
+        newrace = const.SPECIES_SHORTNAME_FIXUPS[oldrace]
+        game['char'] = newrace + game['char'][2:]
+    if game['char'][2:] in const.BACKGROUND_SHORTNAME_FIXUPS:
+        oldbg = game['char'][2:]
+        newbg = const.BACKGROUND_SHORTNAME_FIXUPS[oldbg]
+        game['char'] = game['char'][:2] + newbg
+    game['br'] = const.BRANCH_NAME_FIXUPS.get(game['br'], game['br'])
+    game['ktyp'] = const.KTYP_FIXUPS.get(game['ktyp'], game['ktyp'])
+    game['rc'] = game['char'][:2]
+    game['bg'] = game['char'][2:]
+
+    # Create a dict with the mappings needed for orm.Game objects
+    branch = model.get_branch(s, game['br'])
+    server = model.get_server(s, game['src'])
+    gamedict = {
+        'gid': game['gid'],
+        'account_id': model.get_account(s, game['name'], server).id,
+        'species_id': model.get_species(s, game['char'][:2]).id,
+        'background_id': model.get_background(s, game['char'][2:]).id,
+        'god_id': model.get_god(s, game['god']).id,
+        'version_id': model.get_version(s, game['v']).id,
+        'place_id': model.get_place(s, branch, game['lvl']).id,
+        'xl': game['xl'],
+        'tmsg': game.get('tmsg', ''),
+        'turn': game['turn'],
+        'dur': game['dur'],
+        'runes': game.get('urune', 0),
+        'score': game['sc'],
+        'start': modelutils.crawl_date_to_datetime(game['start']),
+        'end': modelutils.crawl_date_to_datetime(game['end']),
+        'ktyp_id': model.get_ktyp(s, game['ktyp']).id,
+        'potions_used': game.get('potionsused', -1),
+        'scrolls_used': game.get('scrollsused', -1),
+        'dam': game.get('dam', 0),
+        'tdam': game.get('tdam', game.get('dam', 0)),
+        'sdam': game.get('sdam', game.get('dam', 0)),
+    }
+
+    return gamedict
+
+
+def add_game(s: sqlalchemy.orm.session.Session,
+             game: Optional[dict]) -> bool:
+    if game is None:
+        return False
+    # Store the game in the database
+    try:
+        model.add_games(s, [game])
+    except model.DBError:
+        print("Couldn't import %s. Exception follows:" % game)
+        print(traceback.format_exc())
+        print()
+        s.rollback()
+        return False
+    except model.DBIntegrityError:
+        print("Tried to import duplicate game: %s" % game['gid'])
+        s.rollback()
+        if fast_fail:
+            raise
+        return False
+    else:
+        # s.commit()
+        pass
+    return True
+
+
+def parse_field(k: str, v: str) -> Tuple[str, Union[int, str]]:
+    """Convert field value into the correct data type.
+
+    Integer fields are stored as ints, everything else string.
+    """
+    # A few games have junk surrounding a field, like \n or \x00. Trim it.
+    k = k.strip()
+    v = v.strip()
+    # Name should always be a string
+    if k != 'name':
+        try:
+            parsed_v = int(v)
+        except ValueError:
+            parsed_v = v
+    else:
+        parsed_v = v
+    if isinstance(parsed_v, str):
+        parsed_v = v.replace("::", ":")  # Undo logfile escaping
+    return k, parsed_v
