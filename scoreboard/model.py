@@ -64,7 +64,7 @@ def get_server(s: sqlalchemy.orm.session.Session, name: str) -> Server:
 
 @functools.lru_cache(maxsize=128)
 def get_account_id(s: sqlalchemy.orm.session.Session, name: str, server:
-                Server) -> int:
+                   Server) -> int:
     """Get an account id, creating the account if needed.
 
     Note that player names are not case sensitive, so names are stored with
@@ -314,8 +314,8 @@ def create_streak(s: sqlalchemy.orm.session.Session, player: Player) -> Streak:
 
 
 @_reraise_dberror
-def add_games(s: sqlalchemy.orm.session.Session,
-              games: Sequence[dict]) -> None:
+def add_games(s: sqlalchemy.orm.session.Session, games:
+              Sequence[dict]) -> None:
     """Normalise and add multiple games to the database."""
     s.bulk_insert_mappings(Game, games)
 

@@ -438,10 +438,7 @@ def sqlite_performance_over_safety(
     dbapi_con.execute('PRAGMA synchronous = OFF')
 
 
-def setup_database(*,
-                   database: str,
-                   path: str,
-                   credentials: str) -> None:
+def setup_database(*, database: str, path: str, credentials: str) -> None:
     """Set up the database and create the master sessionmaker."""
     if database == 'sqlite':
         db_uri = 'sqlite:///{database_path}'.format(database_path=path)
@@ -454,7 +451,7 @@ def setup_database(*,
     else:
         raise ValueError("Unknown database type!")
     print("Connecting to {}".format(db_uri))
-    engine_opts = {'poolclass': sqlalchemy.pool.NullPool }
+    engine_opts = {'poolclass': sqlalchemy.pool.NullPool}
     engine = sqlalchemy.create_engine(db_uri, **engine_opts)
 
     if db_uri.startswith('sqlite'):
