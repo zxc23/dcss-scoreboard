@@ -134,7 +134,7 @@ def parse_logfile_line(s: sqlalchemy.orm.session.Session, line:
     if 'start' not in game:
         return None
     if 'v' not in game:
-        print("Found game without version tag, skipping. Line: %s" % line.data)
+        print("Found game without version tag, skipping. Line: %s, Game: %s" % (line.data, game))
         return None
     # We should only parse vanilla dcss games
     if game['lv'] != '0.1':
