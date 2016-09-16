@@ -126,11 +126,7 @@ def parse_logfile_line(s: sqlalchemy.orm.session.Session, line:
     for field in re.split(LINE_SPLIT_PATTERN, line.data):
         if not field.strip():
             continue
-        fields = field.split('=', 1)
-        if len(fields) != 2:
-            raise ValueError("Couldn't parse line (bad field %r), skipping: %r"
-                             % (field, line))
-        k, v = parse_field(*fields)
+        k, v = parse_field(field)
         game[k] = v
 
     # Validate the data -- some old broken games don't have this field and
@@ -217,11 +213,14 @@ def add_game(s: sqlalchemy.orm.session.Session, game: Optional[dict]) -> bool:
     return True
 
 
-def parse_field(k: str, v: str) -> Tuple[str, Union[int, str]]:
+def parse_field(field: str) -> Tuple[str, Union[int, str]]:
     """Convert field value into the correct data type.
 
     Integer fields are stored as ints, everything else string.
     """
+    if '=' not in field:
+        raise ValueError("Field is missing a '='" % field)
+    k, v = field.split('=', 1)
     # A few games have junk surrounding a field, like \n or \x00. Trim it.
     k = k.strip()
     v = v.strip()
