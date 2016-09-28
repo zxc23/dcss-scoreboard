@@ -100,6 +100,9 @@ def read_logfile(s: sqlalchemy.orm.session.Session, logfile:
         if not line.strip():
             continue
         yield LogfileLine(line, logfile.src)
+        if lines % 10000 == 0:
+            print("Saving progress at %s lines" % lines)
+            model.save_logfile_progress(s, logfile.path, f.tell())
         line = f.readline()
     model.save_logfile_progress(s, logfile.path, f.tell())
     end = time.time()
