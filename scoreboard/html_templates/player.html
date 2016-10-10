@@ -96,17 +96,7 @@
 
 <div class="row">
   <div class="col-sm-12">
-    {% if wins|length > 15 %}
-      {{ wins[:10]|generic_highscores_to_table(show_player=False) }}
-      <div class="collapse" id="lessrecentwins">
-        {{ wins[10:]|generic_highscores_to_table(show_player=False) }}
-      </div>
-      <a href="#" class="games-accordion" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
-        Show remaining {{ wins|length - 10 }} wins...
-      </a>
-    {% else %}
-      {{ wins|generic_highscores_to_table(show_player=False) }}
-    {% endif %}
+      {{ wins|generic_highscores_to_table(show_player=False, datatables=True) }}
   </div>
 </div>
 {% endif %}

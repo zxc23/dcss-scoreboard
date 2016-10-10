@@ -2,6 +2,7 @@
 
 from typing import Iterable, Sequence, Optional, Callable
 import datetime  # for typing
+import uuid
 
 import jinja2
 
@@ -88,7 +89,8 @@ def _games_to_table(env: jinja2.environment.Environment,
                     prefix_col_title: Optional[str]=None,
                     show_player: bool=False,
                     winning_games: bool=False,
-                    skip_header: bool=False) -> str:
+                    skip_header: bool=False,
+                    datatables: bool=False) -> str:
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
@@ -128,7 +130,7 @@ def _games_to_table(env: jinja2.environment.Environment,
             version=game.version.v,
             morgue=morgue_link(game))
 
-    t = """<table class="{classes}">
+    t = """<table id="{id}" class="{classes}">
           <thead>
             <tr>
             {thead}
@@ -138,6 +140,18 @@ def _games_to_table(env: jinja2.environment.Environment,
             {tbody}
           </tbody>
         </table>"""
+    
+    if datatables:
+        t += """<script>
+             $(document).ready(function(){{
+                 $('#{id}').DataTable({{
+                     "search": {{
+                         "caseInsensitive": false
+                     }},
+                     "order": [[0, "desc"]]
+                 }});
+             }});
+             </script>"""
 
     thead = """{prefix}
               {player}
@@ -178,6 +192,7 @@ def _games_to_table(env: jinja2.environment.Environment,
     tbody = "\n".join(format_trow(game) for game in games)
 
     return t.format(
+        id=uuid.uuid4(),
         classes=const.TABLE_CLASSES,
         thead=thead if not skip_header else '',
         tbody=tbody)
@@ -367,11 +382,12 @@ def generic_games_to_table(env: jinja2.environment.Environment, data:
 
 @jinja2.environmentfilter
 def generic_highscores_to_table(env: jinja2.environment.Environment,
-                                data: Iterable,
-                                show_player: bool=True) -> str:
+                                data: Iterable, show_player: bool=True,
+                                datatables: bool=False) -> str:
     """Convert list of winning games into a HTML table."""
     return _games_to_table(
-        env, data, show_player=show_player, winning_games=True)
+        env, data, show_player=show_player, winning_games=True,
+        datatables=datatables)
 
 
 @jinja2.environmentfilter
