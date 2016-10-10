@@ -95,6 +95,8 @@ def read_logfile(s: sqlalchemy.orm.session.Session, logfile:
     lines = 0
     line = f.readline()
     while line:
+        if line is '':
+            break
         lines += 1
         # skip blank lines
         if not line.strip():
