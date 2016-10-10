@@ -93,8 +93,9 @@ def read_logfile(s: sqlalchemy.orm.session.Session, logfile:
     f.seek(seek_pos)
 
     lines = 0
-    line = f.readline()
+    line = True
     while line:
+        line = f.readline()
         if line is '':
             break
         lines += 1
@@ -104,7 +105,6 @@ def read_logfile(s: sqlalchemy.orm.session.Session, logfile:
         yield LogfileLine(line, logfile.src)
         if lines % 10000 == 0:
             model.save_logfile_progress(s, logfile.path, f.tell())
-        line = f.readline()
     model.save_logfile_progress(s, logfile.path, f.tell())
     end = time.time()
     msg = "Finished reading {f} ({l} new lines) in {s} secs"
