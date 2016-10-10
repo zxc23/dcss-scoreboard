@@ -121,7 +121,7 @@ def parse_logfile_line(s: sqlalchemy.orm.session.Session, line:
 
     """
     # Early warning of corruption
-    if '\x00' in line:
+    if '\x00' in line.data:
         return None
 
     game = {'src': line.src}
