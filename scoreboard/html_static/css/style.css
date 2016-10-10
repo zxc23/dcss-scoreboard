@@ -37,11 +37,11 @@ h3 {
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(220,220,220,0.5);
+    background-color: rgba(230,230,230,0.5);
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(200,200,240,0.5);
+    background-color: rgba(200,200,200,0.5);
 }
 
 /* Columns with a date should never split the date over multiple lines. */
