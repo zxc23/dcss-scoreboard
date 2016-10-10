@@ -71,8 +71,8 @@ def load_logfiles(logdir: str) -> None:
             game = parse_logfile_line(s, line)
             add_game(s, game)
             lines += 1
+            # Save data occasionally
             if lines % 10000 == 0:
-                print("Processed %s lines..." % lines)
                 s.commit()
     s.commit()
     end = time.time()
