@@ -2,6 +2,7 @@
 
 import multiprocessing
 import os
+import sys
 import subprocess
 import urllib.parse
 import re
@@ -14,8 +15,9 @@ from braceexpand import braceexpand
 import scoreboard.constants as const
 
 SIMULTANEOUS_DOWNLOADS = 10
-WGET_SOURCE_CMDLINE = ("wget --timeout 10 --no-verbose -c --tries 5 "
-                       "-O '{outfile}' '{url}'")
+WGET_NAME = 'wget.exe' if sys.platform == 'win32' else 'wget'
+WGET_SOURCE_CMDLINE = ("%s --timeout 10 --no-verbose -c --tries 5 "
+                       "-O '{outfile}' '{url}'" % WGET_NAME)
 # Ignored stuff: sprint & zotdef games, dead servers
 IGNORED_FILES_REGEX = re.compile(
     r'(sprint|zotdef|rl.heh.fi|crawlus.somatika.net|nostalgia|mulch|squarelos|combo_god)')
