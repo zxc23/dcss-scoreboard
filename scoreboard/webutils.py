@@ -148,12 +148,17 @@ def _games_to_table(env: jinja2.environment.Environment,
                      "search": {{
                          "caseInsensitive": false
                      }},
+                     "columnDefs": [
+                         {{ "searchable": false, "targets": [0,4,5,6,8] }},
+                         {{ "orderable": false, "targets": [6,8] }}
+                     ],
                      "order": [[0, "desc"]],
                      "info": false,
                      "lengthChange": false,
                      "oLanguage": {{
                          "sSearch": "Filter:"
-                     }}
+                     }},
+                     "pagingType": "full"
                  }});
              }});
              </script>"""
