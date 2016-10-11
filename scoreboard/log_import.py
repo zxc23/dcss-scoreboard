@@ -24,6 +24,11 @@ class LogImportError(Exception):
     pass
 
 
+class FieldParseError(Exception):
+    """Simple error wrapper."""
+    pass
+
+
 def calculate_game_gid(game: dict) -> str:
     """Calculate GID for a game. Sequell compatible."""
     return "%s:%s:%s" % (game['name'], game['src'], game['start'])
@@ -130,7 +135,12 @@ def parse_logfile_line(s: sqlalchemy.orm.session.Session, line:
     for field in re.split(LINE_SPLIT_PATTERN, line.data):
         if not field.strip():
             continue
-        k, v = parse_field(field)
+        try:
+            k, v = parse_field(field)
+        except FieldParseError as e:
+            print("Can't parse field {}: {}, skipping line: {}".format(
+                field, e, line))
+            return None
         game[k] = v
 
     # Validate the data -- some old broken games don't have this field and
@@ -138,7 +148,8 @@ def parse_logfile_line(s: sqlalchemy.orm.session.Session, line:
     if 'start' not in game:
         return None
     if 'v' not in game:
-        print("Found game without version tag, skipping. Line: %s, Game: %s" % (line.data, game))
+        print("Found game without version tag, skipping. Line: %s, Game: %s" %
+              (line.data, game))
         return None
     # We should only parse vanilla dcss games
     if game['lv'] != '0.1':
@@ -223,7 +234,7 @@ def parse_field(field: str) -> Tuple[str, Union[int, str]]:
     Integer fields are stored as ints, everything else string.
     """
     if '=' not in field:
-        raise ValueError("Field is missing a '=': {}".format(field))
+        raise FieldParseError("No '=' found".format(field))
     k, v = field.split('=', 1)
     # A few games have junk surrounding a field, like \n or \x00. Trim it.
     k = k.strip()
