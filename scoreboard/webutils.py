@@ -158,7 +158,7 @@ def _games_to_table(env: jinja2.environment.Environment,
                      "oLanguage": {{
                          "sSearch": "Filter:"
                      }},
-                     "pagingType": "full"
+                     "pagingType": "numbers"
                  }});
              }});
              </script>"""
