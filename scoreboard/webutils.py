@@ -148,7 +148,12 @@ def _games_to_table(env: jinja2.environment.Environment,
                      "search": {{
                          "caseInsensitive": false
                      }},
-                     "order": [[0, "desc"]]
+                     "order": [[0, "desc"]],
+                     "info": false,
+                     "lengthChange": false,
+                     "oLanguage": {{
+                         "sSearch": "Filter:"
+                     }}
                  }});
              }});
              </script>"""
