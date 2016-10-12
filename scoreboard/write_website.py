@@ -28,8 +28,8 @@ def _write_file(*, path: str, data: str) -> None:
 
 
 def jinja_env(
-        urlbase: Optional[str], s:
-        sqlalchemy.orm.session.Session) -> jinja2.environment.Environment:
+        urlbase: Optional[str],
+        s: sqlalchemy.orm.session.Session) -> jinja2.environment.Environment:
     """Create the Jinja template environment."""
     template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
@@ -72,7 +72,8 @@ def jinja_env(
     return env
 
 
-def setup_website_dir(env: jinja2.environment.Environment, path: str,
+def setup_website_dir(env: jinja2.environment.Environment,
+                      path: str,
                       all_players: Iterable) -> None:
     """Create the website dir and add static content."""
     print("Writing HTML to %s" % path)
@@ -97,8 +98,8 @@ def setup_website_dir(env: jinja2.environment.Environment, path: str,
         data=jsmin.jsmin(js_template.render()))
 
 
-def render_index(s: sqlalchemy.orm.session.Session, template:
-                 jinja2.environment.Template) -> str:
+def render_index(s: sqlalchemy.orm.session.Session,
+                 template: jinja2.environment.Template) -> str:
     """Render the index page."""
     return template.render(
         recent_wins=model.list_games(
@@ -110,8 +111,8 @@ def render_index(s: sqlalchemy.orm.session.Session, template:
             s, limit=const.FRONTPAGE_TABLE_LENGTH))
 
 
-def write_index(s: sqlalchemy.orm.session.Session, env:
-                jinja2.environment.Environment) -> None:
+def write_index(s: sqlalchemy.orm.session.Session,
+                env: jinja2.environment.Environment) -> None:
     """Write the index page."""
     print("Writing index")
     template = env.get_template('index.html')
@@ -119,8 +120,8 @@ def write_index(s: sqlalchemy.orm.session.Session, env:
     _write_file(path=os.path.join(WEBSITE_DIR, 'index.html'), data=data)
 
 
-def write_streaks(s: sqlalchemy.orm.session.Session, env:
-                  jinja2.environment.Environment) -> None:
+def write_streaks(s: sqlalchemy.orm.session.Session,
+                  env: jinja2.environment.Environment) -> None:
     """Write the streak page."""
     print("Writing streaks")
     template = env.get_template('streaks.html')
@@ -132,8 +133,8 @@ def write_streaks(s: sqlalchemy.orm.session.Session, env:
             active_streaks=active_streaks, best_streaks=best_streaks))
 
 
-def render_highscores(s: sqlalchemy.orm.session.Session, template:
-                      jinja2.environment.Template) -> str:
+def render_highscores(s: sqlalchemy.orm.session.Session,
+                      template: jinja2.environment.Template) -> str:
     """Render the highscores page."""
     overall_highscores = model.highscores(s)
     species_highscores = model.species_highscores(s)
@@ -152,8 +153,8 @@ def render_highscores(s: sqlalchemy.orm.session.Session, template:
         shortest_wins=shortest_wins)
 
 
-def write_highscores(s: sqlalchemy.orm.session.Session, env:
-                     jinja2.environment.Environment) -> None:
+def write_highscores(s: sqlalchemy.orm.session.Session,
+                     env: jinja2.environment.Environment) -> None:
     """Write the highscores page."""
     print("Writing highscores")
     template = env.get_template('highscores.html')
@@ -173,8 +174,8 @@ def _get_player_records(global_records: dict, player: orm.Player) -> dict:
     return out
 
 
-def _wins_per_species(s: sqlalchemy.orm.session.Session, games:
-                      Iterable[orm.Game]) -> Iterable[orm.Game]:
+def _wins_per_species(s: sqlalchemy.orm.session.Session,
+                      games: Iterable[orm.Game]) -> Iterable[orm.Game]:
     """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for sp in model.list_species(s, playable=True):
@@ -182,8 +183,8 @@ def _wins_per_species(s: sqlalchemy.orm.session.Session, games:
     return out
 
 
-def _wins_per_background(s: sqlalchemy.orm.session.Session, games:
-                         Iterable[orm.Game]) -> Iterable[orm.Game]:
+def _wins_per_background(s: sqlalchemy.orm.session.Session,
+                         games: Iterable[orm.Game]) -> Iterable[orm.Game]:
     """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for bg in model.list_backgrounds(s, playable=True):
@@ -191,8 +192,8 @@ def _wins_per_background(s: sqlalchemy.orm.session.Session, games:
     return out
 
 
-def _wins_per_god(s: sqlalchemy.orm.session.Session, games:
-                  Iterable[orm.Game]) -> Iterable[orm.Game]:
+def _wins_per_god(s: sqlalchemy.orm.session.Session,
+                  games: Iterable[orm.Game]) -> Iterable[orm.Game]:
     """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for god in model.list_gods(s, playable=True):
@@ -200,8 +201,9 @@ def _wins_per_god(s: sqlalchemy.orm.session.Session, games:
     return out
 
 
-def render_player_page(s: sqlalchemy.orm.session.Session, template:
-                       jinja2.environment.Template, player: orm.Player,
+def render_player_page(s: sqlalchemy.orm.session.Session,
+                       template: jinja2.environment.Template,
+                       player: orm.Player,
                        global_records: dict) -> str:
     """Render an individual player's page."""
     games = model.list_games(s, player=player)
@@ -230,9 +232,9 @@ def write_player_page(player_html_path: str, name: str, data: str) -> None:
     _write_file(path=os.path.join(player_html_path, name + '.html'), data=data)
 
 
-def write_player_pages(s: sqlalchemy.orm.session.Session, env:
-                       jinja2.environment.Environment, players:
-                       Sequence) -> None:
+def write_player_pages(s: sqlalchemy.orm.session.Session,
+                       env: jinja2.environment.Environment,
+                       players: Sequence) -> None:
     """Write all player pages."""
     print("Writing %s player pages... " % len(players))
     start2 = time.time()

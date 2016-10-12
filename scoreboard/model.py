@@ -63,8 +63,9 @@ def get_server(s: sqlalchemy.orm.session.Session, name: str) -> Server:
 
 
 @functools.lru_cache(maxsize=128)
-def get_account_id(s: sqlalchemy.orm.session.Session, name: str, server:
-                   Server) -> int:
+def get_account_id(s: sqlalchemy.orm.session.Session,
+                   name: str,
+                   server: Server) -> int:
     """Get an account id, creating the account if needed.
 
     Note that player names are not case sensitive, so names are stored with
@@ -125,9 +126,11 @@ def setup_species(s: sqlalchemy.orm.session.Session) -> None:
     for sp in const.SPECIES:
         if not s.query(Species).filter(Species.short == sp.short).first():
             print("Adding species '%s'" % sp.full)
-            new.append({'short': sp.short,
-                        'name': sp.full,
-                        'playable': sp.playable})
+            new.append({
+                'short': sp.short,
+                'name': sp.full,
+                'playable': sp.playable
+            })
     s.bulk_insert_mappings(Species, new)
     s.commit()
 
@@ -139,9 +142,11 @@ def setup_backgrounds(s: sqlalchemy.orm.session.Session) -> None:
         if not s.query(Background).filter(
                 Background.short == bg.short).first():
             print("Adding background '%s'" % bg.full)
-            new.append({'short': bg.short,
-                        'name': bg.full,
-                        'playable': bg.playable})
+            new.append({
+                'short': bg.short,
+                'name': bg.full,
+                'playable': bg.playable
+            })
     s.bulk_insert_mappings(Background, new)
     s.commit()
 
@@ -207,17 +212,19 @@ def setup_branches(s: sqlalchemy.orm.session.Session) -> None:
     for br in const.BRANCHES:
         if not s.query(Branch).filter(Branch.short == br.short).first():
             print("Adding branch '%s'" % br.full)
-            new.append({'short': br.short,
-                        'name': br.full,
-                        'multilevel': br.multilevel,
-                        'playable': br.playable})
+            new.append({
+                'short': br.short,
+                'name': br.full,
+                'multilevel': br.multilevel,
+                'playable': br.playable
+            })
     s.bulk_insert_mappings(Branch, new)
     s.commit()
 
 
 @functools.lru_cache(maxsize=256)
-def get_place(s: sqlalchemy.orm.session.Session, branch: Branch, lvl:
-              int) -> Place:
+def get_place(s: sqlalchemy.orm.session.Session, branch: Branch,
+              lvl: int) -> Place:
     """Get a place, creating it if needed."""
     place = s.query(Place).filter(Place.branch == branch,
                                   Place.level == lvl).first()
@@ -314,14 +321,14 @@ def create_streak(s: sqlalchemy.orm.session.Session, player: Player) -> Streak:
 
 
 @_reraise_dberror
-def add_games(s: sqlalchemy.orm.session.Session, games:
-              Sequence[dict]) -> None:
+def add_games(s: sqlalchemy.orm.session.Session,
+              games: Sequence[dict]) -> None:
     """Normalise and add multiple games to the database."""
     s.bulk_insert_mappings(Game, games)
 
 
-def get_logfile_progress(s: sqlalchemy.orm.session.Session, logfile:
-                         str) -> LogfileProgress:
+def get_logfile_progress(s: sqlalchemy.orm.session.Session,
+                         logfile: str) -> LogfileProgress:
     """Get a logfile progress records, creating it if needed."""
     log = s.query(LogfileProgress).filter(
         LogfileProgress.name == logfile).first()
@@ -334,8 +341,9 @@ def get_logfile_progress(s: sqlalchemy.orm.session.Session, logfile:
         return log
 
 
-def save_logfile_progress(s: sqlalchemy.orm.session.Session, logfile: str, pos:
-                          int) -> None:
+def save_logfile_progress(s: sqlalchemy.orm.session.Session,
+                          logfile: str,
+                          pos: int) -> None:
     """Save the position for a logfile."""
     log = get_logfile_progress(s, logfile)
     log.bytes_parsed = pos
@@ -536,9 +544,10 @@ def highscores(s: sqlalchemy.orm.session.Session,
 
 # TODO: type game_column
 def _highscores_helper(
-        s: sqlalchemy.orm.session.Session, mapped_class:
-        sqlalchemy.ext.declarative.api.DeclarativeMeta, game_column:
-        sqlalchemy.orm.attributes.InstrumentedAttribute) -> Sequence[Game]:
+        s: sqlalchemy.orm.session.Session,
+        mapped_class: sqlalchemy.ext.declarative.api.DeclarativeMeta,
+        game_column: sqlalchemy.orm.attributes.InstrumentedAttribute
+) -> Sequence[Game]:
     """Generic function to find highscores against arbitrary foreign keys.
 
     Parameters:
@@ -666,8 +675,8 @@ def get_gobal_records(s: sqlalchemy.orm.session.Session) -> dict:
     return out
 
 
-def get_player_streak(s: sqlalchemy.orm.session.Session, player:
-                      Player) -> Optional[Streak]:
+def get_player_streak(s: sqlalchemy.orm.session.Session,
+                      player: Player) -> Optional[Streak]:
     """Get a player's active streak.
 
     Returns None if they don't have a currently active streak.
@@ -723,7 +732,7 @@ def get_streaks(s: sqlalchemy.orm.session.Session,
     return [t.Streak for t in streaks]
 
 
-def list_achievements(s:
-                      sqlalchemy.orm.session.Session) -> Sequence[Achievement]:
+def list_achievements(
+        s: sqlalchemy.orm.session.Session) -> Sequence[Achievement]:
     """Get all streaks."""
     return s.query(Achievement).all()

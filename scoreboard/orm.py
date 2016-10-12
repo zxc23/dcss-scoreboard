@@ -16,7 +16,8 @@ import sqlalchemy.ext.declarative.api
 
 from . import model
 
-Base = declarative_base()  # type: sqlalchemy.ext.declarative.api.DeclarativeMeta
+Base = declarative_base(
+)  # type: sqlalchemy.ext.declarative.api.DeclarativeMeta
 
 Session = None
 
@@ -431,8 +432,8 @@ class Achievement(Base):
 
 def sqlite_performance_over_safety(
         dbapi_con: sqlite3.Connection,
-        con_record:
-        sqlalchemy.pool._ConnectionRecord  # pylint: disable=protected-access
+        con_record: sqlalchemy.pool.
+        _ConnectionRecord  # pylint: disable=protected-access
 ) -> None:
     """Significantly speeds up inserts but will break on crash."""
     con_record  # pylint: disable=pointless-statement

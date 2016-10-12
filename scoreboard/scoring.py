@@ -9,8 +9,8 @@ import scoreboard.orm as orm
 import scoreboard.constants as const
 
 
-def is_valid_streak_addition(game: orm.Game, current_streak:
-                             orm.Streak) -> bool:
+def is_valid_streak_addition(game: orm.Game,
+                             current_streak: orm.Streak) -> bool:
     """Check if the game is a valid addition to the streak."""
     # Valid if no streak to begin with
     if not current_streak:
@@ -45,8 +45,8 @@ def is_grief(s: sqlalchemy.orm.session.Session, game: orm.Game) -> bool:
     return False
 
 
-def handle_player_streak(s: sqlalchemy.orm.session.Session, game:
-                         orm.Game) -> None:
+def handle_player_streak(s: sqlalchemy.orm.session.Session,
+                         game: orm.Game) -> None:
     """Figure out what a game means for the player's streak.
 
     A first win will start a streak.

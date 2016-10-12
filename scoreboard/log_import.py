@@ -84,8 +84,8 @@ def load_logfiles(logdir: str) -> None:
     print("Loaded logfiles in %s secs" % round(end - start, 2))
 
 
-def read_logfile(s: sqlalchemy.orm.session.Session, logfile:
-                 Logfile) -> Iterable[LogfileLine]:
+def read_logfile(s: sqlalchemy.orm.session.Session,
+                 logfile: Logfile) -> Iterable[LogfileLine]:
     if os.stat(logfile.path).st_size == 0:
         return StopIteration
     start = time.time()
@@ -116,8 +116,8 @@ def read_logfile(s: sqlalchemy.orm.session.Session, logfile:
     print(msg.format(f=logfile.path, l=lines, s=round(end - start, 2)))
 
 
-def parse_logfile_line(s: sqlalchemy.orm.session.Session, line:
-                       LogfileLine) -> Optional[dict]:
+def parse_logfile_line(s: sqlalchemy.orm.session.Session,
+                       line: LogfileLine) -> Optional[dict]:
     """Read a single logfile line and insert it into the database.
 
     If the game is not valid, None is returned. Invalid games could be:

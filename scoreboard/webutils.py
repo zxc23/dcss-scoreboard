@@ -198,8 +198,8 @@ def streakstotable(streaks: Sequence[orm.Streak],
     Returns: (string) '<table>contents</table>'.
     """
 
-    def format_trow(streak: orm.Streak, show_player: bool, show_loss:
-                    bool) -> str:
+    def format_trow(streak: orm.Streak, show_player: bool,
+                    show_loss: bool) -> str:
         """Convert a streak to a table row."""
         player = ""
         loss = ""
@@ -306,23 +306,23 @@ def recordsformatted(records: dict) -> str:
 
     if records['race']:
         race = "<p><strong>Species (%s):</strong> %s</p>" % (
-            len(records['race']), ', '.join([morgue_link(game, game.rc)
-                                             for game in records['race']]))
+            len(records['race']), ', '.join(
+                [morgue_link(game, game.rc) for game in records['race']]))
 
     if records['role']:
         role = "<p><strong>Backgrounds (%s):</strong> %s</p>" % (
-            len(records['role']), ', '.join([morgue_link(game, game.bg)
-                                             for game in records['role']]))
+            len(records['role']), ', '.join(
+                [morgue_link(game, game.bg) for game in records['role']]))
 
     if records['god']:
         god = "<p><strong>Gods (%s):</strong> %s</p>" % (
-            len(records['god']), ', '.join([morgue_link(game, game.god)
-                                            for game in records['god']]))
+            len(records['god']), ', '.join(
+                [morgue_link(game, game.god) for game in records['god']]))
 
     if records['combo']:
         combo = "<p><strong>Combos (%s):</strong> %s</p>" % (
-            len(records['combo']), ', '.join([morgue_link(game, game.char)
-                                              for game in records['combo']]))
+            len(records['combo']), ', '.join(
+                [morgue_link(game, game.char) for game in records['combo']]))
 
     return result.format(race=race, role=role, god=god, combo=combo)
 
@@ -359,8 +359,8 @@ def highscore(games: orm.Game) -> orm.Game:
 
 
 @jinja2.environmentfilter
-def generic_games_to_table(env: jinja2.environment.Environment, data:
-                           Iterable) -> str:
+def generic_games_to_table(env: jinja2.environment.Environment,
+                           data: Iterable) -> str:
     """Convert list of games into a HTML table."""
     return _games_to_table(env, data, show_player=False, winning_games=False)
 
@@ -375,8 +375,8 @@ def generic_highscores_to_table(env: jinja2.environment.Environment,
 
 
 @jinja2.environmentfilter
-def species_highscores_to_table(env: jinja2.environment.Environment, data:
-                                Iterable) -> str:
+def species_highscores_to_table(env: jinja2.environment.Environment,
+                                data: Iterable) -> str:
     """Convert list of games for each species into a HTML table."""
     return _games_to_table(
         env,
@@ -388,8 +388,8 @@ def species_highscores_to_table(env: jinja2.environment.Environment, data:
 
 
 @jinja2.environmentfilter
-def background_highscores_to_table(env: jinja2.environment.Environment, data:
-                                   Iterable) -> str:
+def background_highscores_to_table(env: jinja2.environment.Environment,
+                                   data: Iterable) -> str:
     """Convert list of games for each background into a HTML table."""
     return _games_to_table(
         env,

@@ -20,7 +20,8 @@ WGET_SOURCE_CMDLINE = ("%s --timeout 10 --no-verbose -c --tries 5 "
                        "-O '{outfile}' '{url}'" % WGET_NAME)
 # Ignored stuff: sprint & zotdef games, dead servers
 IGNORED_FILES_REGEX = re.compile(
-    r'(sprint|zotdef|rl.heh.fi|crawlus.somatika.net|nostalgia|mulch|squarelos|combo_god)')
+    r'(sprint|zotdef|rl.heh.fi|crawlus.somatika.net|nostalgia|mulch|squarelos|combo_god)'
+)
 
 
 def sources(src: dict) -> Iterable[str]:
