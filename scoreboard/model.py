@@ -620,6 +620,8 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
         for bot_name in const.BLACKLISTS['bots']:
             bot_id = get_player_id(s, bot_name)
             q = q.filter(Player.id != bot_id)
+        for bad_gid in const.BLACKLISTS['bot-games']:
+            q = q.filter(Game.gid != bad_gid)
     return q.limit(limit).all()
 
 

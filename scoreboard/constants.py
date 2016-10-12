@@ -206,13 +206,17 @@ BRANCHES = {
 GLOBAL_TABLE_LENGTH = 50
 FRONTPAGE_TABLE_LENGTH = 10
 PLAYER_TABLE_LENGTH = 10
-BLACKLISTS = {'griefers': {},
-              'bots':
-              {'autorobin', 'xw', 'auto7hm', 'rw', 'qw', 'ow', 'qwrobin', 'gw',
-               'notqw', 'jw', 'parabodrick', 'hyperqwbe', 'cashybrid',
-               'tstbtto', 'parabolic', 'oppbolic', 'ew', 'rushxxi', 'gaubot',
-               'cojitobot', 'paulcdejean', 'otabotab', 'nakatomy', 'testingqw',
-               'beemell', 'beem', 'drasked', 'phybot', 'khrogbot'}}
+BLACKLISTS = {
+    'griefers': {},
+    'bots': {
+        'autorobin', 'xw', 'auto7hm', 'rw', 'qw', 'ow', 'qwrobin', 'gw',
+        'notqw', 'jw', 'parabodrick', 'hyperqwbe', 'cashybrid', 'tstbtto',
+        'parabolic', 'oppbolic', 'ew', 'rushxxi', 'gaubot', 'cojitobot',
+        'paulcdejean', 'otabotab', 'nakatomy', 'testingqw', 'beemell', 'beem',
+        'drasked', 'phybot', 'khrogbot'
+    },
+    'bot-games': {'LoveLain:cao:20160903064250S'}
+}
 TABLE_CLASSES = "table table-hover table-striped"
 LOGFILE_REGEX = re.compile('(logfile|allgames)')
 MILESTONE_REGEX = re.compile('milestone')
