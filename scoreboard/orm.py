@@ -382,6 +382,8 @@ class Game(Base):
     def pretty_tmsg(self) -> str:
         """Pretty tmsg, more suitable for scoreboard display."""
         msg = self.tmsg
+        if not msg:
+            return msg
         if msg == 'escaped with the Orb':
             msg += '!'
         # We don't use str.capitalize because it lower-cases all letters but
