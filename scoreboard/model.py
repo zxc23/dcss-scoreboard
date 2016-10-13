@@ -449,8 +449,7 @@ def _games(s: sqlalchemy.orm.session.Session,
     """
     q = s.query(Game)
     if player is not None:
-        q = q.join(Game.account).join(Account.player).filter(
-            Player.id == player.id)
+        q = q.filter(Game.player_id == player.id)
     if account is not None:
         q = q.join(Game.account).filter(Account.id == account.id)
     if scored is not None:
@@ -554,8 +553,7 @@ def highscores(s: sqlalchemy.orm.session.Session,
     """
     q = s.query(Game).order_by(Game.score.desc())
     if player is not None:
-        q = q.join(Game.account).join(Account.player).filter(
-            Player.id == player.id)
+        q = q.filter(Game.player_id == player.id)
     return q.limit(limit).all()
 
 
@@ -564,8 +562,7 @@ def total_duration(s: sqlalchemy.orm.session.Session,
                    player: Player) -> int:
     """Return the total play duration for a particular player."""
     q = s.query(func.sum(Game.dur))
-    q = q.join(Game.account).join(Account.player).filter(
-        Player.id == player.id)
+    q = q.filter(Game.player_id == player.id)
     return q.one()[0]
 
 
@@ -653,16 +650,13 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
     ktyp = get_ktyp(s, 'winning')
     q = s.query(Game).filter(Game.ktyp == ktyp).order_by('dur')
     if exclude_bots:
-        q = q.join(Game.account).join(Account.player)
         for bot_name in const.BLACKLISTS['bots']:
             bot_id = get_player_id(s, bot_name)
-            q = q.filter(Player.id != bot_id)
+            q = q.filter(Game.player_id != bot_id)
         for bad_gid in const.BLACKLISTS['bot-games']:
             q = q.filter(Game.gid != bad_gid)
     if player is not None:
-        if not exclude_bots: # bit hacky
-            q = q.join(Game.account).join(Account.player)
-        q = q.filter(Player.id == player.id)
+        q = q.filter(Game.player_id == player.id)
     return q.limit(limit).all()
 
 
@@ -675,8 +669,7 @@ def shortest_wins(s: sqlalchemy.orm.session.Session,
     q = s.query(Game).filter(
         Game.ktyp == ktyp).order_by('turn')
     if player is not None:
-        q = q.join(Game.account).join(Account.player).filter(
-            Player.id == player.id)
+        q = q.filter(Game.player_id == player.id)
     return q.limit(limit).all()
 
 
