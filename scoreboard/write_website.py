@@ -6,6 +6,7 @@ import time
 import datetime
 import subprocess
 import collections
+import random
 
 from typing import Iterable, Optional, Sequence
 
@@ -206,25 +207,46 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
                        player: orm.Player,
                        global_records: dict) -> str:
     """Render an individual player's page."""
-    games = model.list_games(s, player=player)
+    n_games = model.count_games(s, player=player)
     # Don't make pages for players with no games played
-    if len(games) == 0:
+    if n_games == 0:
         return ''
 
+    # XXX: potential memory hog
+    won_games = model.list_games(s, player=player, winning=True)
+    species_wins = _wins_per_species(s, won_games)
+    background_wins = _wins_per_background(s, won_games)
+    god_wins = _wins_per_god(s, won_games)
+    del(won_games)
+
     records = _get_player_records(global_records, player)
-    species_wins = _wins_per_species(s, games)
-    background_wins = _wins_per_background(s, games)
-    god_wins = _wins_per_god(s, games)
     active_streak = model.get_player_streak(s, player)
+    n_boring_games = model.count_games(s, player=player, boring=True)
+    total_dur = model.total_duration(s, player=player)
+    highscore = model.highscores(s, player=player, limit=1)[0]
+    if won_games: # a bit hacky
+        shortest_win = model.shortest_wins(s, player=player, limit=1)[0]
+        fastest_win = model.fastest_wins(s, player=player, limit=1)[0]
+    else:
+        shortest_win = None
+        fastest_win = None
+    recent_games = model.list_games(s, player=player, limit=const.PLAYER_TABLE_LENGTH)
 
     return template.render(
         player=player,
-        games=games,
         records=records,
         species_wins=species_wins,
         background_wins=background_wins,
         god_wins=god_wins,
-        active_streak=active_streak)
+        active_streak=active_streak,
+        n_games=n_games,
+        n_won_games=len(won_games),
+        n_boring_games=n_boring_games,
+        total_dur=total_dur,
+        highscore=highscore,
+        shortest_win=shortest_win,
+        fastest_win=shortest_win,
+        recent_games=recent_games)
 
 
 def write_player_page(player_html_path: str, name: str, data: str) -> None:

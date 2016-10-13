@@ -9,22 +9,17 @@
 </div>
 <div class="row">
   <div class="col-sm-3">
-    <p><strong>Last Active:</strong> {{ games[0]|attr('end')|prettydate }}</p>
-    <p><strong>Games Played:</strong> {{ games|length|prettyint }}</p>
-    {% set wins = games|selectattr("won", "equalto", True)|list %}
-    <p><strong>Wins:</strong> {{ wins|length }} ({{ (wins|length / games|length)|percentage }}%)</p>
-    {% set quits = games|selectattr("boring", "equalto", True)|list %}
-    <p><strong><abbr title="Including leaving and wizmode">Quits</abbr>:</strong> {{ quits|length }} ({{  (quits|length / games|length)|percentage }}%)</p>
+    <p><strong>Last Active:</strong> {{ recent_games[0].end|prettydate }}</p>
+    <p><strong>Games Played:</strong> {{ n_games|prettyint }}</p>
+    <p><strong>Wins:</strong> {{ n_won_games }} ({{ (n_won_games / n_games)|percentage }}%)</p>
+    <p><strong><abbr title="Including leaving and wizmode">Quits</abbr>:</strong> {{ n_boring_games }} ({{  (n_boring_games / n_games)|percentage }}%)</p>
   </div>
   <div class="col-sm-3">
-    <p><strong>Total Playtime:</strong> {{ games|map(attribute="dur")|sum|prettyhours }} hours</p>
-    {% set highest = games|highscore %}
-    <p><strong>Highest Score:</strong> {{ highest|morgue_link(highest.score|prettyint + ' points') }}</p>
-    {% if wins %}
-      {% set shortest = games|shortest_win %}
-      <p><strong>Shortest Win:</strong> {{ shortest|morgue_link(shortest.turn|prettyint + ' turns') }}</p>
-      {% set fastest = games|fastest_win %}
-      <p><strong>Fastest Win:</strong> {{ fastest|morgue_link(fastest.dur|prettydur + ' hours') }}</p>
+    <p><strong>Total Playtime:</strong> {{ total_dur|prettyhours }} hours</p>
+    <p><strong>Highest Score:</strong> {{ highscore|morgue_link(highscore.score|prettyint + ' points') }}</p>
+    {% if n_won_games > 0 %}
+      <p><strong>Shortest Win:</strong> {{ shortest_win|morgue_link(shortest_win.turn|prettyint + ' turns') }}</p>
+      <p><strong>Fastest Win:</strong> {{ fastest_win|morgue_link(fastest_win.dur|prettydur + ' hours') }}</p>
     {% endif %}
   </div>
   <div class="col-sm-3">
@@ -40,7 +35,7 @@
 <div class="row">
   <div class="col-sm-12">
     <h3>Recent Games</h3>
-    {{ games[:10]|generic_games_to_table }}
+    {{ recent_games|generic_games_to_table }}
   </div>
 </div>
 {# if player has a race/role highscore, they also have a combo highscore by definition #}
@@ -102,7 +97,7 @@
         {{ wins[10:]|generic_highscores_to_table(show_player=False) }}
       </div>
       <a href="#" class="games-accordion" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
-        Show remaining {{ wins|length - 10 }} wins...
+        Show remaining {{ n_wins - 10 }} wins...
       </a>
     {% else %}
       {{ wins|generic_highscores_to_table(show_player=False) }}

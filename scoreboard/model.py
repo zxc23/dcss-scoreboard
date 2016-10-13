@@ -430,18 +430,19 @@ def _games(s: sqlalchemy.orm.session.Session,
            limit: Optional[int]=None,
            gid: Optional[str]=None,
            winning: Optional[bool]=None,
+           boring: Optional[bool]=None,
            reverse_order: Optional[bool]=False) -> sqlalchemy.orm.query.Query:
     """Build a query to match games with certain conditions.
 
     Parameters:
-        player: If specified, only return games with a matching player
-        account: If specified, only return games with a matching account
-        scored: If specified, only return games with a matching scored
-        limit: If specified, return up to limit games
-        gid: If specified, only return game with matching gid
-        winning: If specified, only return games where ktyp==/!='winning'
-        reverse_order: If specified, return games least->most recent (if True),
-            or most->least recent (if False)
+        player: If specified, only games with a matching player
+        account: If specified, only games with a matching account
+        scored: If specified, only games with a matching scored
+        limit: If specified, up to limit games
+        gid: If specified, only game with matching gid
+        winning: If specified, only games where ktyp==/!='winning'
+        boring: If specifies, only games where ktyp not boring
+        reverse_order: Return games least->most recent
 
     Returns:
         query object you can call.
@@ -463,6 +464,14 @@ def _games(s: sqlalchemy.orm.session.Session,
             q = q.filter(Game.ktyp_id == ktyp.id)
         else:
             q = q.filter(Game.ktyp_id != ktyp.id)
+    if boring is not None:
+        boring_ktyps = [
+            get_ktyp(s, ktyp).id for ktyp in ('quitting', 'leaving', 'wizmode')
+        ]
+        if boring:
+            q = q.filter(Game.ktyp_id.in_(boring_ktyps))
+        else:
+            q = q.filter(Game.ktyp_id.notin_(boring_ktyps))
     if reverse_order is not None:
         q = q.order_by(Game.end.desc()
                        if not reverse_order else Game.end.asc())
@@ -479,6 +488,7 @@ def list_games(s: sqlalchemy.orm.session.Session,
                limit: Optional[int]=None,
                gid: Optional[str]=None,
                winning: Optional[bool]=None,
+               boring: Optional[bool]=None,
                reverse_order: bool=False) -> Sequence[Game]:
     """Get a list of all games that match specified conditions.
 
@@ -495,6 +505,7 @@ def list_games(s: sqlalchemy.orm.session.Session,
         limit=limit,
         gid=gid,
         winning=winning,
+        boring=boring,
         reverse_order=reverse_order).all()
 
 
@@ -504,7 +515,8 @@ def count_games(s: sqlalchemy.orm.session.Session,
                 account: Optional[Account]=None,
                 scored: Optional[bool]=None,
                 gid: Optional[str]=None,
-                winning: Optional[bool]=None) -> int:
+                winning: Optional[bool]=None,
+                boring: Optional[bool]=None) -> int:
     """Get a count of all games that match specified conditions.
 
     See _games documentation for parameters.
@@ -518,7 +530,8 @@ def count_games(s: sqlalchemy.orm.session.Session,
         account=account,
         scored=scored,
         gid=gid,
-        winning=winning).count()
+        winning=winning,
+        boring=boring).count()
 
 
 def get_game(s: sqlalchemy.orm.session.Session, **kwargs: dict) -> Game:
@@ -533,13 +546,27 @@ def get_game(s: sqlalchemy.orm.session.Session, **kwargs: dict) -> Game:
 
 def highscores(s: sqlalchemy.orm.session.Session,
                *,
-               limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
+               limit: int=const.GLOBAL_TABLE_LENGTH,
+               player: Optional[Player] = None) -> Sequence[Game]:
     """Return up to limit high scores.
 
     Fewer games may be returned if there is not enough matching data.
     """
-    q = s.query(Game).order_by(Game.score.desc()).limit(limit)
-    return q.all()
+    q = s.query(Game).order_by(Game.score.desc())
+    if player is not None:
+        q = q.join(Game.account).join(Account.player).filter(
+            Player.id == player.id)
+    return q.limit(limit).all()
+
+
+def total_duration(s: sqlalchemy.orm.session.Session,
+                   *,
+                   player: Player) -> int:
+    """Return the total play duration for a particular player."""
+    q = s.query(func.sum(Game.dur))
+    q = q.join(Game.account).join(Account.player).filter(
+        Player.id == player.id)
+    return q.one()[0]
 
 
 # TODO: type game_column
@@ -617,7 +644,8 @@ def combo_highscores(s: sqlalchemy.orm.session.Session) -> Sequence[Game]:
 def fastest_wins(s: sqlalchemy.orm.session.Session,
                  *,
                  limit: int=const.GLOBAL_TABLE_LENGTH,
-                 exclude_bots: bool=True) -> Sequence[Game]:
+                 exclude_bots: bool=True,
+                 player: Optional[Player] = None) -> Sequence[Game]:
     """Return up to limit fastest wins.
 
     exclude_bots: If True, exclude known bot accounts from the rankings.
@@ -631,16 +659,24 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
             q = q.filter(Player.id != bot_id)
         for bad_gid in const.BLACKLISTS['bot-games']:
             q = q.filter(Game.gid != bad_gid)
+    if player is not None:
+        q = q.join(Game.account).join(Account.player).filter(
+            Player.id == player.id)
     return q.limit(limit).all()
 
 
 def shortest_wins(s: sqlalchemy.orm.session.Session,
                   *,
-                  limit: int=const.GLOBAL_TABLE_LENGTH) -> Sequence[Game]:
+                  limit: int=const.GLOBAL_TABLE_LENGTH,
+                  player: Optional[Player] = None) -> Sequence[Game]:
     """Return up to limit shortest wins."""
     ktyp = get_ktyp(s, 'winning')
-    return s.query(Game).filter(
-        Game.ktyp == ktyp).order_by('turn').limit(limit).all()
+    q = s.query(Game).filter(
+        Game.ktyp == ktyp).order_by('turn')
+    if player is not None:
+        q = q.join(Game.account).join(Account.player).filter(
+            Player.id == player.id)
+    return q.limit(limit).all()
 
 
 def combo_highscore_holders(s: sqlalchemy.orm.session.Session,
