@@ -214,9 +214,18 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
 
     # XXX: potential memory hog
     won_games = model.list_games(s, player=player, winning=True)
+    n_won_games = len(won_games)
     species_wins = _wins_per_species(s, won_games)
     background_wins = _wins_per_background(s, won_games)
     god_wins = _wins_per_god(s, won_games)
+    if won_games: # a bit hacky
+        print('find shortest')
+        shortest_win = model.shortest_wins(s, player=player, limit=1)[0]
+        print('find fastest')
+        fastest_win = model.fastest_wins(s, player=player, limit=1)[0]
+    else:
+        shortest_win = None
+        fastest_win = None
     del(won_games)
 
     records = _get_player_records(global_records, player)
@@ -240,7 +249,7 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
         god_wins=god_wins,
         active_streak=active_streak,
         n_games=n_games,
-        n_won_games=len(won_games),
+        n_won_games=n_won_games,
         n_boring_games=n_boring_games,
         total_dur=total_dur,
         highscore=highscore,
