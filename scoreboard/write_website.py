@@ -279,6 +279,8 @@ def write_website(players: Optional[Iterable], urlbase: str=None) -> None:
         players = []
     else:
         players = [model.get_player(s, p) for p in players]
+    # Randomise player order
+    random.shuffle(players)
 
     setup_website_dir(env, WEBSITE_DIR, all_players)
 
