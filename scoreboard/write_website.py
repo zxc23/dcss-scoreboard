@@ -219,9 +219,7 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     background_wins = _wins_per_background(s, won_games)
     god_wins = _wins_per_god(s, won_games)
     if won_games: # a bit hacky
-        print('find shortest')
         shortest_win = model.shortest_wins(s, player=player, limit=1)[0]
-        print('find fastest')
         fastest_win = model.fastest_wins(s, player=player, limit=1)[0]
     else:
         shortest_win = None
@@ -233,12 +231,6 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     n_boring_games = model.count_games(s, player=player, boring=True)
     total_dur = model.total_duration(s, player=player)
     highscore = model.highscores(s, player=player, limit=1)[0]
-    if won_games: # a bit hacky
-        shortest_win = model.shortest_wins(s, player=player, limit=1)[0]
-        fastest_win = model.fastest_wins(s, player=player, limit=1)[0]
-    else:
-        shortest_win = None
-        fastest_win = None
     recent_games = model.list_games(s, player=player, limit=const.PLAYER_TABLE_LENGTH)
 
     return template.render(
