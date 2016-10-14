@@ -182,6 +182,7 @@ def parse_logfile_line(s: sqlalchemy.orm.session.Session,
     gamedict = {
         'gid': game['gid'],
         'account_id': model.get_account_id(s, game['name'], server),
+        'player_id': model.get_player_id(s, game['name']),
         'species_id': model.get_species(s, game['char'][:2]).id,
         'background_id': model.get_background(s, game['char'][2:]).id,
         'god_id': model.get_god(s, game['god']).id,

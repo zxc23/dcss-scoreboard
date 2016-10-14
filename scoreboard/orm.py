@@ -299,6 +299,9 @@ class Game(Base):
         Integer, ForeignKey('accounts.id'), nullable=False)  # type: int
     account = relationship("Account")
 
+    # Denormalised data. Set on game record insertion
+    player_id = Column(Integer, nullable=False, index=True)  # type: int
+
     version_id = Column(
         Integer, ForeignKey('versions.id'), nullable=False)  # type: int
     version = relationship("Version")
