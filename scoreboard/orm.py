@@ -267,7 +267,9 @@ class Streak(Base):
     __table_args__ = (Index(
         'one_active_streak_per_player',
         player_id,
-        postgresql_where=active == sqlalchemy.true()), )
+        postgresql_where=active == sqlalchemy.true(),
+        sqlite_where=active == sqlalchemy.true()),
+        )
 
 
 @characteristic.with_repr(["gid"])  # pylint: disable=too-few-public-methods
@@ -344,6 +346,9 @@ class Game(Base):
 
     __table_args__ = (
         # Used to find various highscores in model
+        # XXX: these indexes should have a sqlite_where=ktyp_id == 'winning'
+        # But these indexes can then only be added after the 'winning' ktyp is
+        # added.... chicken & egg.
         Index('species_highscore_index', species_id, score),
         Index('background_highscore_index', background_id, score),
         Index('combo_highscore_index', species_id, background_id, score),
