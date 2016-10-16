@@ -218,12 +218,8 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     species_wins = _wins_per_species(s, won_games)
     background_wins = _wins_per_background(s, won_games)
     god_wins = _wins_per_god(s, won_games)
-    if n_won_games > 0: # a bit hacky
-        shortest_win = model.shortest_wins(s, player=player, limit=1)[0]
-        fastest_win = model.fastest_wins(s, player=player, limit=1)[0]
-    else:
-        shortest_win = None
-        fastest_win = None
+    shortest_win = min(won_games, default=None, key=lambda g: g.turn)
+    fastest_win = min(won_games, default=None, key=lambda g: g.dur)
     del(won_games)
 
     records = _get_player_records(global_records, player)
