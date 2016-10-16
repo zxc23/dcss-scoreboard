@@ -268,8 +268,7 @@ class Streak(Base):
         'one_active_streak_per_player',
         player_id,
         postgresql_where=active == sqlalchemy.true(),
-        sqlite_where=active == sqlalchemy.true()),
-        )
+        sqlite_where=active == sqlalchemy.true()), )
 
 
 @characteristic.with_repr(["gid"])  # pylint: disable=too-few-public-methods

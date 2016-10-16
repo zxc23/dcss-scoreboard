@@ -546,7 +546,7 @@ def get_game(s: sqlalchemy.orm.session.Session, **kwargs: dict) -> Game:
 def highscores(s: sqlalchemy.orm.session.Session,
                *,
                limit: int=const.GLOBAL_TABLE_LENGTH,
-               player: Optional[Player] = None) -> Sequence[Game]:
+               player: Optional[Player]=None) -> Sequence[Game]:
     """Return up to limit high scores.
 
     Fewer games may be returned if there is not enough matching data.
@@ -557,8 +557,7 @@ def highscores(s: sqlalchemy.orm.session.Session,
     return q.limit(limit).all()
 
 
-def total_duration(s: sqlalchemy.orm.session.Session,
-                   *,
+def total_duration(s: sqlalchemy.orm.session.Session, *,
                    player: Player) -> int:
     """Return the total play duration for a particular player."""
     q = s.query(func.sum(Game.dur))
@@ -642,7 +641,7 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
                  *,
                  limit: int=const.GLOBAL_TABLE_LENGTH,
                  exclude_bots: bool=True,
-                 player: Optional[Player] = None) -> Sequence[Game]:
+                 player: Optional[Player]=None) -> Sequence[Game]:
     """Return up to limit fastest wins.
 
     exclude_bots: If True, exclude known bot accounts from the rankings.
@@ -663,11 +662,10 @@ def fastest_wins(s: sqlalchemy.orm.session.Session,
 def shortest_wins(s: sqlalchemy.orm.session.Session,
                   *,
                   limit: int=const.GLOBAL_TABLE_LENGTH,
-                  player: Optional[Player] = None) -> Sequence[Game]:
+                  player: Optional[Player]=None) -> Sequence[Game]:
     """Return up to limit shortest wins."""
     ktyp = get_ktyp(s, 'winning')
-    q = s.query(Game).filter(
-        Game.ktyp == ktyp).order_by('turn')
+    q = s.query(Game).filter(Game.ktyp == ktyp).order_by('turn')
     if player is not None:
         q = q.filter(Game.player_id == player.id)
     return q.limit(limit).all()
