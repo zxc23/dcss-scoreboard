@@ -98,13 +98,9 @@ def read_logfile(s: sqlalchemy.orm.session.Session,
     f.seek(seek_pos)
 
     lines = 0
-    line = True
-    while line:
-        line = f.readline()
-        if line is '':
-            break
+    for line in iter(f.readline, '')
         lines += 1
-        # skip blank lines
+        # skip blank/junk lines
         if not line.strip():
             continue
         yield LogfileLine(line, logfile.src)
