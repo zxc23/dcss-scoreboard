@@ -11,7 +11,7 @@ import scoreboard.scoring
 import scoreboard.write_website
 
 
-def error(msg):
+def error(msg: str) -> None:
     """Print an error and exit."""
     print(msg, file=sys.stderr)
     sys.exit(1)
