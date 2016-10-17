@@ -58,6 +58,7 @@
   </div>
 {% endif %}
 <hr/>
+{% if player.achievements %}
 <h3>Achievements</h3>
 {% for row in player.achievements|batch(3) %}
 <div class="row">
@@ -71,8 +72,9 @@
   {% endfor %}
 </div>
 {% endfor %}
+{% endif %}
 <hr/>
-{% if wins|length %}
+{% if n_won_games %}
 <h3>Wins</h3>
 <div class="row m-b-1">
   <div class="col-sm-4">
@@ -91,16 +93,16 @@
 
 <div class="row">
   <div class="col-sm-12">
-    {% if wins|length > 15 %}
-      {{ wins[:10]|generic_highscores_to_table(show_player=False) }}
+    {% if won_games|length > 15 %}
+      {{ won_games[:10]|generic_highscores_to_table(show_player=False) }}
       <div class="collapse" id="lessrecentwins">
-        {{ wins[10:]|generic_highscores_to_table(show_player=False) }}
+        {{ won_games[10:]|generic_highscores_to_table(show_player=False) }}
       </div>
       <a href="#" class="games-accordion" data-toggle="collapse" data-target="#lessrecentwins" aria-expanded="false" aria-controls="lessrecentwins">
-        Show remaining {{ n_wins - 10 }} wins...
+        Show remaining {{ n_won_games - 10 }} wins...
       </a>
     {% else %}
-      {{ wins|generic_highscores_to_table(show_player=False) }}
+      {{ won_games|generic_highscores_to_table(show_player=False) }}
     {% endif %}
   </div>
 </div>

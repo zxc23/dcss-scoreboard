@@ -220,7 +220,6 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     god_wins = _wins_per_god(s, won_games)
     shortest_win = min(won_games, default=None, key=lambda g: g.turn)
     fastest_win = min(won_games, default=None, key=lambda g: g.dur)
-    del (won_games)
 
     records = _get_player_records(global_records, player)
     active_streak = model.get_player_streak(s, player)
@@ -244,7 +243,8 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
         highscore=highscore,
         shortest_win=shortest_win,
         fastest_win=shortest_win,
-        recent_games=recent_games)
+        recent_games=recent_games,
+        won_games=won_games)
 
 
 def write_player_page(player_html_path: str, name: str, data: str) -> None:
