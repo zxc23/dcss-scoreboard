@@ -236,7 +236,7 @@ def parse_field(field: str) -> Tuple[str, Union[int, str]]:
     # A few games have junk surrounding a field, like \n or \x00. Trim it.
     k = k.strip()
     v = v.strip()
-    # Name should always be a string
+    # Try to convert the value to an Integer, unless the field is name
     if k != 'name':
         try:
             parsed_v = int(v)
