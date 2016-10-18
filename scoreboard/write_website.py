@@ -263,7 +263,7 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
         total_dur=total_dur,
         highscore=highscore,
         shortest_win=shortest_win,
-        fastest_win=shortest_win,
+        fastest_win=fastest_win,
         recent_games=recent_games,
         won_games=won_games)
 
