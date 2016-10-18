@@ -7,6 +7,8 @@ import datetime
 import subprocess
 import collections
 import random
+import shutil
+import sys
 
 from typing import Iterable, Optional, Sequence
 
@@ -20,6 +22,22 @@ from . import orm
 from . import constants as const
 
 WEBSITE_DIR = 'website'
+
+
+def rsync_replacement(src: str, dst: str) -> None:
+    """Poor replacement for rsync on win32.
+
+    Needed because shutil.copytree can't handle already existing dest dir.
+    """
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            rsync_replacement(s, d)
+        else:
+            shutil.copy2(s, d)
 
 
 def _write_file(*, path: str, data: str) -> None:
@@ -85,7 +103,10 @@ def setup_website_dir(env: jinja2.environment.Environment,
     print("Copying static assets")
     src = os.path.join(os.path.dirname(__file__), 'html_static')
     dst = os.path.join(path, 'static')
-    subprocess.run(['rsync', '-a', src + '/', dst + '/'])
+    if sys.platform != 'win32':
+        subprocess.run(['rsync', '-a', src + '/', dst + '/'])
+    else:
+        rsync_replacement(src, dst)
 
     print("Generating player list")
     _write_file(
