@@ -5,6 +5,7 @@ html {
 body {
     font-size: 0.875rem;
     background-image: url("../images/background.png");
+    line-height: 1.3;
 }
 
 nav {
@@ -53,7 +54,7 @@ tr.winning-row {
 }
 
 .table-hover tbody tr.winning-row:hover {
-    background-color: rgba(178, 210, 178, 0.5);
+    background-color: rgba(168, 205, 168, 0.5);
 }
 
 .hidden-game {
@@ -70,6 +71,11 @@ tr.winning-row {
     display: block;
     color: #0275d8;
     cursor: pointer;
+}
+
+.games-accordion:hover {
+    color: #014c8c;
+    text-decoration: underline;
 }
 
 .nav-tabs .nav-link:hover {
