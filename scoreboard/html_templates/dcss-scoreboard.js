@@ -1,5 +1,5 @@
 // Load the list of players and set up player autocomplete
-var ajax = new XMLHttpRequest();
+const ajax = new XMLHttpRequest();
 ajax.open("GET", "{{ urlbase }}/static/js/players.json", true);
 ajax.onload = function() {
   var list = JSON.parse(ajax.responseText);
@@ -9,15 +9,14 @@ ajax.onload = function() {
   );
 };
 ajax.send();
-// Handle selecting a usernames
-$('document').ready(function() {
+
+$('document').ready(function () {
+  // Handle selecting a usernames
   document.querySelector("#playersearch").addEventListener("awesomplete-selectcomplete", function() {
     window.location.href = '{{ urlbase }}/players/' + document.querySelector("#playersearch").value + '.html';
   });
-});
 
-// Convert all timestamps to relative
-jQuery(document).ready(function() {
+  // Convert all timestamps to relative
   jQuery.timeago.settings.strings = {
     prefixAgo: null,
     prefixFromNow: null,
@@ -38,9 +37,17 @@ jQuery(document).ready(function() {
     numbers: []
   };
   jQuery("time.timeago").timeago();
-});
+  
+  // Enable tooltips
+  $('abbr').tooltip();
 
-// Enable tooltips
-$('document').ready(function() {
-  $('abbr').tooltip()
+  // Enable games accordion toggle
+  var show_games = false;
+  $('#oldwinstoggle').click(function () {
+    show_games = !show_games;
+    $('.old-game').css({ 'display': show_games ? 'table-row' : 'none' });
+    const old_text = $('#oldwinstoggle').text();
+    $('#oldwinstoggle').text(((show_games) ? 'Hide' : 'Show') + old_text.substr(4));
+    return false;
+  });
 });

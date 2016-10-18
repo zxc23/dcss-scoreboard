@@ -56,6 +56,10 @@ tr.winning-row {
     background-color: rgba(178, 210, 178, 0.5);
 }
 
+.old-game {
+    display: none;
+}
+
 /* Columns with a date should never split the date over multiple lines. */
 .date-table-col {
     min-width: 10rem;
@@ -64,11 +68,8 @@ tr.winning-row {
 .games-accordion {
     text-align: center;
     display: block;
-}
-
-.games-accordion:focus {
     color: #0275d8;
-    text-decoration: none;
+    cursor: pointer;
 }
 
 .nav-tabs .nav-link:hover {

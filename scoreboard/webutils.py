@@ -87,6 +87,7 @@ def _games_to_table(env: jinja2.environment.Environment,
                     prefix_col: Optional[Callable]=None,
                     prefix_col_title: Optional[str]=None,
                     show_player: bool=False,
+                    show_number: int=0,
                     winning_games: bool=False,
                     skip_header: bool=False) -> str:
     """Jinja filter to convert a list of games into a standard table.
@@ -103,11 +104,16 @@ def _games_to_table(env: jinja2.environment.Environment,
     Returns: (string) '<table>contents</table>'.
     """
 
-    def format_trow(game: orm.Game) -> str:
+    def format_trow(game: orm.Game, old_game: bool=False) -> str:
         """Convert a game to a table row."""
+        classes = ''
+        if game.won and not winning_games:
+            classes += "winning-row "
+        if old_game:
+            classes += "old-game "
+
         return trow.format(
-            tr_class='class="winning-row"'
-            if (game.won and not winning_games) else '',
+            tr_class=classes,
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
             player_row='' if not show_player else "<td>%s</td>" %
@@ -159,7 +165,7 @@ def _games_to_table(env: jinja2.environment.Environment,
         end='' if winning_games else '<th>End</th>',
         runes='<th class="text-xs-right">Runes</th>' if winning_games else '')
 
-    trow = """<tr {tr_class}>
+    trow = """<tr class="{tr_class}">
       {prefix_col}
       {player_row}
       {score}
@@ -175,7 +181,11 @@ def _games_to_table(env: jinja2.environment.Environment,
       <td>{morgue}</td>
     </tr>"""
 
-    tbody = "\n".join(format_trow(game) for game in games)
+    tbody = "\n"
+    counter = 0
+    for game in games:
+        counter += 1
+        tbody += format_trow(game=game, old_game=(counter > show_number if show_number > 0 else False))
 
     return t.format(
         classes=const.TABLE_CLASSES,
@@ -368,10 +378,11 @@ def generic_games_to_table(env: jinja2.environment.Environment,
 @jinja2.environmentfilter
 def generic_highscores_to_table(env: jinja2.environment.Environment,
                                 data: Iterable,
-                                show_player: bool=True) -> str:
+                                show_player: bool=True,
+                                show_number: int=0) -> str:
     """Convert list of winning games into a HTML table."""
     return _games_to_table(
-        env, data, show_player=show_player, winning_games=True)
+        env, data, show_player=show_player, show_number=show_number, winning_games=True)
 
 
 @jinja2.environmentfilter
