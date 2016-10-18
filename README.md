@@ -39,15 +39,15 @@ To use the code, run `loader.py --help`.
 1. First, get Vagrant at <https://www.vagrantup.com/> and install it.
 1. Install the vbguest plugin with `vagrant plugin install vagrant-vbguest`.
 1. Open in the git folder in cmd which should contain 'Vagrantfile', and run `vagrant up`. This will set up an Ubuntu VM and might take a while.
-1. Once the setup is complete, you should be able to visit <http://localhost:8080/> in a web browser and see your development website!.
-1. To update your development scoreboard, you can SSH into the machine with `vagrant ssh` and run `./update-scoreboard.sh`
+1. Once the setup is complete, you should be able to visit <http://localhost:8080/> in a web browser and see your development website!
+1. To update your development scoreboard, you can SSH into the machine with `vagrant ssh` and run `./update-scoreboard.sh`.
 1. Ctrl-D will exit out of the VM's terminal. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
 
-Altrnatively, specify port 8000 when writing the website, `cd /vagrant` and `python server.py` to start serving the website at <http://localhost:8000/>.
+Altrnatively, specify port 8000 when writing the website, `cd /vagrant` and `python server.py &` to start serving the website at <http://localhost:8000/>.
 
 ## Postgresql Management
 
-To create a user & database in Postgres, try the following commands:
+To create a user and database in Postgres, try the following commands:
 
 ```bash
 sudo -u postgres createuser -D -A -P scoreboard
