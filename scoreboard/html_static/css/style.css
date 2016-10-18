@@ -103,3 +103,13 @@ footer p {
 abbr[title] {
   text-decoration: none;
 }
+
+.card-title {
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    width: 90%;
+    margin-left: 10%;
+}
