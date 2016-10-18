@@ -39,3 +39,6 @@ jQuery(document).ready(function() {
   };
   jQuery("time.timeago").timeago();
 });
+
+// Enable tooltips for abbrs
+$('abbr').tooltip()
