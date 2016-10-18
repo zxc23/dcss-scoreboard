@@ -106,7 +106,7 @@ def _games_to_table(env: jinja2.environment.Environment,
     def format_trow(game: orm.Game) -> str:
         """Convert a game to a table row."""
         return trow.format(
-            tr_class='class="table-success"'
+            tr_class='class="winning-row"'
             if (game.won and not winning_games) else '',
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),

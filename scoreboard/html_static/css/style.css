@@ -37,11 +37,23 @@ h3 {
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(230,230,230,0.5);
+    background-color: rgba(230, 230, 230, 0.5);
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(200,200,200,0.5);
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+tr.winning-row {
+    background-color: rgba(212, 235, 208, 0.5);
+}
+
+.table-striped tbody tr.winning-row:nth-of-type(odd) {
+    background-color: rgba(182, 220, 182, 0.5);
+}
+
+.table-hover tbody tr.winning-row:hover {
+    background-color: rgba(178, 210, 178, 0.5);
 }
 
 /* Columns with a date should never split the date over multiple lines. */
