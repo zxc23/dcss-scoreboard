@@ -43,11 +43,11 @@ $('document').ready(function () {
 
   // Enable games accordion toggle
   var show_games = false;
-  $('#oldwinstoggle').click(function () {
+  $('#hiddengamestoggle').click(function () {
     show_games = !show_games;
-    $('.old-game').css({ 'display': show_games ? 'table-row' : 'none' });
-    const old_text = $('#oldwinstoggle').text();
-    $('#oldwinstoggle').text(((show_games) ? 'Hide' : 'Show') + old_text.substr(4));
+    $('.hidden-game').css({ 'display': show_games ? 'table-row' : 'none' });
+    const old_text = $('#hiddengamestoggle').text();
+    $('#hiddengamestoggle').text(((show_games) ? 'Hide' : 'Show') + old_text.substr(4));
     return false;
   });
 });

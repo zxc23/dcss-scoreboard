@@ -95,7 +95,7 @@
   <div class="col-sm-12">
     {% if n_won_games > 15 %}
       {{ won_games|generic_highscores_to_table(show_player=False, show_number=10) }}
-      <span id="oldwinstoggle" class="games-accordion">Show oldest {{ n_won_games - 10 }} wins...</span>
+      <span id="hiddengamestoggle" class="games-accordion">Show oldest {{ n_won_games - 10 }} wins...</span>
     {% else %}
       {{ won_games|generic_highscores_to_table(show_player=False) }}
     {% endif %}

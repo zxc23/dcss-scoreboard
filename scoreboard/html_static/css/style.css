@@ -56,7 +56,7 @@ tr.winning-row {
     background-color: rgba(178, 210, 178, 0.5);
 }
 
-.old-game {
+.hidden-game {
     display: none;
 }
 

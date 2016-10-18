@@ -41,10 +41,10 @@
         {{ background_highscores|background_highscores_to_table }}
       </div>
       <div class="tab-pane" id="char" role="tabpanel">
-        {{ combo_highscores|generic_highscores_to_table }}
+        {{ combo_highscores|generic_highscores_to_table(show_ranks=False) }}
       </div>
       <div class="tab-pane" id="god" role="tabpanel">
-        {{ god_highscores|generic_highscores_to_table }}
+        {{ god_highscores|generic_highscores_to_table(show_ranks=False) }}
       </div>
       <div class="tab-pane" id="fastest" role="tabpanel">
         <p><small>* Bots excluded</small></p>

@@ -88,6 +88,7 @@ def _games_to_table(env: jinja2.environment.Environment,
                     prefix_col_title: Optional[str]=None,
                     show_player: bool=False,
                     show_number: int=0,
+                    show_ranks: bool=False,
                     winning_games: bool=False,
                     skip_header: bool=False) -> str:
     """Jinja filter to convert a list of games into a standard table.
@@ -98,6 +99,7 @@ def _games_to_table(env: jinja2.environment.Environment,
         prefix_col_title (str): Title for the prefix_col column
         show_player (bool): Show the player name column
         show_number (int): If greater than zero, the initial number of rows to display
+        show_ranks (bool): Show position ranks
         winning_games (bool): The table has only winning games, so don't show
                               place or end columns, and do show runes.
         skip_header (bool): Skip the header?
@@ -105,15 +107,16 @@ def _games_to_table(env: jinja2.environment.Environment,
     Returns: (string) '<table>contents</table>'.
     """
 
-    def format_trow(game: orm.Game, old_game: bool=False) -> str:
+    def format_trow(game: orm.Game, index: int, hidden_game: bool=False) -> str:
         """Convert a game to a table row."""
         classes = ''
         if game.won and not winning_games:
             classes += "winning-row "
-        if old_game:
-            classes += "old-game "
+        if hidden_game:
+            classes += "hidden-game "
 
         return trow.format(
+            rank='' if not show_ranks else """<td class="text-xs-right">%d</td>""" % (index + 1),
             tr_class=classes,
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
@@ -146,7 +149,8 @@ def _games_to_table(env: jinja2.environment.Environment,
           </tbody>
         </table>"""
 
-    thead = """{prefix}
+    thead = """{rank}
+              {prefix}
               {player}
               {score}
               <th>Combo</th>
@@ -159,6 +163,7 @@ def _games_to_table(env: jinja2.environment.Environment,
               <th class="text-xs-right">Date</th>
               <th>Version</th>
               <th class="text-xs-center">💀</th>""".format(
+        rank='' if not show_ranks else '<th class="text-xs-right"></th>',
         prefix='' if not prefix_col else '<th>%s</th>' % prefix_col_title,
         player='' if not show_player else '<th>Player</th>',
         score='<th class="text-xs-right">Score</th>' if winning_games else '',
@@ -167,6 +172,7 @@ def _games_to_table(env: jinja2.environment.Environment,
         runes='<th class="text-xs-right">Runes</th>' if winning_games else '')
 
     trow = """<tr class="{tr_class}">
+      {rank}
       {prefix_col}
       {player_row}
       {score}
@@ -182,11 +188,7 @@ def _games_to_table(env: jinja2.environment.Environment,
       <td>{morgue}</td>
     </tr>"""
 
-    tbody = "\n"
-    counter = 0
-    for game in games:
-        counter += 1
-        tbody += format_trow(game=game, old_game=(counter > show_number if show_number > 0 else False))
+    tbody = "\n".join(format_trow(game=game, index=index, hidden_game=(index > show_number if show_number > 0 else False)) for index, game in enumerate(games))
 
     return t.format(
         classes=const.TABLE_CLASSES,
@@ -276,6 +278,7 @@ def mosthighscorestotable(highscores: Iterable) -> str:
     table = """<table class="{classes}">
           <thead>
             <tr>
+              <th class="text-xs-right"></th>
               <th>Player</th>
               <th class="text-xs-right">Highscores</th>
               <th>Combos</th>
@@ -288,16 +291,19 @@ def mosthighscorestotable(highscores: Iterable) -> str:
 
     tbody = ""
 
+    rank = 0
     for entry in highscores:
+        rank += 1
         player = entry[0]
         games = entry[1]
         combos = ', '.join([morgue_link(game, game.char) for game in games])
         tbody += ("""<tr>
+                       <td class="text-xs-right">%d</td>
                        <td>%s</td>
                        <td class="text-xs-right">%s</td>
                        <td>%s</td>
                      </tr>""" %
-                  ("<a href='players/{player}.html'>{player}<a>".format(
+                  (rank, "<a href='players/{player}.html'>{player}<a>".format(
                       player=player), len(games), combos))
 
     return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
@@ -380,10 +386,11 @@ def generic_games_to_table(env: jinja2.environment.Environment,
 def generic_highscores_to_table(env: jinja2.environment.Environment,
                                 data: Iterable,
                                 show_player: bool=True,
-                                show_number: int=0) -> str:
+                                show_number: int=0,
+                                show_ranks: bool=True) -> str:
     """Convert list of winning games into a HTML table."""
     return _games_to_table(
-        env, data, show_player=show_player, show_number=show_number, winning_games=True)
+        env, data, show_player=show_player, show_number=show_number, show_ranks=show_ranks, winning_games=True)
 
 
 @jinja2.environmentfilter
