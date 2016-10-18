@@ -188,7 +188,7 @@ def _games_to_table(env: jinja2.environment.Environment,
       <td>{morgue}</td>
     </tr>"""
 
-    tbody = "\n".join(format_trow(game=game, index=index, hidden_game=(index > show_number if show_number > 0 else False)) for index, game in enumerate(games))
+    tbody = "\n".join(format_trow(game=game, index=index, hidden_game=(index >= show_number if show_number > 0 else False)) for index, game in enumerate(games))
 
     return t.format(
         classes=const.TABLE_CLASSES,
