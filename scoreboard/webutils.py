@@ -163,7 +163,7 @@ def _games_to_table(env: jinja2.environment.Environment,
       {prefix_col}
       {player_row}
       {score}
-      <td><abbr title="{full_character}">{character}</abbrev></td>
+      <td><a href="#" data-toggle="tooltip" title="{full_character}">{character}</a></td>
       <td>{god}</td>
       {place}
       {end}
