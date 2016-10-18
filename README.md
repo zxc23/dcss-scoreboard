@@ -43,7 +43,7 @@ To use the code, run `loader.py --help`.
 1. To update your development scoreboard, you can SSH into the machine with `vagrant ssh` and run `./update-scoreboard.sh`.
 1. Ctrl-D will exit out of the VM's terminal. `vagrant halt` will shut down the VM when you're done. `vagrant up` will start it up again when you need it, and `vagrant destroy` will remove the VM entirely.
 
-Altrnatively, specify port 8000 when writing the website, `cd /vagrant` and `python server.py &` to start serving the website at <http://localhost:8000/>.
+Alternatively, specify port 8000 when writing the website, `cd /vagrant` and `python server.py &` to start serving the website at <http://localhost:8000/>.
 
 ## Postgresql Management
 
