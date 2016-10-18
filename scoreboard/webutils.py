@@ -97,6 +97,7 @@ def _games_to_table(env: jinja2.environment.Environment,
         prefix_col (func): Function to return prefix column's value. Passed each game.
         prefix_col_title (str): Title for the prefix_col column
         show_player (bool): Show the player name column
+        show_number (int): If greater than zero, the initial number of rows to display
         winning_games (bool): The table has only winning games, so don't show
                               place or end columns, and do show runes.
         skip_header (bool): Skip the header?
