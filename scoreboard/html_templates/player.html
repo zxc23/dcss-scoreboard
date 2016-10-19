@@ -94,10 +94,10 @@
 <div class="row">
   <div class="col-sm-12">
     {% if n_won_games > 15 %}
-      {{ won_games|generic_highscores_to_table(show_player=False, show_number=10) }}
+      {{ won_games|generic_highscores_to_table(show_player=False, show_number=10, datatables=True) }}
       <span id="hiddengamestoggle" class="games-accordion">Show oldest {{ n_won_games - 10 }} wins...</span>
     {% else %}
-      {{ won_games|generic_highscores_to_table(show_player=False) }}
+      {{ won_games|generic_highscores_to_table(show_player=False, datatables=True) }}
     {% endif %}
   </div>
 </div>
