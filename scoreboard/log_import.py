@@ -231,7 +231,7 @@ def parse_field(field: str) -> Tuple[str, Union[int, str]]:
     Integer fields are stored as ints, everything else string.
     """
     if '=' not in field:
-        raise FieldParseError("No '=' found".format(field))
+        raise FieldParseError("No '=' found ({})".format(field))
     k, v = field.split('=', 1)
     # A few games have junk surrounding a field, like \n or \x00. Trim it.
     k = k.strip()
