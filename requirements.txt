@@ -5,3 +5,4 @@ braceexpand
 characteristic
 pyyaml
 mypy-lang
+yapf
