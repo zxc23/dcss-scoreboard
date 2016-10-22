@@ -1,6 +1,5 @@
 """Basic data model."""
 
-from typing import Optional
 import sqlite3  # for typing
 
 import characteristic

@@ -11,7 +11,6 @@ from sqlalchemy import func
 import scoreboard.constants as const
 from scoreboard.orm import Server, Player, Species, Background, God, Version, \
     Branch, Place, Game, LogfileProgress, Achievement, Account, Ktyp, Streak
-import scoreboard.modelutils as modelutils
 
 
 class DBError(BaseException):

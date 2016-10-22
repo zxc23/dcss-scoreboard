@@ -6,7 +6,6 @@ import sqlalchemy.orm  # for sqlalchemy.orm.session.Session type hints
 
 import scoreboard.model as model
 import scoreboard.orm as orm
-import scoreboard.constants as const
 
 
 def is_valid_streak_addition(game: orm.Game,
