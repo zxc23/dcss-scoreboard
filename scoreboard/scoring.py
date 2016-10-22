@@ -99,8 +99,8 @@ def score_games() -> set:
     new_scored = 0
     print("Scoring games...")
     while True:
-        games = model.list_games(s, scored=False, limit=100,
-                                 reverse_order=True)
+        games = model.list_games(
+            s, scored=False, limit=100, reverse_order=True)
         if not games:
             break
         for game in games:
