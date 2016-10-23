@@ -453,7 +453,7 @@ ACHIEVEMENTS = (
     Achievement(
         '0.11_clan_second', '0.11 Tournament: Second Place (Clan)',
         'Part of the second placed clan in the 0.11 tournament, November 2012.',
-        True, ('Nomi', '78291', 'Grimm', 'MarvinPA', 'bmfx', 'hyperelliptic'),
+        True, ('Nomi', '78291', 'Grimm', 'MarvinPA', 'bmfx', 'hyperelliptic')),
     Achievement(
         '0.11_clan_third', '0.11 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.11 tournament, November 2012.',
@@ -475,7 +475,7 @@ ACHIEVEMENTS = (
     Achievement(
         '0.10_clan_second', '0.10 Tournament: Second Place (Clan)',
         'Part of the second placed clan in the 0.10 tournament, March 2012.',
-        True, ('Ragdoll', 'Elynae', 'caracal', 'jeanjacques', 'jle', 'reid'),
+        True, ('Ragdoll', 'Elynae', 'caracal', 'jeanjacques', 'jle', 'reid')),
     Achievement(
         '0.10_clan_third', '0.10 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.10 tournament, March 2012.',
@@ -497,7 +497,7 @@ ACHIEVEMENTS = (
     Achievement(
         '0.9_clan_second', '0.9 Tournament: Second Place (Clan)',
         'Part of the second placed clan in the 0.9 tournament, August 2011.',
-        True, ('evilmike', 'Jordan7hm', 'Lawman0', 'Shovelmint', 'heteroy', 'theglow'),
+        True, ('evilmike', 'Jordan7hm', 'Lawman0', 'Shovelmint', 'heteroy', 'theglow')),
     Achievement(
         '0.9_clan_third', '0.9 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.9 tournament, August 2011.',
@@ -510,7 +510,7 @@ ACHIEVEMENTS = (
                 ('elliptic', )),
     Achievement('0.8_third', '0.8 Tournament: Third Place',
                 'Third place in the 0.8 tournament, May 2011.', True,
-                ('casmith789', )),
+                ('casmith789')),
     Achievement(
         '0.8_clan_first', '0.8 Tournament: First Place (Clan)',
         'Part of the first placed clan in the 0.8 tournament, May 2011.',
