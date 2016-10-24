@@ -118,3 +118,11 @@ abbr[title] {
     width: 90%;
     margin-left: 10%;
 }
+
+/* Disable up-arrow/down-arrow sort indicators on datatable columns */
+table.dataTable thead .sorting:before, table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_asc_disabled:before, table.dataTable thead .sorting_desc_disabled:before {
+    visibility: hidden;
+}
+table.dataTable thead .sorting:after, table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_desc:after, table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_desc_disabled:after {
+    visibility: hidden;
+}
