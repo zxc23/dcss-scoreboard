@@ -157,9 +157,6 @@ def _games_to_table(env: jinja2.environment.Environment,
         t += """<script>
              $(document).ready(function(){{
                  $('#{id}').DataTable({{
-                     "search": {{
-                         "caseInsensitive": false
-                     }},
                      "columnDefs": [
                          {{ "searchable": false, "targets": [0,1,5,6,7,9] }},
                          {{ "orderable": false, "targets": [7,9] }}
