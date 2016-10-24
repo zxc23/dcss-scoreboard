@@ -161,7 +161,7 @@ def _games_to_table(env: jinja2.environment.Environment,
                          {{ "searchable": false, "targets": [0,1,5,6,7,9] }},
                          {{ "orderable": false, "targets": [7,9] }}
                      ],
-                     "order": [[0, "desc"]],
+                     "order": [[0, "asc"]],
                      "info": false,
                      "lengthChange": false,
                      "oLanguage": {{
