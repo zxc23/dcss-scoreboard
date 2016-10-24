@@ -37,6 +37,11 @@ h3 {
     padding: .5rem .75rem;
 }
 
+/* override datatables formatting to fit with the rest of the site */
+table.dataTable {
+    border-collapse: collapse !important;
+}
+
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(230, 230, 230, 0.5);
 }

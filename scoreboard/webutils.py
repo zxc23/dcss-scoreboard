@@ -2,6 +2,7 @@
 
 from typing import Iterable, Sequence, Optional, Callable
 import datetime  # for typing
+import uuid
 
 import jinja2
 
@@ -90,7 +91,8 @@ def _games_to_table(env: jinja2.environment.Environment,
                     show_number: int=0,
                     show_ranks: bool=False,
                     winning_games: bool=False,
-                    skip_header: bool=False) -> str:
+                    skip_header: bool=False,
+                    datatables: bool=False) -> str:
     """Jinja filter to convert a list of games into a standard table.
 
     Parameters:
@@ -140,7 +142,7 @@ def _games_to_table(env: jinja2.environment.Environment,
             version=game.version.v,
             morgue=morgue_link(game))
 
-    t = """<table class="{classes}">
+    t = """<table id="{id}" class="{classes}">
           <thead>
             <tr>
             {thead}
@@ -150,6 +152,28 @@ def _games_to_table(env: jinja2.environment.Environment,
             {tbody}
           </tbody>
         </table>"""
+    
+    if datatables:
+        t += """<script>
+             $(document).ready(function(){{
+                 $('#{id}').DataTable({{
+                     "search": {{
+                         "caseInsensitive": false
+                     }},
+                     "columnDefs": [
+                         {{ "searchable": false, "targets": [0,1,5,6,7,9] }},
+                         {{ "orderable": false, "targets": [7,9] }}
+                     ],
+                     "order": [[0, "desc"]],
+                     "info": false,
+                     "lengthChange": false,
+                     "oLanguage": {{
+                         "sSearch": "Filter:"
+                     }},
+                     "pagingType": "numbers"
+                 }});
+             }});
+             </script>"""
 
     thead = """{rank}
               {prefix}
@@ -198,6 +222,7 @@ def _games_to_table(env: jinja2.environment.Environment,
         for index, game in enumerate(games))
 
     return t.format(
+        id=uuid.uuid4(),
         classes=const.TABLE_CLASSES,
         thead=thead if not skip_header else '',
         tbody=tbody)
@@ -394,7 +419,8 @@ def generic_highscores_to_table(env: jinja2.environment.Environment,
                                 data: Iterable,
                                 show_player: bool=True,
                                 show_number: int=0,
-                                show_ranks: bool=True) -> str:
+                                show_ranks: bool=True,
+                                datatables: bool=False) -> str:
     """Convert list of winning games into a HTML table."""
     return _games_to_table(
         env,
@@ -402,7 +428,8 @@ def generic_highscores_to_table(env: jinja2.environment.Environment,
         show_player=show_player,
         show_number=show_number,
         show_ranks=show_ranks,
-        winning_games=True)
+        winning_games=True,
+        datatables=datatables)
 
 
 @jinja2.environmentfilter
