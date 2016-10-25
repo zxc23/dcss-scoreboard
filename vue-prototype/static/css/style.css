@@ -1,0 +1,118 @@
+html {
+    overflow-y: scroll;
+}
+
+body {
+    font-size: 0.875rem;
+    background-image: url("../images/background.png");
+    line-height: 1.3;
+}
+
+nav {
+    font-size: 1.05rem;
+}
+
+.navbar-nav .nav-link {
+    color: #0275d8;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.active:hover,
+.navbar-nav .nav-link.active:focus,
+.navbar-nav .nav-link:focus,
+.navbar-nav .nav-link:hover {
+    color: #e29300;
+}
+
+h2 {
+    font-size: 1.85rem;
+}
+
+h3 {
+    font-size: 1.3rem;
+}
+
+.table td, .table th {
+    padding: .5rem .75rem;
+}
+
+/* override datatables formatting to fit with the rest of the site */
+table.dataTable {
+    border-collapse: collapse !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(230, 230, 230, 0.5);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+tr.winning-row {
+    background-color: rgba(212, 235, 208, 0.5);
+}
+
+.table-striped tbody tr.winning-row:nth-of-type(odd) {
+    background-color: rgba(182, 220, 182, 0.5);
+}
+
+.table-hover tbody tr.winning-row:hover {
+    background-color: rgba(168, 205, 168, 0.5);
+}
+
+.hidden-game {
+    display: none;
+}
+
+/* Columns with a date should never split the date over multiple lines. */
+.date-table-col {
+    min-width: 10rem;
+}
+
+.games-accordion {
+    text-align: center;
+    display: block;
+    color: #0275d8;
+    cursor: pointer;
+}
+
+.games-accordion:hover {
+    color: #014c8c;
+    text-decoration: underline;
+}
+
+p {
+    margin-bottom: 0.5rem;
+}
+
+footer p {
+    font-size: 0.6rem;
+    text-align: center;
+}
+
+.text-muted {
+  color: #bbc0c4; /* about 30% lighter than the base bootstrap colour */
+}
+
+abbr[title] {
+  text-decoration: none;
+}
+
+.card-title {
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    width: 90%;
+    margin-left: 10%;
+}
+
+/* Disable up-arrow/down-arrow sort indicators on datatable columns */
+table.dataTable thead .sorting:before, table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_asc_disabled:before, table.dataTable thead .sorting_desc_disabled:before {
+    visibility: hidden;
+}
+table.dataTable thead .sorting:after, table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_desc:after, table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_desc_disabled:after {
+    visibility: hidden;
+}
