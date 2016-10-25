@@ -56,7 +56,7 @@ def morgue_url(game: orm.Game) -> str:
     src = game.account.server.name
     prefix = _morgue_prefix(src, game.version.v)
 
-    name = game.account.player.name
+    name = game.account.name
     timestamp = game.end.strftime("%Y%m%d-%H%M%S")
     return "%s/%s/morgue-%s-%s.txt" % (prefix, name, name, timestamp)
 
