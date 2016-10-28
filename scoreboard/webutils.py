@@ -155,22 +155,41 @@ def _games_to_table(env: jinja2.environment.Environment,
     
     if datatables:
         t += """<script>
-             $(document).ready(function(){{
-                 $('#{id}').DataTable({{
-                     "columnDefs": [
-                         {{ "searchable": false, "targets": [0,1,5,6,7,9] }},
-                         {{ "orderable": false, "targets": [7,9] }}
-                     ],
-                     "order": [[0, "asc"]],
-                     "info": false,
-                     "lengthChange": false,
-                     "oLanguage": {{
-                         "sSearch": "Filter:"
-                     }},
-                     "pagingType": "numbers"
-                 }});
-             }});
-             </script>"""
+                $(document).ready(function(){{
+                    $('#{id}').DataTable({{
+                        "columnDefs": [
+                            {{ "searchable": false, "targets": [0,1,5,6,7,9] }},
+                            {{ "orderable": false, "targets": [7,9] }}
+                        ],
+                        "order": [[0, "asc"]],
+                        "info": false,
+                        "lengthChange": false,
+                        "oLanguage": {{
+                            "sSearch": "Filter:"
+                        }},
+                        "pagingType": "numbers"
+                    }});
+                    
+                    $('#{id}_wrapper input[type=search]')
+                        .off('cut input keypress keyup paste search')
+                        .on( 'keyup change', function () {{
+                        var tokens = this.value.trim().split(/\s+/);
+                        // Modify tokens to be \bXXXX, if two letters also let match \b..XX\b
+                        // This is to only match words from the start, with the exception
+                        // of two letter class abbreviations, which match the second
+                        // two letters of the combo abbreviation (e.g. match "Be" to "MiBe")
+                        tokens = tokens.map(function(t) {{
+                            t = "\\\\b" + t + (t.length==2 ? "|\\\\b.."+t+"\\\\b" : "");
+                            return t;
+                        }});
+                        // AND tokens together
+                        var regex = "(?=" + tokens.join(")(?=") + ")";
+                        table = $('#{id}').DataTable();
+                        table.search(regex, true, false);
+                        table.draw();
+                    }});
+                }});
+                </script>"""
 
     thead = """{rank}
               {prefix}
