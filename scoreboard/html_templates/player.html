@@ -80,14 +80,26 @@
   <div class="col-sm-4">
     <p><strong>By Species ({{ species_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_species|length }})</strong></p>
     {{ species_wins|prettycounter }}
+    {% if unplayable_species_wins %}
+    <hr>
+    {{ unplayable_species_wins|prettycounter }}
+    {% endif %}
   </div>
   <div class="col-sm-4">
     <p><strong>By Background ({{ background_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_backgrounds|length }})</strong></p>
     {{ background_wins|prettycounter }}
+    {% if unplayable_background_wins %}
+    <hr>
+    {{ unplayable_background_wins|prettycounter }}
+    {% endif %}
   </div>
   <div class="col-sm-4">
     <p><strong>By God ({{ god_wins.values()|map("length")|reject("equalto", 0)|list|length }}/{{ playable_gods|length }})</strong></p>
     {{ god_wins|prettycounter }}
+    {% if unplayable_god_wins %}
+    <hr>
+    {{ unplayable_god_wins|prettycounter }}
+    {% endif %}
   </div>
 </div>
 

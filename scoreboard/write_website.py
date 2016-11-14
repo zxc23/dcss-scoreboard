@@ -197,29 +197,44 @@ def _get_player_records(global_records: dict, player: orm.Player) -> dict:
 
 
 def _wins_per_species(s: sqlalchemy.orm.session.Session,
-                      games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+                      games: Iterable[orm.Game],
+                      playable: bool = True) -> Iterable[orm.Game]:
     """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
-    for sp in model.list_species(s, playable=True):
-        out[sp] = [g for g in games if g.won and g.species == sp]
+    for sp in model.list_species(s, playable=playable):
+        matching_games = [g for g in games if g.won and g.species == sp]
+        # For playable=True, add every species to the output.
+        # For playable=False, only add ones with wins
+        if playable or matching_games:
+            out[sp] = matching_games
     return out
 
 
 def _wins_per_background(s: sqlalchemy.orm.session.Session,
-                         games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+                         games: Iterable[orm.Game],
+                         playable: bool = True) -> Iterable[orm.Game]:
     """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
-    for bg in model.list_backgrounds(s, playable=True):
-        out[bg] = [g for g in games if g.won and g.background == bg]
+    for bg in model.list_backgrounds(s, playable=playable):
+        matching_games = [g for g in games if g.won and g.background == bg]
+        # For playable=True, add every background to the output.
+        # For playable=False, only add ones with wins
+        if playable or matching_games:
+            out[bg] = matching_games
     return out
 
 
 def _wins_per_god(s: sqlalchemy.orm.session.Session,
-                  games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+                  games: Iterable[orm.Game],
+                  playable: bool = True) -> Iterable[orm.Game]:
     """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
-    for god in model.list_gods(s, playable=True):
-        out[god] = [g for g in games if g.won and g.god == god]
+    for god in model.list_gods(s, playable=playable):
+        matching_games = [g for g in games if g.won and g.god == god]
+        # For playable=True, add every god to the output.
+        # For playable=False, only add ones with wins
+        if playable or matching_games:
+            out[god] = matching_games
     return out
 
 
@@ -237,8 +252,11 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     won_games = model.list_games(s, player=player, winning=True)
     n_won_games = len(won_games)
     species_wins = _wins_per_species(s, won_games)
+    unplayable_species_wins = _wins_per_species(s, won_games, playable=False)
     background_wins = _wins_per_background(s, won_games)
+    unplayable_background_wins = _wins_per_background(s, won_games, playable=False)
     god_wins = _wins_per_god(s, won_games)
+    unplayable_god_wins = _wins_per_god(s, won_games, playable=False)
     shortest_win = min(won_games, default=None, key=lambda g: g.turn)
     fastest_win = min(won_games, default=None, key=lambda g: g.dur)
 
@@ -256,6 +274,9 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
         species_wins=species_wins,
         background_wins=background_wins,
         god_wins=god_wins,
+        unplayable_species_wins=unplayable_species_wins,
+        unplayable_background_wins=unplayable_background_wins,
+        unplayable_god_wins=unplayable_god_wins,
         active_streak=active_streak,
         n_games=n_games,
         n_won_games=n_won_games,
