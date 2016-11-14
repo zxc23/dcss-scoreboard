@@ -317,7 +317,8 @@ def write_player_pages(s: sqlalchemy.orm.session.Session,
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
 
 
-def write_website(players: Optional[Iterable], urlbase: str=None) -> None:
+def write_website(players: Optional[Iterable], urlbase: str,
+                  extra_random_players: int) -> None:
     """Write all website files.
 
     Paramers:
@@ -334,14 +335,21 @@ def write_website(players: Optional[Iterable], urlbase: str=None) -> None:
 
     env = jinja_env(urlbase, s)
 
+    # We need the list of all players to generate players.json
     all_players = sorted(model.list_players(s), key=lambda p: p.name)
+
+    # Figure out what player pages to generate
     if players is None:
         players = all_players
-    elif not players:
-        players = []
     else:
-        players = [model.get_player(s, p) for p in players]
-    # Randomise player order
+        if not players:
+            players = []
+        else:
+            players = [model.get_player(s, p) for p in players]
+        if extra_random_players:
+            extra_players = model.get_random_players(s, extra_random_players)
+            players.extend(p for p in extra_players if p not in players)
+    # Randomise order
     random.shuffle(players)
 
     setup_website_dir(env, WEBSITE_DIR, all_players)

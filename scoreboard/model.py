@@ -763,3 +763,9 @@ def list_achievements(
         s: sqlalchemy.orm.session.Session) -> Sequence[Achievement]:
     """Get all streaks."""
     return s.query(Achievement).all()
+
+
+def get_random_players(s: sqlalchemy.orm.session.Session,
+        num: int) -> Sequence[Player]:
+    """Return a list of num random players."""
+    return s.query(Player).order_by(func.random()).limit(num).all()
