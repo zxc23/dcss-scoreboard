@@ -152,7 +152,7 @@ def _games_to_table(env: jinja2.environment.Environment,
             {tbody}
           </tbody>
         </table>"""
-    
+
     if datatables:
         t += """<script>
                 $(document).ready(function(){{
