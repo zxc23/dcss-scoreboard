@@ -763,3 +763,21 @@ def list_achievements(
         s: sqlalchemy.orm.session.Session) -> Sequence[Achievement]:
     """Get all streaks."""
     return s.query(Achievement).all()
+
+
+def check_greaterspecies(s, game):
+    playable_backgrounds = s.query(Background).filter(Background.playable == sqlalchemy.true()).count()
+    q = s.query(Game.background_id).distinct().filter(Game.species_id == game.species.id)
+    q = q.filter(Game.ktyp_id == get_ktyp(s, 'winning').id)
+    q = q.filter(Game.player_id == game.player.id)
+    q = q.join(Game.background)
+    q = q.filter(Background.playable == sqlalchemy.true())
+    result = q.count()
+    assert result <= playable_backgrounds
+    print(game.player)
+    print(result)
+    print(playable_backgrounds)
+    from sqlalchemy.dialects import sqlite
+    print(q.statement.compile(dialect=sqlite.dialect(), compile_kwargs={"literal_binds": True}))
+    if result == playable_backgrounds:
+        print("Winner!!!!")

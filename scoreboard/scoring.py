@@ -76,6 +76,12 @@ def handle_player_streak(s: sqlalchemy.orm.session.Session,
         s.add(current_streak)
 
 
+def handle_greaterfoo(s, game):
+    if game.player.name.lower().startswith('demise101') and game.won:
+        print("Checking this game")
+        model.check_greaterspecies(s, game)
+
+
 def score_game(s: sqlalchemy.orm.session.Session, game: orm.Game) -> None:
     """Score a single game.
 
@@ -88,6 +94,7 @@ def score_game(s: sqlalchemy.orm.session.Session, game: orm.Game) -> None:
     if game.account.blacklisted:
         return
     handle_player_streak(s, game)
+    handle_greaterfoo(s, game)
 
 
 def score_games() -> set:
