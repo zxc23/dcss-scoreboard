@@ -142,6 +142,15 @@ def write_index(s: sqlalchemy.orm.session.Session,
     _write_file(path=os.path.join(WEBSITE_DIR, 'index.html'), data=data)
 
 
+def write_404(s: sqlalchemy.orm.session.Session,
+              env: jinja2.environment.Environment) -> None:
+    """Write the 404 page."""
+    print("Writing 404")
+    template = env.get_template('404.html')
+    _write_file(path=os.path.join(WEBSITE_DIR, '404.html'),
+                data=template.render())
+
+
 def write_streaks(s: sqlalchemy.orm.session.Session,
                   env: jinja2.environment.Environment) -> None:
     """Write the streak page."""
@@ -355,6 +364,8 @@ def write_website(players: Optional[Iterable], urlbase: str,
     setup_website_dir(env, WEBSITE_DIR, all_players)
 
     write_index(s, env)
+
+    write_404(s, env)
 
     write_streaks(s, env)
 
