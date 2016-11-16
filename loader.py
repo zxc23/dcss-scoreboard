@@ -64,11 +64,11 @@ def read_commandline() -> argparse.Namespace:
         metavar='PLAYER',
         help="Re-write the specified player pages.")
     parser.add_argument(
-        '--extra-random-players',
+        '--extra-player-pages',
         metavar='NUM',
         default=0,
         type=int,
-        help='(Re-)Generate pages for an additional random NUM players')
+        help='(Re-)Generate pages for an additional NUM players (least recently updated first)')
     parser.add_argument(
         '--db-credentials',
         metavar="user:passwd",
@@ -108,8 +108,9 @@ def main() -> None:
             else:
                 players = args.players
         scoreboard.write_website.write_website(
-            urlbase=args.urlbase, players=players,
-            extra_random_players=args.extra_random_players)
+            urlbase=args.urlbase,
+            players=players,
+            extra_player_pages=args.extra_player_pages)
 
 
 if __name__ == '__main__':

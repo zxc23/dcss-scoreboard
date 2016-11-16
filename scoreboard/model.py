@@ -1,6 +1,7 @@
 """Defines the database models for this module."""
 
 import functools
+import datetime
 from typing import Optional, Tuple, Callable, Sequence
 
 import sqlalchemy
@@ -95,15 +96,12 @@ def get_player(s: sqlalchemy.orm.session.Session, name: str) -> Player:
     if player:
         return player
     else:
-        player = Player(name=name)
-        s.add(player)
-        s.commit()
-        return player
+        return _add_player(s, name)
 
 
 @functools.lru_cache(maxsize=128)
 def get_player_id(s: sqlalchemy.orm.session.Session, name: str) -> Player:
-    """Get a player's object, creating them if needed.
+    """Get a player's id, creating them if needed.
 
     Note that player names are not case sensitive, so names are stored with
     their canonical capitalisation but we always compare the lowercase version.
@@ -113,10 +111,16 @@ def get_player_id(s: sqlalchemy.orm.session.Session, name: str) -> Player:
     if player:
         return player[0]
     else:
-        player = Player(name=name)
-        s.add(player)
-        s.commit()
-        return player.id
+        return _add_player(s, name).id
+
+
+
+def _add_player(s, name: str) -> Player:
+    player = Player(
+        name=name, page_updated=datetime.datetime.now())
+    s.add(player)
+    s.commit()
+    return player
 
 
 def setup_species(s: sqlalchemy.orm.session.Session) -> None:
@@ -765,7 +769,15 @@ def list_achievements(
     return s.query(Achievement).all()
 
 
-def get_random_players(s: sqlalchemy.orm.session.Session,
-        num: int) -> Sequence[Player]:
-    """Return a list of num random players."""
-    return s.query(Player).order_by(func.random()).limit(num).all()
+def get_old_player_pages(s: sqlalchemy.orm.session.Session,
+                       num: int) -> Sequence[Player]:
+    """Return a list of num players, sorted by least recently updated page."""
+    return s.query(Player).order_by(Player.page_updated).limit(num).all()
+
+
+def updated_player_page(s: sqlalchemy.orm.session.Session,
+                       player: Player) -> None:
+    """Mark a player's page as having been updated."""
+    p = s.query(Player).filter(Player.id == player.id).one()
+    p.page_updated = datetime.datetime.now()
+    s.add(p)

@@ -99,6 +99,8 @@ class Player(Base):
     __tablename__ = 'players'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), unique=True, nullable=False)  # type: str
+    page_updated = Column(
+        DateTime, nullable=False, index=True)  # type: DateTime
     accounts = relationship("Account", back_populates="player")  # type: list
     achievements = relationship(
         "Achievement", secondary=AwardedAchievements, back_populates="players")

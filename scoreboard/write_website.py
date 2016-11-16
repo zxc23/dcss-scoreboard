@@ -319,15 +319,18 @@ def write_player_pages(s: sqlalchemy.orm.session.Session,
     for player in players:
         data = render_player_page(s, template, player, global_records)
         write_player_page(player_html_path, player.name, data)
+        model.updated_player_page(s, player)
         n += 1
         if not n % 100:
             print(n)
+    s.commit()
     end = time.time()
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
 
 
-def write_website(players: Optional[Iterable], urlbase: str,
-                  extra_random_players: int) -> None:
+def write_website(players: Optional[Iterable],
+                  urlbase: str,
+                  extra_player_pages: int) -> None:
     """Write all website files.
 
     Paramers:
@@ -355,8 +358,8 @@ def write_website(players: Optional[Iterable], urlbase: str,
             players = []
         else:
             players = [model.get_player(s, p) for p in players]
-        if extra_random_players:
-            extra_players = model.get_random_players(s, extra_random_players)
+        if extra_player_pages:
+            extra_players = model.get_old_player_pages(s, extra_player_pages)
             players.extend(p for p in extra_players if p not in players)
     # Randomise order
     random.shuffle(players)
