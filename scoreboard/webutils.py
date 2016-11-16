@@ -154,7 +154,7 @@ def _games_to_table(env: jinja2.environment.Environment,
         </table>"""
 
     if datatables:
-        t += """<script>
+        t += r"""<script>
                 $(document).ready(function(){{
                     $('#{id}').DataTable({{
                         "columnDefs": [
@@ -169,7 +169,7 @@ def _games_to_table(env: jinja2.environment.Environment,
                         }},
                         "pagingType": "numbers"
                     }});
-                    
+
                     $('#{id}_wrapper input[type=search]')
                         .off('cut input keypress keyup paste search')
                         .on( 'keyup change', function () {{

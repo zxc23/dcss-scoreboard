@@ -142,13 +142,12 @@ def write_index(s: sqlalchemy.orm.session.Session,
     _write_file(path=os.path.join(WEBSITE_DIR, 'index.html'), data=data)
 
 
-def write_404(s: sqlalchemy.orm.session.Session,
-              env: jinja2.environment.Environment) -> None:
+def write_404(env: jinja2.environment.Environment) -> None:
     """Write the 404 page."""
     print("Writing 404")
     template = env.get_template('404.html')
-    _write_file(path=os.path.join(WEBSITE_DIR, '404.html'),
-                data=template.render())
+    _write_file(
+        path=os.path.join(WEBSITE_DIR, '404.html'), data=template.render())
 
 
 def write_streaks(s: sqlalchemy.orm.session.Session,
@@ -207,7 +206,7 @@ def _get_player_records(global_records: dict, player: orm.Player) -> dict:
 
 def _wins_per_species(s: sqlalchemy.orm.session.Session,
                       games: Iterable[orm.Game],
-                      playable: bool = True) -> Iterable[orm.Game]:
+                      playable: bool=True) -> Iterable[orm.Game]:
     """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for sp in model.list_species(s, playable=playable):
@@ -221,7 +220,7 @@ def _wins_per_species(s: sqlalchemy.orm.session.Session,
 
 def _wins_per_background(s: sqlalchemy.orm.session.Session,
                          games: Iterable[orm.Game],
-                         playable: bool = True) -> Iterable[orm.Game]:
+                         playable: bool=True) -> Iterable[orm.Game]:
     """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for bg in model.list_backgrounds(s, playable=playable):
@@ -235,7 +234,7 @@ def _wins_per_background(s: sqlalchemy.orm.session.Session,
 
 def _wins_per_god(s: sqlalchemy.orm.session.Session,
                   games: Iterable[orm.Game],
-                  playable: bool = True) -> Iterable[orm.Game]:
+                  playable: bool=True) -> Iterable[orm.Game]:
     """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for god in model.list_gods(s, playable=playable):
@@ -263,7 +262,8 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     species_wins = _wins_per_species(s, won_games)
     unplayable_species_wins = _wins_per_species(s, won_games, playable=False)
     background_wins = _wins_per_background(s, won_games)
-    unplayable_background_wins = _wins_per_background(s, won_games, playable=False)
+    unplayable_background_wins = _wins_per_background(
+        s, won_games, playable=False)
     god_wins = _wins_per_god(s, won_games)
     unplayable_god_wins = _wins_per_god(s, won_games, playable=False)
     shortest_win = min(won_games, default=None, key=lambda g: g.turn)
@@ -368,7 +368,7 @@ def write_website(players: Optional[Iterable],
 
     write_index(s, env)
 
-    write_404(s, env)
+    write_404(env)
 
     write_streaks(s, env)
 
