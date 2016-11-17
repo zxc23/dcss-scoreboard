@@ -31,3 +31,8 @@ ratings:
     - "README.md"
     - "scoreboard/html_static/css/style.css"
     - "scoreboard/html_static/js/dcss-scoreboard.js"
+exclude_paths:
+  - awesomeplete.min.js
+  - awesomeplete.css
+  - jquery.timeago.js
+  - tether.min.js
