@@ -414,7 +414,7 @@ class LogfileProgress(Base):
 
     __tablename__ = 'logfile_progress'
     name = Column(String(100), primary_key=True)  # type: str
-    bytes_parsed = Column(Integer, nullable=False, default=0)  # type: int
+    bytes_parsed = Column(Integer, nullable=False)  # type: int
 
 
 @characteristic.with_repr(["key"])  # pylint: disable=too-few-public-methods

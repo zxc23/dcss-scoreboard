@@ -338,7 +338,7 @@ def get_logfile_progress(s: sqlalchemy.orm.session.Session,
     if log:
         return log
     else:
-        log = LogfileProgress(name=logfile)
+        log = LogfileProgress(name=logfile, bytes_parsed=0)
         s.add(log)
         s.commit()
         return log
