@@ -344,7 +344,8 @@ def write_player_api(s: sqlalchemy.orm.session.Session,
     print("Writing player API pages")
     for player in players:
         won_games = model.list_games(s, player=player, winning=True)
-        data = json.dumps([g.as_dict() for g in won_games], indent=2)
+        data = json.dumps(
+            [g.as_dict() for g in won_games], sort_keys=True, indent=2)
         path = os.path.join(WEBSITE_DIR, 'api', '1', 'player', 'wins',
                             player.name.lower())
         _write_file(path=path, data=data)
