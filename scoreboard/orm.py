@@ -403,6 +403,7 @@ class Game(Base):
     def as_dict(self) -> dict:
         """Convert to a dict, for public consumption."""
         return {
+            'gid': self.gid,
             'account_name': self.account.name,
             'player_name': self.player.name,
             'server_name': self.account.server.name,
