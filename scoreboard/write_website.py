@@ -91,14 +91,23 @@ def jinja_env(
     return env
 
 
+def _mkdir(path: str) -> None:
+    if not os.path.isdir(path):
+        print("mkdir %s/" % path)
+        os.mkdir(path)
+
+
 def setup_website_dir(env: jinja2.environment.Environment,
                       path: str,
                       all_players: Iterable) -> None:
     """Create the website dir and add static content."""
     print("Writing HTML to %s" % path)
-    if not os.path.exists(path):
-        print("mkdir %s/" % path)
-        os.mkdir(path)
+
+    _mkdir(path)
+    _mkdir(os.path.join(path, 'api'))
+    _mkdir(os.path.join(path, 'api', '1'))
+    _mkdir(os.path.join(path, 'api', '1', 'player'))
+    _mkdir(os.path.join(path, 'api', '1', 'player', 'wins'))
 
     print("Copying static assets")
     src = os.path.join(os.path.dirname(__file__), 'html_static')
@@ -328,6 +337,19 @@ def write_player_pages(s: sqlalchemy.orm.session.Session,
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
 
 
+def write_player_api(s: sqlalchemy.orm.session.Session,
+                     env: jinja2.environment.Environment,
+                     players: Sequence) -> None:
+    """Write all player API pages."""
+    print("Writing player API pages")
+    for player in players:
+        won_games = model.list_games(s, player=player, winning=True)
+        data = json.dumps([g.as_dict() for g in won_games], indent=2)
+        path = os.path.join(WEBSITE_DIR, 'api', '1', 'player', 'wins',
+                            player.name.lower())
+        _write_file(path=path, data=data)
+
+
 def write_website(players: Optional[Iterable],
                   urlbase: str,
                   extra_player_pages: int) -> None:
@@ -375,5 +397,7 @@ def write_website(players: Optional[Iterable],
     write_highscores(s, env)
 
     write_player_pages(s, env, players)
+
+    write_player_api(s, env, players)
 
     print("Wrote website in %s seconds" % round(time.time() - start, 2))

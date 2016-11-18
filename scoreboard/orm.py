@@ -400,6 +400,33 @@ class Game(Base):
         # the first. We just want to specifically capitalise the first letter.
         return msg[0].upper() + msg[1:]
 
+    def as_dict(self) -> dict:
+        """Convert to a dict, for public consumption."""
+        return {
+            'account_name': self.account.name,
+            'player_name': self.player.name,
+            'server_name': self.account.server.name,
+            'version': self.version.v,
+            'species': self.species.name,
+            'background': self.background.name,
+            'char': self.char,
+            'place': self.place.as_string,
+            'god': self.god.name,
+            'xl': self.xl,
+            'dam': self.dam,
+            'sdam': self.sdam,
+            'tdam': self.tdam,
+            'tmsg': self.tmsg,
+            'turn': self.turn,
+            'dur': self.dur,
+            'runes': self.runes,
+            'score': self.score,
+            'start': self.start.timestamp(),
+            'end': self.end.timestamp(),
+            'potions_used': self.potions_used,
+            'scrolls_used': self.scrolls_used,
+        }
+
 
 @characteristic.with_repr(  # pylint: disable=too-few-public-methods
     ["logfile"])
