@@ -114,10 +114,8 @@ def get_player_id(s: sqlalchemy.orm.session.Session, name: str) -> Player:
         return _add_player(s, name).id
 
 
-
 def _add_player(s, name: str) -> Player:
-    player = Player(
-        name=name, page_updated=datetime.datetime.now())
+    player = Player(name=name, page_updated=datetime.datetime.now())
     s.add(player)
     s.commit()
     return player
@@ -770,13 +768,13 @@ def list_achievements(
 
 
 def get_old_player_pages(s: sqlalchemy.orm.session.Session,
-                       num: int) -> Sequence[Player]:
+                         num: int) -> Sequence[Player]:
     """Return a list of num players, sorted by least recently updated page."""
     return s.query(Player).order_by(Player.page_updated).limit(num).all()
 
 
 def updated_player_page(s: sqlalchemy.orm.session.Session,
-                       player: Player) -> None:
+                        player: Player) -> None:
     """Mark a player's page as having been updated."""
     p = s.query(Player).filter(Player.id == player.id).one()
     p.page_updated = datetime.datetime.now()

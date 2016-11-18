@@ -68,7 +68,8 @@ def read_commandline() -> argparse.Namespace:
         metavar='NUM',
         default=0,
         type=int,
-        help='(Re-)Generate pages for an additional NUM players (least recently updated first)')
+        help='(Re-)Generate pages for an additional NUM players (least recently updated first)'
+    )
     parser.add_argument(
         '--db-credentials',
         metavar="user:passwd",
