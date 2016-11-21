@@ -414,18 +414,13 @@ class Game(Base):
             'place': self.place.as_string,
             'god': self.god.name,
             'xl': self.xl,
-            'dam': self.dam,
-            'sdam': self.sdam,
-            'tdam': self.tdam,
             'tmsg': self.tmsg,
-            'turn': self.turn,
+            'turns': self.turn,
             'dur': self.dur,
             'runes': self.runes,
             'score': self.score,
             'start': self.start.timestamp(),
             'end': self.end.timestamp(),
-            'potions_used': self.potions_used,
-            'scrolls_used': self.scrolls_used,
         }
 
 
