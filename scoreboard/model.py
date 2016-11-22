@@ -92,7 +92,7 @@ def get_player(s: sqlalchemy.orm.session.Session, name: str) -> Player:
     their canonical capitalisation but we always compare the lowercase version.
     """
     player = s.query(Player).filter(
-        func.lower(Player.name) == name.lower()).first()
+        func.lower(Player.name) == name.lower()).one_or_none()
     if player:
         return player
     else:
