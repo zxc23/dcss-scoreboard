@@ -327,7 +327,7 @@ def write_player_pages(s: sqlalchemy.orm.session.Session,
     n = 0
     for player in players:
         data = render_player_page(s, template, player, global_records)
-        write_player_page(player_html_path, player.name, data)
+        write_player_page(player_html_path, player.url_name, data)
         model.updated_player_page(s, player)
         n += 1
         if not n % 100:
@@ -347,7 +347,7 @@ def write_player_api(s: sqlalchemy.orm.session.Session,
         data = json.dumps(
             [g.as_dict() for g in won_games], sort_keys=True, indent=2)
         path = os.path.join(WEBSITE_DIR, 'api', '1', 'player', 'wins',
-                            player.name.lower())
+                            player.url_name)
         _write_file(path=path, data=data)
 
 

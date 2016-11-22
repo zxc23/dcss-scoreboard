@@ -125,7 +125,7 @@ def _games_to_table(env: jinja2.environment.Environment,
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
             player_row='' if not show_player else "<td>%s</td>" %
-            link_player(game.player.name, env.globals['urlbase']),
+            link_player(game.player.url_name, env.globals['urlbase']),
             score='<td class="text-xs-right">{}</td>'.format(
                 prettyint(game.score)) if winning_games else '',
             character=game.char,
@@ -265,8 +265,9 @@ def streakstotable(streaks: Sequence[orm.Streak],
         player = ""
         loss = ""
         if show_player:
-            player = "<td><a href='players/{player}.html'>{player}<a></td>".format(
-                player=streak.player.name)
+            player = "<td><a href='players/{player_url}.html'>{player_name}<a></td>".format(
+                player_url=streak.player.url_name,
+                player_name=streak.player.name)
         if show_loss:
             loss = "<td>%s</td>" % 'TODO'
 

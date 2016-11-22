@@ -107,6 +107,10 @@ class Player(Base):
 
     streak = relationship("Streak", uselist=False, back_populates="player")
 
+    @property
+    def url_name(self):
+        return self.name.lower()
+
 
 @characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
 class Species(Base):
