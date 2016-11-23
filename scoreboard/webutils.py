@@ -76,10 +76,10 @@ def prettydate(d: datetime.datetime) -> str:
         ts=d.isoformat(), t=d.strftime(PRETTY_TIME_FORMAT))
 
 
-def link_player(player: str, urlbase: str) -> str:
+def link_player(player_name: str, player_url: str, urlbase: str) -> str:
     """Convert a player name into a link."""
-    return "<a href='{base}/players/{name}.html'>{name}</a>".format(
-        base=urlbase, name=player)
+    return "<a href='{base}/players/{player_url}.html'>{player_name}</a>".format(
+        base=urlbase, player_url=player_url, player_name=player)
 
 
 def _games_to_table(env: jinja2.environment.Environment,
@@ -124,8 +124,9 @@ def _games_to_table(env: jinja2.environment.Environment,
             tr_class=classes,
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
-            player_row='' if not show_player else "<td>%s</td>" %
-            link_player(game.player.url_name, env.globals['urlbase']),
+            player_row='' if not show_player else
+            "<td>%s</td>" % link_player(game.player.name, game.player.url_name,
+                                        env.globals['urlbase']),
             score='<td class="text-xs-right">{}</td>'.format(
                 prettyint(game.score)) if winning_games else '',
             character=game.char,
