@@ -15,6 +15,29 @@
   .stat-label {
     font-weight: bold;
   }
+
+  .win-columns {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .win-column {
+    flex: 1;
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .win-column:first-child {
+    padding-left: 0;
+  }
+
+  .win-column:last-child {
+    padding-right: 0;
+  }
+
+  .win-column-header {
+    font-weight: bolder;
+  }
 </style>
 
 <template>
@@ -42,6 +65,23 @@
         <div class="stats-column">
         </div>
       </div>
+      <div>
+        <h3>Wins</h3>
+        <div class="win-columns">
+          <div class="win-column">
+            <p class="win-column-header">By Species {{ num_species_won }}/26</p>
+            <p>{{ species_won }}</p>
+          </div>
+          <div class="win-column">
+            <p class="win-column-header">By Background {{ num_backgrounds_won }}/24</p>
+            <p>{{ backgrounds_won }}</p>
+          </div>
+          <div class="win-column">
+            <p class="win-column-header">By God {{ num_gods_won }}/25</p>
+            <p>{{ gods_won }}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -61,10 +101,21 @@
         wins: [],
         last_active: 'Some day',
         num_quits: 15,
-        total_playtime: 646
+        total_playtime: 646,
+        species_filter: [],
+        backgrounds_filter: [],
+        gods_filter: []
       }
     },
     computed: {
+      filtered_wins: function () {
+        return _.filter(this.wins, g => {
+          if (this.species_filter.length > 0 && !_.includes(this.species_filter, g.species)) return false
+          if (this.backgrounds_filter.length > 0 && !_.includes(this.backgrounds_filter, g.background)) return false
+          if (this.gods_filter.length > 0 && !_.includes(this.gods_filter, g.god)) return false
+          return true
+        })
+      },
       games_played: function () {
         return this.wins.length
       },
@@ -72,19 +123,40 @@
         return this.wins.length
       },
       highest_score: function () {
-        return _.maxBy(this.wins, function (g) {
+        return _.maxBy(this.filtered_wins, function (g) {
           return g.score
         })
       },
       shortest_win: function () {
-        return _.minBy(this.wins, function (g) {
+        return _.minBy(this.filtered_wins, function (g) {
           return g.turns
         })
       },
       fastest_win: function () {
-        return _.minBy(this.wins, function (g) {
+        return _.minBy(this.filtered_wins, function (g) {
           return g.dur
         })
+      },
+      species_won: function () {
+        const species = _.groupBy(this.filtered_wins, g => g.species)
+        return _.mapValues(species, s => s.length)
+      },
+      num_species_won: function () {
+        return _.keys(this.species_won).length
+      },
+      backgrounds_won: function () {
+        const backgrounds = _.groupBy(this.filtered_wins, g => g.background)
+        return _.mapValues(backgrounds, b => b.length)
+      },
+      num_backgrounds_won: function () {
+        return _.keys(this.backgrounds_won).length
+      },
+      gods_won: function () {
+        const gods = _.groupBy(this.filtered_wins, g => g.god)
+        return _.mapValues(gods, g => g.length)
+      },
+      num_gods_won: function () {
+        return _.keys(this.gods_won).length
       }
     },
     name: 'player-view',
