@@ -79,7 +79,7 @@ def prettydate(d: datetime.datetime) -> str:
 def link_player(player_name: str, player_url: str, urlbase: str) -> str:
     """Convert a player name into a link."""
     return "<a href='{base}/players/{player_url}.html'>{player_name}</a>".format(
-        base=urlbase, player_url=player_url, player_name=player)
+        base=urlbase, player_url=player_url, player_name=player_name)
 
 
 def _games_to_table(env: jinja2.environment.Environment,
