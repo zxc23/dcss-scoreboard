@@ -5,6 +5,12 @@
 ## Build Setup
 
 ``` bash
+# copy api folder from website to vue-prototype/static
+cp website/api vue-prototype/static
+
+# run further commands from vue-prototype
+cd vue-prototype
+
 # install dependencies
 npm install
 
