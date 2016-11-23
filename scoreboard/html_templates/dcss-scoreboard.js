@@ -13,7 +13,7 @@ ajax.send();
 $('document').ready(function () {
   // Handle selecting a usernames
   document.querySelector("#playersearch").addEventListener("awesomplete-selectcomplete", function() {
-    window.location.href = '{{ urlbase }}/players/' + document.querySelector("#playersearch").value + '.html';
+    window.location.href = '{{ urlbase }}/players/' + document.querySelector("#playersearch").value.toLowerCase() + '.html';
   });
 
   // Convert all timestamps to relative

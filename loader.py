@@ -27,7 +27,9 @@ def read_commandline() -> argparse.Namespace:
         help="Override logfile source. Default: logfiles/",
         default="logfiles")
     parser.add_argument(
-        '--urlbase', help="Override website base URL. Default: file:///CWD")
+        '--urlbase',
+        default=None,
+        help="Override website base URL. Default: file:///CWD")
     parser.add_argument(
         '--database',
         choices=('sqlite', 'postgres'),
@@ -61,6 +63,13 @@ def read_commandline() -> argparse.Namespace:
         nargs='+',
         metavar='PLAYER',
         help="Re-write the specified player pages.")
+    parser.add_argument(
+        '--extra-player-pages',
+        metavar='NUM',
+        default=0,
+        type=int,
+        help='(Re-)Generate pages for an additional NUM players (least recently updated first)'
+    )
     parser.add_argument(
         '--db-credentials',
         metavar="user:passwd",
@@ -100,7 +109,9 @@ def main() -> None:
             else:
                 players = args.players
         scoreboard.write_website.write_website(
-            urlbase=args.urlbase, players=players)
+            urlbase=args.urlbase,
+            players=players,
+            extra_player_pages=args.extra_player_pages)
 
 
 if __name__ == '__main__':

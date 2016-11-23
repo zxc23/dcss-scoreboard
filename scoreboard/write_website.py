@@ -91,14 +91,23 @@ def jinja_env(
     return env
 
 
+def _mkdir(path: str) -> None:
+    if not os.path.isdir(path):
+        print("mkdir %s/" % path)
+        os.mkdir(path)
+
+
 def setup_website_dir(env: jinja2.environment.Environment,
                       path: str,
                       all_players: Iterable) -> None:
     """Create the website dir and add static content."""
     print("Writing HTML to %s" % path)
-    if not os.path.exists(path):
-        print("mkdir %s/" % path)
-        os.mkdir(path)
+
+    _mkdir(path)
+    _mkdir(os.path.join(path, 'api'))
+    _mkdir(os.path.join(path, 'api', '1'))
+    _mkdir(os.path.join(path, 'api', '1', 'player'))
+    _mkdir(os.path.join(path, 'api', '1', 'player', 'wins'))
 
     print("Copying static assets")
     src = os.path.join(os.path.dirname(__file__), 'html_static')
@@ -140,6 +149,14 @@ def write_index(s: sqlalchemy.orm.session.Session,
     template = env.get_template('index.html')
     data = render_index(s, template)
     _write_file(path=os.path.join(WEBSITE_DIR, 'index.html'), data=data)
+
+
+def write_404(env: jinja2.environment.Environment) -> None:
+    """Write the 404 page."""
+    print("Writing 404")
+    template = env.get_template('404.html')
+    _write_file(
+        path=os.path.join(WEBSITE_DIR, '404.html'), data=template.render())
 
 
 def write_streaks(s: sqlalchemy.orm.session.Session,
@@ -197,29 +214,44 @@ def _get_player_records(global_records: dict, player: orm.Player) -> dict:
 
 
 def _wins_per_species(s: sqlalchemy.orm.session.Session,
-                      games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+                      games: Iterable[orm.Game],
+                      playable: bool=True) -> Iterable[orm.Game]:
     """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
-    for sp in model.list_species(s, playable=True):
-        out[sp] = [g for g in games if g.won and g.species == sp]
+    for sp in model.list_species(s, playable=playable):
+        matching_games = [g for g in games if g.won and g.species == sp]
+        # For playable=True, add every species to the output.
+        # For playable=False, only add ones with wins
+        if playable or matching_games:
+            out[sp] = matching_games
     return out
 
 
 def _wins_per_background(s: sqlalchemy.orm.session.Session,
-                         games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+                         games: Iterable[orm.Game],
+                         playable: bool=True) -> Iterable[orm.Game]:
     """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
-    for bg in model.list_backgrounds(s, playable=True):
-        out[bg] = [g for g in games if g.won and g.background == bg]
+    for bg in model.list_backgrounds(s, playable=playable):
+        matching_games = [g for g in games if g.won and g.background == bg]
+        # For playable=True, add every background to the output.
+        # For playable=False, only add ones with wins
+        if playable or matching_games:
+            out[bg] = matching_games
     return out
 
 
 def _wins_per_god(s: sqlalchemy.orm.session.Session,
-                  games: Iterable[orm.Game]) -> Iterable[orm.Game]:
+                  games: Iterable[orm.Game],
+                  playable: bool=True) -> Iterable[orm.Game]:
     """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
-    for god in model.list_gods(s, playable=True):
-        out[god] = [g for g in games if g.won and g.god == god]
+    for god in model.list_gods(s, playable=playable):
+        matching_games = [g for g in games if g.won and g.god == god]
+        # For playable=True, add every god to the output.
+        # For playable=False, only add ones with wins
+        if playable or matching_games:
+            out[god] = matching_games
     return out
 
 
@@ -237,8 +269,12 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     won_games = model.list_games(s, player=player, winning=True)
     n_won_games = len(won_games)
     species_wins = _wins_per_species(s, won_games)
+    unplayable_species_wins = _wins_per_species(s, won_games, playable=False)
     background_wins = _wins_per_background(s, won_games)
+    unplayable_background_wins = _wins_per_background(
+        s, won_games, playable=False)
     god_wins = _wins_per_god(s, won_games)
+    unplayable_god_wins = _wins_per_god(s, won_games, playable=False)
     shortest_win = min(won_games, default=None, key=lambda g: g.turn)
     fastest_win = min(won_games, default=None, key=lambda g: g.dur)
 
@@ -256,6 +292,9 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
         species_wins=species_wins,
         background_wins=background_wins,
         god_wins=god_wins,
+        unplayable_species_wins=unplayable_species_wins,
+        unplayable_background_wins=unplayable_background_wins,
+        unplayable_god_wins=unplayable_god_wins,
         active_streak=active_streak,
         n_games=n_games,
         n_won_games=n_won_games,
@@ -288,15 +327,33 @@ def write_player_pages(s: sqlalchemy.orm.session.Session,
     n = 0
     for player in players:
         data = render_player_page(s, template, player, global_records)
-        write_player_page(player_html_path, player.name, data)
+        write_player_page(player_html_path, player.url_name, data)
+        model.updated_player_page(s, player)
         n += 1
         if not n % 100:
             print(n)
+    s.commit()
     end = time.time()
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
 
 
-def write_website(players: Optional[Iterable], urlbase: str=None) -> None:
+def write_player_api(s: sqlalchemy.orm.session.Session,
+                     env: jinja2.environment.Environment,
+                     players: Sequence) -> None:
+    """Write all player API pages."""
+    print("Writing player API pages")
+    for player in players:
+        won_games = model.list_games(s, player=player, winning=True)
+        data = json.dumps(
+            [g.as_dict() for g in won_games], sort_keys=True, indent=2)
+        path = os.path.join(WEBSITE_DIR, 'api', '1', 'player', 'wins',
+                            player.url_name)
+        _write_file(path=path, data=data)
+
+
+def write_website(players: Optional[Iterable],
+                  urlbase: str,
+                  extra_player_pages: int) -> None:
     """Write all website files.
 
     Paramers:
@@ -313,24 +370,35 @@ def write_website(players: Optional[Iterable], urlbase: str=None) -> None:
 
     env = jinja_env(urlbase, s)
 
+    # We need the list of all players to generate players.json
     all_players = sorted(model.list_players(s), key=lambda p: p.name)
+
+    # Figure out what player pages to generate
     if players is None:
         players = all_players
-    elif not players:
-        players = []
     else:
-        players = [model.get_player(s, p) for p in players]
-    # Randomise player order
+        if not players:
+            players = []
+        else:
+            players = [model.get_player(s, p) for p in players]
+        if extra_player_pages:
+            extra_players = model.get_old_player_pages(s, extra_player_pages)
+            players.extend(p for p in extra_players if p not in players)
+    # Randomise order
     random.shuffle(players)
 
     setup_website_dir(env, WEBSITE_DIR, all_players)
 
     write_index(s, env)
 
+    write_404(env)
+
     write_streaks(s, env)
 
     write_highscores(s, env)
 
     write_player_pages(s, env, players)
+
+    write_player_api(s, env, players)
 
     print("Wrote website in %s seconds" % round(time.time() - start, 2))

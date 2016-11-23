@@ -76,10 +76,10 @@ def prettydate(d: datetime.datetime) -> str:
         ts=d.isoformat(), t=d.strftime(PRETTY_TIME_FORMAT))
 
 
-def link_player(player: str, urlbase: str) -> str:
+def link_player(player_name: str, player_url: str, urlbase: str) -> str:
     """Convert a player name into a link."""
-    return "<a href='{base}/players/{name}.html'>{name}</a>".format(
-        base=urlbase, name=player)
+    return "<a href='{base}/players/{player_url}.html'>{player_name}</a>".format(
+        base=urlbase, player_url=player_url, player_name=player_name)
 
 
 def _games_to_table(env: jinja2.environment.Environment,
@@ -124,8 +124,9 @@ def _games_to_table(env: jinja2.environment.Environment,
             tr_class=classes,
             prefix_col=''
             if not prefix_col else "<td>%s</td>" % prefix_col(game),
-            player_row='' if not show_player else "<td>%s</td>" %
-            link_player(game.player.name, env.globals['urlbase']),
+            player_row='' if not show_player else
+            "<td>%s</td>" % link_player(game.player.name, game.player.url_name,
+                                        env.globals['urlbase']),
             score='<td class="text-xs-right">{}</td>'.format(
                 prettyint(game.score)) if winning_games else '',
             character=game.char,
@@ -152,25 +153,44 @@ def _games_to_table(env: jinja2.environment.Environment,
             {tbody}
           </tbody>
         </table>"""
-    
+
     if datatables:
-        t += """<script>
-             $(document).ready(function(){{
-                 $('#{id}').DataTable({{
-                     "columnDefs": [
-                         {{ "searchable": false, "targets": [0,1,5,6,7,9] }},
-                         {{ "orderable": false, "targets": [7,9] }}
-                     ],
-                     "order": [[0, "asc"]],
-                     "info": false,
-                     "lengthChange": false,
-                     "oLanguage": {{
-                         "sSearch": "Filter:"
-                     }},
-                     "pagingType": "numbers"
-                 }});
-             }});
-             </script>"""
+        t += r"""<script>
+                $(document).ready(function(){{
+                    $('#{id}').DataTable({{
+                        "columnDefs": [
+                            {{ "searchable": false, "targets": [0,1,5,6,7,9] }},
+                            {{ "orderable": false, "targets": [7,9] }}
+                        ],
+                        "order": [[0, "asc"]],
+                        "info": false,
+                        "lengthChange": false,
+                        "oLanguage": {{
+                            "sSearch": "Filter:"
+                        }},
+                        "pagingType": "numbers"
+                    }});
+
+                    $('#{id}_wrapper input[type=search]')
+                        .off('cut input keypress keyup paste search')
+                        .on( 'keyup change', function () {{
+                        var tokens = this.value.trim().split(/\s+/);
+                        // Modify tokens to be \bXXXX, if two letters also let match \b..XX\b
+                        // This is to only match words from the start, with the exception
+                        // of two letter class abbreviations, which match the second
+                        // two letters of the combo abbreviation (e.g. match "Be" to "MiBe")
+                        tokens = tokens.map(function(t) {{
+                            t = "\\\\b" + t + (t.length==2 ? "|\\\\b.."+t+"\\\\b" : "");
+                            return t;
+                        }});
+                        // AND tokens together
+                        var regex = "(?=" + tokens.join(")(?=") + ")";
+                        table = $('#{id}').DataTable();
+                        table.search(regex, true, false);
+                        table.draw();
+                    }});
+                }});
+                </script>"""
 
     thead = """{rank}
               {prefix}
@@ -246,8 +266,9 @@ def streakstotable(streaks: Sequence[orm.Streak],
         player = ""
         loss = ""
         if show_player:
-            player = "<td><a href='players/{player}.html'>{player}<a></td>".format(
-                player=streak.player.name)
+            player = "<td><a href='players/{player_url}.html'>{player_name}<a></td>".format(
+                player_url=streak.player.url_name,
+                player_name=streak.player.name)
         if show_loss:
             loss = "<td>%s</td>" % 'TODO'
 

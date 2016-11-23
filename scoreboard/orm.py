@@ -99,11 +99,17 @@ class Player(Base):
     __tablename__ = 'players'
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), unique=True, nullable=False)  # type: str
+    page_updated = Column(
+        DateTime, nullable=False, index=True)  # type: DateTime
     accounts = relationship("Account", back_populates="player")  # type: list
     achievements = relationship(
         "Achievement", secondary=AwardedAchievements, back_populates="players")
 
     streak = relationship("Streak", uselist=False, back_populates="player")
+
+    @property
+    def url_name(self):
+        return self.name.lower()
 
 
 @characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
@@ -398,6 +404,29 @@ class Game(Base):
         # the first. We just want to specifically capitalise the first letter.
         return msg[0].upper() + msg[1:]
 
+    def as_dict(self) -> dict:
+        """Convert to a dict, for public consumption."""
+        return {
+            'gid': self.gid,
+            'account_name': self.account.name,
+            'player_name': self.player.name,
+            'server_name': self.account.server.name,
+            'version': self.version.v,
+            'species': self.species.name,
+            'background': self.background.name,
+            'char': self.char,
+            'place': self.place.as_string,
+            'god': self.god.name,
+            'xl': self.xl,
+            'tmsg': self.tmsg,
+            'turns': self.turn,
+            'dur': self.dur,
+            'runes': self.runes,
+            'score': self.score,
+            'start': self.start.timestamp(),
+            'end': self.end.timestamp(),
+        }
+
 
 @characteristic.with_repr(  # pylint: disable=too-few-public-methods
     ["logfile"])
@@ -412,7 +441,7 @@ class LogfileProgress(Base):
 
     __tablename__ = 'logfile_progress'
     name = Column(String(100), primary_key=True)  # type: str
-    bytes_parsed = Column(Integer, nullable=False, default=0)  # type: int
+    bytes_parsed = Column(Integer, nullable=False)  # type: int
 
 
 @characteristic.with_repr(["key"])  # pylint: disable=too-few-public-methods

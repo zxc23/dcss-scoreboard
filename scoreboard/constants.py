@@ -448,8 +448,8 @@ ACHIEVEMENTS = (
     Achievement(
         '0.11_clan_first', '0.11 Tournament: First Place (Clan)',
         'Part of the first placed clan in the 0.11 tournament, November 2012.',
-        True,
-        ('evilmike', 'jeanjacques', 'magistern', 'ophanim', 'pivotal', 'theglow')),
+        True, ('evilmike', 'jeanjacques', 'magistern', 'ophanim', 'pivotal',
+               'theglow')),
     Achievement(
         '0.11_clan_second', '0.11 Tournament: Second Place (Clan)',
         'Part of the second placed clan in the 0.11 tournament, November 2012.',
@@ -457,7 +457,8 @@ ACHIEVEMENTS = (
     Achievement(
         '0.11_clan_third', '0.11 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.11 tournament, November 2012.',
-        True, ('Cheibrodos', 'Arrhythmia', 'CursedNobleman', 'FantomFang', 'Yermak', 'araganzar')),
+        True, ('Cheibrodos', 'Arrhythmia', 'CursedNobleman', 'FantomFang',
+               'Yermak', 'araganzar')),
     Achievement('0.10_first', '0.10 Tournament: First Place',
                 'First place in the 0.10 tournament, March 2012.', True,
                 ('elliptic', )),
@@ -470,8 +471,7 @@ ACHIEVEMENTS = (
     Achievement(
         '0.10_clan_first', '0.10 Tournament: First Place (Clan)',
         'Part of the first placed clan in the 0.10 tournament, March 2012.',
-        True,
-        ('elliptic', '78291', 'MarvinPA', 'clouded', 'mikee', 'valrus')),
+        True, ('elliptic', '78291', 'MarvinPA', 'clouded', 'mikee', 'valrus')),
     Achievement(
         '0.10_clan_second', '0.10 Tournament: Second Place (Clan)',
         'Part of the second placed clan in the 0.10 tournament, March 2012.',
@@ -479,7 +479,8 @@ ACHIEVEMENTS = (
     Achievement(
         '0.10_clan_third', '0.10 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.10 tournament, March 2012.',
-        True, ('evilmike', 'GreatZebu', 'Lawman0', 'magistern', 'ophanim', 'pivotal')),
+        True, ('evilmike', 'GreatZebu', 'Lawman0', 'magistern', 'ophanim',
+               'pivotal')),
     Achievement('0.9_first', '0.9 Tournament: First Place',
                 'First place in the 0.9 tournament, August 2011.', True,
                 ('theglow', )),
@@ -492,16 +493,18 @@ ACHIEVEMENTS = (
     Achievement(
         '0.9_clan_first', '0.9 Tournament: First Place (Clan)',
         'Part of the first placed clan in the 0.9 tournament, August 2011.',
-        True,
-        ('ophanim', 'IonFrigate', 'inspector071', 'jokeserver', 'mikee', 'reid')),
+        True, ('ophanim', 'IonFrigate', 'inspector071', 'jokeserver', 'mikee',
+               'reid')),
     Achievement(
         '0.9_clan_second', '0.9 Tournament: Second Place (Clan)',
         'Part of the second placed clan in the 0.9 tournament, August 2011.',
-        True, ('evilmike', 'Jordan7hm', 'Lawman0', 'Shovelmint', 'heteroy', 'theglow')),
+        True, ('evilmike', 'Jordan7hm', 'Lawman0', 'Shovelmint', 'heteroy',
+               'theglow')),
     Achievement(
         '0.9_clan_third', '0.9 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.9 tournament, August 2011.',
-        True, ('casmith789', 'BirdoPrey', 'MarvinPA', 'cbus', 'elliptic', 'valrus')),
+        True,
+        ('casmith789', 'BirdoPrey', 'MarvinPA', 'cbus', 'elliptic', 'valrus')),
     Achievement('0.8_first', '0.8 Tournament: First Place',
                 'First place in the 0.8 tournament, May 2011.', True,
                 ('mikee', )),
@@ -513,17 +516,17 @@ ACHIEVEMENTS = (
                 ('casmith789')),
     Achievement(
         '0.8_clan_first', '0.8 Tournament: First Place (Clan)',
-        'Part of the first placed clan in the 0.8 tournament, May 2011.',
-        True,
+        'Part of the first placed clan in the 0.8 tournament, May 2011.', True,
         ('casmith789', 'MarvinPA', 'Pseudonut', 'elliptic', 'nht', 'valrus')),
     Achievement(
         '0.8_clan_second', '0.8 Tournament: Second Place (Clan)',
         'Part of the second placed clan in the 0.8 tournament, May 2011.',
-        True, ('nyaakitty', 'birdoprey', 'elynae', 'herself', 'tenaya', 'verily')),
+        True,
+        ('nyaakitty', 'birdoprey', 'elynae', 'herself', 'tenaya', 'verily')),
     Achievement(
         '0.8_clan_third', '0.8 Tournament: Third Place (Clan)',
-        'Part of the third placed clan in the 0.8 tournament, May 2011.',
-        True, ('mikee', 'ebarrett', 'jaeger', 'minmay', 'reid', 'xyblor')),
+        'Part of the third placed clan in the 0.8 tournament, May 2011.', True,
+        ('mikee', 'ebarrett', 'jaeger', 'minmay', 'reid', 'xyblor')),
     Achievement('0.7_first', '0.7 Tournament: First Place',
                 'First place in the 0.7 tournament, August 2010.', True,
                 ('elliptic', )),
