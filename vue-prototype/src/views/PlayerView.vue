@@ -81,6 +81,7 @@
             <p>{{ gods_won }}</p>
           </div>
         </div>
+        <games-table :games="filtered_wins"></games-table>
       </div>
     </div>
   </div>
@@ -88,11 +89,13 @@
 
 <script>
   import AppHeader from '../components/AppHeader'
+  import GamesTable from '../components/GamesTable'
   import _ from 'lodash'
 
   export default {
     components: {
-      AppHeader
+      AppHeader,
+      GamesTable
     },
     props: ['player'],
     data: function () {
