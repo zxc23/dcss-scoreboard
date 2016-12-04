@@ -274,6 +274,29 @@ KTYP_FIXUPS = {
     'falling down stairs': 'falling_down_stairs'
 }
 ACHIEVEMENTS = (
+    Achievement('0.19_first', '0.19 Tournament: First Place',
+                'First place in the 0.19 tournament, May 2016.', True,
+                ('Yermak', )),
+    Achievement('0.19_second', '0.19 Tournament: Second Place',
+                'Second place in the 0.19 tournament, May 2016.', True,
+                ('Ultraviolent4', )),
+    Achievement('0.19_third', '0.19 Tournament: Third Place',
+                'Third place in the 0.19 tournament, May 2016.', True,
+                ('p0werm0de', )),
+    Achievement(
+        '0.19_clan_first', '0.19 Tournament: First Place (Clan)',
+        'Part of the first placed clan in the 0.19 tournament, May 2016.',
+        True,
+        ('Charly', 'SaintRoka', 'Sapher', 'Turgon', 'Yermak', 'pedritolo')),
+    Achievement(
+        '0.19_clan_second', '0.19 Tournament: Second Place (Clan)',
+        'Part of the second placed clan in the 0.19 tournament, May 2016.',
+        True, ('Leszczynek', 'Enish', 'kuniqs', 'murphy', 'p0werm0de', 'vev')),
+    Achievement(
+        '0.19_clan_third', '0.19 Tournament: Third Place (Clan)',
+        'Part of the third placed clan in the 0.19 tournament, May 2016.',
+        True, ('Ultraviolent4', 'PurpleRed', 'alcopop', 'edsrzf', 'tabstorm',
+               'AllRandomAllDemise')),
     Achievement('0.18_first', '0.18 Tournament: First Place',
                 'First place in the 0.18 tournament, May 2016.', True,
                 ('Yermak', )),
