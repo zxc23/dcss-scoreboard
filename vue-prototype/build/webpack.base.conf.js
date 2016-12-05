@@ -52,11 +52,34 @@ module.exports = {
         test: /\.vue$/,
         loader: 'vue'
       },
+      // {
+      //   test: /\.js$/,
+      //   loader: 'babel',
+      //   include: projectRoot,
+      //   exclude: /node_modules/
+      // },
       {
         test: /\.js$/,
         loader: 'babel',
         include: projectRoot,
         exclude: /node_modules/
+      },
+      {
+        test: /\.jsx$/,
+        loader: 'babel',
+        include: /node_modules\/vue-tables-2/
+      },
+      // { 
+      //   test: /\.jsx$/, 
+      //   loader: 'babel', 
+      // }, 
+      // { 
+      //   test: /vue-tables-2.*?js$/, 
+      //   loader: 'babel' 
+      // },
+      {
+        test: /\.html$/,
+        loader: 'vue-html'
       },
       {
         test: /\.json$/,
