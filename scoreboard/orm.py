@@ -434,14 +434,13 @@ class LogfileProgress(Base):
     """Logfile import progress.
 
     Columns:
-        name: logfile filename
-        bytes_parsed: how many bytes have been read already. Log import code
-            will seek this far in when resuming.
+        source_url: logfile source url
+        current_key: the key of the next logfile event to import.
     """
 
     __tablename__ = 'logfile_progress'
-    name = Column(String(100), primary_key=True)  # type: str
-    bytes_parsed = Column(Integer, nullable=False)  # type: int
+    source_url = Column(String(100), primary_key=True)  # type: str
+    current_key = Column(Integer, default=0, nullable=False)  # type: int
 
 
 @characteristic.with_repr(["key"])  # pylint: disable=too-few-public-methods
