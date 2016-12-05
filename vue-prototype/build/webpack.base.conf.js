@@ -67,7 +67,12 @@ module.exports = {
       {
         test: /\.jsx$/,
         loader: 'babel',
-        include: /node_modules\/vue-tables-2/
+        include: path.join(__dirname, '../node_modules/vue-tables-2')
+      },
+      {
+        test: /\.jsx$/,
+        loader: 'babel',
+        include: path.join(__dirname, '../node_modules/vue-pagination-2')
       },
       // { 
       //   test: /\.jsx$/, 
