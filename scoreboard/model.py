@@ -329,27 +329,26 @@ def add_games(s: sqlalchemy.orm.session.Session,
 
 
 def get_logfile_progress(s: sqlalchemy.orm.session.Session,
-                         logfile: str) -> LogfileProgress:
+                         url: str) -> LogfileProgress:
     """Get a logfile progress records, creating it if needed."""
     log = s.query(LogfileProgress).filter(
-        LogfileProgress.name == logfile).first()
+        LogfileProgress.source_url == url).one_or_none()
     if log:
         return log
     else:
-        log = LogfileProgress(name=logfile, bytes_parsed=0)
+        log = LogfileProgress(source_url=url)
         s.add(log)
         s.commit()
         return log
 
 
 def save_logfile_progress(s: sqlalchemy.orm.session.Session,
-                          logfile: str,
-                          pos: int) -> None:
+                          source_url: str,
+                          current_key: int) -> None:
     """Save the position for a logfile."""
-    log = get_logfile_progress(s, logfile)
-    log.bytes_parsed = pos
+    log = get_logfile_progress(s, source_url)
+    log.current_key = current_key
     s.add(log)
-    s.commit()
 
 
 def list_accounts(s: sqlalchemy.orm.session.Session,

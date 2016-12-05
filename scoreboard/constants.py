@@ -615,3 +615,4 @@ ACHIEVEMENTS = (
         '0.4_clan_third', '0.4 Tournament: Third Place (Clan)',
         'Part of the third placed clan in the 0.4 tournament, August 2008.',
         True, ('Eronarn', 'Foggy', 'Tag', 'Voiks', 'eternal', 'pointless')), )
+LOGFILE_API_GAME_ARGS = {'type': 'game', 'limit': '1000'}
