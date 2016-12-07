@@ -58,7 +58,7 @@
           <p><span class="stat-label">Total Playtime:</span> {{ total_playtime }} hours</p>
           <p><span class="stat-label">Highest Score:</span> {{ highest_score.score }} points</p>
           <p v-if="num_wins > 0"><span class="stat-label">Shortest Win:</span> {{ shortest_win.turns }} turns</p>
-          <p v-if="num_wins > 0"><span class="stat-label">Fastest Win:</span> {{ fastest_win.dur }} hours</p>
+          <p v-if="num_wins > 0"><span class="stat-label">Fastest Win:</span> {{ fastest_win.dur | prettydur }} hours</p>
         </div>
         <div class="stats-column">
         </div>

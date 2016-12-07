@@ -13,8 +13,7 @@
     "axios": "^0.15.2",
     "lodash": "^4.17.2",
     "vue": "^2.0.1",
-    "vue-axios": "^1.2.2",
-    "vue-tables-2": "^0.2.4"
+    "vue-axios": "^1.2.2"
   },
   "devDependencies": {
     "autoprefixer": "^6.4.0",
