@@ -10,3 +10,4 @@ __pycache__
 .idea/
 database.db
 *.pyc
+npm-debug.log
