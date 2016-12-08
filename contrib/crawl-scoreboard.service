@@ -1,0 +1,8 @@
+[Unit]
+Description=Crawl Scoreboard
+
+[Service]
+ExecStart=/app/scorebboard/contrib/run.sh
+
+[Install]
+WantedBy=multi-user.target
