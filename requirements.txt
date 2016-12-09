@@ -1,8 +1,8 @@
 jinja2
 sqlalchemy
 jsmin
-braceexpand
 characteristic
 pyyaml
 mypy-lang
 yapf
+requests

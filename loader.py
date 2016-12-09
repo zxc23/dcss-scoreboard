@@ -4,7 +4,6 @@
 import argparse
 import sys
 
-import scoreboard.sources
 import scoreboard.log_import
 import scoreboard.orm
 import scoreboard.scoring
@@ -22,10 +21,12 @@ def read_commandline() -> argparse.Namespace:
     description = "Run DCSS Scoreboard."
     epilog = "Specify DB_USER/DB_PASS environment variables if required."
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
+    DEFAULT_API = 'https://api.crawl.project357.org/event'
     parser.add_argument(
-        '--logdir',
-        help="Override logfile source. Default: logfiles/",
-        default="logfiles")
+        '--game-api',
+        default=DEFAULT_API,
+        help='Specify a custom game API url. Set blank to skip API use. Default: %s'
+        % DEFAULT_API)
     parser.add_argument(
         '--urlbase',
         default=None,
@@ -39,17 +40,6 @@ def read_commandline() -> argparse.Namespace:
         '--database-path',
         default='database.db3',
         help='Database path (for sqlite). Default: database.db3')
-    parser.add_argument(
-        '--download-logfiles',
-        action='store_true',
-        help="Download logfiles first.")
-    parser.add_argument(
-        '--download-servers',
-        nargs='*',
-        metavar="SRC",
-        help="Only download logfiles from these servers.")
-    parser.add_argument(
-        '--skip-import', action='store_true', help="Skip log import.")
     parser.add_argument(
         '--skip-scoring', action='store_true', help="Skip scoring.")
     parser.add_argument(
@@ -88,12 +78,8 @@ def main() -> None:
         path=args.database_path,
         credentials=args.db_credentials)
 
-    if args.download_logfiles:
-        scoreboard.sources.download_sources(
-            args.logdir, servers=args.download_servers)
-
-    if not args.skip_import:
-        scoreboard.log_import.load_logfiles(logdir=args.logdir)
+    if args.game_api:
+        scoreboard.log_import.load_logfiles(api_url=args.game_api)
 
     if not args.skip_scoring:
         players = scoreboard.scoring.score_games()
