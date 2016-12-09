@@ -2,7 +2,7 @@
 Description=Crawl Scoreboard
 
 [Service]
-ExecStart=/app/scorebboard/contrib/run.sh
+ExecStart=/app/scoreboard/contrib/run.sh
 
 [Install]
 WantedBy=multi-user.target

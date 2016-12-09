@@ -536,7 +536,7 @@ ACHIEVEMENTS = (
                 ('elliptic', )),
     Achievement('0.8_third', '0.8 Tournament: Third Place',
                 'Third place in the 0.8 tournament, May 2011.', True,
-                ('casmith789')),
+                ('casmith789', )),
     Achievement(
         '0.8_clan_first', '0.8 Tournament: First Place (Clan)',
         'Part of the first placed clan in the 0.8 tournament, May 2011.', True,
