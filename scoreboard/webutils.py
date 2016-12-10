@@ -354,7 +354,7 @@ def mosthighscorestotable(highscores: Iterable) -> str:
                        <td>%s</td>
                      </tr>""" %
                   (rank, "<a href='players/{player}.html'>{player}<a>".format(
-                      player=player), len(games), combos))
+                      player=player.lower()), len(games), combos))
 
     return table.format(classes=const.TABLE_CLASSES, tbody=tbody)
 
