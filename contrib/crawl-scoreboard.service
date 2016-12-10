@@ -3,6 +3,8 @@ Description=Crawl Scoreboard
 
 [Service]
 ExecStart=/app/scoreboard/contrib/run.sh
+Restart=on-success
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
