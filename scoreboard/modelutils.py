@@ -1,6 +1,7 @@
 """Utility functions for the model."""
 
 import datetime
+from typing import Optional
 
 import scoreboard.orm as orm
 
@@ -22,7 +23,7 @@ def crawl_date_to_datetime(d: str) -> datetime.datetime:
         second=int(d[12:14]))
 
 
-def _morgue_prefix(src: str, version: str) -> str:
+def _morgue_prefix(src: str, version: str) -> Optional[str]:
     if src == "cao":
         prefix = "http://crawl.akrasiac.org/rawdata"
     elif src == "cdo":
@@ -46,15 +47,19 @@ def _morgue_prefix(src: str, version: str) -> str:
     elif src == "cwz":
         prefix = "http://webzook.net/soup/morgue/"
         prefix += "/" + version_url(version)
+    elif src in ("ckr", "csn", "rhf"):
+        return None
     else:
         raise ValueError("No prefix for %s" % src)
     return prefix
 
 
-def morgue_url(game: orm.Game) -> str:
+def morgue_url(game: orm.Game) -> Optional[str]:
     """Generates a morgue URL from a game."""
     src = game.account.server.name
     prefix = _morgue_prefix(src, game.version.v)
+    if not prefix:
+        return None
 
     name = game.account.name
     timestamp = game.end.strftime("%Y%m%d-%H%M%S")

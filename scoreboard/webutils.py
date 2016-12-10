@@ -395,12 +395,17 @@ def recordsformatted(records: dict) -> str:
 
 
 def morgue_link(game: orm.Game, text: str="Morgue") -> str:
-    """Returns a hyperlink to a morgue file.
+    """Returns a hyperlink to a game's morgue.
 
-    Game can be either a gid string or a game object.
+    Some servers don't have morgues available online any more, for these
+    we return an empty string.
     """
-    return '<a href="{url}">{text}</a>'.format(
-        url=modelutils.morgue_url(game), text=text)
+    url=modelutils.morgue_url(game)
+    if url:
+        return '<a href="{url}">{text}</a>'.format(
+            url=url, text=text)
+    else:
+        return ''
 
 
 def percentage(n: int, digits: int=2) -> str:
