@@ -63,14 +63,14 @@
       <div class="stats">
         <div class="stats-column">
           <p><span class="stat-label">Last Active:</span> {{ last_active }}</p>
-          <p><span class="stat-label">Games Played:</span> {{ games_played }}</p>
-          <p><span class="stat-label">Wins:</span> {{ num_wins }}</p>
-          <p><span class="stat-label"><abbr title="Including leaving and wizmode">Quits</abbr>:</span> {{ num_quits }}</p>
+          <p><span class="stat-label">Games Played:</span> {{ games_played.toLocaleString() }}</p>
+          <p><span class="stat-label">Wins:</span> {{ num_wins.toLocaleString() }}</p>
+          <p><span class="stat-label"><abbr title="Including leaving and wizmode">Quits</abbr>:</span> {{ num_quits.toLocaleString() }}</p>
         </div>
         <div class="stats-column">
-          <p><span class="stat-label">Total Playtime:</span> {{ total_playtime }} hours</p>
-          <p><span class="stat-label">Highest Score:</span> {{ highest_score.score }} points</p>
-          <p v-if="num_wins > 0"><span class="stat-label">Shortest Win:</span> {{ shortest_win.turns }} turns</p>
+          <p><span class="stat-label">Total Playtime:</span> {{ total_playtime.toLocaleString() }} hours</p>
+          <p><span class="stat-label">Highest Score:</span> {{ highest_score.score.toLocaleString() }} points</p>
+          <p v-if="num_wins > 0"><span class="stat-label">Shortest Win:</span> {{ shortest_win.turns.toLocaleString() }} turns</p>
           <p v-if="num_wins > 0"><span class="stat-label">Fastest Win:</span> {{ fastest_win.dur | prettydur }} hours</p>
         </div>
         <div class="stats-column">
