@@ -86,17 +86,26 @@
             <p>
               <span v-for="sp in playable_species" class="fakelink" :class="{ 'muted': !species_won[sp], 'active': species_filter.includes(sp) }" @click="filterSpecies(sp)">{{ sp }} ({{ species_won[sp] || 0 }}) </span>
             </p>
+            <p>
+              <span v-for="sp in non_playable_species" class="fakelink small" :class="{ 'muted': !species_won[sp], 'active': species_filter.includes(sp) }" @click="filterSpecies(sp)">{{ sp }} ({{ species_won[sp] || 0 }}) </span>
+            </p>
           </div>
           <div class="win-column">
             <p class="win-column-header">By Background {{ num_backgrounds_won }}/{{ Object.keys(playable_backgrounds).length }}</p>
             <p>
               <span v-for="bg in playable_backgrounds" class="fakelink" :class="{ 'muted': !backgrounds_won[bg], 'active': backgrounds_filter.includes(bg) }" @click="filterBackground(bg)">{{ bg }} ({{ backgrounds_won[bg] || 0 }}) </span>
             </p>
+            <p>
+              <span v-for="bg in non_playable_backgrounds" class="fakelink small" :class="{ 'muted': !backgrounds_won[bg], 'active': backgrounds_filter.includes(bg) }" @click="filterBackground(bg)">{{ bg }} ({{ backgrounds_won[bg] || 0 }}) </span>
+            </p>
           </div>
           <div class="win-column">
             <p class="win-column-header">By God {{ num_gods_won }}/{{ playable_gods.length }}</p>
             <p>
               <span v-for="god in playable_gods" class="fakelink" :class="{ 'muted': !gods_won[god], 'active': gods_filter.includes(god) }" @click="filterGod(god)">{{ god }} ({{ gods_won[god] || 0 }}) </span>
+            </p>
+            <p>
+              <span v-for="god in non_playable_gods" class="fakelink small" :class="{ 'muted': !gods_won[god], 'active': gods_filter.includes(god) }" @click="filterGod(god)">{{ god }} ({{ gods_won[god] || 0 }}) </span>
             </p>
           </div>
         </div>
@@ -183,6 +192,15 @@
       },
       num_gods_won: function () {
         return _.intersection(_.keys(this.gods_won), crawl.PLAYABLE_GODS).length
+      },
+      non_playable_species: function () {
+        return _.intersection(_.values(crawl.NON_PLAYABLE_SPECIES), _.map(this.wins, g => g.species))
+      },
+      non_playable_backgrounds: function () {
+        return _.intersection(_.values(crawl.NON_PLAYABLE_BACKGROUNDS), _.map(this.wins, g => g.background))
+      },
+      non_playable_gods: function () {
+        return _.intersection(crawl.NON_PLAYABLE_GODS, _.map(this.wins, g => g.god))
       }
     },
     methods: {
