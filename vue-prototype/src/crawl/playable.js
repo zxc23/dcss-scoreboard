@@ -81,6 +81,7 @@ export const NON_PLAYABLE_BACKGROUNDS = {
 
 export const PLAYABLE_GODS = [
   'Atheist',
+  'Ashenzari',
   'Beogh',
   'Cheibriados',
   'Dithmenos',
