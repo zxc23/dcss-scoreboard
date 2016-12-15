@@ -38,6 +38,19 @@
   .win-column-header {
     font-weight: bolder;
   }
+
+  .fakelink {
+    color: #0275d8;
+    cursor: pointer;
+  }
+
+  .muted {
+    color: #818a91;
+  }
+
+  .fakelink:hover, .active {
+    color: #e29300;
+  }
 </style>
 
 <template>
@@ -69,16 +82,22 @@
         <h3>Wins</h3>
         <div class="win-columns">
           <div class="win-column">
-            <p class="win-column-header">By Species {{ num_species_won }}/26</p>
-            <p>{{ species_won }}</p>
+            <p class="win-column-header">By Species {{ num_species_won }}/{{ Object.keys(playable_species).length }}</p>
+            <p>
+              <span v-for="sp in playable_species" class="fakelink" :class="{ 'muted': !species_won[sp], 'active': species_filter.includes(sp) }" @click="filterSpecies(sp)">{{ sp }} ({{ species_won[sp] || 0 }}) </span>
+            </p>
           </div>
           <div class="win-column">
-            <p class="win-column-header">By Background {{ num_backgrounds_won }}/24</p>
-            <p>{{ backgrounds_won }}</p>
+            <p class="win-column-header">By Background {{ num_backgrounds_won }}/{{ Object.keys(playable_backgrounds).length }}</p>
+            <p>
+              <span v-for="bg in playable_backgrounds" class="fakelink" :class="{ 'muted': !backgrounds_won[bg], 'active': backgrounds_filter.includes(bg) }" @click="filterBackground(bg)">{{ bg }} ({{ backgrounds_won[bg] || 0 }}) </span>
+            </p>
           </div>
           <div class="win-column">
-            <p class="win-column-header">By God {{ num_gods_won }}/25</p>
-            <p>{{ gods_won }}</p>
+            <p class="win-column-header">By God {{ num_gods_won }}/{{ playable_gods.length }}</p>
+            <p>
+              <span v-for="god in playable_gods" class="fakelink" :class="{ 'muted': !gods_won[god], 'active': gods_filter.includes(god) }" @click="filterGod(god)">{{ god }} ({{ gods_won[god] || 0 }}) </span>
+            </p>
           </div>
         </div>
         <games-table :games="filtered_wins"></games-table>
@@ -91,6 +110,7 @@
   import AppHeader from '../components/AppHeader'
   import GamesTable from '../components/GamesTable'
   import _ from 'lodash'
+  import * as crawl from '../crawl/playable'
 
   export default {
     components: {
@@ -107,7 +127,10 @@
         total_playtime: 646,
         species_filter: [],
         backgrounds_filter: [],
-        gods_filter: []
+        gods_filter: [],
+        playable_species: crawl.PLAYABLE_SPECIES,
+        playable_backgrounds: crawl.PLAYABLE_BACKGROUNDS,
+        playable_gods: crawl.PLAYABLE_GODS
       }
     },
     computed: {
@@ -126,17 +149,17 @@
         return this.wins.length
       },
       highest_score: function () {
-        return _.maxBy(this.filtered_wins, function (g) {
+        return _.maxBy(this.wins, function (g) {
           return g.score
         })
       },
       shortest_win: function () {
-        return _.minBy(this.filtered_wins, function (g) {
+        return _.minBy(this.wins, function (g) {
           return g.turns
         })
       },
       fastest_win: function () {
-        return _.minBy(this.filtered_wins, function (g) {
+        return _.minBy(this.wins, function (g) {
           return g.dur
         })
       },
@@ -145,21 +168,38 @@
         return _.mapValues(species, s => s.length)
       },
       num_species_won: function () {
-        return _.keys(this.species_won).length
+        return _.intersection(_.keys(this.species_won), _.values(crawl.PLAYABLE_SPECIES)).length
       },
       backgrounds_won: function () {
         const backgrounds = _.groupBy(this.filtered_wins, g => g.background)
         return _.mapValues(backgrounds, b => b.length)
       },
       num_backgrounds_won: function () {
-        return _.keys(this.backgrounds_won).length
+        return _.intersection(_.keys(this.backgrounds_won), _.values(crawl.PLAYABLE_BACKGROUNDS)).length
       },
       gods_won: function () {
         const gods = _.groupBy(this.filtered_wins, g => g.god)
         return _.mapValues(gods, g => g.length)
       },
       num_gods_won: function () {
-        return _.keys(this.gods_won).length
+        return _.intersection(_.keys(this.gods_won), crawl.PLAYABLE_GODS).length
+      }
+    },
+    methods: {
+      filterSpecies: function (species) {
+        let index = _.indexOf(this.species_filter, species)
+        if (index === -1) this.species_filter.push(species)
+        else this.species_filter.splice(index, 1)
+      },
+      filterBackground: function (bg) {
+        let index = _.indexOf(this.backgrounds_filter, bg)
+        if (index === -1) this.backgrounds_filter.push(bg)
+        else this.backgrounds_filter.splice(index, 1)
+      },
+      filterGod: function (god) {
+        let index = _.indexOf(this.gods_filter, god)
+        if (index === -1) this.gods_filter.push(god)
+        else this.gods_filter.splice(index, 1)
       }
     },
     name: 'player-view',
