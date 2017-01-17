@@ -3,7 +3,7 @@ Description=Crawl Scoreboard
 
 [Service]
 ExecStart=/app/scoreboard/contrib/run.sh
-Restart=on-success
+Restart=always
 RestartSec=5s
 
 [Install]
