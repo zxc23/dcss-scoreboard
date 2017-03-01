@@ -10,6 +10,7 @@ Achievement = namedtuple('Achievement',
                          ['key', 'name', 'description', 'hidden', 'players'])
 
 SPECIES = {
+    Species('Ba', 'Barachian', True),
     Species('Ce', 'Centaur', True),
     Species('DD', 'Deep Dwarf', True),
     Species('DE', 'Deep Elf', True),
