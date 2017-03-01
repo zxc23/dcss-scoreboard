@@ -114,6 +114,7 @@ GODS = {
     God('Xom', True),
     God('Yredelemnul', True),
     God('Zin', True),
+    God('Wu Jian', True),
     # Non-playable gods
     God('Pakellas', False)
 }
@@ -138,7 +139,8 @@ GOD_NAME_FIXUPS = {
     # Nostalgia names
     'Lugafu': 'Trog',
     'Lucy': 'Lugonu',
-    'Feawn': 'Fedhas'
+    'Feawn': 'Fedhas',
+    'Ieoh Jian': 'Wu Jian',
 }
 BACKGROUND_SHORTNAME_FIXUPS = {'Am': 'AM'}
 SPECIES_SHORTNAME_FIXUPS = {'Ke': 'Te', 'DS': 'Ds', 'DG': 'Dg', 'OP': 'Op'}
