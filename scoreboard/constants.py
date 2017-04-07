@@ -217,7 +217,8 @@ BLACKLISTS = {
         'notqw', 'jw', 'parabodrick', 'hyperqwbe', 'cashybrid', 'tstbtto',
         'parabolic', 'oppbolic', 'ew', 'rushxxi', 'gaubot', 'cojitobot',
         'paulcdejean', 'otabotab', 'nakatomy', 'testingqw', 'beemell', 'beem',
-        'drasked', 'phybot', 'khrogbot', 'jwbot', 'autocrawlbot', 'swippen'
+        'drasked', 'phybot', 'khrogbot', 'jwbot', 'autocrawlbot', 'swippen',
+        'cotteux',
     },
     'bot-games': {'LoveLain:cao:20160903064250S'}
 }
