@@ -109,6 +109,11 @@ def add_game(s: sqlalchemy.orm.session.Session, api_game: dict) -> bool:
     # Normalise old data
     game['god'] = const.GOD_NAME_FIXUPS.get(game['god'], game['god'])
     game['race'] = const.SPECIES_NAME_FIXUPS.get(game['race'], game['race'])
+    # Special fixup for Gnome, which was the original Gn, before Gnoll took
+    # that species code.
+    if game['v'] in ('0.1', '0.2', '0.3', '0.4',
+                     '0.5') and game['char'][:2] == 'Gn':
+        game['char'] = 'Gm' + game['char'][2:]
     if game['char'][:2] in const.SPECIES_SHORTNAME_FIXUPS:
         oldrace = game['char'][:2]
         newrace = const.SPECIES_SHORTNAME_FIXUPS[oldrace]

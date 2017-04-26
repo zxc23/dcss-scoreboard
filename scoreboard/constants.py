@@ -20,6 +20,7 @@ SPECIES = {
     Species('Fe', 'Felid', True),
     Species('Fo', 'Formicid', True),
     Species('Gh', 'Ghoul', True),
+    Species('Gn', 'Gnoll', True),
     Species('Gr', 'Gargoyle', True),
     Species('HE', 'High Elf', True),
     Species('HO', 'Hill Orc', True),
@@ -39,7 +40,7 @@ SPECIES = {
     Species('Vp', 'Vampire', True),
     # Non-playable species
     Species('El', 'Elf', False),
-    Species('Gn', 'Gnome', False),
+    Species('Gm', 'Gnome', False),
     Species('OM', 'Ogre-Mage', False),
     Species('HD', 'Hill Dwarf', False),
     Species('MD', 'Mountain Dwarf', False),
@@ -144,7 +145,13 @@ GOD_NAME_FIXUPS = {
     'Ieoh Jian': 'Wu Jian',
 }
 BACKGROUND_SHORTNAME_FIXUPS = {'Am': 'AM'}
-SPECIES_SHORTNAME_FIXUPS = {'Ke': 'Te', 'DS': 'Ds', 'DG': 'Dg', 'OP': 'Op'}
+SPECIES_SHORTNAME_FIXUPS = {
+    'Ke': 'Te',
+    'DS': 'Ds',
+    'DG': 'Dg',
+    'OP': 'Op',
+    'Bu': 'Gn'
+}
 SPECIES_NAME_FIXUPS = {
     'Yellow Draconian': 'Draconian',
     'Grey Draconian': 'Draconian',
@@ -157,6 +164,7 @@ SPECIES_NAME_FIXUPS = {
     'Pale Draconian': 'Draconian',
     'Grotesk': 'Gargoyle',
     'Kenku': 'Tengu',
+    'Bultungin': 'Gnoll',
 }
 BRANCH_NAME_FIXUPS = {
     # April fool's one year
