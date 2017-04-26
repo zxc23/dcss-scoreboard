@@ -85,8 +85,13 @@ def add_game(s: sqlalchemy.orm.session.Session, api_game: dict) -> bool:
     # Validate the data -- some old broken games don't have this field and
     # and should be ignored.
     if 'start' not in api_game['data']:
+        print("Couldn't find start in game, skipping (%s)" % api_game['data'])
         return None
     if 'v' not in api_game['data']:
+        print("Couldn't find v in game, skipping (%s)" % api_game['data'])
+        return None
+    if 'char' not in api_game['data']:
+        print("Couldn't find char in game, skipping (%s)" % api_game['data'])
         return None
     # We should only parse vanilla dcss games
     if api_game['data']['lv'] != '0.1':
