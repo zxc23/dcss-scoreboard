@@ -66,7 +66,7 @@ def load_logfiles(api_url: str) -> None:
         for game in response['results']:
             try:
                 add_game(s, game)
-            except StandardError as e:
+            except Exception as e:
                 print("Couldn't add game, skipping: %s" % game)
             else:
                 games += 1
