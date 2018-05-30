@@ -5,8 +5,17 @@ import sqlite3  # for typing
 import characteristic
 
 import sqlalchemy
-from sqlalchemy import Table, Column, String, Integer, Boolean, DateTime, \
-                       ForeignKey, UniqueConstraint, Index
+from sqlalchemy import (
+    Table,
+    Column,
+    String,
+    Integer,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    UniqueConstraint,
+    Index,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -15,8 +24,7 @@ import sqlalchemy.ext.declarative.api
 
 from . import model
 
-Base = declarative_base(
-)  # type: sqlalchemy.ext.declarative.api.DeclarativeMeta
+Base = declarative_base()  # type: sqlalchemy.ext.declarative.api.DeclarativeMeta
 
 Session = None
 
@@ -29,27 +37,21 @@ class Server(Base):
         name: Server's short name (eg CAO, CPO).
     """
 
-    __tablename__ = 'servers'
+    __tablename__ = "servers"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    name = Column(
-        String(4), nullable=False, index=True, unique=True)  # type: str
+    name = Column(String(4), nullable=False, index=True, unique=True)  # type: str
 
 
 # Many-to-many mapping of players to achivements
 AwardedAchievements = Table(
-    'awarded_achievements',
+    "awarded_achievements",
     Base.metadata,
-    Column(
-        'player_id', Integer, ForeignKey('players.id'), nullable=False),
-    Column(
-        'achievement_id',
-        Integer,
-        ForeignKey('achievements.id'),
-        nullable=False))
+    Column("player_id", Integer, ForeignKey("players.id"), nullable=False),
+    Column("achievement_id", Integer, ForeignKey("achievements.id"), nullable=False),
+)
 
 
-@characteristic.with_repr(  # pylint: disable=too-few-public-methods
-    ["name", "server"])
+@characteristic.with_repr(["name", "server"])  # pylint: disable=too-few-public-methods
 class Account(Base):
     """An account -- a single username on a single server.
 
@@ -59,17 +61,16 @@ class Account(Base):
             streak griefers/etc are blacklisted.
     """
 
-    __tablename__ = 'accounts'
+    __tablename__ = "accounts"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), nullable=False, index=True)  # type: str
-    server_id = Column(
-        Integer, ForeignKey('servers.id'), nullable=False)  # type: int
+    server_id = Column(Integer, ForeignKey("servers.id"), nullable=False)  # type: int
     server = relationship("Server")
     blacklisted = Column(Boolean, nullable=False, default=False)  # type: bool
     player_id = Column(
-        Integer, ForeignKey('players.id'), nullable=False,
-        index=True)  # type: int
-    player = relationship("Player", back_populates='accounts')
+        Integer, ForeignKey("players.id"), nullable=False, index=True
+    )  # type: int
+    player = relationship("Player", back_populates="accounts")
 
     @property
     def canonical_name(self) -> str:
@@ -81,8 +82,7 @@ class Account(Base):
         """
         return self.name.lower()
 
-    __table_args__ = (UniqueConstraint(
-        'name', 'server_id', name='name-server_id'), )
+    __table_args__ = (UniqueConstraint("name", "server_id", name="name-server_id"),)
 
 
 @characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
@@ -96,14 +96,14 @@ class Player(Base):
             Sequell nick mapping).
     """
 
-    __tablename__ = 'players'
+    __tablename__ = "players"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     name = Column(String(20), unique=True, nullable=False)  # type: str
-    page_updated = Column(
-        DateTime, nullable=False, index=True)  # type: DateTime
+    page_updated = Column(DateTime, nullable=False, index=True)  # type: DateTime
     accounts = relationship("Account", back_populates="player")  # type: list
     achievements = relationship(
-        "Achievement", secondary=AwardedAchievements, back_populates="players")
+        "Achievement", secondary=AwardedAchievements, back_populates="players"
+    )
 
     streak = relationship("Streak", uselist=False, back_populates="player")
 
@@ -124,10 +124,9 @@ class Species(Base):
             and trunk...
     """
 
-    __tablename__ = 'species'
+    __tablename__ = "species"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    short = Column(
-        String(2), nullable=False, index=True, unique=True)  # type: str
+    short = Column(String(2), nullable=False, index=True, unique=True)  # type: str
     name = Column(String(15), nullable=False, unique=True)  # type: str
     playable = Column(Boolean, nullable=False)  # type: bool
 
@@ -144,12 +143,10 @@ class Background(Base):
             and trunk...
     """
 
-    __tablename__ = 'backgrounds'
+    __tablename__ = "backgrounds"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    short = Column(
-        String(2), nullable=False, index=True, unique=True)  # type: str
-    name = Column(
-        String(20), nullable=False, index=True, unique=True)  # type: str
+    short = Column(String(2), nullable=False, index=True, unique=True)  # type: str
+    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
@@ -164,10 +161,9 @@ class God(Base):
             and trunk...
     """
 
-    __tablename__ = 'gods'
+    __tablename__ = "gods"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    name = Column(
-        String(20), nullable=False, index=True, unique=True)  # type: str
+    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
@@ -179,10 +175,9 @@ class Version(Base):
         v: version string, eg '0.17', '0.18'.
     """
 
-    __tablename__ = 'versions'
+    __tablename__ = "versions"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    v = Column(
-        String(10), nullable=False, index=True, unique=True)  # type: str
+    v = Column(String(10), nullable=False, index=True, unique=True)  # type: str
 
 
 @characteristic.with_repr(["short"])  # pylint: disable=too-few-public-methods
@@ -199,18 +194,15 @@ class Branch(Base):
             and trunk...
     """
 
-    __tablename__ = 'branches'
+    __tablename__ = "branches"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    short = Column(
-        String(10), nullable=False, index=True, unique=True)  # type: str
-    name = Column(
-        String(20), nullable=False, index=True, unique=True)  # type: str
+    short = Column(String(10), nullable=False, index=True, unique=True)  # type: str
+    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
     multilevel = Column(Boolean, nullable=False)  # type: bool
     playable = Column(Boolean, nullable=False)  # type: bool
 
 
-@characteristic.with_repr(  # pylint: disable=too-few-public-methods
-    ["branch", "level"])
+@characteristic.with_repr(["branch", "level"])  # pylint: disable=too-few-public-methods
 class Place(Base):
     """A DCSS Place (D:8, Pan:1, etc).
 
@@ -218,10 +210,9 @@ class Place(Base):
         Temple:1, Pan:1).
     """
 
-    __tablename__ = 'places'
-    id = Column('id', Integer, primary_key=True, nullable=False)  # type: int
-    branch_id = Column(
-        Integer, ForeignKey('branches.id'), nullable=False)  # type: int
+    __tablename__ = "places"
+    id = Column("id", Integer, primary_key=True, nullable=False)  # type: int
+    branch_id = Column(Integer, ForeignKey("branches.id"), nullable=False)  # type: int
     branch = relationship("Branch")
     level = Column(Integer, nullable=False, index=True)  # type: int
 
@@ -234,22 +225,19 @@ class Place(Base):
         else:
             return "%s" % self.branch.short
 
-    __table_args__ = (UniqueConstraint(
-        'branch_id', 'level', name='branch_id-level'), )
+    __table_args__ = (UniqueConstraint("branch_id", "level", name="branch_id-level"),)
 
 
 @characteristic.with_repr(["name"])  # pylint: disable=too-few-public-methods
 class Ktyp(Base):
     """A DCSS ktyp (mon, beam, etc)."""
 
-    __tablename__ = 'ktyps'
+    __tablename__ = "ktyps"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
-    name = Column(
-        String(20), nullable=False, index=True, unique=True)  # type: str
+    name = Column(String(20), nullable=False, index=True, unique=True)  # type: str
 
 
-@characteristic.with_repr(  # pylint: disable=too-few-public-methods
-    ["player", "id"])
+@characteristic.with_repr(["player", "id"])  # pylint: disable=too-few-public-methods
 class Streak(Base):
     """A streak of wins.
 
@@ -260,21 +248,23 @@ class Streak(Base):
         active: is the streak currently active?
     """
 
-    __tablename__ = 'streaks'
+    __tablename__ = "streaks"
     id = Column(Integer, primary_key=True, nullable=False)  # type: int
     active = Column(Boolean, nullable=False, index=True)  # type: bool
 
-    player_id = Column(
-        Integer, ForeignKey('players.id'), nullable=False)  # type: int
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=False)  # type: int
     player = relationship("Player", back_populates="streak")
 
-    games = relationship("Game", order_by='Game.start')
+    games = relationship("Game", order_by="Game.start")
 
-    __table_args__ = (Index(
-        'one_active_streak_per_player',
-        player_id,
-        postgresql_where=active == sqlalchemy.true(),
-        sqlite_where=active == sqlalchemy.true()), )
+    __table_args__ = (
+        Index(
+            "one_active_streak_per_player",
+            player_id,
+            postgresql_where=active == sqlalchemy.true(),
+            sqlite_where=active == sqlalchemy.true(),
+        ),
+    )
 
 
 @characteristic.with_repr(["gid"])  # pylint: disable=too-few-public-methods
@@ -297,34 +287,30 @@ class Game(Base):
         scored: Has the game been procssed by scoring yet?
     """
 
-    __tablename__ = 'games'
+    __tablename__ = "games"
     gid = Column(String(50), primary_key=True, nullable=False)  # type: str
 
-    account_id = Column(
-        Integer, ForeignKey('accounts.id'), nullable=False)  # type: int
+    account_id = Column(Integer, ForeignKey("accounts.id"), nullable=False)  # type: int
     account = relationship("Account")
 
     # Denormalised data. Set on game record insertion
     player_id = Column(Integer, nullable=False, index=True)  # type: int
 
-    version_id = Column(
-        Integer, ForeignKey('versions.id'), nullable=False)  # type: int
+    version_id = Column(Integer, ForeignKey("versions.id"), nullable=False)  # type: int
     version = relationship("Version")
 
-    species_id = Column(
-        Integer, ForeignKey('species.id'), nullable=False)  # type: int
+    species_id = Column(Integer, ForeignKey("species.id"), nullable=False)  # type: int
     species = relationship("Species")
 
     background_id = Column(
-        Integer, ForeignKey('backgrounds.id'), nullable=False)  # type: int
+        Integer, ForeignKey("backgrounds.id"), nullable=False
+    )  # type: int
     background = relationship("Background")
 
-    place_id = Column(
-        Integer, ForeignKey('places.id'), nullable=False)  # type: int
+    place_id = Column(Integer, ForeignKey("places.id"), nullable=False)  # type: int
     place = relationship("Place")
 
-    god_id = Column(
-        Integer, ForeignKey('gods.id'), nullable=False)  # type: int
+    god_id = Column(Integer, ForeignKey("gods.id"), nullable=False)  # type: int
     god = relationship("God")
 
     xl = Column(Integer, nullable=False)  # type: int
@@ -341,15 +327,12 @@ class Game(Base):
     potions_used = Column(Integer, nullable=False)  # type: int
     scrolls_used = Column(Integer, nullable=False)  # type: int
 
-    ktyp_id = Column(
-        Integer, ForeignKey('ktyps.id'), nullable=False)  # type: int
+    ktyp_id = Column(Integer, ForeignKey("ktyps.id"), nullable=False)  # type: int
     ktyp = relationship("Ktyp")
 
-    scored = Column(
-        Boolean, default=False, nullable=False, index=True)  # type: bool
+    scored = Column(Boolean, default=False, nullable=False, index=True)  # type: bool
 
-    streak_id = Column(
-        Integer, ForeignKey('streaks.id'), index=True)  # type: int
+    streak_id = Column(Integer, ForeignKey("streaks.id"), index=True)  # type: int
     streak = relationship("Streak")
 
     __table_args__ = (
@@ -357,15 +340,16 @@ class Game(Base):
         # XXX: these indexes should have a sqlite_where=ktyp_id == 'winning'
         # But these indexes can then only be added after the 'winning' ktyp is
         # added.... chicken & egg.
-        Index('species_highscore_index', species_id, score),
-        Index('background_highscore_index', background_id, score),
-        Index('combo_highscore_index', species_id, background_id, score),
-        Index('fastest_highscore_index', ktyp_id, dur),
-        Index('shortest_highscore_index', ktyp_id, turn),
+        Index("species_highscore_index", species_id, score),
+        Index("background_highscore_index", background_id, score),
+        Index("combo_highscore_index", species_id, background_id, score),
+        Index("fastest_highscore_index", ktyp_id, dur),
+        Index("shortest_highscore_index", ktyp_id, turn),
         # Used by scoring.score_games
-        Index('unscored_games', scored, end),
+        Index("unscored_games", scored, end),
         # Used by scoring.is_grief
-        Index('first_game_index', account_id, end), )
+        Index("first_game_index", account_id, end),
+    )
 
     @property
     def player(self) -> Player:
@@ -375,22 +359,22 @@ class Game(Base):
     @property
     def won(self) -> bool:
         """Was this game won."""
-        return self.ktyp.name == 'winning'
+        return self.ktyp.name == "winning"
 
     @property
     def quit(self) -> bool:
         """Was this game quit."""
-        return self.ktyp.name == 'quitting'
+        return self.ktyp.name == "quitting"
 
     @property
     def boring(self) -> bool:
         """Was this game was quit, left, or wizmoded."""
-        return self.ktyp.name in ('quitting', 'leaving', 'wizmode')
+        return self.ktyp.name in ("quitting", "leaving", "wizmode")
 
     @property
     def char(self) -> str:
         """Character code eg 'MiFi'."""
-        return '{}{}'.format(self.species.short, self.background.short)
+        return "{}{}".format(self.species.short, self.background.short)
 
     @property
     def pretty_tmsg(self) -> str:
@@ -398,8 +382,8 @@ class Game(Base):
         msg = self.tmsg
         if not msg:
             return msg
-        if msg == 'escaped with the Orb':
-            msg += '!'
+        if msg == "escaped with the Orb":
+            msg += "!"
         # We don't use str.capitalize because it lower-cases all letters but
         # the first. We just want to specifically capitalise the first letter.
         return msg[0].upper() + msg[1:]
@@ -407,29 +391,28 @@ class Game(Base):
     def as_dict(self) -> dict:
         """Convert to a dict, for public consumption."""
         return {
-            'gid': self.gid,
-            'account_name': self.account.name,
-            'player_name': self.player.name,
-            'server_name': self.account.server.name,
-            'version': self.version.v,
-            'species': self.species.name,
-            'background': self.background.name,
-            'char': self.char,
-            'place': self.place.as_string,
-            'god': self.god.name,
-            'xl': self.xl,
-            'tmsg': self.tmsg,
-            'turns': self.turn,
-            'dur': self.dur,
-            'runes': self.runes,
-            'score': self.score,
-            'start': self.start.timestamp(),
-            'end': self.end.timestamp(),
+            "gid": self.gid,
+            "account_name": self.account.name,
+            "player_name": self.player.name,
+            "server_name": self.account.server.name,
+            "version": self.version.v,
+            "species": self.species.name,
+            "background": self.background.name,
+            "char": self.char,
+            "place": self.place.as_string,
+            "god": self.god.name,
+            "xl": self.xl,
+            "tmsg": self.tmsg,
+            "turns": self.turn,
+            "dur": self.dur,
+            "runes": self.runes,
+            "score": self.score,
+            "start": self.start.timestamp(),
+            "end": self.end.timestamp(),
         }
 
 
-@characteristic.with_repr(  # pylint: disable=too-few-public-methods
-    ["logfile"])
+@characteristic.with_repr(["logfile"])  # pylint: disable=too-few-public-methods
 class LogfileProgress(Base):
     """Logfile import progress.
 
@@ -438,7 +421,7 @@ class LogfileProgress(Base):
         current_key: the key of the next logfile event to import.
     """
 
-    __tablename__ = 'logfile_progress'
+    __tablename__ = "logfile_progress"
     source_url = Column(String(100), primary_key=True)  # type: str
     current_key = Column(Integer, default=0, nullable=False)  # type: int
 
@@ -456,45 +439,44 @@ class Achievement(Base):
             God'
     """
 
-    __tablename__ = 'achievements'
+    __tablename__ = "achievements"
     id = Column(Integer, primary_key=True)  # type: int
     key = Column(String(50), nullable=False, index=True)  # type: str
     name = Column(String(50), nullable=False, index=True)  # type: str
     description = Column(String(200), nullable=False)  # type: str
     players = relationship(
-        "Player", secondary=AwardedAchievements, back_populates="achievements")
+        "Player", secondary=AwardedAchievements, back_populates="achievements"
+    )
 
 
 def sqlite_performance_over_safety(
-        dbapi_con: sqlite3.Connection,
-        con_record: sqlalchemy.pool.
-        _ConnectionRecord  # pylint: disable=protected-access
+    dbapi_con: sqlite3.Connection,
+    con_record: sqlalchemy.pool._ConnectionRecord,  # pylint: disable=protected-access
 ) -> None:
     """Significantly speeds up inserts but will break on crash."""
     con_record  # pylint: disable=pointless-statement
-    dbapi_con.execute('PRAGMA journal_mode = MEMORY')
-    dbapi_con.execute('PRAGMA synchronous = OFF')
+    dbapi_con.execute("PRAGMA journal_mode = MEMORY")
+    dbapi_con.execute("PRAGMA synchronous = OFF")
 
 
 def setup_database(*, database: str, path: str, credentials: str) -> None:
     """Set up the database and create the master sessionmaker."""
-    if database == 'sqlite':
-        db_uri = 'sqlite:///{database_path}'.format(database_path=path)
-    elif database == 'postgres':
-        db_uri = 'postgresql+psycopg2://{creds}localhost/scoreboard'
+    if database == "sqlite":
+        db_uri = "sqlite:///{database_path}".format(database_path=path)
+    elif database == "postgres":
+        db_uri = "postgresql+psycopg2://{creds}localhost/scoreboard"
         if credentials:
-            db_uri = db_uri.format(creds='%s@' % credentials)
+            db_uri = db_uri.format(creds="%s@" % credentials)
         else:
-            db_uri = db_uri.format(creds='')
+            db_uri = db_uri.format(creds="")
     else:
         raise ValueError("Unknown database type!")
     print("Connecting to {}".format(db_uri))
-    engine_opts = {'poolclass': sqlalchemy.pool.NullPool}
+    engine_opts = {"poolclass": sqlalchemy.pool.NullPool}
     engine = sqlalchemy.create_engine(db_uri, **engine_opts)
 
-    if db_uri.startswith('sqlite'):
-        sqlalchemy.event.listen(engine, 'connect',
-                                sqlite_performance_over_safety)
+    if db_uri.startswith("sqlite"):
+        sqlalchemy.event.listen(engine, "connect", sqlite_performance_over_safety)
 
     Base.metadata.create_all(engine)
 
@@ -515,6 +497,5 @@ def setup_database(*, database: str, path: str, credentials: str) -> None:
 def get_session() -> sqlalchemy.orm.session.Session:
     """Create a new database session."""
     if Session is None:
-        raise Exception(
-            "Database hasn't been initialised, run setup_database() first!")
+        raise Exception("Database hasn't been initialised, run setup_database() first!")
     return Session()

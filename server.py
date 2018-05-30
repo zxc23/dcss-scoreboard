@@ -7,7 +7,7 @@ PORT = 8000
 Handler = http.server.SimpleHTTPRequestHandler
 
 httpd = socketserver.TCPServer(("", PORT), Handler)
-os.chdir('website')
+os.chdir("website")
 
 print("Serving at port", PORT)
 httpd.serve_forever()

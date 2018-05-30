@@ -8,8 +8,7 @@ import scoreboard.model as model
 import scoreboard.orm as orm
 
 
-def is_valid_streak_addition(game: orm.Game,
-                             current_streak: orm.Streak) -> bool:
+def is_valid_streak_addition(game: orm.Game, current_streak: orm.Streak) -> bool:
     """Check if the game is a valid addition to the streak."""
     # Valid if no streak to begin with
     if not current_streak:
@@ -25,8 +24,7 @@ def is_grief(s: sqlalchemy.orm.session.Session, game: orm.Game) -> bool:
     """
 
     # Only an account's first game can be auto-detected as a grief
-    first_game = model.list_games(
-        s, account=game.account, reverse_order=True, limit=1)
+    first_game = model.list_games(s, account=game.account, reverse_order=True, limit=1)
     if first_game != game:
         return False
 
@@ -44,8 +42,7 @@ def is_grief(s: sqlalchemy.orm.session.Session, game: orm.Game) -> bool:
     return False
 
 
-def handle_player_streak(s: sqlalchemy.orm.session.Session,
-                         game: orm.Game) -> None:
+def handle_player_streak(s: sqlalchemy.orm.session.Session, game: orm.Game) -> None:
     """Figure out what a game means for the player's streak.
 
     A first win will start a streak.
@@ -98,8 +95,7 @@ def score_games() -> set:
     new_scored = 0
     print("Scoring games...")
     while True:
-        games = model.list_games(
-            s, scored=False, limit=100, reverse_order=True)
+        games = model.list_games(s, scored=False, limit=100, reverse_order=True)
         if not games:
             break
         for game in games:
@@ -113,7 +109,9 @@ def score_games() -> set:
         s.commit()
 
     end = time.time()
-    print("Scored %s new games (for %s players) in %s secs" %
-          (new_scored, len(scored_players), round(end - start, 2)))
+    print(
+        "Scored %s new games (for %s players) in %s secs"
+        % (new_scored, len(scored_players), round(end - start, 2))
+    )
 
     return scored_players

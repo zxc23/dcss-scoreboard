@@ -13,14 +13,15 @@ def crawl_date_to_datetime(d: str) -> datetime.datetime:
     for this.
     """
     # Increment the month by one
-    d = d[:4] + '%02d' % (int(d[4:6]) + 1) + d[6:]
+    d = d[:4] + "%02d" % (int(d[4:6]) + 1) + d[6:]
     return datetime.datetime(
         year=int(d[:4]),
         month=int(d[4:6]),
         day=int(d[6:8]),
         hour=int(d[8:10]),
         minute=int(d[10:12]),
-        second=int(d[12:14]))
+        second=int(d[12:14]),
+    )
 
 
 def _morgue_prefix(src: str, version: str) -> Optional[str]:
@@ -73,5 +74,5 @@ def version_url(version: str) -> str:
     if len(version) > 4:
         for i in range(len(version)):
             if version[-(i + 1)] == ".":
-                return version[:-(i + 1)]
+                return version[: -(i + 1)]
     return version

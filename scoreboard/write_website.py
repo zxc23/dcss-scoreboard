@@ -21,7 +21,7 @@ from . import webutils
 from . import orm
 from . import constants as const
 
-WEBSITE_DIR = 'website'
+WEBSITE_DIR = "website"
 
 
 def rsync_replacement(src: str, dst: str) -> None:
@@ -42,51 +42,49 @@ def rsync_replacement(src: str, dst: str) -> None:
 
 def _write_file(*, path: str, data: str) -> None:
     """Write a file."""
-    with open(path, 'w', encoding='utf8') as f:
+    with open(path, "w", encoding="utf8") as f:
         f.write(data)
 
 
 def jinja_env(
-        urlbase: Optional[str],
-        s: sqlalchemy.orm.session.Session) -> jinja2.environment.Environment:
+    urlbase: Optional[str], s: sqlalchemy.orm.session.Session
+) -> jinja2.environment.Environment:
     """Create the Jinja template environment."""
-    template_path = os.path.join(os.path.dirname(__file__), 'html_templates')
+    template_path = os.path.join(os.path.dirname(__file__), "html_templates")
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_path))
-    env.filters['prettyint'] = webutils.prettyint
-    env.filters['prettyhours'] = webutils.prettyhours
-    env.filters['prettydur'] = webutils.prettydur
-    env.filters['prettycounter'] = webutils.prettycounter
-    env.filters['prettycrawldate'] = webutils.prettycrawldate
-    env.filters['streakstotable'] = webutils.streakstotable
-    env.filters['prettydate'] = webutils.prettydate
-    env.filters['link_player'] = webutils.link_player
-    env.filters['morgue_link'] = webutils.morgue_link
-    env.filters['percentage'] = webutils.percentage
-    env.filters['mosthighscorestotable'] = webutils.mosthighscorestotable
-    env.filters['recordsformatted'] = webutils.recordsformatted
-    env.filters['shortest_win'] = webutils.shortest_win
-    env.filters['fastest_win'] = webutils.fastest_win
-    env.filters['highscore'] = webutils.highscore
+    env.filters["prettyint"] = webutils.prettyint
+    env.filters["prettyhours"] = webutils.prettyhours
+    env.filters["prettydur"] = webutils.prettydur
+    env.filters["prettycounter"] = webutils.prettycounter
+    env.filters["prettycrawldate"] = webutils.prettycrawldate
+    env.filters["streakstotable"] = webutils.streakstotable
+    env.filters["prettydate"] = webutils.prettydate
+    env.filters["link_player"] = webutils.link_player
+    env.filters["morgue_link"] = webutils.morgue_link
+    env.filters["percentage"] = webutils.percentage
+    env.filters["mosthighscorestotable"] = webutils.mosthighscorestotable
+    env.filters["recordsformatted"] = webutils.recordsformatted
+    env.filters["shortest_win"] = webutils.shortest_win
+    env.filters["fastest_win"] = webutils.fastest_win
+    env.filters["highscore"] = webutils.highscore
 
-    env.filters['generic_games_to_table'] = webutils.generic_games_to_table
+    env.filters["generic_games_to_table"] = webutils.generic_games_to_table
+    env.filters["generic_highscores_to_table"] = webutils.generic_highscores_to_table
+    env.filters["species_highscores_to_table"] = webutils.species_highscores_to_table
     env.filters[
-        'generic_highscores_to_table'] = webutils.generic_highscores_to_table
-    env.filters[
-        'species_highscores_to_table'] = webutils.species_highscores_to_table
-    env.filters[
-        'background_highscores_to_table'] = webutils.background_highscores_to_table
+        "background_highscores_to_table"
+    ] = webutils.background_highscores_to_table
 
-    env.globals['tableclasses'] = const.TABLE_CLASSES
-    env.globals['playable_species'] = model.list_species(s, playable=True)
-    env.globals['playable_backgrounds'] = model.list_backgrounds(
-        s, playable=True)
-    env.globals['playable_gods'] = model.list_gods(s, playable=True)
-    env.globals['current_time'] = datetime.datetime.utcnow()
+    env.globals["tableclasses"] = const.TABLE_CLASSES
+    env.globals["playable_species"] = model.list_species(s, playable=True)
+    env.globals["playable_backgrounds"] = model.list_backgrounds(s, playable=True)
+    env.globals["playable_gods"] = model.list_gods(s, playable=True)
+    env.globals["current_time"] = datetime.datetime.utcnow()
 
     if urlbase:
-        env.globals['urlbase'] = urlbase
+        env.globals["urlbase"] = urlbase
     else:
-        env.globals['urlbase'] = os.path.join(os.getcwd(), WEBSITE_DIR)
+        env.globals["urlbase"] = os.path.join(os.getcwd(), WEBSITE_DIR)
 
     return env
 
@@ -97,83 +95,90 @@ def _mkdir(path: str) -> None:
         os.mkdir(path)
 
 
-def setup_website_dir(env: jinja2.environment.Environment,
-                      path: str,
-                      all_players: Iterable) -> None:
+def setup_website_dir(
+    env: jinja2.environment.Environment, path: str, all_players: Iterable
+) -> None:
     """Create the website dir and add static content."""
     print("Writing HTML to %s" % path)
 
     _mkdir(path)
-    _mkdir(os.path.join(path, 'api'))
-    _mkdir(os.path.join(path, 'api', '1'))
-    _mkdir(os.path.join(path, 'api', '1', 'player'))
-    _mkdir(os.path.join(path, 'api', '1', 'player', 'wins'))
+    _mkdir(os.path.join(path, "api"))
+    _mkdir(os.path.join(path, "api", "1"))
+    _mkdir(os.path.join(path, "api", "1", "player"))
+    _mkdir(os.path.join(path, "api", "1", "player", "wins"))
 
     print("Copying static assets")
-    src = os.path.join(os.path.dirname(__file__), 'html_static')
-    dst = os.path.join(path, 'static')
-    if sys.platform != 'win32':
-        subprocess.run(['rsync', '-a', src + '/', dst + '/'])
+    src = os.path.join(os.path.dirname(__file__), "html_static")
+    dst = os.path.join(path, "static")
+    if sys.platform != "win32":
+        subprocess.run(["rsync", "-a", src + "/", dst + "/"])
     else:
         rsync_replacement(src, dst)
 
     print("Generating player list")
     _write_file(
-        path=os.path.join(dst, 'js', 'players.json'),
-        data=json.dumps([p.name for p in all_players]))
+        path=os.path.join(dst, "js", "players.json"),
+        data=json.dumps([p.name for p in all_players]),
+    )
 
     print("Writing minified local JS")
-    js_template = env.get_template('dcss-scoreboard.js')
+    js_template = env.get_template("dcss-scoreboard.js")
     _write_file(
-        path=os.path.join(WEBSITE_DIR, 'static/js/dcss-scoreboard.js'),
-        data=jsmin.jsmin(js_template.render()))
+        path=os.path.join(WEBSITE_DIR, "static/js/dcss-scoreboard.js"),
+        data=jsmin.jsmin(js_template.render()),
+    )
 
 
-def render_index(s: sqlalchemy.orm.session.Session,
-                 template: jinja2.environment.Template) -> str:
+def render_index(
+    s: sqlalchemy.orm.session.Session, template: jinja2.environment.Template
+) -> str:
     """Render the index page."""
     return template.render(
         recent_wins=model.list_games(
-            s, winning=True, limit=const.FRONTPAGE_TABLE_LENGTH),
+            s, winning=True, limit=const.FRONTPAGE_TABLE_LENGTH
+        ),
         active_streaks=[],
-        overall_highscores=model.highscores(
-            s, limit=const.FRONTPAGE_TABLE_LENGTH),
+        overall_highscores=model.highscores(s, limit=const.FRONTPAGE_TABLE_LENGTH),
         combo_high_scores=model.combo_highscore_holders(
-            s, limit=const.FRONTPAGE_TABLE_LENGTH))
+            s, limit=const.FRONTPAGE_TABLE_LENGTH
+        ),
+    )
 
 
-def write_index(s: sqlalchemy.orm.session.Session,
-                env: jinja2.environment.Environment) -> None:
+def write_index(
+    s: sqlalchemy.orm.session.Session, env: jinja2.environment.Environment
+) -> None:
     """Write the index page."""
     print("Writing index")
-    template = env.get_template('index.html')
+    template = env.get_template("index.html")
     data = render_index(s, template)
-    _write_file(path=os.path.join(WEBSITE_DIR, 'index.html'), data=data)
+    _write_file(path=os.path.join(WEBSITE_DIR, "index.html"), data=data)
 
 
 def write_404(env: jinja2.environment.Environment) -> None:
     """Write the 404 page."""
     print("Writing 404")
-    template = env.get_template('404.html')
-    _write_file(
-        path=os.path.join(WEBSITE_DIR, '404.html'), data=template.render())
+    template = env.get_template("404.html")
+    _write_file(path=os.path.join(WEBSITE_DIR, "404.html"), data=template.render())
 
 
-def write_streaks(s: sqlalchemy.orm.session.Session,
-                  env: jinja2.environment.Environment) -> None:
+def write_streaks(
+    s: sqlalchemy.orm.session.Session, env: jinja2.environment.Environment
+) -> None:
     """Write the streak page."""
     print("Writing streaks")
-    template = env.get_template('streaks.html')
+    template = env.get_template("streaks.html")
     active_streaks = model.get_streaks(s, active=True, max_age=365)
     best_streaks = model.get_streaks(s, limit=10)
     _write_file(
-        path=os.path.join(WEBSITE_DIR, 'streaks.html'),
-        data=template.render(
-            active_streaks=active_streaks, best_streaks=best_streaks))
+        path=os.path.join(WEBSITE_DIR, "streaks.html"),
+        data=template.render(active_streaks=active_streaks, best_streaks=best_streaks),
+    )
 
 
-def render_highscores(s: sqlalchemy.orm.session.Session,
-                      template: jinja2.environment.Template) -> str:
+def render_highscores(
+    s: sqlalchemy.orm.session.Session, template: jinja2.environment.Template
+) -> str:
     """Render the highscores page."""
     overall_highscores = model.highscores(s)
     species_highscores = model.species_highscores(s)
@@ -189,16 +194,18 @@ def render_highscores(s: sqlalchemy.orm.session.Session,
         god_highscores=god_highscores,
         combo_highscores=combo_highscores,
         fastest_wins=fastest_wins,
-        shortest_wins=shortest_wins)
+        shortest_wins=shortest_wins,
+    )
 
 
-def write_highscores(s: sqlalchemy.orm.session.Session,
-                     env: jinja2.environment.Environment) -> None:
+def write_highscores(
+    s: sqlalchemy.orm.session.Session, env: jinja2.environment.Environment
+) -> None:
     """Write the highscores page."""
     print("Writing highscores")
-    template = env.get_template('highscores.html')
+    template = env.get_template("highscores.html")
     data = render_highscores(s, template)
-    _write_file(path=os.path.join(WEBSITE_DIR, 'highscores.html'), data=data)
+    _write_file(path=os.path.join(WEBSITE_DIR, "highscores.html"), data=data)
 
 
 def _get_player_records(global_records: dict, player: orm.Player) -> dict:
@@ -213,9 +220,9 @@ def _get_player_records(global_records: dict, player: orm.Player) -> dict:
     return out
 
 
-def _wins_per_species(s: sqlalchemy.orm.session.Session,
-                      games: Iterable[orm.Game],
-                      playable: bool=True) -> Iterable[orm.Game]:
+def _wins_per_species(
+    s: sqlalchemy.orm.session.Session, games: Iterable[orm.Game], playable: bool = True
+) -> Iterable[orm.Game]:
     """Return a dict of form {<Species 'Ce'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for sp in model.list_species(s, playable=playable):
@@ -227,9 +234,9 @@ def _wins_per_species(s: sqlalchemy.orm.session.Session,
     return out
 
 
-def _wins_per_background(s: sqlalchemy.orm.session.Session,
-                         games: Iterable[orm.Game],
-                         playable: bool=True) -> Iterable[orm.Game]:
+def _wins_per_background(
+    s: sqlalchemy.orm.session.Session, games: Iterable[orm.Game], playable: bool = True
+) -> Iterable[orm.Game]:
     """Return a dict of form {<Background 'Be'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for bg in model.list_backgrounds(s, playable=playable):
@@ -241,9 +248,9 @@ def _wins_per_background(s: sqlalchemy.orm.session.Session,
     return out
 
 
-def _wins_per_god(s: sqlalchemy.orm.session.Session,
-                  games: Iterable[orm.Game],
-                  playable: bool=True) -> Iterable[orm.Game]:
+def _wins_per_god(
+    s: sqlalchemy.orm.session.Session, games: Iterable[orm.Game], playable: bool = True
+) -> Iterable[orm.Game]:
     """Return a dict of form {<God 'Beogh'>: [winning_game, ...}, ...}."""
     out = collections.OrderedDict()  # type: dict
     for god in model.list_gods(s, playable=playable):
@@ -255,15 +262,17 @@ def _wins_per_god(s: sqlalchemy.orm.session.Session,
     return out
 
 
-def render_player_page(s: sqlalchemy.orm.session.Session,
-                       template: jinja2.environment.Template,
-                       player: orm.Player,
-                       global_records: dict) -> str:
+def render_player_page(
+    s: sqlalchemy.orm.session.Session,
+    template: jinja2.environment.Template,
+    player: orm.Player,
+    global_records: dict,
+) -> str:
     """Render an individual player's page."""
     n_games = model.count_games(s, player=player)
     # Don't make pages for players with no games played
     if n_games == 0:
-        return ''
+        return ""
 
     # XXX: potential memory hog
     won_games = model.list_games(s, player=player, winning=True)
@@ -271,8 +280,7 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     species_wins = _wins_per_species(s, won_games)
     unplayable_species_wins = _wins_per_species(s, won_games, playable=False)
     background_wins = _wins_per_background(s, won_games)
-    unplayable_background_wins = _wins_per_background(
-        s, won_games, playable=False)
+    unplayable_background_wins = _wins_per_background(s, won_games, playable=False)
     god_wins = _wins_per_god(s, won_games)
     unplayable_god_wins = _wins_per_god(s, won_games, playable=False)
     shortest_win = min(won_games, default=None, key=lambda g: g.turn)
@@ -283,8 +291,7 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
     n_boring_games = model.count_games(s, player=player, boring=True)
     total_dur = model.total_duration(s, player=player)
     highscore = model.highscores(s, player=player, limit=1)[0]
-    recent_games = model.list_games(
-        s, player=player, limit=const.PLAYER_TABLE_LENGTH)
+    recent_games = model.list_games(s, player=player, limit=const.PLAYER_TABLE_LENGTH)
 
     return template.render(
         player=player,
@@ -304,25 +311,28 @@ def render_player_page(s: sqlalchemy.orm.session.Session,
         shortest_win=shortest_win,
         fastest_win=fastest_win,
         recent_games=recent_games,
-        won_games=won_games)
+        won_games=won_games,
+    )
 
 
 def write_player_page(player_html_path: str, name: str, data: str) -> None:
     """Write an individual player's page."""
-    _write_file(path=os.path.join(player_html_path, name + '.html'), data=data)
+    _write_file(path=os.path.join(player_html_path, name + ".html"), data=data)
 
 
-def write_player_pages(s: sqlalchemy.orm.session.Session,
-                       env: jinja2.environment.Environment,
-                       players: Sequence) -> None:
+def write_player_pages(
+    s: sqlalchemy.orm.session.Session,
+    env: jinja2.environment.Environment,
+    players: Sequence,
+) -> None:
     """Write all player pages."""
     print("Writing %s player pages... " % len(players))
     start2 = time.time()
-    player_html_path = os.path.join(WEBSITE_DIR, 'players')
+    player_html_path = os.path.join(WEBSITE_DIR, "players")
     if not os.path.exists(player_html_path):
         os.mkdir(player_html_path)
     global_records = model.get_gobal_records(s)
-    template = env.get_template('player.html')
+    template = env.get_template("player.html")
 
     n = 0
     for player in players:
@@ -337,23 +347,23 @@ def write_player_pages(s: sqlalchemy.orm.session.Session,
     print("Wrote player pages in %s seconds" % round(end - start2, 2))
 
 
-def write_player_api(s: sqlalchemy.orm.session.Session,
-                     env: jinja2.environment.Environment,
-                     players: Sequence) -> None:
+def write_player_api(
+    s: sqlalchemy.orm.session.Session,
+    env: jinja2.environment.Environment,
+    players: Sequence,
+) -> None:
     """Write all player API pages."""
     print("Writing player API pages")
     for player in players:
         won_games = model.list_games(s, player=player, winning=True)
-        data = json.dumps(
-            [g.as_dict() for g in won_games], sort_keys=True, indent=2)
-        path = os.path.join(WEBSITE_DIR, 'api', '1', 'player', 'wins',
-                            player.url_name)
+        data = json.dumps([g.as_dict() for g in won_games], sort_keys=True, indent=2)
+        path = os.path.join(WEBSITE_DIR, "api", "1", "player", "wins", player.url_name)
         _write_file(path=path, data=data)
 
 
-def write_website(players: Optional[Iterable],
-                  urlbase: str,
-                  extra_player_pages: int) -> None:
+def write_website(
+    players: Optional[Iterable], urlbase: str, extra_player_pages: int
+) -> None:
     """Write all website files.
 
     Paramers:

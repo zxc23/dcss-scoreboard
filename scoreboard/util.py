@@ -11,14 +11,15 @@ def timer(func: Callable) -> Callable:
         """Call a function, print the duration."""
         t1 = time.time()
         res = func(*arg, **kw)
-        print("{name} took {dur:.4} secs".format(
-            name=func.__name__, dur=time.time() - t1))
+        print(
+            "{name} took {dur:.4} secs".format(name=func.__name__, dur=time.time() - t1)
+        )
         return res
 
     return wrapper
 
 
-def retry(max_tries: int, wait: int=0) -> Callable:
+def retry(max_tries: int, wait: int = 0) -> Callable:
     """Decorator to add basic retry functionality."""
 
     def retry_decorator(func: Callable) -> Callable:
@@ -37,8 +38,10 @@ def retry(max_tries: int, wait: int=0) -> Callable:
                     if tries >= max_tries:
                         raise
                     else:
-                        print("%s failed (%s), waiting %d secs and retrying" %
-                              (func.__name__, e, wait))
+                        print(
+                            "%s failed (%s), waiting %d secs and retrying"
+                            % (func.__name__, e, wait)
+                        )
                         time.sleep(wait)
 
         return wrapper
