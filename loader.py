@@ -3,6 +3,8 @@
 
 import argparse
 import sys
+import os
+import time
 
 import scoreboard.log_import
 import scoreboard.orm
@@ -21,13 +23,6 @@ def read_commandline() -> argparse.Namespace:
     description = "Run DCSS Scoreboard."
     epilog = "Specify DB_USER/DB_PASS environment variables if required."
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
-    DEFAULT_API = "https://api.crawl.project357.org/event"
-    parser.add_argument(
-        "--game-api",
-        default=DEFAULT_API,
-        help="Specify a custom game API url. Set blank to skip API use. Default: %s"
-        % DEFAULT_API,
-    )
     parser.add_argument(
         "--urlbase",
         default=None,
@@ -66,12 +61,7 @@ def read_commandline() -> argparse.Namespace:
         type=int,
         help="(Re-)Generate pages for an additional NUM players (least recently updated first)",
     )
-    parser.add_argument(
-        "--db-credentials",
-        metavar="user:passwd",
-        help="Database credentials",
-        default="",
-    )
+
     args = parser.parse_args()
     return args
 
@@ -80,12 +70,13 @@ def main() -> None:
     """Run CLI."""
     args = read_commandline()
 
-    scoreboard.orm.setup_database(
-        database=args.database, path=args.database_path, credentials=args.db_credentials
-    )
+    # XXX SUPER HACK
+    # Wait a few seconds so that if we're running under docker-compose, the postgres
+    # database has time to start up.
+    time.sleep(5)
+    scoreboard.orm.setup_database(database=args.database, path=args.database_path)
 
-    if args.game_api:
-        scoreboard.log_import.load_logfiles(api_url=args.game_api)
+    scoreboard.log_import.load_logfiles(api_url=os.environ['GAME_API'])
 
     if not args.skip_scoring:
         players = scoreboard.scoring.score_games()

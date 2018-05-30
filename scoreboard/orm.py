@@ -1,6 +1,7 @@
 """Basic data model."""
 
 import sqlite3  # for typing
+import os
 
 import characteristic
 
@@ -459,16 +460,16 @@ def sqlite_performance_over_safety(
     dbapi_con.execute("PRAGMA synchronous = OFF")
 
 
-def setup_database(*, database: str, path: str, credentials: str) -> None:
+def setup_database(*, database: str, path: str) -> None:
     """Set up the database and create the master sessionmaker."""
     if database == "sqlite":
         db_uri = "sqlite:///{database_path}".format(database_path=path)
     elif database == "postgres":
-        db_uri = "postgresql+psycopg2://{creds}localhost/scoreboard"
-        if credentials:
-            db_uri = db_uri.format(creds="%s@" % credentials)
-        else:
-            db_uri = db_uri.format(creds="")
+        db_uri = "postgresql+psycopg2://{u}:{p}@{h}/scoreboard".format(
+            u=os.environ['DB_USERNAME'],
+            p=os.environ['DB_PASSWORD'],
+            h=os.environ['DB_HOST'],
+        )
     else:
         raise ValueError("Unknown database type!")
     print("Connecting to {}".format(db_uri))

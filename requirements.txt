@@ -3,6 +3,4 @@ sqlalchemy
 jsmin
 characteristic
 pyyaml
-mypy-lang
-yapf
 requests

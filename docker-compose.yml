@@ -1,0 +1,22 @@
+version: "3.1"
+
+services:
+  scoreboard:
+    build: .
+    volumes:
+      # Path on the host, relative to the Compose file
+      - ./:/scoreboard
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    environment:
+      DB_USERNAME: postgres
+      DB_PASSWORD: scoreboardpassword
+      DB_HOST: postgres
+      GAME_API: http://crawlapi.mooo.com/event
+  postgres:
+    image: postgres:10-alpine
+    environment:
+      POSTGRES_PASSWORD: scoreboardpassword
+      POSTGRES_DB: scoreboard
