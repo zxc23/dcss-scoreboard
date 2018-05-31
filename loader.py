@@ -76,7 +76,8 @@ def main() -> None:
     time.sleep(5)
     scoreboard.orm.setup_database(database=args.database, path=args.database_path)
 
-    scoreboard.log_import.load_logfiles(api_url=os.environ['GAME_API'])
+    if not os.environ.get('SCOREBOARD_SKIP_IMPORT'):
+        scoreboard.log_import.load_logfiles(api_url=os.environ['GAME_API'])
 
     if not args.skip_scoring:
         players = scoreboard.scoring.score_games()

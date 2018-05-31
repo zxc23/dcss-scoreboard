@@ -1,22 +1,44 @@
-version: "3.1"
+version: "3.6"
+
+volumes:
+  website:
 
 services:
   scoreboard:
     build: .
+    command: /scoreboard/loader.py --database postgres --urlbase '' --skip-scoring
     volumes:
-      # Path on the host, relative to the Compose file
-      - ./:/scoreboard
+      - type: bind
+        # Relative to docker-compose.yml's location
+        source: ./
+        target: /scoreboard
+      - type: volume
+        source: website
+        target: /website
     depends_on:
       - postgres
     links:
       - postgres
     environment:
+      PYTHONUNBUFFERED: 1
       DB_USERNAME: postgres
       DB_PASSWORD: scoreboardpassword
       DB_HOST: postgres
       GAME_API: http://crawlapi.mooo.com/event
+      SCOREBOARD_SKIP_IMPORT: 1
   postgres:
     image: postgres:10-alpine
     environment:
       POSTGRES_PASSWORD: scoreboardpassword
       POSTGRES_DB: scoreboard
+    ports:
+      - "5432:5432"
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+     - "8000:80"
+    volumes:
+      - type: volume
+        source: website
+        target: /usr/share/nginx/html
+        read_only: true
