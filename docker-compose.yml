@@ -26,6 +26,7 @@ services:
       DB_HOST: postgres
       GAME_API: http://crawlapi.mooo.com/event
       SCOREBOARD_SKIP_IMPORT: 1
+      SCOREBOARD_WEBSITE_PATH: /website
   postgres:
     image: postgres:10-alpine
     environment:

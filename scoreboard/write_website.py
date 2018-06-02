@@ -21,7 +21,7 @@ from . import webutils
 from . import orm
 from . import constants as const
 
-WEBSITE_DIR = "website"
+WEBSITE_DIR = os.environ.get('SCOREBOARD_WEBSITE_PATH', "website")
 
 
 def rsync_replacement(src: str, dst: str) -> None:
