@@ -71,15 +71,16 @@ def main() -> None:
     args = read_commandline()
 
     # XXX SUPER HACK
-    # Wait a few seconds so that if we're running under docker-compose, the postgres
-    # database has time to start up.
+    # Wait a few seconds so that the postgres container has time to start up.
     time.sleep(5)
     scoreboard.orm.setup_database(database=args.database, path=args.database_path)
 
-    if not os.environ.get('SCOREBOARD_SKIP_IMPORT'):
+    if os.environ.get('SCOREBOARD_SKIP_IMPORT') == None:
+        print("Loading latest games")
         scoreboard.log_import.load_logfiles(api_url=os.environ['GAME_API'])
 
     if not args.skip_scoring:
+        print("Scoring")
         players = scoreboard.scoring.score_games()
     else:
         players = None

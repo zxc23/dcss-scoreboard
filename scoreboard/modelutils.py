@@ -25,6 +25,7 @@ def crawl_date_to_datetime(d: str) -> datetime.datetime:
 
 
 def _morgue_prefix(src: str, version: str) -> Optional[str]:
+    src = src.lower()
     if src == "cao":
         prefix = "http://crawl.akrasiac.org/rawdata"
     elif src == "cdo":
