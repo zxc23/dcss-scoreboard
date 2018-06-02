@@ -466,9 +466,9 @@ def setup_database(*, database: str, path: str) -> None:
         db_uri = "sqlite:///{database_path}".format(database_path=path)
     elif database == "postgres":
         db_uri = "postgresql+psycopg2://{u}:{p}@{h}/scoreboard".format(
-            u=os.environ['DB_USERNAME'],
-            p=os.environ['DB_PASSWORD'],
-            h=os.environ['DB_HOST'],
+            u=os.environ.get('SCOREBOARD_SCOREBOARD_DB_USERNAME', 'scoreboard'),
+            p=os.environ.get('SCOREBOARD_DB_PASSWORD', 'scoreboard'),
+            h=os.environ.get('SCOREBOARD_DB_HOST', 'localhost'),
         )
     else:
         raise ValueError("Unknown database type!")

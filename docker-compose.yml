@@ -21,10 +21,10 @@ services:
       - postgres
     environment:
       PYTHONUNBUFFERED: 1
-      DB_USERNAME: postgres
-      DB_PASSWORD: scoreboardpassword
-      DB_HOST: postgres
-      GAME_API: http://crawlapi.mooo.com/event
+      SCOREBOARD_SCOREBOARD_DB_USERNAME: postgres
+      SCOREBOARD_DB_PASSWORD: scoreboardpassword
+      SCOREBOARD_DB_HOST: postgres
+      SCOREBOARD_GAME_API: http://crawlapi.mooo.com/event
       SCOREBOARD_SKIP_IMPORT: 1
       SCOREBOARD_WEBSITE_PATH: /website
   postgres:

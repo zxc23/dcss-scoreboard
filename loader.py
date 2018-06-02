@@ -77,7 +77,7 @@ def main() -> None:
 
     if os.environ.get('SCOREBOARD_SKIP_IMPORT') == None:
         print("Loading latest games")
-        scoreboard.log_import.load_logfiles(api_url=os.environ['GAME_API'])
+        scoreboard.log_import.load_logfiles(api_url=os.environ['SCOREBOARD_GAME_API'])
 
     if not args.skip_scoring:
         print("Scoring")
