@@ -460,18 +460,13 @@ def sqlite_performance_over_safety(
     dbapi_con.execute("PRAGMA synchronous = OFF")
 
 
-def setup_database(*, database: str, path: str) -> None:
+def setup_database() -> None:
     """Set up the database and create the master sessionmaker."""
-    if database == "sqlite":
-        db_uri = "sqlite:///{database_path}".format(database_path=path)
-    elif database == "postgres":
-        db_uri = "postgresql+psycopg2://{u}:{p}@{h}/scoreboard".format(
-            u=os.environ.get('SCOREBOARD_SCOREBOARD_DB_USERNAME', 'scoreboard'),
-            p=os.environ.get('SCOREBOARD_DB_PASSWORD', 'scoreboard'),
-            h=os.environ.get('SCOREBOARD_DB_HOST', 'localhost'),
-        )
-    else:
-        raise ValueError("Unknown database type!")
+    db_uri = "postgresql+psycopg2://{u}:{p}@{h}/scoreboard".format(
+        u=os.environ.get('SCOREBOARD_SCOREBOARD_DB_USERNAME', 'scoreboard'),
+        p=os.environ.get('SCOREBOARD_DB_PASSWORD', 'scoreboard'),
+        h=os.environ.get('SCOREBOARD_DB_HOST', 'localhost'),
+    )
     print("Connecting to {}".format(db_uri))
     engine_opts = {"poolclass": sqlalchemy.pool.NullPool}
     engine = sqlalchemy.create_engine(db_uri, **engine_opts)
@@ -487,12 +482,13 @@ def setup_database(*, database: str, path: str) -> None:
 
     sess = Session()
 
-    model.setup_species(sess)
-    model.setup_backgrounds(sess)
-    model.setup_gods(sess)
-    model.setup_branches(sess)
-    model.setup_achievements(sess)
-    model.setup_ktyps(sess)
+    if os.environ.get('SCOREBOARD_SKIP_DB_SETUP') == None:
+        model.setup_species(sess)
+        model.setup_backgrounds(sess)
+        model.setup_gods(sess)
+        model.setup_branches(sess)
+        model.setup_achievements(sess)
+        model.setup_ktyps(sess)
 
 
 def get_session() -> sqlalchemy.orm.session.Session:

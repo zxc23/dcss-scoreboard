@@ -4,9 +4,34 @@ volumes:
   website:
 
 services:
-  scoreboard:
+  scoreboard_api:
     build: .
-    command: /scoreboard/loader.py --database postgres --urlbase '' --skip-scoring
+    command: /scoreboard/loader.py --urlbase ''
+    volumes:
+      - type: bind
+        # Relative to docker-compose.yml's location
+        source: ./
+        target: /scoreboard
+      # - type: volume
+      #   source: website
+      #   target: /website
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    environment:
+      PYTHONUNBUFFERED: 1
+      SCOREBOARD_DATABASE: postgres
+      SCOREBOARD_SCOREBOARD_DB_USERNAME: postgres
+      SCOREBOARD_DB_PASSWORD: scoreboardpassword
+      SCOREBOARD_DB_HOST: postgres
+      SCOREBOARD_GAME_API: http://crawlapi.mooo.com/event
+      # SCOREBOARD_WEBSITE_PATH: /website
+      SCOREBOARD_SKIP_SCORING: 1
+      SCOREBOARD_SKIP_WEBSITE: 1
+  scoreboard_website:
+    build: .
+    command: /scoreboard/loader.py --urlbase '/'
     volumes:
       - type: bind
         # Relative to docker-compose.yml's location
@@ -21,12 +46,15 @@ services:
       - postgres
     environment:
       PYTHONUNBUFFERED: 1
+      SCOREBOARD_DATABASE: postgres
       SCOREBOARD_SCOREBOARD_DB_USERNAME: postgres
       SCOREBOARD_DB_PASSWORD: scoreboardpassword
       SCOREBOARD_DB_HOST: postgres
-      SCOREBOARD_GAME_API: http://crawlapi.mooo.com/event
-      SCOREBOARD_SKIP_IMPORT: 1
+      # SCOREBOARD_GAME_API: http://crawlapi.mooo.com/event
       SCOREBOARD_WEBSITE_PATH: /website
+      SCOREBOARD_SKIP_IMPORT: 1
+      SCOREBOARD_SKIP_DB_SETUP: 1
+    restart: always
   postgres:
     image: postgres:10-alpine
     environment:
